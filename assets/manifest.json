@@ -1,0 +1,1121 @@
+[
+  {
+    "id": "stylegan",
+    "local_path": "assets/originals/stylegan.png",
+    "source_page": "https://github.com/NVlabs/stylegan",
+    "asset_url": "https://raw.githubusercontent.com/NVlabs/stylegan/master/stylegan-teaser.png",
+    "authors_or_owner": "Karras, Laine and Aila / NVIDIA",
+    "paper_or_dataset": "StyleGAN",
+    "figure_or_caption": "Published generated faces",
+    "license_or_usage_note": "NVIDIA Corporation, CC BY-NC 4.0. Attribution to Karras, Laine and Aila. Crops/resize identified in transformations. No FFHQ input photographs copied.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Original downloaded unchanged; derived crops recorded separately.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s01",
+      "s45",
+      "s54",
+      "s56"
+    ],
+    "sha256": "505fa8b7d269bc8c39355b12404a4cf7e53523eda2837f8756f6b4a725e6ccbd"
+  },
+  {
+    "id": "spade",
+    "local_path": "assets/originals/spade.png",
+    "source_page": "https://nvlabs.github.io/SPADE/",
+    "asset_url": "https://nvlabs.github.io/SPADE/images/teaser_high_res_uncompressed.png",
+    "authors_or_owner": "Park et al. / NVIDIA",
+    "paper_or_dataset": "SPADE",
+    "figure_or_caption": "Published layouts and generated landscapes",
+    "license_or_usage_note": "Attributed academic teaching excerpt. Original copyright retained; no blanket image redistribution licence asserted. See source terms.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Original downloaded unchanged; derived crops recorded separately.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s05",
+      "s57"
+    ],
+    "sha256": "d0f76ba9eda1cc4c6f587ea0489877b42341b6ca5e0cd860d2497d794e4bc74d"
+  },
+  {
+    "id": "cyclegan",
+    "local_path": "assets/originals/cyclegan.jpg",
+    "source_page": "https://junyanz.github.io/CycleGAN/",
+    "asset_url": "https://junyanz.github.io/CycleGAN/images/objects.jpg",
+    "authors_or_owner": "Zhu et al.",
+    "paper_or_dataset": "CycleGAN",
+    "figure_or_caption": "Published input / domain translation pairs",
+    "license_or_usage_note": "Attributed academic teaching excerpt. Original copyright retained; no blanket image redistribution licence asserted. See source terms.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Original downloaded unchanged; derived crops recorded separately.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s06",
+      "s57",
+      "s59"
+    ],
+    "sha256": "d95ba8993ba7d30acb8d50ab79160056b839b9816c8311040a1d0debbaa7d9bd"
+  },
+  {
+    "id": "inpainting",
+    "local_path": "assets/originals/inpainting.jpg",
+    "source_page": "https://www.cs.cmu.edu/~dpathak/context_encoder/",
+    "asset_url": "https://www.cs.cmu.edu/~dpathak/context_encoder/resources/result_fig.jpg",
+    "authors_or_owner": "Pathak et al.",
+    "paper_or_dataset": "Context Encoders",
+    "figure_or_caption": "Published model completions, not the human-artwork teaser",
+    "license_or_usage_note": "Attributed academic teaching excerpt. Original copyright retained; no blanket image redistribution licence asserted. See source terms.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Original downloaded unchanged; derived crops recorded separately.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s07",
+      "s59"
+    ],
+    "sha256": "756db70fad7717e02d477e667e40ecdd2b435cd5331c220e466c1b96d2437928"
+  },
+  {
+    "id": "satellite",
+    "local_path": "assets/originals/satellite.png",
+    "source_page": "https://www.samarkhanna.com/DiffusionSat/",
+    "asset_url": "https://www.samarkhanna.com/DiffusionSat/static/images/diffusion_sat_samples.png",
+    "authors_or_owner": "Khanna et al.",
+    "paper_or_dataset": "DiffusionSat",
+    "figure_or_caption": "Published metadata-conditioned samples",
+    "license_or_usage_note": "Attributed academic teaching excerpt. Original copyright retained; no blanket image redistribution licence asserted. See source terms.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Original downloaded unchanged; derived crops recorded separately.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s09",
+      "s59"
+    ],
+    "sha256": "2cd7f397e45dbfc4905771ebfa950cb311791b193fa9a2013588dd362c298c8e"
+  },
+  {
+    "id": "vae-paper",
+    "local_path": "assets/originals/vae-paper.pdf",
+    "source_page": "https://arxiv.org/abs/1312.6114",
+    "asset_url": "https://arxiv.org/pdf/1312.6114",
+    "authors_or_owner": "Kingma and Welling",
+    "paper_or_dataset": "Auto-Encoding Variational Bayes",
+    "figure_or_caption": "Figures 4 and 5",
+    "license_or_usage_note": "Attributed academic teaching excerpt. Original copyright retained; no blanket image redistribution licence asserted. See source terms.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Original downloaded unchanged; derived crops recorded separately.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s02"
+    ],
+    "sha256": "bdcb63b79ed88f64f8ee2d43a721930d01dde5441a4dba20ecaa2342b34e017c"
+  },
+  {
+    "id": "stylegan-paper",
+    "local_path": "assets/originals/stylegan-paper.pdf",
+    "source_page": "https://github.com/NVlabs/stylegan",
+    "asset_url": "https://arxiv.org/pdf/1812.04948",
+    "authors_or_owner": "Karras, Laine and Aila / NVIDIA",
+    "paper_or_dataset": "StyleGAN",
+    "figure_or_caption": "Figure 3 style mixing",
+    "license_or_usage_note": "NVIDIA Corporation, CC BY-NC 4.0. Attribution to Karras, Laine and Aila. Crops/resize identified in transformations. No FFHQ input photographs copied.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Original downloaded unchanged; derived crops recorded separately.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s03",
+      "s43",
+      "s54"
+    ],
+    "sha256": "da4b3fd7b9d5086eae0e011c5448075c1d6144a7a7b1520d57257ce19b5aaf13"
+  },
+  {
+    "id": "stylegan-faces",
+    "local_path": "assets/gallery/stylegan-faces.jpg",
+    "source_page": "https://github.com/NVlabs/stylegan",
+    "asset_url": "assets/originals/stylegan.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "stylegan-faces",
+    "figure_or_caption": "",
+    "license_or_usage_note": "NVIDIA Corporation, CC BY-NC 4.0. Attribution to Karras, Laine and Aila. Crops/resize identified in transformations. No FFHQ input photographs copied.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_pixels": null,
+      "resize_max": [
+        1600,
+        1000
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s01",
+      "s45",
+      "s54",
+      "s56"
+    ],
+    "sha256": "d4a59b9a9893d79d69d9d7dde09196b3fe3605fa45b41ead566ab367cb73ecd5"
+  },
+  {
+    "id": "vae-samples",
+    "local_path": "assets/gallery/vae-samples.jpg",
+    "source_page": "https://arxiv.org/abs/1312.6114",
+    "asset_url": "work/vae-page.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "vae-samples",
+    "figure_or_caption": "Figure 5(a), 2D latent random samples, paper page 10",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_pixels": [
+        230,
+        766,
+        403,
+        970
+      ],
+      "resize_max": [
+        1600,
+        1000
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s02"
+    ],
+    "sha256": "68aa749a8c4118e76e5a06a023f887850e8f81ff61e82989e404f1061382cd2a"
+  },
+  {
+    "id": "vae-manifold",
+    "local_path": "assets/gallery/vae-manifold.jpg",
+    "source_page": "https://arxiv.org/abs/1312.6114",
+    "asset_url": "work/vae-page.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "vae-manifold",
+    "figure_or_caption": "Figure 4(b), inverse Gaussian CDF coordinates; decoded grid, not prior draws",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_pixels": [
+        505,
+        150,
+        925,
+        610
+      ],
+      "resize_max": [
+        1600,
+        1000
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s02"
+    ],
+    "sha256": "f26073d5ceb1533ccd3a35f65956b73bdfca79d89c0b5397f74fb2318074d37c"
+  },
+  {
+    "id": "stylegan-mixing",
+    "local_path": "assets/gallery/stylegan-mixing.jpg",
+    "source_page": "https://github.com/NVlabs/stylegan",
+    "asset_url": "work/stylegan-page.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "stylegan-mixing",
+    "figure_or_caption": "Figure 3 upper-left subset. Source A rows, Source B columns; coarse styles from B. Other styles from A.",
+    "license_or_usage_note": "NVIDIA Corporation, CC BY-NC 4.0. Attribution to Karras, Laine and Aila. Crops/resize identified in transformations. No FFHQ input photographs copied.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_pixels": [
+        61,
+        130,
+        578,
+        736
+      ],
+      "resize_max": [
+        1600,
+        1000
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s03"
+    ],
+    "sha256": "01f747c8caa153120d2b8b1f4cb753e8d260ff3cda564c8549ea2f101f376e7f"
+  },
+  {
+    "id": "spade-layout",
+    "local_path": "assets/gallery/spade-layout.jpg",
+    "source_page": "https://nvlabs.github.io/SPADE/",
+    "asset_url": "assets/originals/spade.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "spade-layout",
+    "figure_or_caption": "Top legend and first two layout columns with first appearance row; correspondence preserved",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_pixels": [
+        0,
+        0,
+        2020,
+        890
+      ],
+      "resize_max": [
+        1600,
+        1000
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s05",
+      "s57"
+    ],
+    "sha256": "5659626859f4ff2e01c8c7e6b3ff704f296825730443760deb4e14341c18088e"
+  },
+  {
+    "id": "cyclegan-horse",
+    "local_path": "assets/gallery/cyclegan-horse.jpg",
+    "source_page": "https://junyanz.github.io/CycleGAN/",
+    "asset_url": "assets/originals/cyclegan.jpg",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "cyclegan-horse",
+    "figure_or_caption": "Top-left input horse / generated zebra pair; labels retained",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_pixels": [
+        0,
+        0,
+        635,
+        340
+      ],
+      "resize_max": [
+        1600,
+        1000
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s06"
+    ],
+    "sha256": "bf50e69d995e5a36ec6d427e55095a757a5c7f9ef5fa234edf0467ba4e44efda"
+  },
+  {
+    "id": "inpainting-pair",
+    "local_path": "assets/gallery/inpainting-pair.jpg",
+    "source_page": "https://www.cs.cmu.edu/~dpathak/context_encoder/",
+    "asset_url": "assets/originals/inpainting.jpg",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "inpainting-pair",
+    "figure_or_caption": "First held-out pair: masked input left, generated completion right",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_pixels": [
+        0,
+        0,
+        1359,
+        681
+      ],
+      "resize_max": [
+        1600,
+        1000
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s07"
+    ],
+    "sha256": "41c8ea6ce1b5f68659cc6b3218b44e75c193c120eb26e1f96dbeb0b02fba7114"
+  },
+  {
+    "id": "satellite-samples",
+    "local_path": "assets/gallery/satellite-samples.jpg",
+    "source_page": "https://www.samarkhanna.com/DiffusionSat/",
+    "asset_url": "assets/originals/satellite.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "satellite-samples",
+    "figure_or_caption": "Published metadata-conditioned generated imagery. No measurement or forecast claim.",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Source figure retained. Scene 9 uses SVG viewBox crops (822,153,173,173) and (1006,153,173,173) from the 1600 by 897 local figure: August and January, first method, first sample row.",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s09"
+    ],
+    "sha256": "f3890ceb7bd2991a312bbb7322e8284dc3a202345277d4f8bb477a594e5174e7"
+  },
+  {
+    "id": "shoe-input",
+    "local_path": "assets/gallery/shoe-input.jpg",
+    "source_page": "https://phillipi.github.io/pix2pix/images/sketch2photo_shoes/latest_net_G_val/index.html",
+    "asset_url": "https://phillipi.github.io/pix2pix/images/sketch2photo_shoes/latest_net_G_val/images/input/100_AB.jpg",
+    "authors_or_owner": "Isola et al.",
+    "paper_or_dataset": "pix2pix / edges2shoes",
+    "figure_or_caption": "Input shoe outline",
+    "license_or_usage_note": "Attributed academic comparison; dataset image rights retained by original owners.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "None",
+    "evidence_type": "published model input or reference",
+    "used_in_scene_ids": [
+      "s04",
+      "s57"
+    ],
+    "sha256": "f480ac6c42d8c46dbf0d117a83001e70f631bc61589366f6e1ad4e529f07e46a"
+  },
+  {
+    "id": "shoe-output",
+    "local_path": "assets/gallery/shoe-output.jpg",
+    "source_page": "https://phillipi.github.io/pix2pix/images/sketch2photo_shoes/latest_net_G_val/index.html",
+    "asset_url": "https://phillipi.github.io/pix2pix/images/sketch2photo_shoes/latest_net_G_val/images/output/100_AB.jpg",
+    "authors_or_owner": "Isola et al.",
+    "paper_or_dataset": "pix2pix / edges2shoes",
+    "figure_or_caption": "Generated output",
+    "license_or_usage_note": "Attributed academic comparison; dataset image rights retained by original owners.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "None",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s04",
+      "s57"
+    ],
+    "sha256": "8caf530f352c4f08c00478ea2de50559282819c175fb8b2d836b03d4cf5d0458"
+  },
+  {
+    "id": "shoe-target",
+    "local_path": "assets/gallery/shoe-target.jpg",
+    "source_page": "https://phillipi.github.io/pix2pix/images/sketch2photo_shoes/latest_net_G_val/index.html",
+    "asset_url": "https://phillipi.github.io/pix2pix/images/sketch2photo_shoes/latest_net_G_val/images/target/100_AB.jpg",
+    "authors_or_owner": "Isola et al.",
+    "paper_or_dataset": "pix2pix / edges2shoes",
+    "figure_or_caption": "Ground truth reference photo",
+    "license_or_usage_note": "Attributed academic comparison; dataset image rights retained by original owners.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "None",
+    "evidence_type": "published model input or reference",
+    "used_in_scene_ids": [
+      "s04",
+      "s57"
+    ],
+    "sha256": "3adef1b724dbacc67e0bb5e739a7d07cd476bc447466251b5e7b8db49f8ee958"
+  },
+  {
+    "id": "spade-input",
+    "local_path": "assets/gallery/spade-input.jpg",
+    "source_page": "https://nvlabs.github.io/SPADE/",
+    "asset_url": "assets/originals/spade.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "spade-layout",
+    "figure_or_caption": "Top legend and first two layout columns with first appearance row; correspondence preserved",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_from": "assets/gallery/spade-layout.jpg",
+      "box": [
+        0,
+        0,
+        1600,
+        345
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s05"
+    ],
+    "sha256": "19fe26055146d0bafa332dbe4df5d581f9a368e0d2bdb5e95f005639cba8aacc"
+  },
+  {
+    "id": "cyclegan-input",
+    "local_path": "assets/gallery/cyclegan-input.jpg",
+    "source_page": "https://junyanz.github.io/CycleGAN/",
+    "asset_url": "assets/originals/cyclegan.jpg",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "cyclegan-horse",
+    "figure_or_caption": "Top-left input horse / generated zebra pair; labels retained",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_from": "assets/gallery/cyclegan-horse.jpg",
+      "box": [
+        0,
+        0,
+        317,
+        340
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s06"
+    ],
+    "sha256": "226df418878e5a44b070b94adb9a654f5ba306404343d887b4ffb751ae1ee435"
+  },
+  {
+    "id": "inpainting-input",
+    "local_path": "assets/gallery/inpainting-input.jpg",
+    "source_page": "https://www.cs.cmu.edu/~dpathak/context_encoder/",
+    "asset_url": "assets/originals/inpainting.jpg",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "inpainting-pair",
+    "figure_or_caption": "First held-out pair: masked input left, generated completion right",
+    "license_or_usage_note": "Attributed teaching crop; original copyright retained. StyleGAN material: NVIDIA CC BY-NC 4.0.",
+    "retrieved_date": "2026-10-19",
+    "transformations": {
+      "crop_from": "assets/gallery/inpainting-pair.jpg",
+      "box": [
+        0,
+        0,
+        679,
+        681
+      ]
+    },
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s07"
+    ],
+    "sha256": "6ab8d3d98cadc8b6ce3c6c57e7ce4ba9fef68dc4e45094d05b03026be555f407"
+  },
+  {
+    "id": "stylegan-sources",
+    "local_path": "assets/gallery/stylegan-sources.jpg",
+    "source_page": "https://github.com/NVlabs/stylegan",
+    "asset_url": "work/stylegan-page.png",
+    "authors_or_owner": "See original asset entry",
+    "paper_or_dataset": "stylegan-mixing",
+    "figure_or_caption": "Figure 3 upper-left subset. Source A rows, Source B columns; coarse styles from B. Other styles from A.",
+    "license_or_usage_note": "NVIDIA Corporation, CC BY-NC 4.0. Attribution to Karras, Laine and Aila. Crops/resize identified in transformations. No FFHQ input photographs copied.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Source A row 1 and Source B column 1 cropped and placed side by side",
+    "evidence_type": "published model output",
+    "used_in_scene_ids": [
+      "s03"
+    ],
+    "sha256": "7878bb966e4ce77b9dab8ba9f9effc76c302a2c5aafe01143efd0fc506e87034"
+  },
+  {
+    "id": "vae-epoch-0",
+    "local_path": "assets/recorded/vae-epoch-0.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "cb751eb1b6bd01cb37d2619279db09ca4c43c478ec4b2709b68981ef8a3ec066"
+  },
+  {
+    "id": "vae-epoch-65",
+    "local_path": "assets/recorded/vae-epoch-65.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "6cfa4d3c7b4dcbf06be79a7e0aeee5581aa30cb48b7c83f3e7f8ab7c9bdbe983"
+  },
+  {
+    "id": "vae-epoch-1",
+    "local_path": "assets/recorded/vae-epoch-1.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "841d74d821cf2ef5aa4ee2ef3ab45e31fddda383ed5c460b9b245717328ece5b"
+  },
+  {
+    "id": "provenance",
+    "local_path": "assets/recorded/provenance.json",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s45",
+      "s52",
+      "s54",
+      "s56"
+    ],
+    "sha256": "2f5d51f72a69870704f00e05375e1a8ca3d2209b0d67828840247eed9487ad70"
+  },
+  {
+    "id": "vae-epoch-10",
+    "local_path": "assets/recorded/vae-epoch-10.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "d9a60e26e6a54e494020ed7010145b302d56d76c66fab5957419b38603acecb3"
+  },
+  {
+    "id": "vae-binary",
+    "local_path": "assets/recorded/vae-binary.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "060ac36ec0ed8ad8c8fe63824170a3ca201dc0ed0b7e0ca9d3c2edc48a9b7d45"
+  },
+  {
+    "id": "reconstructions",
+    "local_path": "assets/recorded/reconstructions.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "1b54010552a6e76179eef81ef21100004902f4f076df7f5ef986dba6d3b6ec0a"
+  },
+  {
+    "id": "vae-epoch-30",
+    "local_path": "assets/recorded/vae-epoch-30.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "b5fb55a366e511ead1986d195d18535edf94fc6821f7775e98706c64bcd9f47f"
+  },
+  {
+    "id": "held-out",
+    "local_path": "assets/recorded/held-out.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "92e4e306ebb38c945fd5a5cd6d65bdaa332924b240065b801db602cf4bc8b347"
+  },
+  {
+    "id": "vae-data",
+    "local_path": "assets/recorded/vae-data.json",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "bdf9c9e4005506396f18bc33c3c1e48249bc6d4e5dc18547035842dd95b3806a"
+  },
+  {
+    "id": "vae-prior",
+    "local_path": "assets/recorded/vae-prior.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "6cfa4d3c7b4dcbf06be79a7e0aeee5581aa30cb48b7c83f3e7f8ab7c9bdbe983"
+  },
+  {
+    "id": "decoder",
+    "local_path": "assets/recorded/decoder.json",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "7b044dd6434b771debfac4c32c6018926301bc01330c0a830958abd3f3414f40"
+  },
+  {
+    "id": "vae-grid",
+    "local_path": "assets/recorded/vae-grid.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s42",
+      "s43",
+      "s44"
+    ],
+    "sha256": "dbc1c07875760aed1e99e866b09437638cb18ccd3af8369f5f9cf5d02d479f16"
+  },
+  {
+    "id": "gan",
+    "local_path": "assets/recorded/gan.json",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s45",
+      "s52",
+      "s54",
+      "s56"
+    ],
+    "sha256": "924ebdc5264d8cbca8abe30baa87c9f11ae5e59aac076b53f0ed4e3c70a0052c"
+  },
+  {
+    "id": "image-gan",
+    "local_path": "assets/recorded/image-gan.png",
+    "source_page": "notebooks/train.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s17",
+      "s45",
+      "s52",
+      "s54",
+      "s56"
+    ],
+    "sha256": "d8484f710482fdb5434619230d3bf5c328f2ef7bf332706d5db3f43e49ad3208"
+  },
+  {
+    "id": "phases",
+    "local_path": "assets/recorded/phases.json",
+    "source_page": "notebooks/validate.py",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Procedural binary glyphs / 2D Gaussian mixture",
+    "figure_or_caption": "Recorded training run; see provenance.json",
+    "license_or_usage_note": "New local teaching experiment",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Training and export described in assets/recorded/provenance.json",
+    "evidence_type": "local trained-model output",
+    "used_in_scene_ids": [
+      "s45",
+      "s52",
+      "s54",
+      "s56"
+    ],
+    "sha256": "33b9ae33750421a05f9867e5dcbf4e68b80b5811645eef257a460fe6b8d0640c"
+  },
+  {
+    "id": "sleep-proposal",
+    "local_path": "src/visuals.mjs",
+    "source_page": "src/visuals.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Proposed sensing application",
+    "figure_or_caption": "Proposed lab application; illustrative signals",
+    "license_or_usage_note": "Original deterministic illustration",
+    "retrieved_date": "2026-10-19",
+    "transformations": "100 Hz sampling of spindle-like sinusoids with Gaussian envelopes; fixed scales",
+    "evidence_type": "illustrative teaching image",
+    "used_in_scene_ids": [
+      "s08"
+    ],
+    "sha256": "cf0cdced246e70d671e1a0363e9f333a775227a29ef3e233ffa5f5f7c369f9d3"
+  },
+  {
+    "id": "diagram-s17",
+    "local_path": "figures/s17.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s17",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s17"
+    ],
+    "sha256": "8dae0afa663e2dd718dc9b07ab16123b3f39e37b226e32b93afae9e9d9507c12"
+  },
+  {
+    "id": "diagram-s24",
+    "local_path": "figures/s24.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s24",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s24"
+    ],
+    "sha256": "0a262229846f44d7c1b16e5ee1c6c374a78c06804bbf828793ca9c9c4331397f"
+  },
+  {
+    "id": "diagram-s25",
+    "local_path": "figures/s25.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s25",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s25"
+    ],
+    "sha256": "ab2d9e76c01bcaa8ccde58e4f1fe3fc088f31c0cae0212aeff454291f1ed70e4"
+  },
+  {
+    "id": "diagram-s26",
+    "local_path": "figures/s26.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s26",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s26"
+    ],
+    "sha256": "1d9e7e37f74310e945d947b6a0a41c3c1b8c5b12818b81c5f9d58a8bcdb345f8"
+  },
+  {
+    "id": "diagram-s31",
+    "local_path": "figures/s31.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s31",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s31"
+    ],
+    "sha256": "5ab87ef99988aa72c0f7dac2a26cf1a8c2d25c23b4fe10aa0c56bbb4d22b49b7"
+  },
+  {
+    "id": "diagram-s32",
+    "local_path": "figures/s32.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s32",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s32"
+    ],
+    "sha256": "259608da15b017146b14ac2cf6040c603b4719e144f35b0b5caab95f9856bfb5"
+  },
+  {
+    "id": "diagram-s33",
+    "local_path": "figures/s33.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s33",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s33"
+    ],
+    "sha256": "8fea616612777159581b51b1165dc19bc8f1688387dcabd61fb60cee1eafaa2b"
+  },
+  {
+    "id": "diagram-s34",
+    "local_path": "figures/s34.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s34",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s34"
+    ],
+    "sha256": "62716b328f29a47aecc5ec494bc69e842851e340280fa56f2757ea91fba81311"
+  },
+  {
+    "id": "diagram-s35",
+    "local_path": "figures/s35.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s35",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s35"
+    ],
+    "sha256": "62716b328f29a47aecc5ec494bc69e842851e340280fa56f2757ea91fba81311"
+  },
+  {
+    "id": "diagram-s37",
+    "local_path": "figures/s37.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s37",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s37"
+    ],
+    "sha256": "ee5b9405030336dd8808f2aaf02d16a2a8b219926e3e969ddb394532447c7ecb"
+  },
+  {
+    "id": "diagram-s38",
+    "local_path": "figures/s38.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s38",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s38"
+    ],
+    "sha256": "8c5aca36b45d8d0e96a6b85fee9b476170766701d9ed241378ffba33680e4752"
+  },
+  {
+    "id": "diagram-s46",
+    "local_path": "figures/s46.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s46",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s46"
+    ],
+    "sha256": "3196251e52fb3e8fd45eb0b615a8c6304b39c6959dfe07235380d154586e7ccd"
+  },
+  {
+    "id": "diagram-s48",
+    "local_path": "figures/s48.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s48",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s48"
+    ],
+    "sha256": "5bc809a6af5490cea7d59b5fa5be11aec47de2a3e0b5f815d1104a1ff0553152"
+  },
+  {
+    "id": "diagram-s49",
+    "local_path": "figures/s49.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s49",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s49"
+    ],
+    "sha256": "0df6a86547ba2710607618ae13714883bb2133b6241bb35aee68005da7c77e60"
+  },
+  {
+    "id": "diagram-s53",
+    "local_path": "figures/s53.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s53",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s53"
+    ],
+    "sha256": "3196251e52fb3e8fd45eb0b615a8c6304b39c6959dfe07235380d154586e7ccd"
+  },
+  {
+    "id": "diagram-s57",
+    "local_path": "figures/s57.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s57",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s57"
+    ],
+    "sha256": "9507d07fa572212cecd41672992d3260f7651a7e0974c7f40654dd5018b3f84c"
+  },
+  {
+    "id": "diagram-s58",
+    "local_path": "figures/s58.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s58",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s58"
+    ],
+    "sha256": "0df6a86547ba2710607618ae13714883bb2133b6241bb35aee68005da7c77e60"
+  },
+  {
+    "id": "diagram-s59",
+    "local_path": "figures/s59.svg",
+    "source_page": "src/figures.mjs",
+    "asset_url": null,
+    "authors_or_owner": "ES 667 teaching implementation",
+    "paper_or_dataset": "Original mechanism diagram; recorded local model outputs where shown",
+    "figure_or_caption": "Exported from the completed scene s59",
+    "license_or_usage_note": "Original diagram. Embedded published shoe images retain the attribution and rights recorded in the shoe asset entries.",
+    "retrieved_date": "2026-10-19",
+    "transformations": "Native SVG exported from the lecture. Image hrefs are relative to this repository.",
+    "evidence_type": "original teaching diagram",
+    "used_in_scene_ids": [
+      "s59"
+    ],
+    "sha256": "9460fb86517116b1f83714881e228d3526a025a241b61c535b3d7860f05709ec"
+  }
+]

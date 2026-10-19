@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "gridPoints": 101,
+  "checks": [
+    "fixtures",
+    "support and invalid-input handling",
+    "ELBO gap identity across q",
+    "entropy identity",
+    "fixed-noise finite differences",
+    "GAN saturation derivatives",
+    "deterministic RNG",
+    "MLE variance",
+    "Gaussian KL prior match"
+  ]
+}

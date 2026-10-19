@@ -1,0 +1,29 @@
+<!doctype html><html lang="en-GB"><meta charset="utf-8"><title>Learning to generate · two-page recap</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box}body{font:10pt/1.28 'Avenir Next','Segoe UI',sans-serif;color:#30343B;margin:0}section{break-after:page}h1{font-size:22pt;line-height:1.15;margin:0 0 5mm}h2{font-size:13pt;color:#178F82;margin:3mm 0 1mm}p{margin:2mm 0}code,pre{font:8.8pt/1.2 Menlo,monospace}pre{padding:2mm;background:#eef0f3;white-space:pre-wrap}table{border-collapse:collapse;width:100%;font-size:10pt}td,th{text-align:left;vertical-align:top;border-bottom:1px solid #ddd;padding:2mm}a{color:#245ca8}.label{font-size:9pt;color:#616975;letter-spacing:.08em;text-transform:uppercase}</style>
+<section><p class="label">ES 667 · Nipun Batra · IIT Gandhinagar · 1 / 2</p><h1>Distributions, latent variables<br>and the VAE</h1>
+<h2>Notation</h2><table><tr><td>x: observed output</td><td>z: a per-example latent draw</td><td>ε: fixed-distribution noise</td></tr><tr><td>θ: decoder / generator</td><td>φ: encoder</td><td>ψ: discriminator</td></tr></table><p><b>p(z)</b> is the prior. <b>pθ(x|z)</b> is the decoder likelihood. <b>pθ(z|x)</b> is the true posterior. <b>qφ(z|x)</b> is its learned approximation.</p>
+<h2>KL measures expected extra surprisal</h2><pre>KL(P ∥ Q) = Σᵢ Pᵢ log(Pᵢ/Qᵢ)
+H(P,Q) = H(P) + KL(P ∥ Q)</pre><p>Natural logs give nats. P weights the expectation. KL is nonnegative but asymmetric. A zero-weight term contributes zero; positive P against zero Q gives infinity.</p><p>For P=(0.8,0.2), Q=(0.6,0.4): KL(P∥Q)=0.091516222; reverse KL=0.104649629. A negative individual contribution is possible.</p>
+<h2>A model and a bound</h2><pre>pθ(x,z) = p(z) pθ(x|z)
+pθ(x) = ∫ p(z) pθ(x|z) dz
+ELBO = E_q[log pθ(x|z)] − KL(qφ(z|x) ∥ p(z))
+log pθ(x) = ELBO + KL(qφ(z|x) ∥ pθ(z|x))</pre><p>The loss has a <b>prior KL</b>. The gap has a <b>true-posterior KL</b>. Jensen's inequality uses concavity of log. An exact expectation is a lower bound; one Monte Carlo realisation need not be.</p>
+<h2>Reparameterize, then differentiate</h2><pre>std = exp(0.5 * logvar)
+z = mu + std * epsilon       # epsilon ~ N(0,I)
+KL = 0.5 * Σⱼ(muⱼ² + exp(logvarⱼ) − 1 − logvarⱼ)</pre><p>For μ=1, σ=0.5, ε=−0.4 and f(z)=z²: z=0.8, f=0.64, ∂f/∂μ=1.6, ∂f/∂σ=−0.64, ∂f/∂logvar=−0.16. Keep ε fixed for finite differences.</p>
+<h2>Train and generate</h2><p>For binary observations: use BCE with raw logits, sum over pixels; sum KL over latent coordinates; add per example, then average the batch. β=1 is the vanilla negative ELBO.</p><p><b>Generation:</b> prior → z → decoder → observation distribution. The encoder is unnecessary. A probability image is different from a Bernoulli draw. A uniform latent grid is different from prior sampling.</p><p><a href="https://arxiv.org/abs/1312.6114">Kingma & Welling · Auto-Encoding Variational Bayes</a></p></section>
+<section><p class="label">ES 667 · Nipun Batra · IIT Gandhinagar · 2 / 2</p><h1>GAN updates<br>and model comparison</h1><h2>One label convention</h2><p>D(x) is the displayed probability that x is real. Code uses raw logits a(x). Real target: 1. Fake target for D: 0. Fake target for G: 1.</p><pre>L_D = −E_real log D(x) − E_z log(1 − D(G(z)))
+L_G = −E_z log D(G(z))        # non-saturating</pre><p>At D(real)=0.8 and D(fake)=0.3: L_D=0.579818495 and L_G=1.203972804.</p><h2>One complete alternating iteration</h2><pre># D phase
+D.requires_grad_(True)
+opt_D.zero_grad(); opt_G.zero_grad()
+fake = G(z)
+loss_D = BCE_logits(D(real), ones)
+loss_D += BCE_logits(D(fake.detach()), zeros)
+loss_D.backward(); opt_D.step()
+
+# G phase: fresh graph through updated D
+opt_D.zero_grad(); opt_G.zero_grad()
+D.requires_grad_(False)
+fake = G(new_z)
+loss_G = BCE_logits(D(fake), ones)
+loss_G.backward(); opt_G.step()
+D.requires_grad_(True)</pre><p>Freezing D parameters preserves the input derivative. Detaching fake or using no_grad around D in the G phase removes the needed path. The minimal models have no BatchNorm/Dropout state.</p><h2>Why the practical generator objective?</h2><p>With D=sigmoid(a), the minimax derivative is −D; the non-saturating derivative is D−1. At D=0.01 they are −0.01 and −0.99. The complete parameter gradient also includes da/dx and dx/dθ.</p><h2>Compare on the same questions</h2><table><tr><th>Model</th><th>Training</th><th>Generation / likelihood</th></tr><tr><td>Autoregressive</td><td>Next-token NLL</td><td>Sequential samples; exact factorised likelihood</td></tr><tr><td>VAE</td><td>Negative ELBO</td><td>Prior and decoder; marginal usually intractable</td></tr><tr><td>GAN</td><td>Adversarial objectives</td><td>G only; implicit sample distribution</td></tr></table><h2>What a loss curve cannot tell you</h2><p>Inspect fixed-seed samples, diversity and coverage. Attractive samples may miss a mode. D≈1/2 is not proof of matching distributions. Generated scientific images and signals are not measurements. The supplied glyph and 2D runs are controlled teaching examples.</p><p><a href="https://arxiv.org/abs/1406.2661">Goodfellow et al. · Generative Adversarial Nets</a> · <a href="../index.html?reading">Lecture notes and worked examples</a></p></section></html>

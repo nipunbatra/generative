@@ -1,0 +1,2713 @@
+[
+  {
+    "id": "s01",
+    "number": 1,
+    "title": "Where did these faces come from?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Where could these portraits have come from?",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "These are published generated faces. Change the random input and the face changes.",
+        "latex": ""
+      }
+    ],
+    "goal": "Open with compelling published GAN samples and a question, before introducing technical names.",
+    "visual": "A legible selection from the original StyleGAN face-synthesis teaser. The lecture title is a small overlay, not a preceding text-only slide. Preserve source-image aspect ratios and use different faces to make variation visible.",
+    "math": "Only the informal relation `random input \u2192 learned generator \u2192 image`; no formal probability definition yet.",
+    "question": "Would one convincing face be enough to show that a generator has learned the data distribution?",
+    "narration": "These faces come from a published generator. We want more than one convincing image: different random inputs should give us varied, plausible faces. Keep that requirement in mind when we reach GANs.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Where did these faces come from?",
+    "source_asset_ids": [
+      "stylegan",
+      "stylegan-faces"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s45",
+      "s54",
+      "s56"
+    ],
+    "planned_builds": [
+      "Show the portraits and ask where they came from. ",
+      "Reveal that these are published generated samples; identify a random seed as the input and highlight variation across samples."
+    ],
+    "answer": "No. A model could repeat one face and still miss most of the variation in the data.",
+    "speaking_cue": "Look across the faces. What varies, and what still makes each one look plausible?",
+    "takeaway": "These are published generated faces. Change the random input and the face changes."
+  },
+  {
+    "id": "s02",
+    "number": 2,
+    "title": "How can a hidden space make digits?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "How could a model produce another digit after training?",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "A decoded grid shows how the hidden coordinates change the digit.",
+        "latex": ""
+      }
+    ],
+    "goal": "Put an accessible VAE example beside the initial GAN example and promise a mechanism the lecture will explain.",
+    "visual": "First show a small, readable grid of published VAE MNIST samples; then show the published decoded two-dimensional latent grid with its source caption.",
+    "math": "No VAE equation yet. Clearly label `generated samples` versus `decoded grid`. The grid is a visualization rather than random draws from the prior.",
+    "question": "Does the displayed grid consist of independent Gaussian draws?",
+    "narration": "The published VAE result gives us two ways to look at generation: individual samples and a decoded latent grid. The grid helps us inspect the decoder. It is not a collection of independent random draws from the prior.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Generate handwriting and move through a latent grid",
+    "source_asset_ids": [
+      "vae-paper",
+      "vae-samples",
+      "vae-manifold"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s24",
+      "s37",
+      "s42",
+      "s43"
+    ],
+    "planned_builds": [
+      "Reveal generated digit samples and ask how new samples could be drawn after training. ",
+      "Reveal the latent grid and ask how moving through a small hidden space could change the output."
+    ],
+    "answer": "No. Its coordinates are deliberately arranged at Gaussian quantiles so we can inspect the decoder.",
+    "speaking_cue": "Watch how the digit changes as we move across this hidden space.",
+    "takeaway": "A decoded grid shows how the hidden coordinates change the digit."
+  },
+  {
+    "id": "s03",
+    "number": 3,
+    "title": "Which properties can we mix?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Which properties of these two sources could be combined?",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "Take coarse styles from B and the remaining styles from A: this is style mixing.",
+        "latex": ""
+      }
+    ],
+    "goal": "Show controlled variation using a concrete GAN result without making an interpolation claim.",
+    "visual": "A carefully cropped, legible example from original StyleGAN Figure 3: two source generated faces and one or more style-mixed results. Preserve row/column correspondence.",
+    "math": "Label `style mixing`, explicitly distinct from `linear latent interpolation`. Do not introduce StyleGAN's full mapping network or claim that semantic properties can always be independently controlled.",
+    "question": "Does style mixing mean averaging the two source images pixel by pixel?",
+    "narration": "This StyleGAN example combines styles at different scales. In this crop, coarse styles come from source B and the other styles come from source A. This is a property of this model's architecture, not something every generator can do.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Mix styles while keeping some properties",
+    "source_asset_ids": [
+      "stylegan-paper",
+      "stylegan-mixing",
+      "stylegan-sources"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s43",
+      "s54"
+    ],
+    "planned_builds": [
+      "Show the source samples and ask which properties might be combined. ",
+      "Reveal the published mixed result and label which source supplies styles at the selected layer groups."
+    ],
+    "answer": "No. It changes the styles supplied to different parts of the generator.",
+    "speaking_cue": "Try to identify which features came from each source.",
+    "takeaway": "Take coarse styles from B and the remaining styles from A: this is style mixing."
+  },
+  {
+    "id": "s04",
+    "number": 4,
+    "title": "What does a shoe outline leave out?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "An outline specifies shape. What does it leave unspecified?",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "The model fills in the appearance. The photograph is a separate reference.",
+        "latex": ""
+      }
+    ],
+    "goal": "Introduce conditional generation with a clear observed input and generated output.",
+    "visual": "One complete pix2pix shoe example, preserving the author's `Input`, `Output` and `Ground Truth` labels. Keep the model output visually distinct from the reference photo.",
+    "math": "The outline is a condition; the image is an output. Do not claim that a deterministic published input/output pair demonstrates diversity across random seeds.",
+    "question": "Could two different photographs both fit this outline?",
+    "narration": "An outline narrows the set of possible shoes without specifying every pixel. The output is a generated appearance; the separately labelled reference is an observed photograph. Matching the outline is only one part of producing a plausible shoe.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "A shoe outline becomes a photograph",
+    "source_asset_ids": [
+      "shoe-input",
+      "shoe-output",
+      "shoe-target"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s50",
+      "s57"
+    ],
+    "planned_builds": [
+      "Show the outline and ask which appearance details it does not specify. ",
+      "Reveal the generated output and optionally the ground-truth reference in a separately labelled column."
+    ],
+    "answer": "Yes. The outline does not uniquely determine colour, texture, material or lighting.",
+    "speaking_cue": "The outline tells us the shape. It leaves the colour and material open.",
+    "takeaway": "The model fills in the appearance. The photograph is a separate reference."
+  },
+  {
+    "id": "s05",
+    "number": 5,
+    "title": "Can a layout specify a landscape?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The layout fixes where the regions belong.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "The layout constrains the scene; the generator supplies its appearance.",
+        "latex": ""
+      }
+    ],
+    "goal": "Connect generation directly to the segmentation labels students already know.",
+    "visual": "A clear semantic layout and its corresponding published SPADE/GauGAN output. Retain the layout's class legend. Use the pix2pix facade comparison as an optional later replay after the GAN loss is explained.",
+    "math": "A segmentation/layout map is a condition. Do not infer a same-layout diversity experiment from a figure that only shows one output; show multiple outputs only when their provenance confirms the shared condition.",
+    "question": "Does a semantic layout specify every output pixel?",
+    "narration": "The semantic map supplies spatial constraints, such as where the sky and vegetation belong. The generator supplies their visual appearance. The SPADE example lets us separate a condition from the image produced under that condition.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Turn a semantic layout into a landscape",
+    "source_asset_ids": [
+      "spade",
+      "spade-layout",
+      "spade-input"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s50",
+      "s57"
+    ],
+    "planned_builds": [
+      "Reveal the layout and named regions. ",
+      "Reveal the generated image and highlight the difference between spatial constraints and appearance details."
+    ],
+    "answer": "No. It constrains regions and classes while leaving much of their appearance unspecified.",
+    "speaking_cue": "The layout says what goes where. What still has to be invented?",
+    "takeaway": "The layout constrains the scene; the generator supplies its appearance."
+  },
+  {
+    "id": "s06",
+    "number": 6,
+    "title": "What changes from horse to zebra?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "What should stay recognisable when the domain changes?",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "The horse is an observed input. The zebra-domain image is a generated translation.",
+        "latex": ""
+      }
+    ],
+    "goal": "Motivate image translation with unpaired training data, without adding a full new architecture lesson.",
+    "visual": "A clearly matched CycleGAN input/output pair. The original horse photo remains labelled as an input; the zebra-domain result remains labelled as generated. Summer/winter translation can be a small optional comparison drawer.",
+    "math": "No cycle-consistency derivation in the core gallery. Label the task as `unpaired domain translation`; do not imply that the vanilla GAN introduced later alone implements every detail of CycleGAN.",
+    "question": "What should remain consistent through this translation?",
+    "narration": "The observed horse image is the input. The generated output has the appearance of the zebra domain. The example shows image translation; it is not evidence that the original scene contained a zebra.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Translate a horse photograph into the zebra domain",
+    "source_asset_ids": [
+      "cyclegan",
+      "cyclegan-horse",
+      "cyclegan-input"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s57",
+      "s59"
+    ],
+    "planned_builds": [
+      "Show the horse image and desired target domain. ",
+      "Reveal the published translation and the question of learning without paired horse/zebra photographs."
+    ],
+    "answer": "The scene and animal structure should remain recognisable while the relevant appearance changes.",
+    "speaking_cue": "We want the animal and scene to remain recognisable as the appearance changes.",
+    "takeaway": "The horse is an observed input. The zebra-domain image is a generated translation."
+  },
+  {
+    "id": "s07",
+    "number": 7,
+    "title": "What belongs in the missing region?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The visible context constrains the missing region. Does it determine every detail?",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "A plausible completion is not proof of the hidden original.",
+        "latex": ""
+      }
+    ],
+    "goal": "Show semantic inpainting as another image-generation application and make uncertainty concrete.",
+    "visual": "One Context Encoders held-out example with its missing region clearly outlined, the generated completion and any reference image kept under separate labels. Align the unchanged context at identical coordinates.",
+    "math": "The visible pixels and mask form a condition. The word `encoder` in this model's name does not by itself mean a variational posterior. Do not infer a multiple-sample experiment from a single completion.",
+    "question": "Does a realistic completion prove that we recovered the original pixels?",
+    "narration": "The surrounding pixels constrain the missing region, but they may not determine it uniquely. A convincing completion can be useful even when it differs from the hidden original. Plausibility and recovery are separate claims.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Complete a missing image region",
+    "source_asset_ids": [
+      "inpainting",
+      "inpainting-pair",
+      "inpainting-input"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s57",
+      "s59"
+    ],
+    "planned_builds": [
+      "Show the masked observation and ask what the surrounding pixels constrain. ",
+      "Reveal the published model completion and distinguish plausible filling from uniquely recovered hidden detail."
+    ],
+    "answer": "No. Several completions can agree with the visible context.",
+    "speaking_cue": "More than one missing patch could fit the visible context.",
+    "takeaway": "A plausible completion is not proof of the hidden original."
+  },
+  {
+    "id": "s08",
+    "number": 8,
+    "title": "Could we generate a signal segment?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Proposed lab application; illustrative signals. Condition: a spindle-like event.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "Different traces can fit one event description. Scientific validity still needs testing.",
+        "latex": ""
+      }
+    ],
+    "goal": "Connect generative modelling to the lab's sensing work without fabricating a result.",
+    "visual": "Three clearly labelled synthetic EEG-like traces conditioned on an illustrative event such as a spindle. Use procedurally drawn signals with a fixed scale and an event window; add the caption \u201cProposed lab application; illustrative signals.\u201d",
+    "math": "A signal is a multichannel time series, e.g. `channels \u00d7 samples`; the example event is a condition.",
+    "question": "What would we need to check before using generated signals in a study?",
+    "narration": "Here the condition describes a spindle-like event and the traces are deterministic teaching illustrations. A research model would need evaluation of signal properties and downstream usefulness. Generating a plausible-looking waveform would not establish either result.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "A lab idea: synthesize a sleep-signal segment",
+    "source_asset_ids": [
+      "sleep-proposal"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s55",
+      "s56",
+      "s59"
+    ],
+    "planned_builds": [
+      "Show the condition and one trace. ",
+      "Reveal variation in amplitude/timing while preserving the described event."
+    ],
+    "answer": "Whether they preserve the relevant signal and event properties, and whether the intended downstream use actually benefits.",
+    "speaking_cue": "These traces illustrate the idea. They are not validated physiological recordings.",
+    "takeaway": "Different traces can fit one event description. Scientific validity still needs testing."
+  },
+  {
+    "id": "s09",
+    "number": 9,
+    "title": "Which satellite images are possible?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "What does the metadata tell a satellite-image generator?",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "These are generated possibilities, not recovered measurements or forecasts.",
+        "latex": ""
+      }
+    ],
+    "goal": "Connect conditioning and spatial structure to geospatial research.",
+    "visual": "Attributed satellite-generation examples or clearly labelled illustrative tiles, with a metadata card and multiple possible outputs. Separate observed input imagery from generated candidates.",
+    "math": "An optional input tuple `(location/context, acquisition metadata)`; do not promise supported conditions beyond the source.",
+    "question": "Can generated satellite imagery replace an actual measurement without further evidence?",
+    "narration": "DiffusionSat uses conditioning information to guide image generation. A generated image is not an observation of an unmeasured location or a guaranteed forecast. We return to the mechanics of diffusion in the next lecture.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Generate satellite-image possibilities",
+    "source_asset_ids": [
+      "satellite",
+      "satellite-samples"
+    ],
+    "returns_to": [],
+    "return_in": [
+      "s55",
+      "s56",
+      "s59"
+    ],
+    "planned_builds": [
+      "Show a metadata-conditioned sample. ",
+      "Reveal alternative possibilities and mark structures that vary."
+    ],
+    "answer": "No. A model-generated possibility does not establish what was observed on the ground.",
+    "speaking_cue": "Treat each output as a possible image under the metadata, not as a measurement.",
+    "takeaway": "These are generated possibilities, not recovered measurements or forecasts."
+  },
+  {
+    "id": "s10",
+    "number": 10,
+    "title": "Have we generated something already?",
+    "section": "A",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Choose a next character from its categorical distribution.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "A new random seed gives another sequence from the same fitted model.",
+        "latex": ""
+      }
+    ],
+    "goal": "End the gallery by reconnecting to the students' own next-token name generator.",
+    "visual": "Reuse the course's name-generation interface or recreate its recognisable token-by-token build. Show two generated names from the same start token with different seeds; a small code-completion card may broaden the application.",
+    "math": "Show a categorical next-token distribution for one step, but save the product factorization for Scene 15.",
+    "question": "If we always chose the most likely character, what would we lose?",
+    "narration": "The small character model chooses a next character from a categorical distribution, then repeats with the growing prefix. It is a seeded bigram teaching model. A different seed can produce another name without changing the learned probabilities.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "You have already generated something",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [
+      "s15",
+      "s16",
+      "s59"
+    ],
+    "planned_builds": [
+      "Animate next-token sampling for one name. ",
+      "Reveal another sample and highlight that the training recipe is already familiar."
+    ],
+    "answer": "Much of the variation produced by sampling from the next-character distribution.",
+    "speaking_cue": "We have already seen this pattern: predict probabilities, then draw one outcome.",
+    "takeaway": "A new random seed gives another sequence from the same fitted model."
+  },
+  {
+    "id": "s11",
+    "number": 11,
+    "title": "What did the gallery have in common?",
+    "section": "B",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "A sample is one outcome. The distribution describes possible outcomes.",
+        "latex": "x"
+      },
+      {
+        "order": 2,
+        "caption": "Learn a distribution from which we can draw new outputs.",
+        "latex": "x\\sim p_\\theta(x)"
+      },
+      {
+        "order": 3,
+        "caption": "A condition narrows which outputs are plausible.",
+        "latex": "x\\sim p_\\theta(x\\mid c)"
+      }
+    ],
+    "goal": "Define the common task only after its applications are concrete.",
+    "visual": "Collapse the ten examples into three slots: condition `c`, source of variation, output `x`; keep a few examples visible as small anchors.",
+    "math": "`x ~ p_theta(x)` and `x ~ p_theta(x | c)`. Explain that the notation denotes sampling, not setting `x` equal to a probability.",
+    "question": "What is the difference between a distribution and a sample?",
+    "narration": "The gallery outputs look different, but each example concerns a distribution over possible outputs. A sample is one draw from that distribution. When we supply a condition, we ask for outputs that fit that condition.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "What did the gallery have in common?",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Label observed outputs as samples. ",
+      "Introduce a model distribution `p_theta(x)`. ",
+      "Add an optional condition to obtain `p_theta(x | c)`."
+    ],
+    "answer": "The distribution describes possible outcomes and their probabilities; a sample is one outcome drawn from it.",
+    "speaking_cue": "A generator needs a way to assign probabilities, draw samples, or both.",
+    "takeaway": "A condition narrows which outputs are plausible."
+  },
+  {
+    "id": "s12",
+    "number": 12,
+    "title": "Can a good average be a bad sample?",
+    "section": "B",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The average falls between the two clusters.",
+        "latex": "\\mathbb E[X]\\neq X"
+      },
+      {
+        "order": 2,
+        "caption": "Good samples should look plausible and cover the data distribution.",
+        "latex": ""
+      }
+    ],
+    "goal": "Separate representing a distribution from predicting one central value.",
+    "visual": "A two-cluster point cloud, its mean in the gap, and generated points. Offer a switch between a faithful mixture, a collapsed cluster and a central point.",
+    "math": "`mean = E[X]` does not imply `X = E[X]`. For a bimodal distribution, the mean may have low density.",
+    "question": "Why can low squared error be a poor goal for this generator?",
+    "narration": "For two separated clusters, the mean may be far from both. Producing that mean repeatedly would be poor generation. We need to inspect both whether samples look plausible and whether they cover the different regions of the data.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "A good average can be a bad sample",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Show the mean as a summary statistic. ",
+      "Compare realism and coverage of the three generated sets."
+    ],
+    "answer": "It can favour the mean between the modes, even though that point is not a plausible sample.",
+    "speaking_cue": "The average is in the middle. But almost none of our data live there.",
+    "takeaway": "Good samples should look plausible and cover the data distribution."
+  },
+  {
+    "id": "s13",
+    "number": 13,
+    "title": "What does fitting a Gaussian learn?",
+    "section": "B",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Fit the centre to six observations.",
+        "latex": "\\hat\\mu=\\frac1N\\sum_i x_i=0"
+      },
+      {
+        "order": 2,
+        "caption": "For maximum likelihood, divide the squared deviations by N.",
+        "latex": "\\hat\\sigma^2=\\frac1N\\sum_i(x_i-\\hat\\mu)^2"
+      },
+      {
+        "order": 3,
+        "caption": "Even the best fit within one family can miss the shape of the data.",
+        "latex": "x=\\hat\\mu+\\hat\\sigma\\epsilon"
+      }
+    ],
+    "goal": "Make likelihood fitting and sampling tangible using familiar probability.",
+    "visual": "One-dimensional observations at `[-2.2, -2.0, -1.8, 1.8, 2.0, 2.2]`; a fitted Gaussian curve; a sample tray. Parameter and resampling controls are independent.",
+    "math": "`mu_hat = mean(x_i) = 0`; `sigma_hat^2 = (1/N) sum_i (x_i-mu_hat)^2 = 4.0266667`. Label this as the Gaussian MLE variance, not the unbiased `1/(N-1)` estimator. Generate `x = mu_hat + sigma_hat * epsilon` with `epsilon ~ N(0,1)`.",
+    "question": "Would more accurate optimisation fix this single Gaussian's missing two-cluster structure?",
+    "narration": "For a Gaussian, maximum likelihood gives the sample mean and a variance with denominator N. Those parameters are optimal within the Gaussian family. They do not make one Gaussian a good description of two separated clusters.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "The simplest generative model: fit a Gaussian, then sample",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Show observations and fit the mean. ",
+      "Fit the MLE variance and overlay density. ",
+      "Draw fresh samples and reveal the poor fit near the gap."
+    ],
+    "answer": "No. The limitation here is the distribution family, not an optimisation error.",
+    "speaking_cue": "Fitting the parameters is straightforward. Choosing a suitable family is the harder question.",
+    "takeaway": "Even the best fit within one family can miss the shape of the data."
+  },
+  {
+    "id": "s14",
+    "number": 14,
+    "title": "What if a hidden choice selects a cluster?",
+    "section": "B",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "First choose a component.",
+        "latex": "z\\sim\\operatorname{Categorical}(1/2,1/2)"
+      },
+      {
+        "order": 2,
+        "caption": "Then draw from its Gaussian. Sum over the hidden choice.",
+        "latex": "p(x)=\\sum_z p(z)p(x\\mid z)"
+      }
+    ],
+    "goal": "Introduce a latent variable first as an understandable sampling procedure.",
+    "visual": "A fair two-way selector chooses a left or right Gaussian; then a point appears. Display selector outcomes over repeated samples.",
+    "math": "`P(z=0)=P(z=1)=1/2`; `p(x)=sum_z p(z)p(x|z)`. Illustrative component means are `-2,+2` and standard deviation `0.25`; do not imply these are the exact MLE fit to Scene 13.",
+    "question": "Why is there a sum over z when we compute p(x)?",
+    "narration": "The hidden component label makes a mixture easy to sample. If we only observe the final point, we sum over the possible component choices to obtain its density. This small example introduces the role of a latent variable.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "A hidden choice gives a mixture",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Sample `z` from two categories. ",
+      "Sample `x` from the selected Gaussian and combine both into a mixture curve."
+    ],
+    "answer": "The component choice is unobserved, and each possible choice contributes to the marginal density.",
+    "speaking_cue": "Think of two random choices: which cluster, then which point within it.",
+    "takeaway": "Then draw from its Gaussian. Sum over the hidden choice."
+  },
+  {
+    "id": "s15",
+    "number": 15,
+    "title": "What distribution did our name model learn?",
+    "section": "B",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Every token has a probability given its preceding context.",
+        "latex": "p_\\theta(x_t\\mid x_{<t})"
+      },
+      {
+        "order": 2,
+        "caption": "Multiply the next-token probabilities, including the probability of stopping.",
+        "latex": "p_\\theta(x)=\\prod_t p_\\theta(x_t\\mid x_{<t})"
+      }
+    ],
+    "goal": "Reuse autoregression as the first neural generative model.",
+    "visual": "The previous course's token sequence and progressively extended context; place one conditional distribution beneath each generated token.",
+    "math": "`p_theta(x_1,...,x_T)=prod_t p_theta(x_t|x_<t)`; `-log p_theta(x)=sum_t -log p_theta(x_t|x_<t)`.",
+    "question": "Why does the end token belong in the sequence probability?",
+    "narration": "The chain rule writes a sequence probability as a product of conditional probabilities. Include the end token: it is the model's decision to stop. Our teaching bigram model uses only the previous character, although the general formula allows the full prefix.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Our name generator learned a joint distribution",
+    "source_asset_ids": [],
+    "returns_to": [
+      "s10"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Display conditional next-token probabilities. ",
+      "Multiply them to obtain the probability of a complete sequence, including the end token."
+    ],
+    "answer": "Stopping at that point is one of the events that defines the generated sequence.",
+    "speaking_cue": "We can score a whole name by following exactly the choices used to generate it.",
+    "takeaway": "Multiply the next-token probabilities, including the probability of stopping."
+  },
+  {
+    "id": "s16",
+    "number": 16,
+    "title": "Could we generate pixels in sequence?",
+    "section": "B",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "An image can be ordered into a pixel sequence.",
+        "latex": "x_1,x_2,\\ldots,x_{16}"
+      },
+      {
+        "order": 2,
+        "caption": "Training uses the observed prefix. A causal mask lets us score positions in parallel.",
+        "latex": "-\\log p_\\theta(x)=-\\sum_i\\log p_\\theta(x_i\\mid x_{<i})"
+      },
+      {
+        "order": 3,
+        "caption": "Generation feeds each sampled pixel into the next prediction.",
+        "latex": "x_i\\sim p_\\theta(x_i\\mid x_{<i})"
+      }
+    ],
+    "goal": "Establish an alternative to latent generation without reteaching a transformer.",
+    "visual": "A small `4\u00d74` binary image revealed in raster order; side-by-side training and generation views.",
+    "math": "`p_theta(x)=prod_i p_theta(x_i|x_<i)`; shape labels identify one token/value versus the image.",
+    "question": "Why does parallel training not imply parallel ancestral sampling?",
+    "narration": "An ordering lets us apply the same chain rule to image pixels. With a causal mask, training can score positions in parallel using the observed prefix. Sampling still needs the previously sampled pixels before it can continue.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "The same idea could generate pixels",
+    "source_asset_ids": [],
+    "returns_to": [
+      "s10"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Linearize pixels into a sequence. ",
+      "During training, show known preceding pixels and next-pixel likelihoods. ",
+      "During generation, sample a pixel and feed it into the next step."
+    ],
+    "answer": "At generation time, later conditional distributions depend on earlier pixels that have not yet been sampled.",
+    "speaking_cue": "During training we know the prefix. During generation we must build it ourselves.",
+    "takeaway": "Generation feeds each sampled pixel into the next prediction."
+  },
+  {
+    "id": "s17",
+    "number": 17,
+    "title": "Could one random vector make an image?",
+    "section": "B",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Could a random vector select an entire output?",
+        "latex": "z\\sim p(z)"
+      },
+      {
+        "order": 2,
+        "caption": "Learn a map that turns latent draws into plausible outputs.",
+        "latex": "x=G_\\theta(z)"
+      }
+    ],
+    "goal": "Motivate a latent generator as a modelling choice, not an impossibility result about autoregression.",
+    "visual": "A two-dimensional noise plane feeds a learned network and a digit canvas. Selecting different points changes output.",
+    "math": "`z ~ p(z)`; for an implicit generator, `x = G_theta(z)`. A VAE's probabilistic decoder will be introduced separately.",
+    "question": "What has to be learned in this picture?",
+    "narration": "Instead of sampling one output coordinate at a time, we can transform a latent draw into an output. The map must be learned so that draws from the chosen prior produce useful outputs. A random input alone does not guarantee useful variation.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Could one random vector generate an entire image?",
+    "source_asset_ids": [
+      "image-gan",
+      "diagram-s17"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Show `z` and a learned mapping. ",
+      "Reveal multiple generated outputs for multiple `z` values."
+    ],
+    "answer": "The mapping from latent draws to outputs, so that its output distribution matches the data.",
+    "speaking_cue": "Imagine choosing the whole output through one random vector.",
+    "takeaway": "Learn a map that turns latent draws into plausible outputs."
+  },
+  {
+    "id": "s18",
+    "number": 18,
+    "title": "Does reconstruction tell us how to sample?",
+    "section": "B",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "An autoencoder learns to reconstruct its inputs.",
+        "latex": "x\\to E_\\phi(x)\\to G_\\theta(E_\\phi(x))"
+      },
+      {
+        "order": 2,
+        "caption": "Reconstruction alone can leave irregularly arranged codes.",
+        "latex": ""
+      },
+      {
+        "order": 3,
+        "caption": "Where should we draw a new code? Reconstruction alone has not answered that.",
+        "latex": "z\\sim\\;?"
+      }
+    ],
+    "goal": "Explain the missing ingredient that motivates a probabilistic latent model.",
+    "visual": "`x \u2192 encoder \u2192 z \u2192 decoder \u2192 reconstruction`; then plot encoded training points and sample from a standard Gaussian in the same latent plane.",
+    "math": "A reconstruction objective alone does not specify a convenient prior or ensure that its samples land in well-trained regions. Do not claim that autoencoders can never be used generatively; modelling the learned latent distribution is another possible method.",
+    "question": "Why is a reconstruction network not automatically a complete sampling model?",
+    "narration": "An ordinary autoencoder can learn useful reconstructions while arranging its codes irregularly. Sampling from an arbitrary Gaussian may then land between the codes used during training. We need a generative model and a way to connect inference to its prior.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "An autoencoder solves reconstruction; what about sampling?",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Reveal the reconstruction pathway. ",
+      "Show a possible irregular arrangement of learned codes. ",
+      "Ask what distribution should be used for new latent samples."
+    ],
+    "answer": "Its reconstruction objective does not specify a suitable distribution over new latent codes.",
+    "speaking_cue": "Reconstructing the training images does not tell us where to draw a new code.",
+    "takeaway": "Where should we draw a new code? Reconstruction alone has not answered that."
+  },
+  {
+    "id": "s19",
+    "number": 19,
+    "title": "How do two distributions disagree?",
+    "section": "C",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Two distributions assign different probabilities to the same categories.",
+        "latex": "P=(0.8,0.2),\\quad Q=(0.6,0.4)"
+      },
+      {
+        "order": 2,
+        "caption": "An unlikely observation is more surprising.",
+        "latex": "\\operatorname{surprisal}(i)=-\\log Q_i"
+      },
+      {
+        "order": 3,
+        "caption": "Average the extra surprise, weighting each event by its probability under P.",
+        "latex": "D_{\\mathrm{KL}}(P\\|Q)=\\sum_iP_i\\log\\frac{P_i}{Q_i}"
+      }
+    ],
+    "goal": "Introduce KL through two probability bars and a question about assigning probability to observations.",
+    "visual": "Two-category bars for `P=(0.8,0.2)` and `Q=(0.6,0.4)`; sample labels drawn from `P`.",
+    "math": "Natural logarithms throughout; units are nats. `D_KL(P||Q)=sum_i P_i log(P_i/Q_i)`.",
+    "question": "Which distribution supplies the averaging weights in KL(P || Q)?",
+    "narration": "Both distributions refer to the same categories. We compare their log probabilities and average using P. That choice of weighting is part of the definition and will matter when we reverse the arguments.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Compare two probability distributions",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Reveal `P` and `Q`. ",
+      "Introduce surprisal `-log probability` for an observed category. ",
+      "Ask about the average extra surprisal from using `Q` for data distributed as `P`."
+    ],
+    "answer": "P supplies the weights; Q is the distribution whose predictions we compare with P.",
+    "speaking_cue": "Read KL as the extra surprise we incur by using Q when the outcomes follow P.",
+    "takeaway": "Average the extra surprise, weighting each event by its probability under P."
+  },
+  {
+    "id": "s20",
+    "number": 20,
+    "title": "Can we compute KL by hand?",
+    "section": "C",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Category 1: weight the log ratio by its probability under P.",
+        "latex": "P_1\\log(P_1/Q_1)"
+      },
+      {
+        "order": 2,
+        "caption": "Category 2 can make a negative contribution.",
+        "latex": "P_2\\log(P_2/Q_2)"
+      },
+      {
+        "order": 3,
+        "caption": "Individual contributions can be negative. Their sum cannot.",
+        "latex": "D_{\\mathrm{KL}}(P\\|Q)\\geq0"
+      }
+    ],
+    "goal": "Make KL computable rather than a vague \u2018distance\u2019 label.",
+    "visual": "A synchronized table with columns `i`, `P_i`, `Q_i`, `log(P_i/Q_i)`, `P_i log(P_i/Q_i)`; the corresponding bar is highlighted for each row.",
+    "math": "Show the full substitution, not only the result. A negative individual contribution is valid; the complete divergence is nonnegative.",
+    "question": "Does a negative category contribution mean that our KL calculation is wrong?",
+    "narration": "Work through the two category contributions separately, using natural logarithms. One contribution is negative because Q assigns less probability than P to the other category and more to this one. The weighted sum is still nonnegative.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Compute KL completely, with real numbers",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Compute the first contribution, `0.8 log(0.8/0.6)=0.230145658`. ",
+      "Compute the second contribution, `0.2 log(0.2/0.4)=-0.138629436`. ",
+      "Sum to `D_KL(P||Q)=0.091516222 nats`."
+    ],
+    "answer": "No. Individual terms can be negative; the complete KL is nonnegative.",
+    "speaking_cue": "Keep the negative term. It is the total, not each contribution, that must be nonnegative.",
+    "takeaway": "Individual contributions can be negative. Their sum cannot."
+  },
+  {
+    "id": "s21",
+    "number": 21,
+    "title": "Why do direction and support matter?",
+    "section": "C",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Swap P and Q: the weights change as well as the log ratios.",
+        "latex": "D_{\\mathrm{KL}}(Q\\|P)\\neq D_{\\mathrm{KL}}(P\\|Q)"
+      },
+      {
+        "order": 2,
+        "caption": "Matching distributions incur no extra surprisal.",
+        "latex": "D_{\\mathrm{KL}}(P\\|P)=0"
+      },
+      {
+        "order": 3,
+        "caption": "A possible event given zero model probability has infinite cost.",
+        "latex": "P_i>0,\\;Q_i=0\\;\\Longrightarrow\\;D_{\\mathrm{KL}}(P\\|Q)=\\infty"
+      }
+    ],
+    "goal": "Prevent the two most common KL misconceptions.",
+    "visual": "Swap the roles of the two bars without recoloring the definitions; then let `Q_2` approach zero using a slider.",
+    "math": "KL is not symmetric and is not a metric. Use `0 log(0/q)=0`; a positive-probability event assigned zero probability contributes `+infinity`. Handle these cases explicitly in code rather than showing `NaN`.",
+    "question": "When is KL(P || Q) infinite in this finite example?",
+    "narration": "Reversing KL changes both the weights and the log ratios. If Q rules out an event that P can produce, observing that event has infinite surprisal under Q. The demonstration shows infinity explicitly rather than hiding it with a numerical clamp.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Direction and support matter",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Compute the reverse divergence `D_KL(Q||P)=0.104649629`. ",
+      "Show `KL(P||P)=0`. ",
+      "Set `Q_i=0` where `P_i>0` and display infinity with a short explanation."
+    ],
+    "answer": "When some event has positive probability under P and zero probability under Q.",
+    "speaking_cue": "Swap the arguments first. Then try giving a possible event zero probability.",
+    "takeaway": "A possible event given zero model probability has infinite cost."
+  },
+  {
+    "id": "s22",
+    "number": 22,
+    "title": "Where is KL hiding in cross-entropy?",
+    "section": "C",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Entropy is the uncertainty in P. Cross-entropy uses Q to describe it.",
+        "latex": "H(P)=-\\sum_iP_i\\log P_i"
+      },
+      {
+        "order": 2,
+        "caption": "With P fixed, minimising cross-entropy also minimises KL.",
+        "latex": "H(P,Q)=H(P)+D_{\\mathrm{KL}}(P\\|Q)"
+      }
+    ],
+    "goal": "Connect the detour to familiar supervised learning.",
+    "visual": "A decomposition bar with entropy, extra mismatch, and cross-entropy; values update from the same `P,Q` controls.",
+    "math": "When `P` is fixed, minimizing cross-entropy over `Q` is equivalent to minimizing `D_KL(P||Q)`. Explain the expectation over labels; do not conflate the empirical one-hot label for a single example with an unknown population distribution.",
+    "question": "Why can we minimise cross-entropy without explicitly subtracting H(P)?",
+    "narration": "Cross-entropy includes the uncertainty already present in P, plus the extra cost of using Q. Subtracting the fixed entropy leaves KL. This explains why minimising cross-entropy can be understood as matching distributions.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Your cross-entropy loss already contains a KL",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Compute `H(P)=0.500402424` and `H(P,Q)=0.591918645`. ",
+      "Show `H(P,Q)=H(P)+D_KL(P||Q)`."
+    ],
+    "answer": "H(P) is constant with respect to the parameters of Q.",
+    "speaking_cue": "With the data distribution fixed, entropy is a constant in the training objective.",
+    "takeaway": "With P fixed, minimising cross-entropy also minimises KL."
+  },
+  {
+    "id": "s23",
+    "number": 23,
+    "title": "What changes for a continuous latent?",
+    "section": "C",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "For a continuous latent, sum becomes integral.",
+        "latex": "D_{\\mathrm{KL}}(q\\|p)=\\int q(z)\\log\\frac{q(z)}{p(z)}\\,dz"
+      },
+      {
+        "order": 2,
+        "caption": "The encoder gives a distribution for this x. The prior does not depend on x.",
+        "latex": "D_{\\mathrm{KL}}(q_\\phi(z\\mid x)\\|p(z))"
+      }
+    ],
+    "goal": "Prepare the continuous KL used in a VAE, with arguments kept explicit.",
+    "visual": "A standard Gaussian prior curve and one example-specific Gaussian curve. Their overlap is visually illustrative; numerical KL comes from the correct formula later.",
+    "math": "`D_KL(q||p)=integral q(z) log(q(z)/p(z)) dz`. A density value is not a probability mass; the ratio inside the logarithm is the relevant quantity.",
+    "question": "Which distribution here changes when we replace the observed image?",
+    "narration": "The same log-ratio idea applies to densities. In the VAE loss we compare the encoder's distribution for one observation with the prior. Keep the dependence on x visible: different observations can produce different encoder distributions.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "From category bars to latent densities",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Replace the discrete sum by an integral. ",
+      "Label the future comparison as `q_phi(z|x)` versus `p(z)`."
+    ],
+    "answer": "The approximate posterior q(z | x) changes with x; the chosen prior p(z) does not.",
+    "speaking_cue": "Now the latent can take any real value, so the sum becomes an integral.",
+    "takeaway": "The encoder gives a distribution for this x. The prior does not depend on x."
+  },
+  {
+    "id": "s24",
+    "number": 24,
+    "title": "What is the generative story?",
+    "section": "D",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Begin with a prior. No observed image or encoder is needed.",
+        "latex": "z\\sim\\mathcal N(0,I)"
+      },
+      {
+        "order": 2,
+        "caption": "Decode probabilities first, then sample the observation.",
+        "latex": "p_\\theta(x,z)=p(z)p_\\theta(x\\mid z)"
+      }
+    ],
+    "goal": "Define the VAE's generative model cleanly.",
+    "visual": "A prior distribution produces `z`; a learned decoder produces likelihood parameters; an observation is sampled from that likelihood. Keep the encoder absent initially.",
+    "math": "`p_theta(x,z)=p(z)p_theta(x|z)`. The prior here is fixed and has no learned parameters. The decoder parameterizes a distribution; its mean/probabilities are not automatically a sample from that distribution.",
+    "question": "Do we need an input image to draw a new sample from this model?",
+    "narration": "The generative model starts with the prior and a decoder likelihood. The encoder has no role in this sampling story. We introduce it later because learning from observed images requires reasoning about their hidden latents.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Specify a generative story before its training algorithm",
+    "source_asset_ids": [
+      "diagram-s24"
+    ],
+    "returns_to": [
+      "s02"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Sample `z ~ N(0,I)`. ",
+      "Sample `x ~ p_theta(x|z)` and show the joint model."
+    ],
+    "answer": "No. Draw from the prior and then from the decoder likelihood.",
+    "speaking_cue": "Tell the sampling story in order: draw z, decode its parameters, then draw x.",
+    "takeaway": "Decode probabilities first, then sample the observation."
+  },
+  {
+    "id": "s25",
+    "number": 25,
+    "title": "What does maximum likelihood require?",
+    "section": "D",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Every latent that could explain this image contributes to its probability.",
+        "latex": "p_\\theta(x)=\\int p(z)p_\\theta(x\\mid z)\\,dz"
+      },
+      {
+        "order": 2,
+        "caption": "With a nonlinear decoder, this integral is usually hard to compute exactly.",
+        "latex": "\\max_\\theta\\sum_n\\log p_\\theta(x_n)"
+      }
+    ],
+    "goal": "Explain \u2018evidence\u2019 and the computational difficulty that motivates a bound.",
+    "visual": "Many latent values each contribute to the likelihood of the same observed digit; progressively overlay their weighted contributions.",
+    "math": "`p_theta(x)=integral p(z)p_theta(x|z) dz`; MLE maximizes `sum_n log p_theta(x_n)`. \u201cEvidence\u201d here means this marginal probability/density of the observation.",
+    "question": "Why can we not score an image using only its single best latent?",
+    "narration": "The marginal likelihood integrates the joint density over z. The nonlinear decoder makes this integral difficult to compute exactly. Sampling a plausible image can therefore be easier than evaluating its exact marginal likelihood.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "The quantity MLE asks us to compute",
+    "source_asset_ids": [
+      "diagram-s25"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Write the marginal likelihood as an integral. ",
+      "Show why evaluating a nonlinear decoder over all continuous latent possibilities is generally intractable."
+    ],
+    "answer": "The marginal probability includes contributions from all possible latent values, not just the best one.",
+    "speaking_cue": "To score one image, we must account for all the latent values that could explain it.",
+    "takeaway": "With a nonlinear decoder, this integral is usually hard to compute exactly."
+  },
+  {
+    "id": "s26",
+    "number": 26,
+    "title": "Which latent could explain this image?",
+    "section": "D",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "After observing x, which latent values explain it?",
+        "latex": "p_\\theta(z\\mid x)=\\frac{p_\\theta(x,z)}{p_\\theta(x)}"
+      },
+      {
+        "order": 2,
+        "caption": "Use a tractable encoder distribution to approximate the true posterior.",
+        "latex": "q_\\phi(z\\mid x)\\approx p_\\theta(z\\mid x)"
+      }
+    ],
+    "goal": "Separate the model's true posterior from the trainable inference network.",
+    "visual": "A solid forward generative arrow `z \u2192 x`; a dashed inference arrow `x \u2192 q_phi(z|x)`; a ghost label for the true posterior `p_theta(z|x)`.",
+    "math": "`p_theta(z|x)=p_theta(x,z)/p_theta(x)`. The intractable evidence appears in the denominator. The approximate posterior is not the prior and is not the exact posterior by definition.",
+    "question": "Why do we introduce q if Bayes' rule already defines the posterior?",
+    "narration": "Bayes' rule defines the true posterior, but its denominator is the difficult marginal likelihood. We introduce q as a tractable approximation. The encoder predicts that approximation; it does not directly return the exact posterior.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Introduce an approximate posterior",
+    "source_asset_ids": [
+      "diagram-s26"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Use Bayes' rule to identify the desired posterior. ",
+      "Introduce `q_phi(z|x)` as a tractable normalized approximation parameterized by an encoder."
+    ],
+    "answer": "The definition does not make the posterior tractable to evaluate or sample from.",
+    "speaking_cue": "The true posterior asks which latents could have produced the image we observed.",
+    "takeaway": "Use a tractable encoder distribution to approximate the true posterior."
+  },
+  {
+    "id": "s27",
+    "number": 27,
+    "title": "How does log become a lower bound?",
+    "section": "D",
+    "buildCount": 4,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Start with the marginal probability of the observation.",
+        "latex": "\\log p_\\theta(x)=\\log\\int p_\\theta(x,z)\\,dz"
+      },
+      {
+        "order": 2,
+        "caption": "Multiply and divide by q. It must be normalised and cover the required support.",
+        "latex": "=\\log\\int q_\\phi(z\\mid x)\\frac{p_\\theta(x,z)}{q_\\phi(z\\mid x)}\\,dz"
+      },
+      {
+        "order": 3,
+        "caption": "The integral is now an expectation under q.",
+        "latex": "=\\log\\mathbb E_q\\!\\left[\\frac{p_\\theta(x,z)}{q_\\phi(z\\mid x)}\\right]"
+      },
+      {
+        "order": 4,
+        "caption": "Move log inside the expectation using Jensen. This is the first inequality.",
+        "latex": "\\geq\\mathbb E_q\\!\\left[\\log\\frac{p_\\theta(x,z)}{q_\\phi(z\\mid x)}\\right]"
+      }
+    ],
+    "goal": "Give the first four steps of the actual derivation, with no skipped expectation identity.",
+    "visual": "An equation canvas with one active line and up to two earlier lines dimmed above it; a small concave `log` plot makes Jensen's direction visible. Each introduced `q` term is highlighted with the same color.",
+    "math": "Define `R=p_theta(x,z)/q_phi(z|x)`. State in notes that the normalized `q` must have the support needed for the displayed expectation identity; the Gaussian choices used here have positive density everywhere. Do not reverse Jensen's inequality.",
+    "question": "Which step loses equality, and why?",
+    "narration": "Start with the marginal likelihood. Multiply and divide by a normalised q that covers the required support, recognise an expectation, and then use the concavity of log. The first three lines are equalities; the last gives a lower bound.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Derive the ELBO, part 1: move the logarithm",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Start with `log p_theta(x)=log integral p_theta(x,z) dz`. ",
+      "Multiply and divide by `q_phi(z|x)` inside the integral. ",
+      "Recognize `log E_q[p_theta(x,z)/q_phi(z|x)]`. ",
+      "Apply concavity: `log E_q[R] >= E_q[log R]`."
+    ],
+    "answer": "Moving log inside the expectation uses Jensen's inequality for the concave logarithm.",
+    "speaking_cue": "Follow the equality signs. Jensen's inequality is the one step that introduces a bound.",
+    "takeaway": "Move log inside the expectation using Jensen. This is the first inequality."
+  },
+  {
+    "id": "s28",
+    "number": 28,
+    "title": "What are the two terms in the bound?",
+    "section": "D",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Factor the joint and separate the logarithms.",
+        "latex": "\\mathbb E_q[\\log p_\\theta(x\\mid z)+\\log p(z)-\\log q_\\phi(z\\mid x)]"
+      },
+      {
+        "order": 2,
+        "caption": "The bound is expected reconstruction log likelihood minus a KL to the prior.",
+        "latex": "\\mathbb E_q[\\log p_\\theta(x\\mid z)]-D_{\\mathrm{KL}}(q_\\phi(z\\mid x)\\|p(z))"
+      },
+      {
+        "order": 3,
+        "caption": "Maximise the evidence lower bound, or minimise its negative.",
+        "latex": "\\log p_\\theta(x)\\geq\\mathcal E(\\theta,\\phi;x)"
+      }
+    ],
+    "goal": "Finish the seven-build derivation and connect it to an optimizable objective.",
+    "visual": "Continue the same equation style; group reconstruction likelihood and prior/posterior terms with braces. Do not show the final answer before the factorization is revealed.",
+    "math": "`log p_theta(x) >= ELBO = E_q log p_theta(x|z) - KL(q||p)`. Maximizing the ELBO is equivalent to minimizing expected reconstruction NLL plus KL. The vanilla objective has coefficient one on KL.",
+    "question": "Why does the practical loss add KL even though the bound subtracts it?",
+    "narration": "Factor the joint into likelihood and prior, then split the logarithm. The resulting bound has an expected reconstruction log likelihood and a prior KL. Maximising the bound is equivalent to minimising its negative.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Derive the ELBO, part 2: recognize its two terms",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Substitute `p_theta(x,z)=p_theta(x|z)p(z)` and split the logarithm. ",
+      "Recognize `E_q[log p_theta(x|z)] - D_KL(q_phi(z|x)||p(z))`. ",
+      "Name this quantity `ELBO(theta,phi;x)` and show the loss as its negative."
+    ],
+    "answer": "The training loss is the negative of the ELBO.",
+    "speaking_cue": "The bound rewards explaining the image and subtracts a KL to the prior.",
+    "takeaway": "Maximise the evidence lower bound, or minimise its negative."
+  },
+  {
+    "id": "s29",
+    "number": 29,
+    "title": "What is the gap to log evidence?",
+    "section": "D",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Expand the KL to the true posterior using Bayes\u2019 rule.",
+        "latex": "D_{\\mathrm{KL}}(q\\|p_\\theta(z\\mid x))=\\mathbb E_q[\\log q-\\log p_\\theta(x,z)]+\\log p_\\theta(x)"
+      },
+      {
+        "order": 2,
+        "caption": "The gap is a posterior KL, not the KL to the prior.",
+        "latex": "\\log p_\\theta(x)=\\mathcal E+D_{\\mathrm{KL}}(q\\|p_\\theta(z\\mid x))"
+      },
+      {
+        "order": 3,
+        "caption": "The gap closes when q matches the true posterior almost everywhere.",
+        "latex": "q=p_\\theta(z\\mid x)\\;\\Longrightarrow\\;\\mathcal E=\\log p_\\theta(x)"
+      }
+    ],
+    "goal": "Explain what the lower bound actually means rather than treating it as a new arbitrary loss.",
+    "visual": "A vertical number line with `ELBO` below `log p_theta(x)` and a bracket labelled by posterior KL; the likelihood can itself change as `theta` changes.",
+    "math": "Contrast the two KLs explicitly: the objective uses `KL(q||prior)`; the bound gap uses `KL(q||true posterior)`. The latter is generally not directly computable in the full nonlinear model.",
+    "question": "Does making q equal to the prior necessarily close the evidence gap?",
+    "narration": "The gap to log evidence is KL from q to the true posterior. That is different from the KL to the prior inside the ELBO. The bound becomes tight when q agrees with the true posterior almost everywhere.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "What is the gap between the bound and the target?",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Expand `KL(q_phi(z|x)||p_theta(z|x))`. ",
+      "Rearrange to `log p_theta(x)=ELBO+KL(q_phi(z|x)||p_theta(z|x))`. ",
+      "Show equality when `q` equals the true posterior, within the appropriate almost-everywhere meaning."
+    ],
+    "answer": "No. The gap closes when q equals the true posterior for the observed x.",
+    "speaking_cue": "There are two KLs in this story. Check which distribution is on the right each time.",
+    "takeaway": "The gap closes when q matches the true posterior almost everywhere."
+  },
+  {
+    "id": "s30",
+    "number": 30,
+    "title": "Can we check the bound exactly?",
+    "section": "D",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Two latent states let us compute evidence and posterior exactly.",
+        "latex": "p(x=1)=\\sum_zp(z)p(x=1\\mid z)"
+      },
+      {
+        "order": 2,
+        "caption": "Move q. The bound changes; the fixed model evidence does not.",
+        "latex": "\\mathcal E+D_{\\mathrm{KL}}(q\\|p(z\\mid x))=\\log p(x)"
+      }
+    ],
+    "goal": "Turn the bound into numbers the students can independently verify.",
+    "visual": "A two-state latent tree and a synchronized calculator. For the observed `x=1`, set `p(z)=(0.5,0.5)`, `p(x=1|z)=(0.8,0.2)`, and `q(z|x)=(0.6,0.4)`. An adjustable `q_0` slider changes the bound but not the fixed model evidence.",
+    "math": "Rounded to six decimals: `E_q log p(x|z)=-0.777661`; `KL(q||prior)=0.020136`; `ELBO=-0.797797`; posterior-gap KL `=0.104650`; `log p(x)=-0.693147`. Verify `ELBO + posterior_gap = log_evidence` using full-precision computed quantities; the displayed sum is approximately `-0.797797+0.104650=-0.693147`.",
+    "question": "Where should q be set to make the bound tight?",
+    "narration": "This finite model has only two latent states, so we can calculate the evidence and posterior exactly. Changing q changes the bound and the posterior gap, not the fixed model's evidence. Their sum provides a direct numerical check of the identity.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Verify the ELBO with a tiny exact model",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Compute `p(x=1)=0.5` and true posterior `(0.8,0.2)`. ",
+      "Reveal the exact decomposition below and let q move toward the posterior."
+    ],
+    "answer": "At the exact posterior of this finite model.",
+    "speaking_cue": "Move q while watching the evidence stay fixed and the bound move below it.",
+    "takeaway": "Move q. The bound changes; the fixed model evidence does not."
+  },
+  {
+    "id": "s31",
+    "number": 31,
+    "title": "Which distribution is which?",
+    "section": "D",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Which distribution belongs at each point in the model?",
+        "latex": "p(z),\\quad p_\\theta(z\\mid x),\\quad q_\\phi(z\\mid x),\\quad p_\\theta(x\\mid z)"
+      },
+      {
+        "order": 2,
+        "caption": "The exact ELBO is a bound. One Monte Carlo estimate can sit above log evidence.",
+        "latex": "\\widehat{\\mathcal E}\\neq\\mathcal E\\;\\text{in general}"
+      }
+    ],
+    "goal": "Consolidate prior, posterior, bound and objective.",
+    "visual": "Four draggable or selectable labels: prior, true posterior, approximate posterior and likelihood; reveal the correct assignments in the existing diagram. Keep this short, not a new visual motif.",
+    "math": "The exact ELBO is an expectation. A one-sample Monte Carlo objective estimates it; a single noisy estimate need not itself lie below the exact log evidence on every draw.",
+    "question": "If one Monte Carlo ELBO estimate exceeds log evidence, has Jensen's inequality failed?",
+    "narration": "Separate the prior, true posterior, approximate posterior and decoder likelihood. Then distinguish the exact ELBO from its Monte Carlo estimate. An individual estimate can lie above log evidence without invalidating the bound on the exact expectation.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Check the meaning before introducing more machinery",
+    "source_asset_ids": [
+      "diagram-s31"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Ask students to assign each distribution and say what is conditioned on. ",
+      "Reveal the assignments and the question that remains: differentiating through a sample from q."
+    ],
+    "answer": "No. Jensen bounds the exact expectation, not every random estimate of it.",
+    "speaking_cue": "Before using a symbol, say what is conditioned on and what it describes.",
+    "takeaway": "The exact ELBO is a bound. One Monte Carlo estimate can sit above log evidence."
+  },
+  {
+    "id": "s32",
+    "number": 32,
+    "title": "Where is the missing gradient path?",
+    "section": "E",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The encoder controls the sampling distribution. We need its expected-loss gradient.",
+        "latex": "\\nabla_\\phi\\mathbb E_{z\\sim q_\\phi}[f(z)]"
+      },
+      {
+        "order": 2,
+        "caption": "An opaque random draw hides the path needed for ordinary backpropagation.",
+        "latex": "\\mu,\\sigma\\to\\text{sampler}\\to z\\to f(z)"
+      }
+    ],
+    "goal": "Explain the specific problem without the false claim that random variables cannot be differentiated through by any method.",
+    "visual": "Encoder parameters produce `mu,sigma`; a black-box sampler yields `z`; a decoder produces a loss. Highlight the dependency on the distribution parameters.",
+    "math": "We want `grad_phi E_{z~q_phi(z|x)}[f(z)]`, not merely a derivative with respect to a sampled constant `z`.",
+    "question": "What gradient is missing from the opaque sampling picture?",
+    "narration": "The encoder changes the distribution from which z is drawn. An opaque random-sampling operation does not expose the pathwise derivative that ordinary backpropagation needs. Reparameterisation rewrites that same draw using explicit differentiable operations.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "A parameter-dependent sampling operation hides a gradient path",
+    "source_asset_ids": [
+      "diagram-s32"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Show the naive sampling box and the desired gradient. ",
+      "Explain that an opaque sampling API does not expose the pathwise derivative we need; alternate estimators exist but are not this detour's topic."
+    ],
+    "answer": "The path from the sampled loss back to the parameters that determine the latent distribution.",
+    "speaking_cue": "We need the loss to tell the encoder how to move its sampling distribution.",
+    "takeaway": "An opaque random draw hides the path needed for ordinary backpropagation."
+  },
+  {
+    "id": "s33",
+    "number": 33,
+    "title": "Can we move the randomness?",
+    "section": "E",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Draw noise from a fixed, parameter-independent distribution.",
+        "latex": "\\epsilon\\sim\\mathcal N(0,1)"
+      },
+      {
+        "order": 2,
+        "caption": "Stretch the same noise draw.",
+        "latex": "\\sigma\\epsilon"
+      },
+      {
+        "order": 3,
+        "caption": "Shift the scaled noise. The result has exactly the Gaussian distribution we wanted.",
+        "latex": "z=\\mu+\\sigma\\epsilon\\sim\\mathcal N(\\mu,\\sigma^2)"
+      }
+    ],
+    "goal": "Derive Gaussian reparameterization visually.",
+    "visual": "Fixed standard-normal samples are stretched by sigma and shifted by mu; arrows connect the same sampled dots across panels.",
+    "math": "For vectors, `z=mu+sigma odot epsilon`, `epsilon~N(0,I)`. The auxiliary distribution no longer depends on phi.",
+    "question": "Does reparameterisation replace the Gaussian sample with an approximation?",
+    "narration": "A standard Gaussian draw becomes a draw from the desired Gaussian after scaling and shifting. The randomness now enters through epsilon, whose distribution does not depend on the encoder parameters. The resulting z still has exactly the intended distribution.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Move the randomness into a fixed distribution",
+    "source_asset_ids": [
+      "diagram-s33"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Draw `epsilon ~ N(0,1)`. ",
+      "Scale by positive sigma. ",
+      "Shift by mu and label `z=mu+sigma epsilon ~ N(mu,sigma^2)`."
+    ],
+    "answer": "No. The affine transformation has exactly the required Gaussian distribution.",
+    "speaking_cue": "Keep the noise draw fixed. Stretch it, then shift it.",
+    "takeaway": "Shift the scaled noise. The result has exactly the Gaussian distribution we wanted."
+  },
+  {
+    "id": "s34",
+    "number": 34,
+    "title": "Which derivatives follow the sample?",
+    "section": "E",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Move the expectation to parameter-independent noise.",
+        "latex": "\\mathbb E_q f(z)=\\mathbb E_\\epsilon f(\\mu+\\sigma\\epsilon)"
+      },
+      {
+        "order": 2,
+        "caption": "For this draw, hold epsilon fixed and differentiate.",
+        "latex": "\\frac{\\partial z}{\\partial\\mu}=1,\\qquad\\frac{\\partial z}{\\partial\\sigma}=\\epsilon"
+      },
+      {
+        "order": 3,
+        "caption": "Apply the chain rule to each draw; average draws to estimate the expected gradient.",
+        "latex": "\\frac{\\partial f}{\\partial\\mu}=f\\prime(z),\\quad\\frac{\\partial f}{\\partial\\sigma}=f\\prime(z)\\epsilon"
+      }
+    ],
+    "goal": "Make the chain rule explicit, including the role of a fixed noise draw.",
+    "visual": "An animated computation graph with independently highlighted paths from `mu` and `sigma` through `z` to `f(z)`. Sliders move parameters while keeping epsilon fixed until `Resample` is pressed.",
+    "math": "`partial f/partial mu=f'(z)` and `partial f/partial sigma=f'(z) epsilon` for the scalar example. Do not claim that a single sample yields the exact expected gradient.",
+    "question": "Why must we hold epsilon fixed when differentiating a sample path?",
+    "narration": "The rewrite places the expectation over parameter-independent noise. For one fixed draw, differentiate z with respect to mean and scale, then apply the chain rule through the loss. Averaging such sample gradients estimates the expected gradient under the usual differentiation conditions.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Follow the pathwise gradient",
+    "source_asset_ids": [
+      "diagram-s34"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Display `E_q f(z)=E_epsilon f(mu+sigma epsilon)`. ",
+      "Show `partial z/partial mu=1` and `partial z/partial sigma=epsilon`. ",
+      "Apply the chain rule and mark that averaging sample gradients estimates the expectation's gradient under the usual regularity conditions."
+    ],
+    "answer": "We are differentiating the same deterministic computation with respect to its parameters, not comparing two unrelated draws.",
+    "speaking_cue": "For this derivative, epsilon is a fixed input, just like any other number in the graph.",
+    "takeaway": "Apply the chain rule to each draw; average draws to estimate the expected gradient."
+  },
+  {
+    "id": "s35",
+    "number": 35,
+    "title": "Can we check one gradient by hand?",
+    "section": "E",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "A fixed draw gives a concrete sample and loss.",
+        "latex": "\\mu=1,\\quad\\sigma=.5,\\quad\\epsilon=-.4,\\quad a=0"
+      },
+      {
+        "order": 2,
+        "caption": "Use the same epsilon when checking the derivatives with finite differences.",
+        "latex": "\\frac{\\partial f}{\\partial v}=f\\prime(z)\\frac{\\sigma\\epsilon}{2},\\quad v=\\log\\sigma^2"
+      }
+    ],
+    "goal": "Demonstrate that the pathwise explanation predicts actual derivatives.",
+    "visual": "Number cards feed the same graph: `mu=1`, `sigma=0.5`, `epsilon=-0.4`, and target `a=0`; show loss `f(z)=(z-a)^2`.",
+    "math": "For `v=log sigma^2`, `sigma=exp(v/2)` and `df/dv=f'(z)*(sigma epsilon/2)=-0.16` here.",
+    "question": "Why is the log-variance derivative different from the standard-deviation derivative?",
+    "narration": "The chosen mean, scale and noise give one concrete latent and loss. We compare analytic derivatives with finite differences of that same computation. Resampling between the two evaluations would mix random variation into the gradient check.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "A numerical gradient you can check by hand",
+    "source_asset_ids": [
+      "diagram-s35"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Compute `z=0.8`, `f(z)=0.64`. ",
+      "Reveal `df/dmu=1.6` and `df/dsigma=-0.64`; optionally compare with finite differences at the same epsilon."
+    ],
+    "answer": "Standard deviation is exp(logvar / 2), so the chain rule contributes a factor of standard deviation divided by two.",
+    "speaking_cue": "Use the same epsilon on both sides of the finite-difference check.",
+    "takeaway": "Use the same epsilon when checking the derivatives with finite differences."
+  },
+  {
+    "id": "s36",
+    "number": 36,
+    "title": "What should the encoder output?",
+    "section": "E",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The encoder predicts log variance. Convert it to standard deviation before sampling.",
+        "latex": "\\operatorname{std}=\\exp(\\tfrac12\\operatorname{logvar})"
+      },
+      {
+        "order": 2,
+        "caption": "All five tensors have the same shape.",
+        "latex": "z=\\mu+\\operatorname{std}\\odot\\epsilon"
+      }
+    ],
+    "goal": "Translate probability parameters into the values a network actually outputs.",
+    "visual": "One hidden representation branches into `mu` and `logvar` heads; an explicit exponentiation box converts log variance to standard deviation; noise arrives through a separate input.",
+    "math": "Shapes of `mu,logvar,std,eps,z` all match. A normal distribution's reparameterized sampling method, where supported, corresponds to this construction; an ordinary detached sample does not.",
+    "question": "What goes wrong if we use exp(logvar) as the sampling scale?",
+    "narration": "Convert log variance to standard deviation with exp(logvar / 2). Draw epsilon with the same shape and combine the tensors elementwise. This keeps one latent vector per example throughout the computation.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Implement the encoder's Gaussian safely",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Label `logvar=log(sigma^2)` and `std=exp(0.5*logvar)`. ",
+      "Highlight the three implementation lines `std = exp(0.5*logvar)`, `eps = randn_like(std)`, `z = mu + std*eps`."
+    ],
+    "answer": "That gives the variance rather than the standard deviation, changing the sampled distribution.",
+    "speaking_cue": "Log variance is a convenient network output. It is not the scale used to multiply epsilon.",
+    "takeaway": "All five tensors have the same shape."
+  },
+  {
+    "id": "s37",
+    "number": 37,
+    "title": "How do the VAE tensors fit together?",
+    "section": "F",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Flatten each image, then compute a hidden representation.",
+        "latex": "[B,1,28,28]\\to[B,784]\\to[B,128]"
+      },
+      {
+        "order": 2,
+        "caption": "Two heads give a mean and a log variance for each image.",
+        "latex": "\\mu,\\operatorname{logvar},z:\\ [B,2]"
+      },
+      {
+        "order": 3,
+        "caption": "The decoder returns logits. Sigmoid turns them into pixel probabilities.",
+        "latex": "[B,2]\\to[B,128]\\to[B,784]"
+      }
+    ],
+    "goal": "Assemble everything already introduced into one architecture.",
+    "visual": "A clean left-to-right graph, split across reveals to avoid a wall of boxes. Distinguish encoder and decoder parameters by color.",
+    "math": "`q_phi(z|x)=N(mu_phi(x),diag(exp(logvar_phi(x))))`. A 2D latent is chosen for visualization, not claimed to be optimal for image quality.",
+    "question": "Why does the encoder need two output heads?",
+    "narration": "Flatten each 28 by 28 image to 784 values. The encoder produces separate two-dimensional mean and log-variance vectors. The decoder returns 784 logits, which become Bernoulli probabilities after sigmoid.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "The complete VAE, with tensor shapes",
+    "source_asset_ids": [
+      "diagram-s37"
+    ],
+    "returns_to": [
+      "s02"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Show image `x: [B,1,28,28] \u2192 flatten [B,784] \u2192 Linear(784,128) \u2192 h [B,128]`. ",
+      "Branch to `mu,logvar: [B,2]`, reparameterize to `z: [B,2]`. ",
+      "Decode `Linear(2,128) \u2192 Linear(128,784)` to logits `[B,784]`, probabilities and image-shaped display."
+    ],
+    "answer": "It predicts the mean and log variance of each example's approximate posterior.",
+    "speaking_cue": "Trace one batch through the diagram and check the width at each arrow.",
+    "takeaway": "The decoder returns logits. Sigmoid turns them into pixel probabilities."
+  },
+  {
+    "id": "s38",
+    "number": 38,
+    "title": "Why is reconstruction a likelihood?",
+    "section": "F",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Once z is given, the model assigns each binary pixel a Bernoulli probability.",
+        "latex": "p_\\theta(x\\mid z)=\\prod_i\\pi_i^{x_i}(1-\\pi_i)^{1-x_i}"
+      },
+      {
+        "order": 2,
+        "caption": "Negative log likelihood is BCE summed over pixels.",
+        "latex": "-\\log p_\\theta(x\\mid z)=-\\sum_i[x_i\\log\\pi_i+(1-x_i)\\log(1-\\pi_i)]"
+      },
+      {
+        "order": 3,
+        "caption": "Fixed-variance Gaussian observations instead give squared error plus constants.",
+        "latex": "-\\log p(x\\mid z)=\\frac{\\lVert x-m_\\theta(z)\\rVert^2}{2\\tau^2}+C"
+      }
+    ],
+    "goal": "Tie decoder output and familiar losses to an explicit observation model.",
+    "visual": "Magnify a tiny binary image; each decoder logit produces a Bernoulli probability. Show one correct and one poor predicted pixel probability.",
+    "math": "`-log p_theta(x|z)=-sum_i[x_i log pi_i+(1-x_i)log(1-pi_i)]`. Use logits with `BCEWithLogitsLoss`/`binary_cross_entropy_with_logits`; sigmoid is for displaying pi. If using MNIST, explicitly binarize it for this Bernoulli interpretation. Soft grayscale targets must not be silently described as observed Bernoulli outcomes.",
+    "question": "Why do we sum BCE over pixels before averaging over examples?",
+    "narration": "For binary pixels, a product of Bernoulli likelihoods gives a summed binary cross-entropy loss. A fixed-variance Gaussian observation model instead gives squared error plus constants. These are modelling choices, not interchangeable names for reconstruction quality.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Reconstruction is a likelihood, not an unexplained penalty",
+    "source_asset_ids": [
+      "diagram-s38"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Define a factorized Bernoulli likelihood for binary pixels. ",
+      "Expand its negative log likelihood into binary cross-entropy summed over pixels. ",
+      "Compare briefly with a fixed-variance Gaussian observation model, whose NLL is proportional to squared error plus constants."
+    ],
+    "answer": "The observation likelihood is a product over pixels, so its negative log is a sum for each example.",
+    "speaking_cue": "Choose the observation model first. The reconstruction loss follows from that choice.",
+    "takeaway": "Fixed-variance Gaussian observations instead give squared error plus constants."
+  },
+  {
+    "id": "s39",
+    "number": 39,
+    "title": "Can we compute Gaussian KL exactly?",
+    "section": "F",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "For one Gaussian coordinate, the KL is analytic.",
+        "latex": "\\tfrac12(\\mu^2+\\sigma^2-1-\\log\\sigma^2)"
+      },
+      {
+        "order": 2,
+        "caption": "Add the KL contributions from the independent latent coordinates.",
+        "latex": "\\tfrac12\\sum_j(\\mu_j^2+\\sigma_j^2-1-\\log\\sigma_j^2)"
+      },
+      {
+        "order": 3,
+        "caption": "At mean zero and variance one, each contribution is zero.",
+        "latex": "\\tfrac12\\sum_j(\\mu_j^2+e^{v_j}-1-v_j)"
+      }
+    ],
+    "goal": "Explain every term in the exact KL used by the implementation.",
+    "visual": "Prior and posterior curves for one coordinate with separate controls for mean and variance; then a sum over latent coordinates.",
+    "math": "`KL(N(mu,diag(sigma^2))||N(0,I))=0.5 sum_j[mu_j^2+sigma_j^2-1-log sigma_j^2]`; equivalently `-0.5 sum_j[1+logvar_j-mu_j^2-exp(logvar_j)]`.",
+    "question": "Which part of our VAE objective is analytic for a diagonal Gaussian posterior?",
+    "narration": "The Gaussian KL has a closed form, so this part of the VAE loss needs no Monte Carlo estimate. For a diagonal posterior, add the contribution of each coordinate. The expression reaches zero at mean zero and variance one.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "The Gaussian KL has a closed form",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Show the one-dimensional formula. ",
+      "Generalize to diagonal covariance. ",
+      "Translate it into log-variance code and verify zero at `mu=0,logvar=0`."
+    ],
+    "answer": "The KL to the standard normal prior.",
+    "speaking_cue": "Try mean zero and variance one. The posterior then matches the standard normal prior.",
+    "takeaway": "At mean zero and variance one, each contribution is zero."
+  },
+  {
+    "id": "s40",
+    "number": 40,
+    "title": "What is a complete two-pixel VAE loss?",
+    "section": "F",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "A temporary two-pixel example: sample the latent first.",
+        "latex": "x=(1,0),\\quad z=\\mu+\\sigma\\odot\\epsilon"
+      },
+      {
+        "order": 2,
+        "caption": "At this z, the specified decoder probabilities are (0.75, 0.25).",
+        "latex": "-\\log .75-\\log(1-.25)"
+      },
+      {
+        "order": 3,
+        "caption": "Add the exact Gaussian KL to this draw's reconstruction cost.",
+        "latex": "\\widehat{-\\mathcal E}=\\operatorname{NLL}(x\\mid z)+D_{\\mathrm{KL}}(q\\|p)"
+      }
+    ],
+    "goal": "Connect a latent sample, reconstruction likelihood and KL numerically.",
+    "visual": "Use a compact two-pixel observation only for this worked example; clearly mark the temporary change from the `28\u00d728` architecture. Show all number cards as outputs of the corresponding conceptual network steps.",
+    "math": "`logvar=(log 0.25,0)=(-1.386294361,0)`. Show both latent-coordinate KL contributions: `0.818147181` and `0.5`. The decoder probabilities are specified outputs for this numerical example, not numbers inferred from mu or sigma.",
+    "question": "Which part of this total changes if we draw a different epsilon with the encoder fixed?",
+    "narration": "This two-pixel example makes the reductions visible. We sample z, evaluate the specified Bernoulli probabilities at that z, and sum the two negative log probabilities. Adding the analytic Gaussian KL gives one estimate of the negative ELBO.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "A complete two-pixel VAE loss, computed by hand",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Set `x=(1,0)`, `mu=(1,-1)`, `sigma=(0.5,1)`, `epsilon=(0.2,-0.4)`, so `z=(1.1,-1.4)`. ",
+      "Given decoder probabilities `pi=(0.75,0.25)` at this z, compute reconstruction NLL `-log(0.75)-log(0.75)=0.575364145`. ",
+      "Compute KL `1.318147181` and the one-sample negative-ELBO estimate `1.893511326`."
+    ],
+    "answer": "The sampled reconstruction term can change; the analytic KL stays fixed.",
+    "speaking_cue": "Keep the two calculations separate: sampled reconstruction cost, then exact latent KL.",
+    "takeaway": "Add the exact Gaussian KL to this draw's reconstruction cost."
+  },
+  {
+    "id": "s41",
+    "number": 41,
+    "title": "What happens in one VAE update?",
+    "section": "F",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Encode, sample, decode. The graph joins both networks.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "For each image, sum over pixels and over latent coordinates separately.",
+        "latex": ""
+      },
+      {
+        "order": 3,
+        "caption": "Average per-example totals, then update encoder and decoder.",
+        "latex": "\\mathcal L=\\frac1B\\sum_b(\\operatorname{recon}_b+\\operatorname{KL}_b)"
+      }
+    ],
+    "goal": "Give a complete executable training recipe and map every line to the architecture.",
+    "visual": "Left: the architecture. Right: a short code panel, highlighting a few lines at a time; below: per-example reconstruction, KL and total values.",
+    "math": "`loss=(recon_per_example + kl_per_example).mean()`. Do not average reconstruction over all pixels while leaving KL summed unless an explicit scaling change is intended and explained.",
+    "question": "What happens if we average reconstruction over pixels but sum the latent KL?",
+    "narration": "Encoding, sampling and decoding form one connected computation graph. Sum reconstruction costs over pixels and KL contributions over latent coordinates for each example. Average the per-example totals, then update both networks.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "One VAE training step, with the correct reductions",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Encode, reparameterize and decode. ",
+      "Sum reconstruction over pixels and KL over latent dimensions for each example. ",
+      "Add the terms, average over the batch, backpropagate and update both encoder and decoder."
+    ],
+    "answer": "We change their relative weighting and no longer implement the stated negative ELBO.",
+    "speaking_cue": "Build one loss per example before taking the batch mean.",
+    "takeaway": "Average per-example totals, then update encoder and decoder."
+  },
+  {
+    "id": "s42",
+    "number": 42,
+    "title": "What is needed to generate a new image?",
+    "section": "F",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Reconstruction starts with an observed image and its encoded posterior.",
+        "latex": "z\\sim q_\\phi(z\\mid x)"
+      },
+      {
+        "order": 2,
+        "caption": "Fresh generation starts at the prior and skips the encoder.",
+        "latex": "z\\sim p(z),\\quad x\\sim p_\\theta(x\\mid z)"
+      }
+    ],
+    "goal": "Make the deployment computation unmistakable.",
+    "visual": "Toggle between reconstruction and generation; in generation, remove the observed image and encoder and sample z from the prior. Show a toggle between decoder probability image and a Bernoulli sample.",
+    "math": "`z: [N,2] \u2192 decoder logits [N,784] \u2192 sigmoid \u2192 probabilities`; actual binary samples use a Bernoulli draw from those probabilities.",
+    "question": "Why is the encoder useful during learning but unnecessary for fresh generation?",
+    "narration": "Reconstruction uses an observed image to obtain q and then decode a latent from it. Fresh generation starts at the prior and bypasses the encoder. Displayed decoder probabilities and sampled binary pixels are two different views of the output.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Generation requires the prior and decoder",
+    "source_asset_ids": [
+      "vae-epoch-0",
+      "vae-epoch-65",
+      "vae-epoch-1",
+      "vae-epoch-10",
+      "vae-binary",
+      "reconstructions",
+      "vae-epoch-30",
+      "held-out",
+      "vae-data",
+      "vae-prior",
+      "decoder",
+      "vae-grid"
+    ],
+    "returns_to": [
+      "s02"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Reconstruction: encode observed x, use a posterior sample or explicitly labelled mean, decode. ",
+      "Generation: sample `z~N(0,I)` and decode; choose mean/probability display or sample the observation model."
+    ],
+    "answer": "It approximates latent inference for observed data; the generative model already specifies the prior and decoder.",
+    "speaking_cue": "Cover the encoder in the diagram. We can still generate from the prior.",
+    "takeaway": "Fresh generation starts at the prior and skips the encoder."
+  },
+  {
+    "id": "s43",
+    "number": 43,
+    "title": "What does moving in latent space do?",
+    "section": "F",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Move through z while keeping the trained decoder fixed.",
+        "latex": "z=(z_1,z_2)"
+      },
+      {
+        "order": 2,
+        "caption": "A regular grid helps us inspect the decoder. It is not a batch of prior draws.",
+        "latex": "z\\sim\\mathcal N(0,I)"
+      }
+    ],
+    "goal": "Show continuity, diversity and the distinction between posterior encoding and prior sampling.",
+    "visual": "A 2D plane with a draggable latent point, a prior-density backdrop, an optional encoded-data overlay and a linked output. A small grid shows decoded probabilities at fixed coordinates.",
+    "math": "A uniformly spaced latent grid is a visualization, not a sample from the Gaussian prior. Do not label coordinates as \u201crotation\u201d or \u201cthickness\u201d unless the trained example supports that interpretation.",
+    "question": "Does a uniform sweep over the square show how often the prior visits each region?",
+    "narration": "The browser evaluates the exported trained decoder at the selected point. The encoded held-out examples help us see where this model places observations. A regular coordinate grid helps exploration, but it does not have the same distribution as Gaussian prior draws.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Explore the latent plane without inventing semantic axes",
+    "source_asset_ids": [
+      "stylegan-paper",
+      "vae-epoch-0",
+      "vae-epoch-65",
+      "vae-epoch-1",
+      "vae-epoch-10",
+      "vae-binary",
+      "reconstructions",
+      "vae-epoch-30",
+      "held-out",
+      "vae-data",
+      "vae-prior",
+      "decoder",
+      "vae-grid"
+    ],
+    "returns_to": [
+      "s02",
+      "s03"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Move z while holding the decoder fixed. ",
+      "Compare uniformly selected grid points, prior-weighted samples and encoded observations."
+    ],
+    "answer": "No. The prior is Gaussian, so it weights locations differently from a uniform sweep.",
+    "speaking_cue": "The decoder stays fixed. Only the two latent coordinates move.",
+    "takeaway": "A regular grid helps us inspect the decoder. It is not a batch of prior draws."
+  },
+  {
+    "id": "s44",
+    "number": 44,
+    "title": "What does the VAE objective guarantee?",
+    "section": "F",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The objective balances explaining x and keeping q near the prior.",
+        "latex": "\\mathcal L=\\operatorname{reconstruction\\ NLL}+\\operatorname{KL}"
+      },
+      {
+        "order": 2,
+        "caption": "The objective does not guarantee sharp samples or interpretable latent coordinates.",
+        "latex": "\\beta=1:\\ \\text{vanilla negative ELBO}"
+      }
+    ],
+    "goal": "Provide an honest model interpretation before introducing GANs.",
+    "visual": "Three compact, evidence-labelled examples: good reconstruction with poor prior samples; strong regularization with lost detail; a functioning compromise. Use actual recorded model outputs where possible.",
+    "math": "If a beta slider is provided, label `beta=1` as the vanilla negative ELBO and `beta!=1` as a modified objective. A changed slider only displays real retrained checkpoints if such checkpoints exist; it must not pretend an untrained model instantly adapts.",
+    "question": "Does a small training loss guarantee sharp samples and disentangled latents?",
+    "narration": "The displayed glyph results come from the recorded beta-equals-one VAE run. Its reconstructions and samples show the limits of this small model. We have not run a beta sweep, and the objective alone does not guarantee interpretable latent directions.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "What the VAE objective encourages\u2014and what it does not guarantee",
+    "source_asset_ids": [
+      "vae-epoch-0",
+      "vae-epoch-65",
+      "vae-epoch-1",
+      "vae-epoch-10",
+      "vae-binary",
+      "reconstructions",
+      "vae-epoch-30",
+      "held-out",
+      "vae-data",
+      "vae-prior",
+      "decoder",
+      "vae-grid"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Explain the reconstruction/regularization tradeoff. ",
+      "Introduce posterior collapse and restrictive likelihoods as possible failure modes, while avoiding blanket \u201call VAEs are blurry\u201d claims."
+    ],
+    "answer": "No. Neither property is guaranteed by the vanilla VAE objective.",
+    "speaking_cue": "Look at what this run actually learned. The objective does not promise sharp or meaningful coordinates.",
+    "takeaway": "The objective does not guarantee sharp samples or interpretable latent coordinates."
+  },
+  {
+    "id": "s45",
+    "number": 45,
+    "title": "Can we learn the training signal?",
+    "section": "G",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "A generator makes fake samples. Compare them with real data.",
+        "latex": "x_{\\mathrm{fake}}=G_\\theta(z)"
+      },
+      {
+        "order": 2,
+        "caption": "Train a classifier to recognise the source.",
+        "latex": "D_\\psi(x)=\\operatorname{sigmoid}(a_\\psi(x))"
+      }
+    ],
+    "goal": "Introduce the adversarial idea as a concrete supervised subproblem.",
+    "visual": "Real samples and generated samples enter a small binary classifier. Use a tiny point distribution first, with image thumbnails as a secondary connection.",
+    "math": "`z~N(0,I)`, `x_fake=G_theta(z)`; `D_psi(x)=sigmoid(a_psi(x))`. The discriminator's logit `a` is distinct from its probability display `D`.",
+    "question": "Where does the generator's training signal come from in this setup?",
+    "narration": "The generator maps noise to fake examples. The discriminator learns to distinguish those examples from real data, supplying a training signal to the generator. We will make the two update phases explicit before running them.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Learn a training signal from examples",
+    "source_asset_ids": [
+      "stylegan",
+      "stylegan-faces",
+      "provenance",
+      "gan",
+      "image-gan",
+      "phases"
+    ],
+    "returns_to": [
+      "s01"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Show the generator's outputs and the real data. ",
+      "Introduce a discriminator trained to distinguish their sources."
+    ],
+    "answer": "From the discriminator's response to generated examples.",
+    "speaking_cue": "This time we learn a critic of the samples as well as the generator.",
+    "takeaway": "Train a classifier to recognise the source."
+  },
+  {
+    "id": "s46",
+    "number": 46,
+    "title": "How do the two networks connect?",
+    "section": "G",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The generator maps noise into the data space.",
+        "latex": "z:[B,32]\\to G_\\theta\\to[B,784]"
+      },
+      {
+        "order": 2,
+        "caption": "Real examples enter a discriminator that outputs logits.",
+        "latex": "x:[B,784]\\to D_\\psi\\to[B,1]"
+      },
+      {
+        "order": 3,
+        "caption": "Both real and generated images go through the same discriminator.",
+        "latex": "G_\\theta(z)\\to D_\\psi\\to[B,1]"
+      }
+    ],
+    "goal": "Establish the GAN's architecture before writing its losses.",
+    "visual": "A generator branch and a real-data branch meet at the same discriminator; shared discriminator weights are indicated clearly rather than duplicating independent networks.",
+    "math": "Suggested image demo: `G:32\u2192128\u2192256\u2192784\u2192Sigmoid`; `D:784\u2192256\u2192128\u21921` with LeakyReLU hidden activations and no terminal sigmoid in the implemented D. Use real and fake pixel values on the same `[0,1]` scale.",
+    "question": "Do real and fake examples use two different discriminators?",
+    "narration": "Real and generated images enter one discriminator. Its output is a logit; sigmoid turns that logit into a source-classification probability. The generator output must have the same data dimensions as the real examples.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Two networks, two parameter sets, one generated sample",
+    "source_asset_ids": [
+      "diagram-s46"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "`z:[B,32] \u2192 G \u2192 fake:[B,784]`. ",
+      "`real:[B,784] \u2192 D \u2192 real_logits:[B,1]`. ",
+      "`fake:[B,784] \u2192 the same D \u2192 fake_logits:[B,1]`."
+    ],
+    "answer": "No. The same discriminator processes both sources.",
+    "speaking_cue": "Both paths end at the same discriminator with the same parameters.",
+    "takeaway": "Both real and generated images go through the same discriminator."
+  },
+  {
+    "id": "s47",
+    "number": 47,
+    "title": "Which labels train the discriminator?",
+    "section": "G",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Real examples have target 1.",
+        "latex": "-\\mathbb E_{\\mathrm{real}}\\log D(x)"
+      },
+      {
+        "order": 2,
+        "caption": "Generated examples have target 0.",
+        "latex": "-\\mathbb E_z\\log(1-D(G(z)))"
+      },
+      {
+        "order": 3,
+        "caption": "The discriminator loss adds the two batch means.",
+        "latex": "\\mathcal L_D=-\\mathbb E\\log D(x)-\\mathbb E\\log(1-D(G(z)))"
+      }
+    ],
+    "goal": "Connect adversarial training to familiar BCE.",
+    "visual": "A real example receives target 1; a generated example receives target 0; show their logits, displayed probabilities and individual losses.",
+    "math": "`L_D=-E_real log D(x)-E_z log(1-D(G(z)))`. With `D(real)=0.8` and `D(fake)=0.3`, the corresponding single-pair loss is `-log 0.8-log 0.7=0.579818495`.",
+    "question": "What do labels zero and one mean in this GAN loss?",
+    "narration": "The discriminator loss is the sum of the mean real-example BCE and the mean fake-example BCE. These labels describe source, not image class. We use logits for numerically stable binary cross-entropy.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "The discriminator has ordinary binary labels",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Reveal real target and term. ",
+      "Reveal fake target and term. ",
+      "Sum the two batch means."
+    ],
+    "answer": "They identify generated and real sources for the discriminator's binary task.",
+    "speaking_cue": "In the discriminator's task, real means one and generated means zero.",
+    "takeaway": "The discriminator loss adds the two batch means."
+  },
+  {
+    "id": "s48",
+    "number": 48,
+    "title": "Where should gradients stop for D?",
+    "section": "G",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Clear gradients and generate a fake batch.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "Detach the fake batch: keep its values, cut its connection to G.",
+        "latex": ""
+      },
+      {
+        "order": 3,
+        "caption": "Step D's optimiser. G receives no new gradient in this phase.",
+        "latex": "\\psi\\leftarrow\\psi-\\eta\\nabla_\\psi\\mathcal L_D"
+      }
+    ],
+    "goal": "Make discriminator-step gradient isolation visible and executable.",
+    "visual": "The generator is visually fixed; the fake tensor crosses a `detach` boundary; backpropagation arrows end inside D and do not reach G.",
+    "math": "`loss_D = BCEWithLogits(real_logits,ones)+BCEWithLogits(fake_logits,zeros)`. Detaching changes the gradient graph, not the fake tensor's numerical values.",
+    "question": "Does detach alter the generated image values?",
+    "narration": "During the discriminator phase, fake images are inputs to D rather than a route for updating G. Detach them, compute both source losses, and step only the discriminator optimiser. Clearing gradients makes the measured phase boundaries easier to check.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Update D: detach the generated sample",
+    "source_asset_ids": [
+      "diagram-s48"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Clear D gradients and generate fake samples. ",
+      "Feed `fake.detach()` into D and compute `L_D` from raw logits. ",
+      "Backpropagate and update only D; show unchanged G parameter values for a tiny numeric readout."
+    ],
+    "answer": "No. It removes the autograd connection to the generator for this use of the tensor.",
+    "speaking_cue": "Detaching keeps the fake values but cuts the path back to the generator.",
+    "takeaway": "Step D's optimiser. G receives no new gradient in this phase."
+  },
+  {
+    "id": "s49",
+    "number": 49,
+    "title": "How can frozen D train G?",
+    "section": "G",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Use a fresh forward pass through the updated discriminator.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "Freeze D's parameters while keeping the derivative with respect to its input.",
+        "latex": "\\mathcal L_G=-\\mathbb E_z\\log D(G_\\theta(z))"
+      },
+      {
+        "order": 3,
+        "caption": "Use target 1 to update G. D's parameter values stay fixed.",
+        "latex": "\\theta\\leftarrow\\theta-\\eta\\nabla_\\theta\\mathcal L_G"
+      }
+    ],
+    "goal": "Explain the practical non-saturating generator loss and correct freezing semantics.",
+    "visual": "D's parameters are locked, but the path from its output through its input to G remains lit. Use different visual conventions for a locked parameter and a severed computational edge.",
+    "math": "`L_G=-E_z log D(G(z))`; implemented as `BCEWithLogits(D(G(z)),ones)`. Do not detach fake, use `no_grad()` around D, or detach D's output during the G step.",
+    "question": "Why must we not put this discriminator forward pass inside no_grad?",
+    "narration": "Start a fresh forward pass after the discriminator update. Freeze D's parameters but keep the path from its output through the fake image to G. Target one encourages G to produce examples that D treats as real.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Update G: the target changes, the gradient path remains",
+    "source_asset_ids": [
+      "diagram-s49"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Generate a fresh fake batch and pass it through the updated D. ",
+      "Set the generator objective's target to ",
+      "",
+      "Backpropagate through D into G and update G while D parameters remain fixed."
+    ],
+    "answer": "That would remove the input-gradient path needed to train G.",
+    "speaking_cue": "Frozen parameters do not mean a frozen function. We still differentiate D with respect to its input.",
+    "takeaway": "Use target 1 to update G. D's parameter values stay fixed."
+  },
+  {
+    "id": "s50",
+    "number": 50,
+    "title": "Which generator objective do we use?",
+    "section": "G",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "The original game asks G to minimise what D maximises.",
+        "latex": "\\min_G\\max_D\\;\\mathbb E\\log D(x)+\\mathbb E\\log(1-D(G(z)))"
+      },
+      {
+        "order": 2,
+        "caption": "Our code uses the non-saturating generator loss, which gives different gradients.",
+        "latex": "\\mathcal L_G^{\\mathrm{NS}}=-\\mathbb E\\log D(G(z))"
+      }
+    ],
+    "goal": "Connect the commonly quoted GAN formula to the code students will write.",
+    "visual": "Place the theoretical two-player objective above two clearly labelled generator-loss alternatives. Mark the practical code path.",
+    "math": "These are different generator objectives with a shared desirable distribution-matching solution under the idealized analysis. Do not call them algebraically identical or claim finite neural-network training is guaranteed to converge.",
+    "question": "Are the minimax and non-saturating generator losses the same formula?",
+    "narration": "The original generator minimises the fake part of the minimax value. In practice, the non-saturating objective gives a stronger logit-level gradient when D confidently rejects fake samples. We should name the objective the code actually implements.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "The original minimax objective and the practical objective",
+    "source_asset_ids": [],
+    "returns_to": [
+      "s04",
+      "s05"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Show `min_G max_D [E_real log D(x)+E_z log(1-D(G(z)))]`. ",
+      "Contrast the minimax generator term `E_z log(1-D(G(z)))` with the non-saturating choice `-E_z log D(G(z))`."
+    ],
+    "answer": "No. They provide different training gradients, though both encourage generated samples to be accepted as real.",
+    "speaking_cue": "The minimax game explains the idea. Our code uses the non-saturating generator loss.",
+    "takeaway": "Our code uses the non-saturating generator loss, which gives different gradients."
+  },
+  {
+    "id": "s51",
+    "number": 51,
+    "title": "Why use the non-saturating objective?",
+    "section": "G",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "When D confidently rejects a fake, the minimax logit gradient becomes small.",
+        "latex": "\\frac{d\\log(1-\\operatorname{sigmoid}(a))}{da}=-D"
+      },
+      {
+        "order": 2,
+        "caption": "At small D, the non-saturating loss still has a strong logit gradient.",
+        "latex": "\\frac{d[-\\log\\operatorname{sigmoid}(a)]}{da}=D-1"
+      },
+      {
+        "order": 3,
+        "caption": "At D = 0.01, compare \u22120.01 with \u22120.99. Continue the chain rule through G.",
+        "latex": "\\frac{d\\mathcal L}{d\\theta}=\\frac{d\\mathcal L}{da}\\frac{da}{dx_{\\mathrm{fake}}}\\frac{dx_{\\mathrm{fake}}}{d\\theta}"
+      }
+    ],
+    "goal": "Explain the non-saturating choice with an actual derivative, not a slogan.",
+    "visual": "A logit `a` slider controls `D=sigmoid(a)`. Plot both generator losses and their derivatives with respect to a. Keep loss and gradient axes separate.",
+    "math": "Both derivatives are with respect to D's input logit. The complete generator gradient also includes `da/dx_fake` and `dx_fake/dtheta`; the scalar comparison does not guarantee that all parameter gradients are large.",
+    "question": "Does a strong logit-level slope guarantee a useful full generator gradient?",
+    "narration": "The minimax slope with respect to the discriminator logit is minus D; the non-saturating slope is D minus one. At D equal to 0.01 these are minus 0.01 and minus 0.99. The full parameter gradient still depends on the discriminator and generator Jacobians.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "See the gradient saturation in one scalar",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Differentiate the minimax generator term: `d log(1-sigmoid(a))/da = -sigmoid(a)`. ",
+      "Differentiate the non-saturating loss: `d[-log sigmoid(a)]/da = sigmoid(a)-1`. ",
+      "Set `D=0.01`: derivatives are `-0.01` and `-0.99`, respectively."
+    ],
+    "answer": "No. The remaining derivatives through D and G also matter.",
+    "speaking_cue": "At D equal to 0.01, compare the two slopes before following the rest of the graph.",
+    "takeaway": "At D = 0.01, compare \u22120.01 with \u22120.99. Continue the chain rule through G."
+  },
+  {
+    "id": "s52",
+    "number": 52,
+    "title": "What changes in one alternating iteration?",
+    "section": "G",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "D phase: detached fake, targets 1 and 0, update D.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "G phase: fresh graph, D frozen, target 1, update G.",
+        "latex": ""
+      },
+      {
+        "order": 3,
+        "caption": "After G's update, enable D's parameter gradients for the next iteration.",
+        "latex": ""
+      }
+    ],
+    "goal": "Consolidate the two update phases and their sequence.",
+    "visual": "A two-phase timeline with four tensor/parameter readouts: G parameters, D parameters, fake tensor and discriminator logits. A `Next operation` button advances individual operations.",
+    "math": "One D step and one G step are a pedagogical default, not a universal optimal update ratio. No `retain_graph=True` is needed with these fresh forward passes.",
+    "question": "Why do we need a fresh forward pass for the generator phase?",
+    "narration": "The first phase trains D using detached fake images. The second uses a fresh graph to train G through D with D's parameters frozen. Restore D's parameter gradients before the next iteration; the recorded deltas make the separation visible.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "One complete alternating iteration",
+    "source_asset_ids": [
+      "provenance",
+      "gan",
+      "image-gan",
+      "phases"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Sample real/noise, compute detached fake and update D. ",
+      "Recompute a fresh forward pass using updated D, freeze D parameter gradients and update G. ",
+      "Restore D parameter gradients for the next iteration and show which quantities changed in each phase."
+    ],
+    "answer": "D has just changed, and G needs a current, connected computation graph through that updated discriminator.",
+    "speaking_cue": "After each phase, check which parameter values changed and which stayed fixed.",
+    "takeaway": "After G's update, enable D's parameter gradients for the next iteration."
+  },
+  {
+    "id": "s53",
+    "number": 53,
+    "title": "Where does each GAN tensor go?",
+    "section": "G",
+    "buildCount": 3,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Noise dimension, batch size and pixel dimension have different roles.",
+        "latex": "[64,32]\\to[64,128]\\to[64,256]\\to[64,784]"
+      },
+      {
+        "order": 2,
+        "caption": "Reshape for viewing. D still receives flattened pixels.",
+        "latex": "[64,784]\\to[64,256]\\to[64,128]\\to[64,1]"
+      },
+      {
+        "order": 3,
+        "caption": "Targets must match logits exactly.",
+        "latex": "\\operatorname{shape}(y)=\\operatorname{shape}(a)=[64,1]"
+      }
+    ],
+    "goal": "Make the image implementation as concrete as the VAE implementation.",
+    "visual": "Highlight one row from a batch and show shape badges after every layer; synchronize with a few code lines.",
+    "math": "Label latent dimension 32, batch size 64 and pixel dimension 784 as distinct roles. Never let broadcasting hide a mismatched `[B]` target versus `[B,1]` logit.",
+    "question": "What shape should the real/fake targets have when logits have shape [64, 1]?",
+    "narration": "For a batch of 64, each noise vector has 32 coordinates and each image has 784 pixels. Hidden-layer widths change the feature dimension, not the batch dimension. Targets must have the same shape as discriminator logits to avoid unintended broadcasting.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Follow an image through every GAN tensor",
+    "source_asset_ids": [
+      "diagram-s53"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Trace `z [64,32] \u2192 [64,128] \u2192 [64,256] \u2192 [64,784]`. ",
+      "Reshape one fake to `[1,28,28]`; trace D through `[64,256] \u2192 [64,128] \u2192 [64,1]`. ",
+      "Show matching target shapes `[64,1]` and scalar losses after reduction."
+    ],
+    "answer": "The targets should also have shape [64, 1].",
+    "speaking_cue": "The first dimension counts examples. It should survive every layer unchanged.",
+    "takeaway": "Targets must match logits exactly."
+  },
+  {
+    "id": "s54",
+    "number": 54,
+    "title": "Which network remains at generation?",
+    "section": "G",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Training needs real examples and the discriminator.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "To sample after training, we only need noise and G.",
+        "latex": "z\\sim p(z),\\quad x=G_\\theta(z)"
+      }
+    ],
+    "goal": "Separate GAN training cost from its sampling pathway.",
+    "visual": "Switch to generation: remove real data, the discriminator, labels, losses and optimizers. A prior feeds G and a sample grid.",
+    "math": "`z~p(z)`, `x=G_theta(z)`. The basic GAN discussed here supplies samples without a generally tractable explicit image likelihood.",
+    "question": "Do we need real examples or D to generate a new image after training?",
+    "narration": "The discriminator supplies a training signal, but it is not part of the sampling path. The short local image-GAN run is shown honestly alongside the published face example. The small run demonstrates the procedure; its image quality is not evidence of convergence.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Generation uses G alone",
+    "source_asset_ids": [
+      "stylegan",
+      "stylegan-paper",
+      "stylegan-faces",
+      "provenance",
+      "gan",
+      "image-gan",
+      "phases"
+    ],
+    "returns_to": [
+      "s01",
+      "s03"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Display the whole training system. ",
+      "Fade unused components and generate several samples from fixed random seeds."
+    ],
+    "answer": "No. Sampling requires the trained generator and a new draw from its noise distribution.",
+    "speaking_cue": "Once training is over, keep the generator and feed it fresh noise.",
+    "takeaway": "To sample after training, we only need noise and G."
+  },
+  {
+    "id": "s55",
+    "number": 55,
+    "title": "Can realistic samples miss a mode?",
+    "section": "G",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Plausible samples can all come from one mode.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "Check whether samples are plausible and whether all modes are represented.",
+        "latex": ""
+      }
+    ],
+    "goal": "Make mode collapse concrete and distinguish it from poor realism.",
+    "visual": "Reuse the two-cluster point cloud. Compare a model covering both clusters with a generator covering one cluster very well. Show separate realism and coverage counters for this fully specified toy geometry.",
+    "math": "The counters are toy diagnostics based on distances to known cluster centers, not general-purpose image-generation metrics. State their definitions and thresholds.",
+    "question": "Could a realism score alone detect this missing cluster?",
+    "narration": "Mode collapse separates sample quality from distribution coverage. A generator can concentrate on one valid region and ignore another. The toy controls let us compare that failure with a model that covers both clusters.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "High-quality samples can still miss a mode",
+    "source_asset_ids": [],
+    "returns_to": [
+      "s08",
+      "s09"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Reveal a sample set concentrated in one real cluster. ",
+      "Reveal the missing mode and show many distinct latent draws mapped to similar outputs."
+    ],
+    "answer": "Not necessarily. We must also measure or inspect coverage.",
+    "speaking_cue": "Every point may look plausible while an entire cluster is missing.",
+    "takeaway": "Check whether samples are plausible and whether all modes are represented."
+  },
+  {
+    "id": "s56",
+    "number": 56,
+    "title": "What should we monitor during training?",
+    "section": "G",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Keep the noise fixed while replaying the recorded training checkpoints.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "Read samples, coverage and losses together. D \u2248 1/2 is not proof of success.",
+        "latex": ""
+      }
+    ],
+    "goal": "Demonstrate useful monitoring and the limits of adversarial loss curves.",
+    "visual": "Fixed-seed generated samples across checkpoints; D and G loss histories; cluster coverage for the toy dataset; a small held-out/nearest-neighbour comparison when image samples are available. Keep plot axes and sample counts fixed across checkpoints. If a one-dimensional density view is offered, label a density estimated from generated samples as a KDE/histogram rather than an analytically known GAN density.",
+    "math": "In an ideal matched-distribution setting an optimal D returns 1/2; observing approximately 1/2 in a finite model is not proof of distribution matching. Avoid asserting a universal best GAN loss value.",
+    "question": "Is a discriminator output near one half sufficient evidence of successful training?",
+    "narration": "The replay uses fixed noise at each recorded checkpoint. Compare the samples, mode coverage and losses together. The readout losses use the displayed points; the history curves use training batches, so they answer different monitoring questions.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Read a training run without overinterpreting its losses",
+    "source_asset_ids": [
+      "stylegan",
+      "stylegan-faces",
+      "provenance",
+      "gan",
+      "image-gan",
+      "phases"
+    ],
+    "returns_to": [
+      "s01",
+      "s08",
+      "s09"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Inspect sample changes and coverage across actual recorded checkpoints. ",
+      "Overlay losses and reveal a case where a superficially reassuring loss does not establish a good generator."
+    ],
+    "answer": "No. It can also occur with a weak or failed discriminator; inspect the generated distribution too.",
+    "speaking_cue": "Follow the same latent draws across checkpoints so movement reflects training.",
+    "takeaway": "Read samples, coverage and losses together. D \u2248 1/2 is not proof of success."
+  },
+  {
+    "id": "s57",
+    "number": 57,
+    "title": "How can both players use a condition?",
+    "section": "G",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Give the requested condition to the generator.",
+        "latex": "x_{\\mathrm{fake}}=G(z,c)"
+      },
+      {
+        "order": 2,
+        "caption": "D needs the condition too, so it can judge whether the output fits the request.",
+        "latex": "D(x,c)"
+      }
+    ],
+    "goal": "Reconnect GANs to the application gallery and earlier conditioning architectures.",
+    "visual": "A class label `c` enters G alongside z and enters D alongside the real or generated sample. Swap the condition while keeping z fixed.",
+    "math": "`x_fake=G(z,c)` and `D(x,c)`. A simple classroom implementation concatenates a one-hot class vector; more elaborate attention conditioning is outside the core route.",
+    "question": "What problem remains if only G sees the condition?",
+    "narration": "A conditional generator receives both noise and a condition. The discriminator receives an example together with its condition. This lets its learning signal address compatibility, not just whether the example looks plausible on its own.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Condition both players",
+    "source_asset_ids": [
+      "spade",
+      "cyclegan",
+      "spade-layout",
+      "shoe-input",
+      "shoe-output",
+      "shoe-target",
+      "diagram-s57"
+    ],
+    "returns_to": [
+      "s04",
+      "s05",
+      "s06",
+      "s07"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Add c to G to control the sample. ",
+      "Add c to D so it can assess whether the sample matches the requested condition."
+    ],
+    "answer": "An unconditional D cannot directly judge whether the generated output matches that condition.",
+    "speaking_cue": "An output can look like a shoe and still fail to match the outline.",
+    "takeaway": "D needs the condition too, so it can judge whether the output fits the request."
+  },
+  {
+    "id": "s58",
+    "number": 58,
+    "title": "Can you find the broken gradient path?",
+    "section": "G",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Find the detach boundary in D\u2019s update and the open path in G\u2019s update.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "In the lab, compare a working GAN, a missing mode and a cut generator gradient.",
+        "latex": ""
+      }
+    ],
+    "goal": "Make the GAN block immediately actionable without turning the lecture into a terminal session.",
+    "visual": "A compact, syntax-highlighted two-update function, with toggles for D-step and G-step emphasis. Link to the separate runnable lab files.",
+    "math": "Map code symbols to the existing shapes and objectives. Explain that BatchNorm/Dropout state handling would require care in richer models; the minimal supplied MLP deliberately has neither.",
+    "question": "If fake is detached during the generator phase, can the generator optimiser repair the missing gradient?",
+    "narration": "The lab contrasts a working update, a one-mode failure and a deliberately detached generator path. Check tensor shapes, gradient presence and parameter changes before interpreting losses. A decreasing discriminator loss alone cannot tell us whether G is learning.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Read the complete code and set up the lab",
+    "source_asset_ids": [
+      "diagram-s58"
+    ],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Highlight stable logits-based BCE, `detach()` in the D step and parameter freezing in the G step. ",
+      "Show the lab's three experiments: correct training, one-mode coverage failure, and a deliberately broken gradient-path diagnostic."
+    ],
+    "answer": "No. The forward graph must connect the loss to G before an optimiser can update it from that loss.",
+    "speaking_cue": "Find the cut in the graph before changing the optimiser or the learning rate.",
+    "takeaway": "In the lab, compare a working GAN, a missing mode and a cut generator gradient."
+  },
+  {
+    "id": "s59",
+    "number": 59,
+    "title": "How do the three recipes compare?",
+    "section": "H",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Compare the learned distributions and the work needed to sample.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "The sampling path and access to likelihood depend on the model we choose.",
+        "latex": ""
+      }
+    ],
+    "goal": "Leave a coherent model map rather than a list of unrelated acronyms.",
+    "visual": "A small comparison table: autoregressive model, VAE and GAN; columns are training signal, generation steps, auxiliary network needed for generation and likelihood access. Pair it with three miniature sampling diagrams.",
+    "math": "AR: exact factorized likelihood for the specified model; VAE: explicit latent model with generally intractable marginal likelihood and an optimized lower bound; GAN: implicit sample distribution without a generally tractable explicit density. Avoid ranking methods as universally better/worse.",
+    "question": "Which model here provides an explicit product of conditionals for scoring an observation?",
+    "narration": "Autoregressive models score sequences through conditional probabilities and sample sequentially. VAEs use latent likelihood models with approximate inference and an evidence bound. GANs learn a sampling map through an adversarial objective without providing a tractable image likelihood in this setup.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Compare the recipes on the same questions",
+    "source_asset_ids": [
+      "cyclegan",
+      "inpainting",
+      "satellite",
+      "diagram-s59"
+    ],
+    "returns_to": [
+      "s06",
+      "s07",
+      "s08",
+      "s09",
+      "s10"
+    ],
+    "return_in": [],
+    "planned_builds": [
+      "Populate AR and VAE using student answers. ",
+      "Add GAN and highlight the common role of randomness and learned structure."
+    ],
+    "answer": "The autoregressive model. The VAE marginal typically needs approximation, and this GAN does not provide a tractable likelihood.",
+    "speaking_cue": "Compare what each model lets us calculate and how it produces one new sample.",
+    "takeaway": "The sampling path and access to likelihood depend on the model we choose."
+  },
+  {
+    "id": "s60",
+    "number": 60,
+    "title": "What can you explain now?",
+    "section": "H",
+    "buildCount": 2,
+    "builds": [
+      {
+        "order": 1,
+        "caption": "Explain prior sampling, the two KLs, and the gradient through frozen D.",
+        "latex": ""
+      },
+      {
+        "order": 2,
+        "caption": "Next: can deliberately corrupting data give us targets for learning to generate?",
+        "latex": ""
+      }
+    ],
+    "goal": "Check understanding and create a precise diffusion transition.",
+    "visual": "Three concise questions revealed together after the first one has been considered; then a small noisy-image filmstrip leading into the next lecture.",
+    "math": "No diffusion equation yet. Do not imply that a one-step generator is mathematically impossible or that diffusion is simply repeated subtraction of known noise.",
+    "question": "What is the common task despite these different training recipes?",
+    "narration": "Use these questions to check the mechanisms rather than just the model names. For a VAE, generation bypasses the encoder; the prior KL and posterior-gap KL have different roles. For a GAN, freezing D's parameters still allows its input derivative. The final question introduces learning from deliberate corruption in the next lecture.",
+    "routes": [
+      "full",
+      "short"
+    ],
+    "title_original": "Three exit questions and the next lecture's problem",
+    "source_asset_ids": [],
+    "returns_to": [],
+    "return_in": [],
+    "planned_builds": [
+      "Ask: \u201cWhy is the VAE encoder unnecessary for prior sampling?\u201d, \u201cWhat are the two different KL divergences in the ELBO discussion?\u201d, and \u201cHow can D remain frozen while gradients reach G?\u201d ",
+      "Reveal answer fragments and ask whether generation could be learned as a sequence of small denoising steps."
+    ],
+    "answer": "Learning a model that can produce varied, plausible draws from the target distribution, with any requested condition respected.",
+    "speaking_cue": "Explain the sampling path, the two KLs, and the gradient through frozen D in your own words.",
+    "takeaway": "Next: can deliberately corrupting data give us targets for learning to generate?"
+  }
+]

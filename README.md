@@ -17,7 +17,7 @@ Two 75-minute sessions:
 ## Open it
 
 ```sh
-python3 -m http.server 8771
+python3 scripts/review_server.py      # or: python3 -m http.server 8771
 ```
 
 Then open http://127.0.0.1:8771/part1.html (or `part2.html`, `index.html`).
@@ -26,10 +26,20 @@ Then open http://127.0.0.1:8771/part1.html (or `part2.html`, `index.html`).
 
 ## Review notes (right-click annotations)
 
-- **Right-click** anything on a slide → type a note → **Save** (or ⌘/Ctrl+Enter). A numbered red pin marks the spot; click it to edit or delete.
-- The note records the slide, the click (build) number and what you clicked: for an equation, its exact LaTeX.
-- Press **A** to list all notes, then **Copy all** and paste them into the chat. If you review in the Claude app's browser pane, just say "read my notes": Claude reads them with `window.deckNotes()`.
-- Shift+right-click still opens the normal browser menu. Notes live in that browser's local storage, one list per deck file.
+Start the review server (it serves the deck and receives notes):
+
+```sh
+python3 scripts/review_server.py      # then open http://127.0.0.1:8771/part1.html
+```
+
+- **Right-click** anything on a slide, type what should change, press **Send** (or ⌘/Ctrl+Enter).
+- The note records the deck, slide, click number and what you clicked (an equation's exact LaTeX).
+  It is written to `review/notes.json` and appended to `review/inbox.jsonl`, which a running Claude session watches,
+  so the request arrives immediately.
+- **Red pin** = open request. **Green ✓** = Claude made the change; hover or click it to read the reply.
+- When the deck is rebuilt, open pages reload themselves onto the same slide and click.
+- Press **A** to list all notes (Copy all / Clear all). Shift+right-click opens the normal browser menu.
+- Without the server (file:// or a static host) notes stay in the browser; use **A → Copy all** and paste them into the chat.
 
 ## Maths
 

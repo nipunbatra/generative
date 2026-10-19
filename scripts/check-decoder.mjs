@@ -1,0 +1,3 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import {sigmoid} from '../src/math.mjs';const w=JSON.parse(fs.readFileSync('assets/recorded/decoder.json')),v=JSON.parse(fs.readFileSync('assets/recorded/vae-data.json'));let max=0;
+for(let k=0;k<16;k++){const z=v.mu[k],h=w['decoder_hidden.weight'].map((row,i)=>Math.max(0,w['decoder_hidden.bias'][i]+row[0]*z[0]+row[1]*z[1]));w['decoder_logits.weight'].forEach((row,i)=>{const p=sigmoid(row.reduce((s,v,j)=>s+v*h[j],w['decoder_logits.bias'][i]));max=Math.max(max,Math.abs(p-v.reconstructions[k][i]));});}
+assert.ok(max<1e-5);fs.writeFileSync('qa/decoder-parity.json',JSON.stringify({pixelsCompared:16*784,maxAbsoluteError:max,passed:true},null,2));console.log('Decoder parity',max);

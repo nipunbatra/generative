@@ -1,0 +1,26 @@
+{
+  "completed-scenes": {
+    "pages": 64,
+    "expected": 64,
+    "selectableCharacters": 37998,
+    "externalLinks": 69,
+    "internalLinks": 568,
+    "sayCuePages": 63
+  },
+  "all-builds": {
+    "pages": 151,
+    "expected": 151,
+    "selectableCharacters": 87051,
+    "externalLinks": 164,
+    "internalLinks": 1359,
+    "sayCuePages": 151
+  },
+  "recap": {
+    "pages": 2,
+    "expected": 2,
+    "selectableCharacters": 3702,
+    "externalLinks": 3,
+    "internalLinks": 0,
+    "sayCuePages": 0
+  }
+}

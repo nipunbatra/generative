@@ -1,0 +1,14 @@
+{
+  "errors": [],
+  "mobile": {
+    "width": 390,
+    "scrollWidth": 390,
+    "stages": 63,
+    "overflows": []
+  },
+  "static": {
+    "broken": 0,
+    "canvases": 0,
+    "notes": 63
+  }
+}

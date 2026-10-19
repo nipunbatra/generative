@@ -342,3 +342,7 @@ body.print .anno-pin, body.reading .anno-pin { display: none; }
 .stackbar b .katex { font-size: 1.05em; }
 .erows { display: grid; grid-template-columns: 640px 1fr; row-gap: 6px; align-items: center; }
 .erows .lab { font-size: 21px; color: var(--ink-2); }
+.anno-pin.done { background: #0F766E; font-size: 14px; }
+.anno-reply { font-size: 13px; color: #0F766E; background: #D9F2EF; border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; line-height: 1.35; }
+.anno-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 70; background: #14171F; color: #fff;
+  font: 600 14px var(--font-ui); padding: 8px 14px; border-radius: 10px; opacity: 0; transition: opacity .25s; pointer-events: none; }

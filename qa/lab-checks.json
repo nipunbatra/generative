@@ -1,0 +1,22 @@
+{
+  "passed": 14,
+  "checks": [
+    "pathwise autograd matches shared module",
+    "VAE shapes B=3",
+    "VAE reduction semantics B=3",
+    "GAN and target shapes B=3",
+    "VAE shapes B=17",
+    "VAE reduction semantics B=17",
+    "GAN and target shapes B=17",
+    "prior generation bypasses encoder",
+    "D phase leaves G parameters and gradients unchanged",
+    "D phase updates D",
+    "frozen D still transmits nonzero gradient to G",
+    "G phase changes only G",
+    "broken G detach removes the gradient graph",
+    "two-pixel PyTorch loss agrees with shared fixtures"
+  ],
+  "torch": "2.13.0",
+  "fixtures_source": "src/math.mjs",
+  "executed": true
+}

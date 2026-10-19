@@ -1,0 +1,42 @@
+[
+  {
+    "path": "index.html",
+    "bytes": 1221,
+    "sha256": "ac743dd1aa0410f1b7b08176bca5a908fd456e41195083b35e66115785311795"
+  },
+  {
+    "path": "notes.html",
+    "bytes": 1349200,
+    "sha256": "ed5a6f0d1276ce299c1b06d5d4a0bcc086e5ca3a6d4bfd6e7f3e2d998223eb99"
+  },
+  {
+    "path": "exports/completed-scenes.pdf",
+    "bytes": 3727049,
+    "sha256": "5416b7b0d6094a314dae160db3ee8b288204fd17dfd930a27414c07b3e4ed2b3"
+  },
+  {
+    "path": "exports/all-builds.pdf",
+    "bytes": 5692597,
+    "sha256": "75a7efa3efe3b431326edcc951255f1d0c1b7401c672eeb3a9debdd76ac6f95b"
+  },
+  {
+    "path": "exports/recap.pdf",
+    "bytes": 90818,
+    "sha256": "fe27529774a01820862539ff4d2579c903e61d7556e34c5d902958d7962fa309"
+  },
+  {
+    "path": "notebooks/lecture-lab.ipynb",
+    "bytes": 68737,
+    "sha256": "208ab48c2515315496037750411376d067ec5628fc68a306e760e7453c520417"
+  },
+  {
+    "path": "README.md",
+    "bytes": 8361,
+    "sha256": "7e353c0fe1ca2a1c822ccd3099aeced96c526c279daf1f2d4c0e4b1310a63c64"
+  },
+  {
+    "path": "qa/QA_REPORT.md",
+    "bytes": 5306,
+    "sha256": "6262a0041ec506b4c68474aec1ceea9f0cec409e26ac0ab1ff705bedeb290c3f"
+  }
+]

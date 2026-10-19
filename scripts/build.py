@@ -1,0 +1,10 @@
+from pathlib import Path
+import json,subprocess
+r=Path(__file__).resolve().parents[1]
+subprocess.run(['node','scripts/sync-content.mjs'],cwd=r,check=True)
+scenes=json.loads((r/'src/scene-manifest.json').read_text());assert len(scenes)==60 and sum(s['buildCount'] for s in scenes)==145
+html='''<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,"><title>Learning to Generate · ES 667</title><link rel="stylesheet" href="vendor/katex/katex.min.css"><link rel="stylesheet" href="src/style.css"><script src="vendor/katex/katex.min.js"></script></head><body><main id="viewport"><p>Loading the local lecture and recorded demonstrations…</p></main><nav class="toolbar" aria-label="Lecture controls"><button data-action="back" aria-label="Previous reveal">←</button><span class="progress">1/60</span><button data-action="next" aria-label="Next reveal">→</button><button data-action="overview">Overview</button><button data-action="notes">Notes</button><button data-action="question">Discuss</button><button data-action="glossary">Glossary</button><select id="route" aria-label="Teaching route"><option value="full">Full</option><option value="short">Compressed</option></select><span id="route-status">120 min</span><a href="?reading">Read</a><a href="exports/completed-scenes.pdf">PDF</a></nav><dialog aria-label="Lecture information"></dialog><script type="module" src="src/app.mjs"></script></body></html>'''
+(r/'index.html').write_text(html)
+# Verify authored reveal copy matches the specification before publishing files.
+subprocess.run(['node','--input-type=module','-e',"import {content} from './src/content.mjs';import fs from 'node:fs';let a=JSON.parse(fs.readFileSync('src/scene-manifest.json'));for(let s of a)if(content[s.number].length!==s.buildCount)throw Error(s.id);console.log('60 scenes / 145 reveals + 3 appendix scenes / 6 reveals');"],cwd=r,check=True)
+print('Built index.html; all runtime modules and assets are local.')

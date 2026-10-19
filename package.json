@@ -1,16 +1,1 @@
-{
-  "name": "generative-modelling-i",
-  "private": true,
-  "version": "2.0.0",
-  "description": "ES667 offline interactive generative modelling lecture",
-  "scripts": {
-    "build": "python3 src/build.py",
-    "verify": "node src/verify.cjs",
-    "export": "node src/export.cjs",
-    "serve": "python3 -m http.server 8766 --bind 127.0.0.1",
-    "verify:geometry": "node src/audit_geometry.cjs"
-  },
-  "devDependencies": {
-    "puppeteer": "24.32.1"
-  }
-}
+{"name":"learning-to-generate","private":true,"version":"1.0.0","type":"module","scripts":{"build":"python3 scripts/build.py","serve":"python3 -m http.server 8766 --bind 127.0.0.1","test":"node scripts/test-math.mjs","verify":"node scripts/verify.mjs","export":"node scripts/export.mjs"},"devDependencies":{"puppeteer":"24.32.1"}}

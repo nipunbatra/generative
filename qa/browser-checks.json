@@ -1,0 +1,26 @@
+{
+  "captured": 151,
+  "coreScenes": 60,
+  "coreBuilds": 145,
+  "appendixScenes": 3,
+  "appendixBuilds": 6,
+  "errors": [],
+  "layoutFailures": [],
+  "interactionChecks": [
+    "support infinity rendered",
+    "equal distributions zero",
+    "range arrow changes parameter without navigating",
+    "epsilon fixed while parameter changes",
+    "reset canonical epsilon",
+    "checkpoint step wraps deterministically",
+    "leaving a scene pauses playback",
+    "compressed route timing",
+    "section jump",
+    "deep-linked reveal",
+    "desktop scale fits",
+    "warm lecture works offline",
+    "GAN reveal defaults follow D forward, G forward, G update",
+    "GAN reset respects current reveal",
+    "reconstruction canvas matches between presentation and all-build export"
+  ]
+}
