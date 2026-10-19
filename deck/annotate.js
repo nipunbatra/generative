@@ -32,6 +32,17 @@
     } catch { toast('Saved in this browser only (server not reachable)'); }
   }
 
+  // text without KaTeX's duplicate MathML copy: maths becomes its LaTeX source
+  function plainText(el) {
+    if (!el) return '';
+    const c = el.cloneNode(true);
+    c.querySelectorAll('.katex').forEach(k => {
+      const tex = k.querySelector('annotation[encoding="application/x-tex"]')?.textContent || '';
+      k.replaceWith(document.createTextNode('$' + tex + '$'));
+    });
+    return c.textContent.trim().replace(/\s+/g, ' ');
+  }
+
   // ------------------------------------------------------------ what was clicked?
   function describe(el) {
     const tex = el.closest('.katex')?.querySelector('annotation[encoding="application/x-tex"]');
@@ -44,7 +55,7 @@
     if (el.tagName === 'IMG') return { kind: 'image', text: el.getAttribute('src') };
     const block = el.closest('h2, p, li, td, th, pre, .node, .callout, .stat, .cap, .q, .kicker') || el;
     return { kind: block.tagName.toLowerCase() + (block.className ? '.' + String(block.className).split(' ')[0] : ''),
-             text: (block.innerText || block.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 160) };
+             text: plainText(block).slice(0, 200) };
   }
 
   // ------------------------------------------------------------ pins
@@ -52,7 +63,7 @@
     document.querySelectorAll('.anno-pin').forEach(p => p.remove());
     const all = [...document.querySelectorAll('section.slide')];
     notes.forEach(n => {
-      const slide = document.getElementById(n.slide) || all[n.slideNo - 1];
+      const slide = n.slide ? document.getElementById(n.slide) : all[n.slideNo - 1];
       if (!slide) return;
       const pin = document.createElement('button');
       const done = n.status === 'done';
@@ -124,7 +135,7 @@
     const all = [...document.querySelectorAll('section.slide')];
     openBox(e.clientX, e.clientY, null, {
       deck: deckName, slide: slide.id, slideNo: all.indexOf(slide) + 1, build: Number(slide.dataset.build || 1),
-      title: slide.querySelector('h2')?.textContent.trim().slice(0, 120) || '',
+      title: plainText(slide.querySelector('h2')).slice(0, 120),
       x: Math.round((e.clientX - r.left) / scale), y: Math.round((e.clientY - r.top) / scale),
       target: describe(e.target),
     });

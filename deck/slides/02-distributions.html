@@ -1,65 +1,52 @@
-<!-- ===================================================================== 2 · DISTRIBUTIONS -->
+<!-- ===================================================================== PART 1 · LEARN A DISTRIBUTION, THEN SAMPLE -->
 
-<section class="slide sec-dist opener" id="dist-open" data-section="Distributions">
-  <p class="kicker">Part 1</p>
-  <h2>What does it mean to learn a distribution?</h2>
-  <p>Before images, one number. Everything we need (fitting, sampling, hidden causes, inference) fits on a number line.</p>
+<section class="slide sec-dist opener break" id="dist-open" data-section="1 · Distributions">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 1 of 7</p>
+      <h2>Learn a distribution from examples, then sample from it</h2>
+      <p class="why">We have seen what generators can do. Before any network, the whole idea on <b>one number</b>: what does "learning" mean, and how do we then make new samples?</p>
+    </div>
+    <!--route:1-->
+  </div>
 </section>
 
-<section class="slide sec-dist" id="toy-data" data-section="Distributions">
-  <p class="kicker">Our 1-D toy data</p>
-  <h2>200 numbers in two clumps</h2>
-  <div class="body center"><img class="fig" src="figures/data/toy-data.svg" style="width:1080px"></div>
-  <p class="q">Pretend each number is an image squashed to one value. How would you produce a 201st that looks like it belongs?</p>
+<section class="slide sec-dist" id="task" data-section="1 · Distributions">
+  <p class="kicker">What are we trying to do?</p>
+  <h2>Examples in, a model out, new examples from the model</h2>
+  <div class="body center"><!--svg:task--></div>
+  <div class="steps2" data-b="3">
+    <div class="callout dec"><h3>1 · Learn</h3>Choose the model's parameters $\theta$ so that the examples we have are <b>probable</b> under it.</div>
+    <div class="callout z"><h3>2 · Generate</h3>Draw <b>new</b> samples from the learned model $p_\theta$.</div>
+  </div>
   <aside class="notes">
-    <p>Data: 200 draws, half from 𝒩(−2, 0.5²) and half from 𝒩(2, 0.5²). Students do not need to know that yet; they should see two clumps.</p>
-    <p>Typical answers: "pick a random existing point" (memorising, no new data), "use the average" (next slide), "fit a distribution and sample" (yes).</p>
+    <p>This is the frame for the whole lecture. Every model today does these two steps; they differ in what the model is and how the learning is done.</p>
+    <p>Bottom row: the 1-D toy version we use for the next few slides. Same task, one number per example instead of 784 pixels.</p>
   </aside>
 </section>
 
-<section class="slide sec-dist" id="toy-mean" data-section="Distributions">
+<section class="slide sec-dist" id="toy-data" data-section="1 · Distributions">
+  <p class="kicker">Our toy data</p>
+  <h2>200 numbers from a recipe we keep hidden</h2>
+  <div class="body center"><img class="fig" src="figures/data/toy-data.svg" style="width:1060px"></div>
+  <p class="q">The model sees only these 200 numbers, not the recipe. Goal: learn from them, then produce a 201st that looks like it belongs.</p>
+  <aside class="notes">
+    <p>The hidden recipe (reveal at the end of the part): flip a fair coin; heads, draw from 𝒩(−2, 0.5²); tails, from 𝒩(2, 0.5²). Students should just see two clumps.</p>
+    <p>Ask for ideas. "Pick an existing number" copies, it does not generate. "Use the average" is next.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-mean" data-section="1 · Distributions">
   <p class="kicker">A tempting answer</p>
   <h2>The average is a terrible sample</h2>
-  <div class="body center"><img class="fig" src="figures/data/toy-mean.svg" style="width:1080px"></div>
-  <p class="q">A model that predicts the mean always outputs something that never occurs. Regression thinking does not give generation.</p>
-  <aside class="notes"><p>This is why "train a network with MSE to output an image" gives blurry averages. We will see a softer version of this later when VAE samples look blurry.</p></aside>
+  <div class="body center"><img class="fig" src="figures/data/toy-mean.svg" style="width:1060px"></div>
+  <p class="q">The mean is a number that almost never occurs. Generating needs the whole spread of the data, not one summary of it.</p>
+  <aside class="notes"><p>This is why "train a network with squared error to output an image" gives blurry averages.</p></aside>
 </section>
 
-<section class="slide sec-dist" id="toy-gauss" data-section="Distributions">
-  <p class="kicker">Fit, then sample</p>
-  <h2>The best single Gaussian, by maximum likelihood</h2>
-  <div class="body">
-    <div class="stack center">
-      <img class="fig" src="figures/data/toy-gauss.svg" style="width:1040px" data-b="=1">
-      <img class="fig" src="figures/data/toy-gauss-samples.svg" style="width:1040px" data-b="2">
-    </div>
-    <div class="row" style="justify-content:center;gap:50px">
-      <div class="mathblock" style="font-size:24px">$$\hat\mu = \frac1N\sum_{i=1}^{N} x_i = {{toy.mean}} \qquad \hat\sigma^2 = \frac1N \sum_{i=1}^{N} (x_i-\hat\mu)^2 = {{toy.var}}$$</div>
-      <div class="mathblock" style="font-size:24px" data-b="2">$$x_{\text{new}} = \hat\mu + \hat\sigma\,\eps,\quad \eps \sim \N(0,1)$$</div>
-    </div>
-  </div>
-  <p class="q" data-b="=1">These two numbers make the observed data as probable as any Gaussian can.</p>
-  <p class="q" data-b="2">{{toy.gauss_samples_in_gap}} of 30 samples land in the empty gap. Best fit within the family, wrong shape.</p>
-  <aside class="notes">
-    <p>The maximum-likelihood Gaussian has the sample mean and the 1/N variance. Students derived this in the probability lectures.</p>
-    <p>Lesson: optimisation worked perfectly; the model family was too simple. Better optimisation cannot fix that.</p>
-  </aside>
-</section>
-
-<section class="slide sec-dist" id="toy-story" data-section="Distributions">
-  <p class="kicker">A richer model: tell a story</p>
-  <h2>Hidden choice first, then the number</h2>
-  <div class="body center"><!--svg:mixture-story--></div>
-  <p class="q">The coin is never written down in the data. We only ever see $x$. The coin $z$ is a hidden (latent) variable.</p>
-  <aside class="notes">
-    <p>Read the sampling recipe aloud: flip a coin, pick that bump, draw a point from it. Two simple steps make a two-bump distribution that one Gaussian could not.</p>
-    <p>This "generative story" pattern is exactly the VAE: first draw a hidden code z, then draw the image x given z.</p>
-  </aside>
-</section>
-
-<section class="slide sec-dist" id="gauss-density" data-section="Distributions">
-  <p class="kicker">One ingredient, worked by hand</p>
-  <h2>How high is bump B at $x = 1.5$?</h2>
+<section class="slide sec-dist" id="gauss-density" data-section="1 · Distributions">
+  <p class="kicker">Our first model: one Gaussian · how it scores a number</p>
+  <h2>How probable is $x = 1.5$ under a bump at 2?</h2>
   <div class="body">
     <div class="row" style="gap:30px">
       <div class="col" style="width:600px">
@@ -71,30 +58,108 @@
       <img class="fig" src="figures/data/gauss-density.svg" style="width:500px">
     </div>
   </div>
-  <p class="q" data-b="4">A density is a height, not a probability: it can exceed 1 for a narrow bump. Only areas are probabilities.</p>
+  <p class="q" data-b="4">The model's two parameters, $\mu$ and $\sigma$, decide how high the curve is at every $x$. Higher means more probable.</p>
   <aside class="notes">
-    <p>The formula has two parts: how many standard deviations away x is (squared, inside the exponent), and a constant that makes the area under the curve 1.</p>
-    <p>One standard deviation from the centre always gives e^{−1/2} ≈ 0.61 of the peak height.</p>
+    <p>The formula has two parts: how many standard deviations x is from the centre (squared, inside the exponent), and a constant that makes the total area 1.</p>
+    <p>A density is a height, not a probability: it can exceed 1 for a narrow bump. Only areas are probabilities. For comparing parameter choices, heights are what we need.</p>
   </aside>
 </section>
 
-<section class="slide sec-dist" id="toy-mixture" data-section="Distributions">
-  <p class="kicker">From the story to a probability</p>
-  <h2>To score $x$, add over every hidden value</h2>
+<section class="slide sec-dist" id="likelihood" data-section="1 · Distributions">
+  <p class="kicker">Step 1 · Learn</p>
+  <h2>Score a choice of $\mu, \sigma$ on all 200 numbers</h2>
   <div class="body">
-    <img class="fig" src="figures/data/toy-mixture-samples.svg" style="width:960px;margin:0 auto">
-    <div class="mathblock" style="font-size:27px">$$p(x) = \sum_{z\in\{\mathrm{A},\mathrm{B}\}} \cz{p(z)}\,\cdec{p(x\mid z)} = \tfrac12\,\N(x;-2,0.5^2) + \tfrac12\,\N(x;\,2,0.5^2)$$</div>
-    <div class="mathblock" style="font-size:24px" data-b="2">$$\text{at } x=1.5:\quad \tfrac12\cdot 0.000 + \tfrac12\cdot {{gauss_15.value}} = 0.242$$</div>
+    <div class="mathblock" style="font-size:27px">$$\log p_\theta(\text{data}) = \sum_{i=1}^{200} \log \N(x_i;\mu,\sigma^2), \qquad \theta = (\mu, \sigma)$$</div>
+    <div class="cands" style="margin-top:6px">
+      <div class="col" data-b="2"><img class="fig" src="figures/data/cand-a.svg" style="width:340px"><span class="ll">$\log p = {{cand.a.ll}}$</span></div>
+      <div class="col" data-b="3"><img class="fig" src="figures/data/cand-b.svg" style="width:340px"><span class="ll">$\log p = {{cand.b.ll}}$</span></div>
+      <div class="col" data-b="4"><img class="fig" src="figures/data/cand-c.svg" style="width:340px"><span class="ll"><b>$\log p = {{cand.c.ll}}$</b></span></div>
+    </div>
   </div>
-  <p class="q">Samples now fall in the bumps. Remember this sum. With images it becomes an integral we cannot compute.</p>
+  <p class="q" data-b="4">Learning = keep the $\theta$ with the highest score. That is <b>maximum likelihood</b>, the same rule that trained the name model.</p>
   <aside class="notes">
-    <p>The A-bump contributes about 2 × 10⁻¹² at x = 1.5: 7 standard deviations away.</p>
-    <p>"Marginalising out z": the probability of what we observe is an average over everything we cannot observe.</p>
+    <p>Why the log? The likelihood is a product of 200 heights, a tiny number. The log turns it into a sum, and the best θ is the same.</p>
+    <p>Left: a narrow bump on the right clump. It fits those points perfectly, but every point on the left clump is 8 standard deviations away, so the score collapses. Middle: a narrow bump in the gap misses every point by about 4 standard deviations, which costs less in total. Right: the best single Gaussian, wide enough to cover both clumps.</p>
   </aside>
 </section>
 
-<section class="slide sec-dist" id="bayes-table" data-section="Distributions">
-  <p class="kicker">Run the story backwards</p>
+<section class="slide sec-dist" id="toy-gauss" data-section="1 · Distributions">
+  <p class="kicker">Step 1 · Learn, then Step 2 · Generate</p>
+  <h2>The best Gaussian has a formula; then we sample from it</h2>
+  <div class="body">
+    <div class="stack center">
+      <img class="fig" src="figures/data/toy-gauss.svg" style="width:1000px" data-b="=1">
+      <img class="fig" src="figures/data/toy-gauss-samples.svg" style="width:1000px" data-b="2">
+    </div>
+    <div class="row" style="justify-content:center;gap:50px">
+      <div class="mathblock" style="font-size:24px">$$\hat\mu = \frac1N\sum_{i=1}^{N} x_i = {{toy.mean}} \qquad \hat\sigma^2 = \frac1N \sum_{i=1}^{N} (x_i-\hat\mu)^2 = {{toy.var}}$$</div>
+      <div class="mathblock" style="font-size:24px" data-b="2">$$x_{\text{new}} = \hat\mu + \hat\sigma\,\eps,\quad \eps \sim \N(0,1)$$</div>
+    </div>
+  </div>
+  <p class="q" data-b="=1">Setting the derivative of the score to zero gives these two numbers: the same answer as the third candidate.</p>
+  <p class="q" data-b="2">Step 2: {{toy.gauss_samples_in_gap}} of 30 samples land in the empty gap. Learning worked; the model was too simple.</p>
+  <aside class="notes">
+    <p>Students derived the Gaussian maximum-likelihood estimates in the probability lectures: the sample mean and the 1/N variance.</p>
+    <p>Lesson: optimisation worked perfectly; the model family could not describe two clumps. Better optimisation cannot fix that.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="checkpoint-1" data-section="1 · Distributions">
+  <p class="kicker">Checkpoint</p>
+  <h2>So far: learn and generate work; one bump is not enough</h2>
+  <div class="body">
+    <table class="cmp">
+      <tr><th></th><th>what we did</th><th>result</th></tr>
+      <tr><td>Learn</td><td>chose $\mu, \sigma$ to maximise $\log p_\theta(\text{data})$</td><td>$\hat\mu = {{toy.mean}},\ \hat\sigma = {{toy.std}}$</td></tr>
+      <tr><td>Generate</td><td>sampled $x = \hat\mu + \hat\sigma\eps$</td><td>many samples in the gap</td></tr>
+      <tr data-b="2"><td>Fix</td><td>a richer model that can make two clumps</td><td>next slide</td></tr>
+    </table>
+  </div>
+  <aside class="notes"><p>Pause here. Everything else in the lecture follows this recipe with a richer model: VAEs and GANs are different answers to "what model, and how do we learn it".</p></aside>
+</section>
+
+<section class="slide sec-dist" id="toy-story" data-section="1 · Distributions">
+  <p class="kicker">A richer model: tell a story</p>
+  <h2>Hidden choice first, then the number</h2>
+  <div class="body center"><!--svg:mixture-story--></div>
+  <p class="q">This is how we will generate: run the two steps. The coin is never written down in the data, so it is a hidden (latent) variable $z$.</p>
+  <aside class="notes"><p>Read the recipe aloud: flip a coin, pick that bump, draw a number from it. Two simple steps make two clumps, which one Gaussian could not.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="toy-mixture" data-section="1 · Distributions">
+  <p class="kicker">How the new model scores a number</p>
+  <h2>To score $x$, add up every way it could have been made</h2>
+  <div class="body">
+    <img class="fig" src="figures/data/toy-mixture-samples.svg" style="width:940px;margin:0 auto">
+    <div class="mathblock" style="font-size:26px">$$p(x) = \underbrace{\tfrac12\,\N(x;-2,0.5^2)}_{\text{made by bump A}} + \underbrace{\tfrac12\,\N(x;\,2,0.5^2)}_{\text{made by bump B}} = \sum_{z} \cz{p(z)}\,\cdec{p(x\mid z)}$$</div>
+    <div class="mathblock" style="font-size:23px" data-b="2">$$\text{at } x=1.5:\quad \tfrac12\cdot 0.000 + \tfrac12\cdot {{gauss_15.value}} = 0.242$$</div>
+  </div>
+  <p class="q">One hidden coin flip made the model rich enough: the samples now fall in the bumps, not in the gap.</p>
+  <aside class="notes">
+    <p>Read the formula aloud: probability of x through bump A plus probability of x through bump B, each weighted by how likely that bump is. Summing over the hidden choice is called marginalising it out.</p>
+    <p>The A-bump contributes about 2 × 10⁻¹² at x = 1.5: 7 standard deviations away.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="why-backwards" data-section="1 · Distributions">
+  <p class="kicker">Step 1 · Learn, for the two-bump model</p>
+  <h2>To fit two bumps, guess which bump made each point</h2>
+  <div class="body">
+    <div class="steps2">
+      <div class="callout plain"><h3>If we knew the coin for every point</h3>fitting is easy: average the A-points for bump A's centre, the B-points for bump B's.</div>
+      <div class="callout enc" data-b="2"><h3>We don't, so ask for each point</h3>given this $x$, how probable is it that bump B made it? That is $p(\mathrm{B}\mid x)$.</div>
+    </div>
+    <img class="fig" src="figures/data/toy-colored.svg" style="width:960px;margin:18px auto 0" data-b="3">
+  </div>
+  <p class="q" data-b="3">Running the story backwards, from a number to its likely hidden cause, is called <b>inference</b>. It is part of learning, not a detour.</p>
+  <aside class="notes">
+    <p>Build 3: each of the 200 points coloured by p(B | x), computed on the next slide. Points in the middle are grey: unsure.</p>
+    <p>For the curious: alternating "guess the bump" and "refit the bumps" is the EM algorithm. We will not need its details; the point is that learning a hidden-variable model needs this backwards step.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="bayes-table" data-section="1 · Distributions">
+  <p class="kicker">The backwards step, worked by hand</p>
   <h2>You see $x = 0.1$. Which bump made it?</h2>
   <div class="body">
     <table class="work" style="margin:0 auto;font-size:24px">
@@ -105,16 +170,16 @@
     </table>
     <div class="mathblock" style="font-size:27px;margin-top:20px" data-b="5">$$p(\mathrm{B}\mid x) = \frac{p(\mathrm{B})\,p(x\mid\mathrm{B})}{p(x)} = {{bayes01.post_b}}$$</div>
   </div>
-  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. $x = 0.1$ is close to the middle, so we stay unsure.</p>
+  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. Note the total is exactly the $p(x)$ from two slides ago.</p>
   <aside class="notes">
-    <p>Build by build: the two likelihoods (both tiny: 0.1 is far from both centres, but closer to B), multiply by the prior, add to get the evidence, divide.</p>
-    <p>The tiny numbers do not matter: only their ratio does. This will matter for images, where likelihoods are like 10⁻⁵⁰.</p>
+    <p>Build by build: the two likelihoods (both tiny: 0.1 is far from both centres, but closer to B), multiply by the prior, add to get p(x), divide.</p>
+    <p>The tiny numbers do not matter, only their ratio. Important for later: the backwards step needs p(x), the sum over all hidden values.</p>
   </aside>
 </section>
 
-<section class="slide sec-dist" id="toy-posterior" data-section="Distributions">
+<section class="slide sec-dist" id="toy-posterior" data-section="1 · Distributions">
   <p class="kicker">Do it for every $x$</p>
-  <h2>The posterior, as a curve</h2>
+  <h2>The backwards step, as a curve</h2>
   <div class="body">
     <div class="row" style="gap:36px">
       <img class="fig" src="figures/data/toy-posterior.svg" style="width:640px">
@@ -125,15 +190,12 @@
       </div>
     </div>
   </div>
-  <p class="q">Going from an observation back to its hidden cause is called <b>inference</b>. The VAE's encoder will learn to do it.</p>
-  <aside class="notes">
-    <p>Derivation of the sigmoid if asked: the log ratio of the two likelihoods is [(x+2)² − (x−2)²]/(2·0.25) = 16x, and the equal priors cancel.</p>
-    <p>Here inference is exact because we can compute p(x). For images, p(x) is the hard part, so the posterior will be hard too.</p>
-  </aside>
+  <p class="q">These are the colours on the 200 points two slides ago.</p>
+  <aside class="notes"><p>Derivation of the sigmoid if asked: the log ratio of the two likelihoods is [(x+2)² − (x−2)²]/(2·0.25) = 16x, and the equal priors cancel.</p></aside>
 </section>
 
-<section class="slide sec-dist" id="vocab" data-section="Distributions">
-  <p class="kicker">Four words we will use all lecture</p>
+<section class="slide sec-dist" id="vocab" data-section="1 · Distributions">
+  <p class="kicker">Four words for the rest of the lecture</p>
   <h2>Prior, likelihood, evidence, posterior</h2>
   <div class="body">
     <table class="work vocab" style="margin:4px auto 0;font-size:23px">
@@ -144,17 +206,106 @@
       <tr data-b="4"><td><b class="cenc">posterior</b></td><td>$p(z\mid x)$</td><td>having seen $x$, which $z$ explains it?</td><td>B: {{bayes01.post_b}}</td></tr>
     </table>
   </div>
-  <p class="q" data-b="4">Bayes ties them together: posterior = prior × likelihood ÷ evidence.</p>
-  <aside class="notes"><p>Keep these four colours in mind: amber for z and the prior, teal for the decoder/likelihood, blue for observed data, purple for the encoder/posterior.</p></aside>
+  <p class="q" data-b="4">Generating uses the prior and the likelihood. Learning needs the evidence and the posterior.</p>
+  <aside class="notes"><p>Keep these four colours in mind: amber for z and the prior, teal for the decoder and the likelihood, blue for observed data, purple for the posterior.</p></aside>
 </section>
 
-<section class="slide sec-dist" id="latent-story" data-section="Distributions">
+<section class="slide sec-dist" id="recap-1" data-section="1 · Distributions">
+  <p class="kicker">End of Part 1</p>
+  <h2>What we did, and what comes next</h2>
+  <div class="body">
+    <div class="recap">
+      <div>
+        <h3>What we did</h3>
+        <ol>
+          <li><b>Learn</b> = choose parameters that make the data probable.</li>
+          <li><b>Generate</b> = sample from the learned model.</li>
+          <li>One bump was too simple; a hidden coin $z$ fixed it.</li>
+          <li>Scoring $x$ sums over $z$; learning needs the backwards step $p(z\mid x)$.</li>
+        </ol>
+      </div>
+      <div class="next" data-b="2">
+        <h3>Next: the same story for images</h3>
+        <p class="small">The coin becomes a short code $z$ of real numbers; each bump becomes a neural network that turns $z$ into an image.</p>
+        <p class="small">Generating stays easy. Learning gets hard: the sum over $z$ becomes a sum over infinitely many codes.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>The hidden recipe for the 200 numbers was exactly the two-bump story. Reveal it here.</p></aside>
+</section>
+
+<!-- ------------------------------------------------ from a coin to a code, slowly -->
+
+<section class="slide sec-dist" id="coin-to-code" data-section="1 · Distributions">
   <p class="kicker">From a coin to a code</p>
-  <h2>The same story for images</h2>
-  <div class="body center"><!--svg:latent-story--></div>
-  <p class="q">The code is 2 real numbers instead of a coin, and a network maps it to 784 pixel probabilities. Nobody tells it what $z$ means.</p>
-  <aside class="notes">
-    <p>Real outputs of the decoder we train later. Step 2 gives a probability per pixel (a grey image). Step 3 flips a coin per pixel. Most papers show step 2 as "the sample" because it looks cleaner.</p>
-    <p>If we had this decoder, generating would be trivial. The whole difficulty is training it.</p>
-  </aside>
+  <h2>Same story, bigger pieces</h2>
+  <div class="body">
+    <table class="cmp">
+      <tr><th></th><th>two bumps (so far)</th><th>images (from now on)</th></tr>
+      <tr><td>hidden $z$</td><td>a coin: A or B</td><td data-b="2">2 real numbers $(z_1, z_2)$, drawn from $\N(0, I)$</td></tr>
+      <tr><td>$p(x\mid z)$</td><td>a bump at $-2$ or $+2$</td><td data-b="3">a neural network, the <b>decoder</b>, with weights $\theta$</td></tr>
+      <tr><td>observed $x$</td><td>one number</td><td data-b="4">784 pixels, each ink (1) or paper (0)</td></tr>
+      <tr><td>sum over $z$</td><td>2 terms</td><td data-b="5">every point in a plane: infinitely many</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="5">Next three slides: generate one image this way, one step at a time.</p>
+  <aside class="notes"><p>Fill in the right column one row at a time, asking the class to guess each entry first. The last row is the problem Parts 2 to 4 solve.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="story-1" data-section="1 · Distributions">
+  <p class="kicker">Generating an image · step 1 of 3</p>
+  <h2>Draw a code</h2>
+  <div class="body">
+    <div class="row" style="gap:40px;justify-content:center">
+      <img class="fig" src="figures/data/story-plane.svg" style="height:400px">
+      <div class="col" style="width:500px">
+        <div class="mathblock left" style="font-size:28px">$$z \sim \N(0, I)$$</div>
+        <p class="small">Two numbers, each from a standard bell curve: like flipping the coin, but the "coin" can land anywhere in the plane.</p>
+        <p class="small" data-b="2">This draw: $z = ({{story_z.0}},\ {{story_z.1}})$.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">On its own, $z$ means nothing. The decoder will give it meaning.</p>
+  <aside class="notes"><p>The dashed circles are where most draws land (1, 2, 3 standard deviations). There is no "digit" axis: the meaning of z1 and z2 is whatever the decoder learns.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="story-2" data-section="1 · Distributions">
+  <p class="kicker">Generating an image · step 2 of 3</p>
+  <h2>Decode it into 784 pixel probabilities</h2>
+  <div class="body center"><!--svg:story-decode--></div>
+  <p class="q">$\pi_i$ is the probability that pixel $i$ is ink. Dark grey = probably ink; white = probably paper.</p>
+  <aside class="notes"><p>This is the trained decoder we build in Part 6. One forward pass: 2 numbers in, 784 numbers between 0 and 1 out (a sigmoid at the end). It plays the role of "which bump": it says what x is likely to look like, given z.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="story-3" data-section="1 · Distributions">
+  <p class="kicker">Generating an image · step 3 of 3</p>
+  <h2>Flip one coin per pixel</h2>
+  <div class="body">
+    <div class="row" style="gap:40px;justify-content:center">
+      <div class="col" style="align-items:center"><img class="fig pix" src="figures/data/story-pi.png" style="width:280px;border:2.5px solid var(--dec);border-radius:6px"><p class="cap">probabilities $\pi$</p></div>
+      <span class="arrow" style="font-size:40px">→</span>
+      <div class="col" style="align-items:center" data-b="2"><img class="fig pix" src="figures/data/story-sample.png" style="width:280px;border:2.5px solid var(--x);border-radius:6px"><p class="cap">one sample $x$</p></div>
+      <div class="col" style="width:330px" data-b="2">
+        <div class="mathblock left" style="font-size:26px">$$x_i \sim \mathrm{Bernoulli}(\pi_i)$$</div>
+        <p class="small">Each pixel independently: ink with probability $\pi_i$.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">That is a generated image. In practice we usually display $\pi$ itself, because it looks cleaner.</p>
+  <aside class="notes"><p>The speckle comes from the coin flips. Most papers, and most of this lecture, show π (the mean image) instead of a sample.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="story-learn" data-section="1 · Distributions">
+  <p class="kicker">The same two steps as before</p>
+  <h2>Generating is easy. Learning is the catch.</h2>
+  <div class="body">
+    <div class="steps2">
+      <div class="callout z"><h3>Generate ✓</h3>draw $z \sim \N(0,I)$, decode, flip pixels. Three slides, done.</div>
+      <div class="callout dec" data-b="2"><h3>Learn ?</h3>choose the decoder's weights $\theta$ to make the training images probable:
+        <div class="mathblock" style="font-size:24px">$$p_\theta(x) = \int p(z)\,p_\theta(x\mid z)\,dz$$</div>
+        the two-bump sum, now over every code in the plane.</div>
+    </div>
+  </div>
+  <p class="q" data-b="2">Parts 2 to 4 are about this one problem. First, a simpler idea that almost works: the autoencoder.</p>
+  <aside class="notes"><p>Link back to the two-bump slides: there, learning needed the sum over z and the backwards step p(z|x). Both become hard with a continuous code and a neural decoder. That is the whole motivation for the encoder, KL and the ELBO.</p></aside>
 </section>

@@ -1,12 +1,17 @@
 <!-- ===================================================================== 3 · AUTOENCODERS -->
 
-<section class="slide sec-ae opener" id="ae-open" data-section="Autoencoders">
-  <p class="kicker">Part 2</p>
-  <h2>First attempt: an autoencoder</h2>
-  <p>Compress an image into a few numbers, then rebuild it. Then we try to generate with it, and watch that fail.</p>
+<section class="slide sec-ae opener break" id="ae-open" data-section="2 · Autoencoders">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 2 of 7</p>
+      <h2>First attempt: an autoencoder</h2>
+      <p class="why">Part 1 ended with a catch: to learn a decoder we need to know which code goes with each image. An <b>encoder</b> network could simply tell us. Let us try that, and watch what breaks.</p>
+    </div>
+    <!--route:2-->
+  </div>
 </section>
 
-<section class="slide sec-ae" id="ae-arch" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae-arch" data-section="2 · Autoencoders">
   <p class="kicker">Squeeze, then rebuild</p>
   <h2>An autoencoder on our 3</h2>
   <div class="body center"><!--svg:ae--></div>
@@ -17,7 +22,7 @@
   </aside>
 </section>
 
-<section class="slide sec-ae" id="ae-loss" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae-loss" data-section="2 · Autoencoders">
   <p class="kicker">Comparing the rebuild with the original</p>
   <h2>Binary cross-entropy, one pixel at a time</h2>
   <div class="body">
@@ -33,7 +38,7 @@
   <aside class="notes"><p>Same cross-entropy as classification, with one binary "class" per pixel. Summed over 784 pixels per image.</p></aside>
 </section>
 
-<section class="slide sec-ae" id="ae-recon" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae-recon" data-section="2 · Autoencoders">
   <p class="kicker">Trained on 60,000 digits</p>
   <h2>It reconstructs very well</h2>
   <div class="body center col" style="gap:4px">
@@ -44,7 +49,7 @@
   <aside class="notes"><p>This is an autoencoder with a 16-number code. Same architecture as before otherwise. Test-set reconstruction loss: {{ae16_final.recon}} nats per image.</p></aside>
 </section>
 
-<section class="slide sec-ae" id="ae-gen" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae-gen" data-section="2 · Autoencoders">
   <p class="kicker">The obvious idea</p>
   <h2>Keep the decoder, feed it a random code</h2>
   <div class="body center"><!--svg:ae-generate--></div>
@@ -52,7 +57,24 @@
   <aside class="notes"><p>Let students commit to a prediction before the next slide.</p></aside>
 </section>
 
-<section class="slide sec-ae" id="ae-scribbles" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae-normal" data-section="2 · Autoencoders">
+  <p class="kicker">What is a "random code"?</p>
+  <h2>$z \sim \N(0, I)$: two independent bell curves</h2>
+  <div class="body">
+    <div class="row" style="gap:40px;justify-content:center">
+      <img class="fig" src="figures/data/std-normal-2d.svg" style="height:420px">
+      <div class="col" style="width:520px">
+        <p class="small">Draw $z_1$ from a standard bell curve $\N(0, 1)$: mean 0, spread 1. Draw $z_2$ the same way, independently.</p>
+        <p class="small" data-b="2">Together that is written $\N(0, I)$: the <b>0</b> says the centre is $(0, 0)$; the <b>I</b> (identity matrix) says each number has spread 1 and the two do not depend on each other.</p>
+        <p class="small" data-b="3">500 draws, plotted: most land within 2 of the origin, almost none beyond 3.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Why this choice? It is the simplest distribution we can sample from. The decoder, though, was never told about it.</p>
+  <aside class="notes"><p>In 2-D the fraction inside radius r is 1 − exp(−r²/2): 39% within 1, 86% within 2, 99% within 3. Students often expect 68% within radius 1, which is the 1-D number.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-scribbles" data-section="2 · Autoencoders">
   <p class="kicker">What actually comes out</p>
   <h2>Random codes give scribbles</h2>
   <div class="body center col" style="gap:10px">
@@ -66,7 +88,7 @@
   </aside>
 </section>
 
-<section class="slide sec-ae" id="ae-scatter" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae-scatter" data-section="2 · Autoencoders">
   <p class="kicker">Look inside (2-number version)</p>
   <h2>Where 5,000 test digits land</h2>
   <div class="body">
@@ -75,7 +97,7 @@
       <div class="col grow">
         <p class="small">Each dot is one test digit's code, coloured by its true label. The star is our 3.</p>
         <p class="small" data-b="2">Same digits cluster together. Nobody asked for that; it just helps reconstruction.</p>
-        <p class="small" data-b="3">Look at the axes: $z_1$ runs from {{ae_range.0.0}} to {{ae_range.0.1}}. The dashed circles mark where $\N(0, I)$ puts its samples.</p>
+        <p class="small" data-b="3">Look at the axes: $z_1$ runs from {{ae_range.0.0}} to {{ae_range.0.1}}, $z_2$ from {{ae_range.1.0}} to {{ae_range.1.1}}. Nothing made the codes stay near the origin.</p>
       </div>
     </div>
   </div>
@@ -83,14 +105,14 @@
   <aside class="notes"><p>The encoder never saw labels. Clustering by digit emerges because similar images are cheapest to decode from nearby codes.</p></aside>
 </section>
 
-<section class="slide sec-ae" id="ae-prior" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae-prior" data-section="2 · Autoencoders">
   <p class="kicker">Overlay random codes</p>
   <h2>Random draws all land in one small spot</h2>
   <div class="body">
     <div class="row" style="gap:30px">
       <img class="fig" src="figures/data/ae-scatter-prior.svg" style="height:470px">
       <div class="col grow">
-        <p class="small">150 draws from $\N(0, I)$ in amber: all inside one tiny crowded patch.</p>
+        <p class="small">Now add 150 random codes from $\N(0, I)$ (orange), the kind we fed the decoder two slides ago. Dashed circles: radius 1 and 2. On this map they all fall into one small crowded patch.</p>
         <img class="fig pix" src="figures/data/ae-prior-decodes.png" style="width:540px" data-b="2">
         <p class="cap" data-b="2" style="text-align:left">ten of them decoded: some digits, some smudges</p>
         <p class="small" data-b="3">And we can never generate a 1: the 1s live near $z_1 \approx 20$.</p>
@@ -103,7 +125,30 @@
   </aside>
 </section>
 
-<section class="slide sec-ae" id="ae-wishes" data-section="Autoencoders">
+<section class="slide sec-ae" id="ae2-explore" data-section="2 · Autoencoders">
+  <p class="kicker">Try it: the trained autoencoder, in your browser</p>
+  <h2>Pick a code, any code, and decode it</h2>
+  <div class="body">
+    <div class="lx interactive" data-widget="latent" data-model="ae2">
+      <div class="lx-plotwrap"><canvas class="lx-plot" width="1000" height="1000"></canvas><div class="lx-tip"><canvas width="28" height="28"></canvas><span></span></div></div>
+      <div class="lx-side">
+        <div class="lx-imgs">
+          <figure><canvas class="lx-out" width="28" height="28"></canvas><figcaption>decoded from $z$</figcaption></figure>
+          <figure class="lx-origfig"><canvas class="lx-orig" width="28" height="28"></canvas><figcaption>the real digit</figcaption></figure>
+        </div>
+        <div class="lx-z">$z$ = (<span class="lx-z1"></span>, <span class="lx-z2"></span>)</div>
+        <label>$z_1$ <input type="range" class="lx-s1"></label>
+        <label>$z_2$ <input type="range" class="lx-s2"></label>
+        <div class="lx-btns"><button data-a="prior">random code from $\N(0, I)$</button><button data-a="real">encode a real test digit</button></div>
+      </div>
+    </div>
+    <img class="fig lx-static" src="figures/data/ae-scatter-prior.svg" style="height:440px;margin:0 auto">
+  </div>
+  <p class="q">A real digit's code decodes well. A random code usually gives a smudge: the decoder only learned the dotted regions.</p>
+  <aside class="notes"><p>Three ways to choose a code: drag the sliders, click anywhere on the map, or press a button. Hover over any dot to see the test digit it came from.</p><p>Live demo: press "random code" five times, then "encode a real test digit" five times, then click into a gap between clusters. The decoder runs in the browser with the trained weights (2 → 256 → 512 → 784).</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-wishes" data-section="2 · Autoencoders">
   <p class="kicker">What we want instead</p>
   <h2>Encode to a cloud, not a point</h2>
   <div class="body center"><!--svg:cloud-vs-point--></div>
@@ -117,7 +162,7 @@
   </aside>
 </section>
 
-<section class="slide sec-ae" id="vae-preview" data-section="Autoencoders">
+<section class="slide sec-ae" id="vae-preview" data-section="2 · Autoencoders">
   <p class="kicker">A preview of where we are going</p>
   <h2>The same plot for a VAE</h2>
   <div class="body">
@@ -132,4 +177,15 @@
   </div>
   <p class="q">To get here we need two tools: a distance between distributions (KL), and a principled loss (the ELBO).</p>
   <aside class="notes"><p>Show the contrast with the previous plot: axes now run from −4 to 4, every class sits inside the dashed circles, and decoded draws are digits.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="recap-2" data-section="2 · Autoencoders">
+  <p class="kicker">End of Part 2</p>
+  <h2>What we did, and what comes next</h2>
+  <div class="body">
+    <div class="recap">
+      <div><h3>What we did</h3><ol><li>An encoder squeezes an image into a short code; a decoder rebuilds it. The image is its own target.</li><li>Random codes from $\N(0, I)$ decode to scribbles.</li><li>The codes spread over an arbitrary range, and the decoder never saw the space between them.</li><li>The wish: encode each image to a <b>cloud</b>, and keep every cloud near $\N(0, I)$.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next: a distance between distributions</h3><p class="small">"Keep the cloud near $\N(0, I)$" needs one number for how far one distribution is from another. That number is the KL divergence.</p></div>
+    </div>
+  </div>
 </section>

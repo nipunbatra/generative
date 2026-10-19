@@ -134,6 +134,127 @@ def train_autoencoder(name, data, latent, variational, beta=1.0, epochs=30, seed
                 seed=seed, history=history)
 
 
+# ----------------------------------------------------------------------------- conditional VAE
+class CondVAE(nn.Module):
+    """A VAE told which digit to draw: the one-hot label c goes into both encoder and decoder."""
+
+    def __init__(self, latent=2, n_classes=10):
+        super().__init__()
+        self.latent, self.n_classes = latent, n_classes
+        self.enc = nn.Sequential(nn.Linear(784 + n_classes, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU())
+        self.mu = nn.Linear(256, latent)
+        self.logvar = nn.Linear(256, latent)
+        self.dec = nn.Sequential(nn.Linear(latent + n_classes, 256), nn.ReLU(), nn.Linear(256, 512), nn.ReLU(), nn.Linear(512, 784))
+
+    def decode(self, z, y):
+        return self.dec(torch.cat([z, F.one_hot(y, self.n_classes).float()], 1))
+
+    def forward(self, x, y):
+        h = self.enc(torch.cat([x.flatten(1), F.one_hot(y, self.n_classes).float()], 1))
+        mu, logvar = self.mu(h), self.logvar(h)
+        z = mu + torch.exp(0.5 * logvar) * torch.randn_like(mu)
+        return self.decode(z, y), mu, logvar
+
+
+def train_cvae(data, latent=2, epochs=25, seed=0):
+    torch.manual_seed(seed)
+    model = CondVAE(latent).to(DEVICE)
+    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+    xtr, ytr = data["train"]
+    gen = torch.Generator().manual_seed(seed)
+    history = []
+    for epoch in range(1, epochs + 1):
+        sums, count = np.zeros(2), 0
+        for xb, yb in batches(xtr, ytr, 128, gen):
+            xb, yb = xb.to(DEVICE), yb.to(DEVICE)
+            logits, mu, logvar = model(xb, yb)
+            recon = F.binary_cross_entropy_with_logits(logits, xb.flatten(1), reduction="none").sum(1)
+            kl = 0.5 * (mu.square() + logvar.exp() - 1.0 - logvar).sum(1)
+            loss = (recon + kl).mean()
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            opt.step()
+            sums += np.array([recon.sum().item(), kl.sum().item()])
+            count += len(xb)
+        history.append(dict(epoch=epoch, train_recon=sums[0] / count, train_kl=sums[1] / count))
+        print(f"cvae epoch {epoch:2d}  recon {sums[0] / count:7.2f}  kl {sums[1] / count:6.2f}", flush=True)
+    torch.save(model.state_dict(), OUT / "cvae2.pt")
+    return dict(name="cvae2", latent=latent, epochs=epochs, seed=seed, history=history)
+
+
+# ----------------------------------------------------------------------------- route A: pixel by pixel
+class MaskedConv(nn.Conv2d):
+    """Each output pixel sees only pixels already generated (above it, or to its left in its row)."""
+
+    def __init__(self, cin, cout, k, context):
+        super().__init__(cin, cout, k, padding=k // 2)
+        m = torch.zeros(k, k)
+        c = k // 2
+        if context == "row3":          # the previous 3 pixels in the same row, like the name model's 3 characters
+            m[c, c - 3:c] = 1
+        else:                          # every earlier pixel in a k x k window: rows above, plus the left of this row
+            m[:c, :] = 1
+            m[c, :c] = 1
+        self.register_buffer("mask", m[None, None].expand_as(self.weight).clone())
+
+    def forward(self, x):
+        return F.conv2d(x, self.weight * self.mask, self.bias, padding=self.padding)
+
+
+class PixelAR(nn.Module):
+    """p(x) = prod_i p(x_i | earlier pixels). Row and column are given as two extra (unmasked) channels."""
+
+    def __init__(self, context="window7", k=7, hidden=64):
+        super().__init__()
+        self.context = context
+        self.pix = MaskedConv(1, hidden, k, context)
+        self.pos = nn.Conv2d(2, hidden, 1)
+        self.head = nn.Sequential(nn.ReLU(), nn.Conv2d(hidden, hidden, 1), nn.ReLU(), nn.Conv2d(hidden, 1, 1))
+        lin = torch.linspace(-1, 1, 28)
+        self.register_buffer("coords", torch.stack(torch.meshgrid(lin, lin, indexing="ij"))[None])
+
+    def forward(self, x):  # x: [B, 1, 28, 28] in {0, 1}; returns one logit per pixel
+        return self.head(self.pix(x) + self.pos(self.coords.expand(len(x), -1, -1, -1)))
+
+    @torch.no_grad()
+    def sample(self, n, generator=None):
+        x = torch.zeros(n, 1, 28, 28, device=self.coords.device)
+        for r in range(28):
+            for c in range(28):
+                p = torch.sigmoid(self(x)[:, 0, r, c])
+                u = torch.rand(n, generator=generator).to(x.device)
+                x[:, 0, r, c] = (u < p.cpu().to(x.device)).float()
+        return x
+
+
+def train_pixel_ar(data, context, epochs=8, seed=0):
+    torch.manual_seed(seed)
+    model = PixelAR(context).to(DEVICE)
+    opt = torch.optim.Adam(model.parameters(), lr=2e-3)
+    xtr, ytr = data["train"]
+    xte, _ = data["test"]
+    gen = torch.Generator().manual_seed(seed)
+    history = []
+    for epoch in range(1, epochs + 1):
+        tot, count = 0.0, 0
+        for xb, _ in batches(xtr, ytr, 128, gen):
+            xb = xb.unsqueeze(1).to(DEVICE)
+            nll = F.binary_cross_entropy_with_logits(model(xb), xb, reduction="none").sum((1, 2, 3))
+            loss = nll.mean()
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            opt.step()
+            tot += nll.sum().item()
+            count += len(xb)
+        with torch.no_grad():
+            xt = xte[:5000].unsqueeze(1).to(DEVICE)
+            test = F.binary_cross_entropy_with_logits(model(xt), xt, reduction="none").sum((1, 2, 3)).mean().item()
+        history.append(dict(epoch=epoch, train_nll=tot / count, test_nll=test))
+        print(f"pixelAR {context} epoch {epoch}  train nll {tot / count:7.2f}  test nll {test:7.2f}", flush=True)
+    torch.save(model.state_dict(), OUT / f"pixelar_{context}.pt")
+    return dict(name=f"pixelar_{context}", context=context, epochs=epochs, history=history)
+
+
 # ----------------------------------------------------------------------------- MNIST GAN
 class ConvG(nn.Module):
     """z [B, 100] -> image [B, 1, 28, 28] with pixels in [-1, 1]."""
@@ -273,7 +394,7 @@ def main():
     meta_path = OUT / "training.json"
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
     t0 = time.time()
-    need_data = a.only in ("all", "ae2", "ae16", "vae2", "vae2b8", "vae16", "gan")
+    need_data = a.only in ("all", "ae2", "ae16", "vae2", "vae2b8", "vae16", "gan", "cvae2", "pixelar")
     data = load_mnist() if need_data else None
     jobs = {
         "ae2": lambda: train_autoencoder("ae2", data, 2, False, epochs=30),
@@ -282,6 +403,8 @@ def main():
         "vae2b8": lambda: train_autoencoder("vae2b8", data, 2, True, beta=8.0, epochs=40),
         "vae16": lambda: train_autoencoder("vae16", data, 16, True, beta=1.0, epochs=40),
         "gan": lambda: train_mnist_gan(load_mnist(binary=False), epochs=30),
+        "cvae2": lambda: train_cvae(data),
+        "pixelar": lambda: [train_pixel_ar(data, "row3"), train_pixel_ar(data, "window7")],
     }
     for name, job in jobs.items():
         if a.only in ("all", name):

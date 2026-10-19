@@ -220,9 +220,10 @@ def common():
     d.math(105, 256, r"z \sim \N(0, I)", 20, INK2)
     d.end()
     d.begin(3)
-    d.node(40, 10, 150, 64, "grey", "condition", "optional", dash="6 4")
-    d.line([(190, 42), (330, 120)], C["grey"])
-    d.text(105, 300, "e.g. a sketch, a label, a sentence", 15, INK3)
+    d.rect(10, 0, 470, 84, C["grey"], ROLE["grey"][1], dash="6 4")
+    d.text(245, 28, "condition (optional): what to make", 17, INK2, 650)
+    d.text(245, 62, "a label “7” · a sentence · a sketch · a place and date", 15, INK3)
+    d.line([(420, 84), (440, 112)], C["grey"])
     d.end()
     d.begin(1)
     d.line([(150, 150), (330, 150)], C["z"])
@@ -393,27 +394,33 @@ def ae_generate():
 
 
 def cloud_vs_point():
-    d = SVG("cloud-vs-point", 1152, 360)
-    for cx, title, vae in ((290, "autoencoder: a point", False), (860, "VAE: a cloud", True)):
+    d = SVG("cloud-vs-point", 1152, 400)
+    for cx, title, vae in ((290, "autoencoder: each image → one point", False), (870, "VAE: each image → a small cloud", True)):
         d.begin(1 if not vae else 2)
-        d.text(cx, 28, title, 22, C["enc"] if vae else INK, 650)
-        d.plane(cx, 190, 140, rings=vae)
-        a, b = (cx - 70, 140), (cx + 60, 230)
+        d.text(cx, 26, title, 21, C["enc"] if vae else INK, 650)
+        d.plane(cx, 210, 140, rings=vae, label=False)
+        a, b = (cx - 66, 160), (cx + 62, 252)
+        # the two training images, linked to their codes
+        d.image(cx - 270, 70, 74, 74, "digit3.png", "x", sw=2)
+        d.image(cx + 196, 270, 74, 74, "digit7.png", "x", sw=2)
+        d.line([(cx - 192, 110), (a[0] - 12, a[1] - 4)], C["enc"], 1.8, dash="4 3")
+        d.line([(cx + 194, 300), (b[0] + 12, b[1] + 4)], C["enc"], 1.8, dash="4 3")
         if vae:
             d.cloud(a[0], a[1], 46, 30)
             d.cloud(b[0], b[1], 40, 34)
             for dx, dy in ((-18, 8), (14, -10), (30, 6)):
                 d.add(f'<circle cx="{a[0] + dx}" cy="{a[1] + dy}" r="5" fill="{C["z"]}"/>')
-            d.label(a[0], a[1] - 44, r"every $z$ here must decode to this 3", 15, C["enc"])
-            d.label(cx, 347, r"codes are spread out, overlap, and stay near $\N(0, I)$", 16, INK2)
+            d.label(cx, 384, r"training: every code in the 3's cloud must decode back to the 3", 16, INK2, width=560)
         else:
             for pt in (a, b):
                 d.add(f'<circle cx="{pt[0]}" cy="{pt[1]}" r="8" fill="{C["enc"]}"/>')
-            d.text(a[0], a[1] - 18, "a 3", 16, C["enc"], 650)
-            d.text(b[0], b[1] + 34, "a 7", 16, C["enc"], 650)
-            d.add(f'<circle cx="{cx + 10}" cy="180" r="8" fill="none" stroke="{C["z"]}" stroke-width="3"/>')
-            d.text(cx + 36, 186, "?", 26, C["z"], 700)
-            d.text(cx, 345, "nothing tells the decoder what lives between codes", 16, INK2)
+            d.text(a[0] + 4, a[1] - 18, "code of the 3", 15, C["enc"], 650)
+            d.text(b[0] - 4, b[1] + 30, "code of the 7", 15, C["enc"], 650)
+            m = (cx + 6, 206)
+            d.add(f'<circle cx="{m[0]}" cy="{m[1]}" r="9" fill="#fff" stroke="{C["z"]}" stroke-width="3"/>')
+            d.text(m[0] + 66, m[1] - 4, "a random code", 15, C["z"], 650)
+            d.text(m[0] + 66, m[1] + 16, "decodes to ... ?", 15, C["z"], 650)
+            d.text(cx, 384, "training only ever used the two purple points", 16, INK2)
         d.end()
     d.save()
 
@@ -913,9 +920,109 @@ def recipes():
     d.save()
 
 
+def task():
+    d = SVG("task", 1152, 380)
+    rows = [("images", 20, "digit"), ("numbers", 210, "number")]
+    for i, (name, y, kind) in enumerate(rows):
+        d.begin(i + 1)
+        d.rect(10, y, 190, 120, C["grey"], ROLE["grey"][1], dash="6 4")
+        d.text(105, y + 52, "unknown process", 18, INK2, 650)
+        d.text(105, y + 80, "people writing digits" if kind == "digit" else "a recipe we hide", 16, INK3)
+        d.line([(204, y + 60), (272, y + 60)], C["x"])
+        d.text(238, y + 46, "data", 16, C["x"], 650)
+        if kind == "digit":
+            for k, f in enumerate(["vote-02.png", "vote-04.png", "vote-05.png", "vote-09.png"]):
+                d.image(278 + k * 84, y + 22, 76, 76, f, "x", sw=2)
+        else:
+            for k, v in enumerate(NUM["toy"]["first"][:4]):
+                c, t = ROLE["x"]
+                d.rect(278 + k * 84, y + 36, 76, 48, c, t, r=8, sw=2)
+                d.math(316 + k * 84, y + 68, f"{v:.2f}", 19, INK)
+        d.line([(618, y + 60), (690, y + 60)], C["dec"])
+        d.text(654, y + 46, "learn", 16, C["dec"], 650)
+        d.trapezoid(694, y + 60, 170, 70, 120, "dec", "model", r"$p_\theta$")
+        d.line([(868, y + 60), (950, y + 60)], C["dec"])
+        d.text(909, y + 46, "sample", 16, C["dec"], 650)
+        if kind == "digit":
+            d.image(956, y + 10, 100, 100, "vae-prior-one.png", "dec")
+            d.text(1006, y + 136, "a new digit", 16, C["dec"], 650)
+        else:
+            c, t = ROLE["dec"]
+            d.rect(956, y + 36, 100, 48, c, t, r=8, sw=2)
+            d.text(1006, y + 68, "?", 22, c, 700)
+            d.text(1006, y + 108, "a new number", 16, C["dec"], 650)
+        d.end()
+    d.save()
+
+
+def route_a():
+    d = SVG("route-a", 1152, 430)
+    bits = NUM["digit3_bits"]
+    ra = NUM["routeA"]
+    R, Cc = ra["r"], ra["c"]
+    s0, x0, y0 = 14, 20, 18
+    for ctx_build, ctx in ((1, "row3"), (2, "window7")):
+        pass
+    for k in range(784):
+        rr, cc = divmod(k, 28)
+        before = k < R * 28 + Cc
+        if k == R * 28 + Cc:
+            fill = C["z"]
+        elif before:
+            fill = INK if bits[k] else "#FFFFFF"
+        else:
+            fill = "#ECEEF2"
+        d.add(f'<rect x="{x0 + cc * s0}" y="{y0 + rr * s0}" width="{s0 - 1}" height="{s0 - 1}" fill="{fill}"/>')
+    d.text(x0 + 14 * s0, y0 + 28 * s0 + 26, "drawn so far · next pixel (orange) · not yet drawn (grey)", 15, INK3)
+    # context outlines
+    d.begin("=1")
+    d.add(f'<rect x="{x0 + (Cc - 3) * s0 - 1.5}" y="{y0 + R * s0 - 1.5}" width="{3 * s0 + 2}" height="{s0 + 2}" fill="none" stroke="{C["x"]}" stroke-width="3"/>')
+    d.end()
+    d.begin(2)
+    pts = [(Cc - 3, R - 3), (Cc + 4, R - 3), (Cc + 4, R), (Cc, R), (Cc, R + 1), (Cc - 3, R + 1)]
+    path = "M" + " L".join(f"{x0 + a * s0 - 1.5},{y0 + b * s0 - 1.5}" for a, b in pts) + " Z"
+    d.add(f'<path d="{path}" fill="none" stroke="{C["x"]}" stroke-width="3"/>')
+    d.end()
+    # right side
+    d.begin("=1")
+    d.text(760, 40, "context: the 3 previous pixels", 21, C["x"], 650)
+    d.text(760, 70, "(the name model read 3 previous characters)", 17, INK3)
+    d.label(760, 130, rf"$p(x_i = \text{{ink}} \mid 3 \text{{ pixels}}) = {ra['p_row3']}$", 24, INK, width=600)
+    d.end()
+    d.begin(2)
+    d.text(760, 40, "context: 3 rows above + 3 to the left", 21, C["x"], 650)
+    d.text(760, 70, "24 pixels the model may look at", 17, INK3)
+    d.label(760, 130, rf"$p(x_i = \text{{ink}} \mid 24 \text{{ pixels}}) = {ra['p_window7']}$", 24, INK, width=600)
+    d.end()
+    d.begin(1)
+    d.trapezoid(520, 230, 170, 100, 60, "dec", "network")
+    d.line([(694, 230), (740, 230)], C["dec"])
+    d.text(750, 238, "one probability: ink or paper?", 18, C["dec"], 650, "start")
+    d.label(760, 330, r"Repeat for all 784 pixels, one after another:", 18, INK2, 500, width=640)
+    d.label(760, 372, r"$p(x) = \prod_{i=1}^{784} p(x_i \mid x_{<i})$", 26, INK, width=640)
+    d.end()
+    d.save()
+
+
+def story_decode():
+    d = SVG("story-decode", 1152, 340)
+    z = NUM["story_z"]
+    d.vec(40, 110, z, "z", cw=100, ch=48)
+    d.math(90, 96, "z", 26, C["z"])
+    d.line([(144, 158), (196, 158)], C["z"])
+    d.trapezoid(200, 158, 260, 100, 250, "dec", "decoder", r"weights $\theta$")
+    d.line([(464, 158), (516, 158)], C["dec"])
+    d.image(522, 18, 280, 280, "story-pi.png", "dec")
+    d.math(662, 330, r"\pi = \mathrm{sigmoid}(\text{decoder}_\theta(z))", 20, C["dec"])
+    d.label(990, 110, r"each $\pi_i$ is between 0 and 1", 19, INK2, 500, width=320)
+    d.label(990, 150, r"$\pi_i$ = probability that", 19, INK2, 500, width=320)
+    d.label(990, 180, r"pixel $i$ is ink", 19, INK2, 500, width=320)
+    d.save()
+
+
 def main():
     for f in (common, two_ways, mixture_story, latent_story, ae, ae_generate, cloud_vs_point, vae_encode, vae_sample,
-              vae_decode, vae, vae_generate, pgm, vae_shapes, pixels, reparam_before, reparam_after, reparam_numbers,
+              vae_decode, vae, vae_generate, pgm, vae_shapes, pixels, task, route_a, story_decode, reparam_before, reparam_after, reparam_numbers,
               gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes):
         f()
     print("wrote", len(list(OUT.glob("*.svg"))), "diagrams")

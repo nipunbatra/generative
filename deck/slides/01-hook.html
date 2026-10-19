@@ -33,25 +33,16 @@
   <p class="kicker">Your turn to be the judge</p>
   <h2>Real or generated?</h2>
   <div class="body">
-    <div class="tiles" style="grid-template-columns:repeat(6,150px);gap:18px 26px;justify-content:center;margin-top:8px">
-      <div><img src="figures/data/vote-01.png"><p class="tile-lab">1</p></div>
-      <div><img src="figures/data/vote-02.png"><p class="tile-lab">2</p></div>
-      <div><img src="figures/data/vote-03.png"><p class="tile-lab">3</p></div>
-      <div><img src="figures/data/vote-04.png"><p class="tile-lab">4</p></div>
-      <div><img src="figures/data/vote-05.png"><p class="tile-lab">5</p></div>
-      <div><img src="figures/data/vote-06.png"><p class="tile-lab">6</p></div>
-      <div><img src="figures/data/vote-07.png"><p class="tile-lab">7</p></div>
-      <div><img src="figures/data/vote-08.png"><p class="tile-lab">8</p></div>
-      <div><img src="figures/data/vote-09.png"><p class="tile-lab">9</p></div>
-      <div><img src="figures/data/vote-10.png"><p class="tile-lab">10</p></div>
-      <div><img src="figures/data/vote-11.png"><p class="tile-lab">11</p></div>
-      <div><img src="figures/data/vote-12.png"><p class="tile-lab">12</p></div>
+    <div class="tiles vote" style="grid-template-columns:repeat(6,150px);gap:18px 26px;justify-content:center;margin-top:8px">
+      {{vote_tiles_hook}}
     </div>
   </div>
-  <p class="q">Six are MNIST test digits, six come from a network. Write down which six are fake.</p>
+  <p class="q" data-b="=1">Six are MNIST test digits, six come from a network. Write down which six are fake.</p>
+  <p class="q" data-b="2">Generated: {{vote_fakes}} (teal frames). Six from a small network we will train ourselves, in about 9 minutes.</p>
   <aside class="notes">
-    <p>Give one minute. Ask for a show of hands on two or three tiles. Do not reveal: we come back to this vote in the GAN section, where our own discriminator also votes.</p>
-    <p>The six generated digits come from the small GAN we train later in this lecture (about 9 minutes on a laptop GPU).</p>
+    <p>Give one minute and take a show of hands on two or three tiles, then click to reveal: generated = {{vote_fakes}}; the rest are real MNIST test digits.</p>
+    <p>Worth pointing at: tile 3, with its broken stroke, is the easiest fake to spot; tile 6, a clean 8, is the hardest.</p>
+    <p>In Session 2 we return to these 12 tiles and show what our own trained discriminator said about each one.</p>
   </aside>
 </section>
 
@@ -122,6 +113,59 @@
   </aside>
 </section>
 
+<section class="slide sec-hook" id="conditions" data-section="Why generate?">
+  <p class="kicker">What can the condition be?</p>
+  <h2>Tell the generator what you want</h2>
+  <div class="body">
+    <div class="condgrid">
+      <div class="cond">
+        <p class="cond-c"><span class="chip">a label</span> $c = 7$</p>
+        <img class="fig pix" src="figures/data/cvae-sevens.png" style="width:100%">
+        <p class="cap">our own conditional VAE: eight different random $z$, all asked for a 7</p>
+      </div>
+      <div class="cond" data-b="2">
+        <p class="cond-c"><span class="chip">a sentence + a date</span> <span class="mono">“a satellite image of an electric substation in Finland”</span>, August vs January</p>
+        <img class="fig" src="figures/data/sat-substation.jpg" style="width:100%;border-radius:6px">
+        <p class="cap">DiffusionSat (Khanna et al., 2024): same caption, only the month changes</p>
+      </div>
+      <div class="cond" data-b="3">
+        <p class="cond-c"><span class="chip">a sentence + a place</span> <span class="mono">“a satellite image of a stadium”</span>, France vs USA coordinates</p>
+        <img class="fig" src="figures/data/sat-stadium.jpg" style="width:100%;border-radius:6px">
+        <p class="cap">DiffusionSat: same caption, only the latitude and longitude change</p>
+      </div>
+      <div class="cond" data-b="4">
+        <p class="cond-c"><span class="chip">an image</span> a sketch, a label map, a photo with a hole</p>
+        <div class="row" style="gap:8px;justify-content:center"><img class="fig" src="assets/gallery/shoe-input.jpg" style="width:150px;border-radius:6px"><span class="arrow">→</span><img class="fig" src="assets/gallery/shoe-output.jpg" style="width:150px;border-radius:6px"></div>
+        <p class="cap">pix2pix, from the earlier slide</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="4">The condition fixes <b>what</b>; the randomness still decides <b>which one</b> of the many matching outputs you get.</p>
+  <aside class="notes">
+    <p>Text prompts are the most familiar condition (text-to-image systems). DiffusionSat conditions on a caption plus metadata: location, date, ground resolution. The substation turns snowy in January; the stadium looks European or American depending on the coordinates.</p>
+    <p>The 7s come from a conditional VAE trained for this lecture: the one-hot label goes into both the encoder and the decoder. We build the unconditional VAE in Part 6; adding a label is a small change.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="cvae-grid" data-section="Why generate?">
+  <p class="kicker">Our conditional VAE, all labels at once</p>
+  <h2>The label picks the digit; the random $z$ picks the style</h2>
+  <div class="body">
+    <div class="row" style="gap:36px;justify-content:center">
+      <div class="row" style="gap:6px">
+        <div class="cvlabs">{{cvae_labels}}</div>
+        <img class="fig pix" src="figures/data/cvae-grid.png" style="height:470px">
+      </div>
+      <div class="col" style="width:420px">
+        <p class="small">Each <b>row</b>: one label $c$, from 0 to 9.</p>
+        <p class="small">Each <b>column</b>: one random $z$, the same all the way down.</p>
+        <p class="small" data-b="2">Read down a column: every digit is written with the same slant and thickness. The code $z$ carries the handwriting; the label carries the identity.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>Real outputs: 2-number code, trained on binarised MNIST for 25 epochs. Because the label already says which digit, z is free to capture only style. Compare with the unconditional VAE later, where z must also encode the digit.</p></aside>
+</section>
+
 <section class="slide sec-hook" id="names" data-section="Why generate?">
   <p class="kicker">Part 1 of this course</p>
   <h2>You have already built a generator</h2>
@@ -188,6 +232,48 @@
     <p>Route A is exactly the name model with pixels as tokens (PixelRNN/PixelCNN): it works but needs 784 sequential steps per image.</p>
     <p>Route B makes the whole image in one pass from a short random vector. The rest of the lecture is about training that decoder. The code values shown, (0.33, −1.99), are the actual code of our running "3".</p>
   </aside>
+</section>
+
+<section class="slide sec-hook" id="route-a" data-section="Why generate?">
+  <p class="kicker">Route A, the way our name model worked</p>
+  <h2>Predict each pixel from the pixels already drawn</h2>
+  <div class="body center"><!--svg:route-a--></div>
+  <aside class="notes">
+    <p>Build 1: exactly the name model, with pixels as tokens: read the 3 previous pixels in raster order and output one probability (ink or paper). Real number from a trained model for this position on our 3.</p>
+    <p>Build 2: 3 pixels in a row cannot see the row above, so the model has no idea of strokes. Give it the pixels above too (a 7 × 7 window, only the already-drawn half): this is the idea behind PixelCNN.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="route-a-samples" data-section="Why generate?">
+  <p class="kicker">Route A, trained on MNIST</p>
+  <h2>What these two pixel-by-pixel models generate</h2>
+  <div class="body">
+    <div class="row" style="gap:40px;justify-content:center">
+      <div class="col" style="align-items:center"><img class="fig pix" src="figures/data/pixelar-row3-samples.png" style="width:480px"><p class="cap">context: 3 previous pixels · $\log p(\text{our }3) = {{pixelar_row3.logp3}}$</p></div>
+      <div class="col" style="align-items:center" data-b="2"><img class="fig pix" src="figures/data/pixelar-window7-samples.png" style="width:480px"><p class="cap">context: 24 pixels above and left · $\log p(\text{our }3) = {{pixelar_window7.logp3}}$</p></div>
+    </div>
+  </div>
+  <p class="q" data-b="2">More context, better strokes. And route A gives an exact $\log p(x)$: just add the 784 log-probabilities.</p>
+  <aside class="notes">
+    <p>Both models: one masked convolution plus two 1 × 1 layers, 8 epochs, real samples drawn pixel by pixel (784 network calls per image). Test-set average −log p(x): {{pixelar_row3.test_nll}} nats (3 pixels) vs {{pixelar_window7.test_nll}} nats (24 pixels).</p>
+    <p>Samples are still poor: 24 pixels see only a small neighbourhood, so long strokes do not join up. Real PixelCNNs stack many layers to see the whole image.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="route-ab" data-section="Why generate?">
+  <p class="kicker">So why route B today?</p>
+  <h2>Two routes, different strengths</h2>
+  <div class="body">
+    <table class="cmp">
+      <tr><th></th><th>A · pixel by pixel</th><th>B · one code, one pass</th></tr>
+      <tr><td>generate one image</td><td>784 network calls, in order</td><td>1 network call</td></tr>
+      <tr data-b="2"><td>$\log p(x)$ of an image</td><td><b>exact</b>: a sum of 784 terms</td><td>an integral over codes: hard</td></tr>
+      <tr data-b="3"><td>a short summary $z$</td><td>none</td><td><b>yes</b>: 2 to 100 numbers you can move, mix, edit</td></tr>
+      <tr data-b="4"><td>used today in</td><td>language models; image models over image tokens</td><td>VAEs, GANs, and the latent space of diffusion models</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="4">Route A is the name model you already know. Today is route B: what the code is, and how to train a decoder when nobody tells us the right code.</p>
+  <aside class="notes"><p>Route A is not worse; it is a different trade. The "hard" entry for route B is the subject of Parts 2 to 4.</p></aside>
 </section>
 
 <section class="slide sec-hook" id="map" data-section="Why generate?">

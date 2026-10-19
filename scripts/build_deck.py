@@ -32,6 +32,12 @@ def derived():
             f'<div class="vt {cls}"><img src="figures/data/vote-{v["n"]:02d}.png">'
             f'<p class="tile-lab"><span>{v["n"]}</span><span class="vk" data-b="2">{"real" if v["kind"] == "real" else "fake"} · D {v["d_real"]:.2f}</span></p></div>')
     d["vote_tiles"] = "\n      ".join(tiles)
+    d["vote_tiles_hook"] = "\n      ".join(
+        f'<div class="vt {"real" if v["kind"] == "real" else "fake"}"><img src="figures/data/vote-{v["n"]:02d}.png">'
+        f'<p class="tile-lab"><span>{v["n"]}</span><span class="vk" data-b="2">{"real" if v["kind"] == "real" else "generated"}</span></p></div>'
+        for v in NUM["vote"])
+    d["cvae_labels"] = "".join(f"<span>{k}</span>" for k in range(10))
+    d["vote_fakes"] = ", ".join(str(v["n"]) for v in NUM["vote"] if v["kind"] != "real")
     return d
 
 
@@ -63,6 +69,21 @@ SESSIONS = {
 }
 
 
+PARTS = [
+    ("--z", "Distributions and hidden causes"), ("--enc", "Autoencoders"), ("--loss", "KL divergence"),
+    ("--dec", "The ELBO"), ("--z", "Reparameterisation"), ("--enc", "The VAE on MNIST"), ("--disc", "GANs"),
+]
+
+
+def route(current):
+    """The 7-part route with finished parts ticked and the current one highlighted."""
+    items = []
+    for i, (col, name) in enumerate(PARTS, 1):
+        state = "done" if i < current else ("now" if i == current else "todo")
+        items.append(f'<li class="{state}" style="--c:var({col})"><span class="dot">{"✓" if state == "done" else i}</span>{name}</li>')
+    return '<ol class="route-mini">' + "".join(items) + "</ol>"
+
+
 def assemble(prefixes):
     files = [f for f in sorted((ROOT / "deck" / "slides").glob("*.html")) if f.name[:2] in prefixes]
     body = "\n".join(f.read_text() for f in files)
@@ -72,6 +93,7 @@ def assemble(prefixes):
         return s_.replace('xmlns="http://www.w3.org/2000/svg" ', "")
 
     body = re.sub(r"<!--svg:([\w-]+)-->", svg, body)
+    body = re.sub(r"<!--route:(\d)-->", lambda m: route(int(m.group(1))), body)
 
     def num(m):
         v = lookup(m.group(1))

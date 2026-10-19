@@ -1,12 +1,17 @@
 <!-- ===================================================================== 4 · KL -->
 
-<section class="slide sec-kl opener" id="kl-open" data-section="KL divergence">
-  <p class="kicker">Part 3 · tool 1</p>
-  <h2>KL divergence: how far is one distribution from another?</h2>
-  <p>We need a number for "this cloud is far from $\N(0, I)$". Build it from surprise, with two bars first.</p>
+<section class="slide sec-kl opener break" id="kl-open" data-section="3 · KL divergence">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 3 of 7</p>
+      <h2>KL divergence: how far apart are two distributions?</h2>
+      <p class="why">The fix for the autoencoder was to keep each image's cloud of codes close to $\N(0, I)$. To say <b>close</b> we need one number for the gap between two distributions. We build it from two bars.</p>
+    </div>
+    <!--route:3-->
+  </div>
 </section>
 
-<section class="slide sec-kl" id="kl-bars" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-bars" data-section="3 · KL divergence">
   <p class="kicker">Two distributions over the same two outcomes</p>
   <h2>The data says 80/20. The model says 60/40.</h2>
   <div class="body">
@@ -27,7 +32,7 @@
   <aside class="notes"><p>Keep the story concrete: draw digits from the data, ask the model how probable each was. When a 1 shows up, the model said 0.6 when it should have said 0.8.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-surprise" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-surprise" data-section="3 · KL divergence">
   <p class="kicker">Ingredient: surprise</p>
   <h2>Surprise $= -\log(\text{probability})$</h2>
   <div class="body">
@@ -44,7 +49,7 @@
   <aside class="notes"><p>This is the same −log p that appeared in the name model and in cross-entropy. Nothing new, just a name for it.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-extra" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-extra" data-section="3 · KL divergence">
   <p class="kicker">KL, step 1 of 3</p>
   <h2>For each outcome: how much extra surprise does $Q$ cause?</h2>
   <div class="body">
@@ -58,7 +63,7 @@
   <p class="q" data-b="3">Negative for the 7: $Q$ over-predicts 7s, so a 7 surprises it less than it should.</p>
 </section>
 
-<section class="slide sec-kl" id="kl-weight" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-weight" data-section="3 · KL divergence">
   <p class="kicker">KL, step 2 of 3</p>
   <h2>Weight each outcome by how often it really happens</h2>
   <div class="body">
@@ -72,7 +77,7 @@
   <aside class="notes"><p>Why weight by P and not by Q? Because P is what actually happens. We ask: on the data we really see, how much extra surprise does the model cause per example?</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-sum" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-sum" data-section="3 · KL divergence">
   <p class="kicker">KL, step 3 of 3</p>
   <h2>Add them up: that is the KL divergence</h2>
   <div class="body">
@@ -87,7 +92,7 @@
   <aside class="notes"><p>Why can't the total be negative? To over-predict 7s, Q had to under-predict 1s, and 1s carry more weight. Gibbs' inequality makes this precise.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="expectation" data-section="KL divergence">
+<section class="slide sec-kl" id="expectation" data-section="3 · KL divergence">
   <p class="kicker">Notation we will use all lecture</p>
   <h2>$\E$ means "average over"</h2>
   <div class="body">
@@ -104,7 +109,7 @@
   </aside>
 </section>
 
-<section class="slide sec-kl" id="kl-order" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-order" data-section="3 · KL divergence">
   <p class="kicker">Not a distance</p>
   <h2>Swap the arguments, get a different number</h2>
   <div class="body">
@@ -125,7 +130,7 @@
   <aside class="notes"><p>Drag the slider live. Both curves are zero at q = 0.8. Near q = 0 the red curve explodes: the data has 1s but the model says they never happen.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-ce" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-ce" data-section="3 · KL divergence">
   <p class="kicker">You have minimised a KL many times</p>
   <h2>Cross-entropy = entropy + KL</h2>
   <div class="body">
@@ -145,7 +150,7 @@
   <aside class="notes"><p>Together: H(P, Q) = 0.592 nats. Remember the direction: data first. That direction will explain why VAEs blur.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-gauss" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-gauss" data-section="3 · KL divergence">
   <p class="kicker">The version the VAE needs</p>
   <h2>KL between two bumps: an area</h2>
   <div class="body">
@@ -163,7 +168,7 @@
   <aside class="notes"><p>Numerical integral of the lower curve: {{kl_gauss_numeric}}. The grey part is where q is below p and contributes negatively, like the 7 row earlier.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-gauss-2" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-gauss-2" data-section="3 · KL divergence">
   <p class="kicker">Gaussian KL, step 1 of 2</p>
   <h2>Write out the log of the ratio</h2>
   <div class="body">
@@ -179,7 +184,7 @@
   <p class="q" data-b="3">Three terms. Next: average each one over $z \sim q$.</p>
 </section>
 
-<section class="slide sec-kl" id="kl-gauss-3" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-gauss-3" data-section="3 · KL divergence">
   <p class="kicker">Gaussian KL, step 2 of 2</p>
   <h2>Average each term over the cloud $q$</h2>
   <div class="body">
@@ -194,7 +199,7 @@
   <aside class="notes"><p>The check matches the shaded area from two slides ago. This exact formula is what the VAE code computes.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-direction" data-section="KL divergence">
+<section class="slide sec-kl" id="kl-direction" data-section="3 · KL divergence">
   <p class="kicker">Back to our two bumps</p>
   <h2>Fit one Gaussian: the KL direction decides what you get</h2>
   <div class="body">
@@ -210,4 +215,15 @@
     <p>Both fits found by brute-force search over (μ, σ). Forward: 𝒩({{kl_fit.fwd_mu}}, {{kl_fit.fwd_sd}}²), the same as the moment-matched maximum-likelihood fit. Reverse: 𝒩({{kl_fit.rev_mu}}, {{kl_fit.rev_sd}}²), sitting on one bump.</p>
     <p>Why: KL(p‖q) is weighted by p, so q is punished wherever data exists and q is small. KL(q‖p) is weighted by q, so q is punished wherever it puts mass and the data is absent.</p>
   </aside>
+</section>
+
+<section class="slide sec-kl" id="recap-3" data-section="3 · KL divergence">
+  <p class="kicker">End of Part 3</p>
+  <h2>What we did, and what comes next</h2>
+  <div class="body">
+    <div class="recap">
+      <div><h3>What we did</h3><ol><li>Surprise $= -\log p$. KL $=$ the average extra surprise from believing $Q$ when the truth is $P$.</li><li>$\KL \ge 0$, zero only when the two match, and not symmetric.</li><li>Cross-entropy $=$ entropy $+$ KL: training a classifier already minimises a KL.</li><li>For Gaussians, per coordinate: $\KL = \tfrac12(\mu^2 + \sigma^2 - 1 - \log\sigma^2)$.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next: the loss itself</h3><p class="small">Part 1's catch: learning needs $p_\theta(x)$, an integral over every code. With the encoder and KL in hand, Part 4 turns that integral into a loss we can compute: the ELBO.</p></div>
+    </div>
+  </div>
 </section>

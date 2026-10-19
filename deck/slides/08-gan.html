@@ -1,12 +1,17 @@
 <!-- ===================================================================== 8 · GANS -->
 
-<section class="slide sec-gan opener" id="gan-open" data-section="GANs">
-  <p class="kicker">Part 7</p>
-  <h2>GANs: learn the judge instead of the likelihood</h2>
-  <p>Drop the encoder and the ELBO. Train a second network to tell real from fake, and train the generator to fool it.</p>
+<section class="slide sec-gan opener break" id="gan-open" data-section="7 · GANs">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 7 of 7</p>
+      <h2>GANs: learn the judge instead of the likelihood</h2>
+      <p class="why">VAEs train on a bound on $p_\theta(x)$, and their samples blur. A different idea: no encoder, no ELBO. Train a second network to tell real from fake, and train the generator to fool it.</p>
+    </div>
+    <!--route:7-->
+  </div>
 </section>
 
-<section class="slide sec-gan" id="gan-idea" data-section="GANs">
+<section class="slide sec-gan" id="gan-idea" data-section="7 · GANs">
   <p class="kicker">Remember the vote? You were the discriminator.</p>
   <h2>Two networks, one game</h2>
   <div class="body center"><!--svg:gan--></div>
@@ -17,7 +22,7 @@
   </aside>
 </section>
 
-<section class="slide sec-gan" id="gan1d-start" data-section="GANs">
+<section class="slide sec-gan" id="gan1d-start" data-section="7 · GANs">
   <p class="kicker">Back to our 1-D bumps</p>
   <h2>A GAN on the toy data, at step 0</h2>
   <div class="body">
@@ -35,7 +40,7 @@
   <aside class="notes"><p>Same data as the start of the lecture. z ∼ 𝒩(0, 1), one dimension. G must learn to turn one bump of noise into two bumps of data.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan-dloss" data-section="GANs">
+<section class="slide sec-gan" id="gan-dloss" data-section="7 · GANs">
   <p class="kicker">Step 1 of each iteration</p>
   <h2>The discriminator is an ordinary binary classifier</h2>
   <div class="body">
@@ -51,7 +56,7 @@
   <aside class="notes"><p>In code, D returns a raw logit and we use <code>binary_cross_entropy_with_logits</code>; D(x) = sigmoid(logit) for display. Over a batch, average each term.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan-dstep" data-section="GANs">
+<section class="slide sec-gan" id="gan-dstep" data-section="7 · GANs">
   <p class="kicker">Update D, hold G fixed</p>
   <h2>D step: cut the wire to G with detach()</h2>
   <div class="body center"><!--svg:gan-dstep--></div>
@@ -61,7 +66,7 @@
   <aside class="notes"><p>detach() keeps the numbers in fake but forgets how they were computed, so backward() stops there. Without it, G would accumulate gradients from D's loss: wasted work at best, a bug at worst.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan-chain" data-section="GANs">
+<section class="slide sec-gan" id="gan-chain" data-section="7 · GANs">
   <p class="kicker">Where G's gradient comes from</p>
   <h2>The chain rule runs through D</h2>
   <div class="body">
@@ -76,7 +81,7 @@
   <aside class="notes"><p>This is why the G step must not detach the fake: the middle factor needs the path through D. It is also why D's weights can stay frozen: we need the slope of D, not an update to it.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan-gstep-1d" data-section="GANs">
+<section class="slide sec-gan" id="gan-gstep-1d" data-section="7 · GANs">
   <p class="kicker">Step 2: what would fool D?</p>
   <h2>G step: push every fake uphill on D(x)</h2>
   <div class="body">
@@ -93,7 +98,7 @@
   <aside class="notes"><p>At step 25 D has learned that large x looks real, so fakes are pushed right. This is where the gradient for G comes from: through D's input.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan-gstep" data-section="GANs">
+<section class="slide sec-gan" id="gan-gstep" data-section="7 · GANs">
   <p class="kicker">Update G, hold D fixed</p>
   <h2>G step: lock D's weights, keep the wire</h2>
   <div class="body center"><!--svg:gan-gstep--></div>
@@ -103,7 +108,7 @@
   <aside class="notes"><p>Gradient must flow through D to reach G, so no detach and no torch.no_grad() here. requires_grad_(False) only stops D's own weights from collecting gradients; D still differentiates with respect to its input.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="freeze-detach" data-section="GANs">
+<section class="slide sec-gan" id="freeze-detach" data-section="7 · GANs">
   <p class="kicker">The most common GAN bug</p>
   <h2>Freezing is not detaching</h2>
   <div class="body center"><!--svg:freeze-detach--></div>
@@ -111,7 +116,7 @@
   <aside class="notes"><p>Quiz: which single change to the G-step code makes the generator receive no gradient? Answer: <code>D(G(z).detach())</code> or wrapping it in <code>torch.no_grad()</code>.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan1d-train" data-section="GANs">
+<section class="slide sec-gan" id="gan1d-train" data-section="7 · GANs">
   <p class="kicker">Alternate the two steps 3,000 times</p>
   <h2>Watch the game on the toy data</h2>
   <div class="body">
@@ -130,7 +135,7 @@
   </aside>
 </section>
 
-<section class="slide sec-gan" id="minimax" data-section="GANs">
+<section class="slide sec-gan" id="minimax" data-section="7 · GANs">
   <p class="kicker">The textbook formula</p>
   <h2>A two-player minimax game</h2>
   <div class="body">
@@ -144,7 +149,7 @@
   <aside class="notes"><p>The optimal discriminator and its link to Jensen-Shannon divergence are in the appendix. Do not claim that GAN training provably converges in practice.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="saturation-derive" data-section="GANs">
+<section class="slide sec-gan" id="saturation-derive" data-section="7 · GANs">
   <p class="kicker">Two generator losses, two slopes</p>
   <h2>Differentiate both with respect to D's logit $a$</h2>
   <div class="body">
@@ -166,7 +171,7 @@
   <aside class="notes"><p>Both losses push D(G(z)) up and share the same ideal solution. They are not equal as functions; they differ in how hard they push when the generator is bad, which is exactly when it needs a push.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="saturation" data-section="GANs">
+<section class="slide sec-gan" id="saturation" data-section="7 · GANs">
   <p class="kicker">Why the code uses a different generator loss</p>
   <h2>Early on, the minimax loss gives G almost no signal</h2>
   <div class="body center"><img class="fig" src="figures/data/saturation.svg" style="width:990px"></div>
@@ -174,7 +179,7 @@
   <aside class="notes"><p>Derivatives with respect to D's logit a, where D = sigmoid(a): d log(1 − sigmoid a)/da = −D; d[−log sigmoid a]/da = D − 1. The two generator losses are not equal; they share the same fixed point but behave very differently early in training.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan-code" data-section="GANs">
+<section class="slide sec-gan" id="gan-code" data-section="7 · GANs">
   <p class="kicker">The complete update</p>
   <h2>One GAN iteration in code</h2>
   <div class="body">
@@ -193,7 +198,7 @@
   <aside class="notes"><p>From <code>gan_step</code> in <code>scripts/train_models.py</code>. A fresh forward pass after D's update, so no retain_graph is needed. For MNIST, G and D are small convolutional networks.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="gan-film" data-section="GANs">
+<section class="slide sec-gan" id="gan-film" data-section="7 · GANs">
   <p class="kicker">On MNIST: the same 8 codes, through training</p>
   <h2>Watch the samples, not the loss</h2>
   <div class="body">
@@ -205,7 +210,7 @@
   <aside class="notes"><p>Grey-level MNIST, a small convolutional G and D, 30 epochs (about 9 minutes on a laptop GPU). Each column is one fixed z, so you can watch a single sample sharpen into a digit. Grey static, then stripes, then blobs, then strokes.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="vote-reveal" data-section="GANs">
+<section class="slide sec-gan" id="vote-reveal" data-section="7 · GANs">
   <p class="kicker">Back to the vote</p>
   <h2>Which were real, and what did our discriminator think?</h2>
   <div class="body">
@@ -217,7 +222,7 @@
   <aside class="notes"><p>Blue frame: real MNIST test digit. Teal frame: GAN sample. The number is D(x) from our final discriminator. A D stuck near 0.5 is what the game aims for, but it does not prove the generator is good: next slide.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="collapse" data-section="GANs">
+<section class="slide sec-gan" id="collapse" data-section="7 · GANs">
   <p class="kicker">The classic failure</p>
   <h2>Mode collapse: perfect samples of only one kind</h2>
   <div class="body">
@@ -234,7 +239,7 @@
   <aside class="notes"><p>Recorded run with a deliberately small generator (seed 0). The main run used 64 hidden units. Real GANs collapse for subtler reasons, but the symptom is the same: high quality, low diversity.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="losses" data-section="GANs">
+<section class="slide sec-gan" id="losses" data-section="7 · GANs">
   <p class="kicker">So how do you know it worked?</p>
   <h2>The loss curves cannot tell these two runs apart</h2>
   <div class="body center"><img class="fig" src="figures/data/gan1d-losses.svg" style="width:1080px"></div>
@@ -242,7 +247,7 @@
   <aside class="notes"><p>Unlike the VAE, a GAN's losses do not measure sample quality: each player's loss depends on the other. In practice people track sample grids and metrics such as FID.</p></aside>
 </section>
 
-<section class="slide sec-gan" id="cgan" data-section="GANs">
+<section class="slide sec-gan" id="cgan" data-section="7 · GANs">
   <p class="kicker">Back to the shoes</p>
   <h2>Conditioning: tell both players what you want</h2>
   <div class="body center"><!--svg:cgan--></div>

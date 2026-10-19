@@ -22,7 +22,7 @@ from matplotlib.patches import Ellipse  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from train_models import AutoEncoder, ConvG, ConvD, load_mnist, toy_data  # noqa: E402
+from train_models import AutoEncoder, ConvG, ConvD, CondVAE, PixelAR, load_mnist, toy_data  # noqa: E402
 
 MODELS = ROOT / "assets" / "models"
 FIG = ROOT / "figures" / "data"
@@ -201,7 +201,7 @@ def main():
     g = torch.Generator().manual_seed(0)
     toy = toy_data(200, g).numpy()
     mu_hat, sd_hat = toy.mean(), toy.std()
-    NUM["toy"] = dict(n=200, mean=r(mu_hat, 2), std=r(sd_hat, 2), var=r(sd_hat ** 2, 2))
+    NUM["toy"] = dict(n=200, mean=r(mu_hat, 2), std=r(sd_hat, 2), var=r(sd_hat ** 2, 2), first=[r(v, 2) for v in toy[:6]])
     xs = np.linspace(-5, 5, 600)
 
     def npdf(x, m, s):
@@ -308,6 +308,39 @@ def main():
         ax_.spines["left"].set_visible(False)
     save(fig, "reparam-grads")
 
+    # ---------------- learning = pick the parameters that make the data most probable
+    def loglik(m, sd):
+        return float(np.sum(-0.5 * ((toy - m) / sd) ** 2 - np.log(sd * math.sqrt(2 * math.pi))))
+
+    cands = [("a", 2.0, 0.5), ("b", 0.0, 0.5), ("c", float(mu_hat), float(sd_hat))]
+    NUM["cand"] = {k: dict(mu=r(m, 2), sd=r(sd, 2), ll=r(loglik(m, sd), 0)) for k, m, sd in cands}
+    for k, m, sd in cands:
+        fig, ax = plt.subplots(figsize=(4.6, 3.2))
+        ax.hist(toy, bins=np.linspace(-4.5, 4.5, 37), density=True, color=C["x_t"], ec="white", lw=1)
+        ax.plot(toy, np.full_like(toy, -0.03), "|", color=C["x"], ms=8, alpha=.6, mew=1.1)
+        ax.plot(xs, npdf(xs, m, sd), color=C["dec"], lw=2.6)
+        ax.set_xlim(-5, 5)
+        ax.set_ylim(-0.08, 0.85)
+        ax.set_yticks([])
+        ax.spines["left"].set_visible(False)
+        ax.set_xticks([-4, -2, 0, 2, 4])
+        ax.text(-4.8, 0.74, rf"$\mu = {m:.2f},\ \sigma = {sd:.2f}$", fontsize=16, color=C["dec"])
+        save(fig, f"cand-{k}")
+
+    # each data point coloured by p(B | x): the backwards step, applied to all 200 points
+    post = 1 / (1 + np.exp(-16 * toy))
+    fig, ax = plt.subplots(figsize=(10.5, 2.6))
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("ab", [C["x"], "#C9CED6", C["z"]])
+    ax.scatter(toy, np.random.default_rng(1).uniform(-0.3, 0.3, len(toy)), c=post, cmap=cmap, s=34, lw=0.6, ec="white")
+    ax.set_xlim(-5, 5)
+    ax.set_ylim(-0.6, 0.6)
+    ax.set_yticks([])
+    ax.spines["left"].set_visible(False)
+    ax.set_xticks([-4, -2, 0, 2, 4])
+    ax.text(-4.8, 0.42, r"blue: surely bump A", color=C["x"], fontsize=15)
+    ax.text(2.4, 0.42, r"orange: surely bump B", color=C["z"], fontsize=15)
+    save(fig, "toy-colored")
+
     # posterior over the hidden choice: p(B | x) = sigmoid(16 x)
     fig, ax = plt.subplots(figsize=(8.5, 3.4))
     ax.plot(xs, 1 / (1 + np.exp(-16 * xs)), color=C["enc"])
@@ -371,7 +404,24 @@ def main():
     code3_ae = code3_ae[0]
     NUM["our3_ae"] = [r(v, 1) for v in code3_ae]
     tile_png(decode(ae2, code3_ae.unsqueeze(0))[0].numpy(), "digit3-ae2-recon")
-    latent_fig(mu_ae, "ae-scatter", lim=ae_lim, star=code3_ae.numpy())
+    latent_fig(mu_ae, "ae-scatter", lim=ae_lim, star=code3_ae.numpy(), circle=False)
+
+    # what N(0, I) looks like: 500 draws of two independent standard normals
+    dr = torch.randn(500, 2, generator=torch.Generator().manual_seed(13)).numpy()
+    fig, ax = plt.subplots(figsize=(5.2, 5.2))
+    ax.scatter(dr[:, 0], dr[:, 1], s=14, color=C["z"], alpha=.75, lw=0.4, ec="white")
+    for k, frac in ((1, 1 - math.exp(-0.5)), (2, 1 - math.exp(-2))):
+        ax.add_patch(Ellipse((0, 0), 2 * k, 2 * k, fill=False, ec=C["z"], lw=1.8, ls=(0, (4, 3))))
+        inside = np.mean(np.hypot(dr[:, 0], dr[:, 1]) < k)
+        ax.text(0.9, 3.3 - 0.42 * k, rf"inside radius {k}: {100 * inside:.0f}%", fontsize=14, color=C["ink2"])
+    ax.set_xlim(-3.6, 3.6)
+    ax.set_ylim(-3.6, 3.6)
+    ax.set_aspect("equal")
+    ax.axhline(0, color=C["line"], lw=1)
+    ax.axvline(0, color=C["line"], lw=1)
+    ax.set_xlabel(r"$z_1$")
+    ax.set_ylabel(r"$z_2$", rotation=0, labelpad=12)
+    save(fig, "std-normal-2d")
     latent_fig(mu_ae, "ae-scatter-prior", with_prior=True, lim=ae_lim)
     latent_fig(mu_vae, "vae-scatter", lim=((-4, 4), (-4, 4)), star=mu3.numpy())
     latent_fig(mu_vae, "vae-scatter-prior", with_prior=True, lim=((-4, 4), (-4, 4)))
@@ -392,6 +442,20 @@ def main():
     tile_png(torch.bernoulli(pis, generator=torch.Generator().manual_seed(3)).numpy(), "story-sample")
     tile_png(decode(vae2, zs[0:1])[0].numpy(), "vae-prior-one")
     NUM["story_z"] = [r(v, 2) for v in zs[2]]
+    fig, ax = plt.subplots(figsize=(4.6, 4.6))
+    for k in (1, 2, 3):
+        ax.add_patch(Ellipse((0, 0), 2 * k, 2 * k, fill=False, ec=C["z"], lw=1.4, ls=(0, (4, 3)), alpha=.7))
+    ax.plot([float(zs[2][0])], [float(zs[2][1])], "o", color=C["z"], ms=13, mec="white", mew=2)
+    ax.annotate(rf"$z = ({float(zs[2][0]):.2f},\ {float(zs[2][1]):.2f})$", xy=(float(zs[2][0]), float(zs[2][1])),
+                xytext=(0.6, 2.3), fontsize=16, color=C["z"], arrowprops=dict(arrowstyle="-", color=C["z"]))
+    ax.set_xlim(-3.4, 3.4)
+    ax.set_ylim(-3.4, 3.4)
+    ax.set_aspect("equal")
+    ax.axhline(0, color=C["line"], lw=1)
+    ax.axvline(0, color=C["line"], lw=1)
+    ax.set_xlabel(r"$z_1$")
+    ax.set_ylabel(r"$z_2$", rotation=0, labelpad=12)
+    save(fig, "story-plane")
     z16 = torch.randn(10, 16, generator=torch.Generator().manual_seed(12))
     grid_png(decode(ae16, z16).numpy(), 1, 10, "ae16-prior-decodes", scale=4)
     grid_png(decode(ae16, z16).numpy(), 2, 5, "ae16-prior-decodes-2x5", scale=6, pad=2)
@@ -574,6 +638,51 @@ def main():
     ax.set_ylabel("nats")
     ax.grid(color=C["grid"])
     save(fig, "kl-vs-q")
+
+    # ---------------- KL, slowly: surprise curve, tangent bound, evidence piling up
+    pp = np.linspace(0.01, 1, 400)
+    fig, ax = plt.subplots(figsize=(6.4, 4.0))
+    ax.plot(pp, -np.log(pp), color=C["ink2"], lw=2.4)
+    for v, col, lab, dx, dy in ((0.8, C["x"], r"a 1 under $P$", 0.03, 0.18), (0.6, C["dec"], r"a 1 under $Q$", 0.03, 0.22),
+                                (0.4, C["dec"], r"a 7 under $Q$", 0.03, 0.25), (0.2, C["x"], r"a 7 under $P$", 0.03, 0.25)):
+        ax.plot([v], [-math.log(v)], "o", color=col, ms=9, mec="white", mew=1.5)
+        ax.text(v + dx, -math.log(v) + dy, lab + rf": ${-math.log(v):.2f}$", fontsize=13, color=col)
+    ax.set_xlim(0, 1.05)
+    ax.set_ylim(0, 3.2)
+    ax.set_xlabel(r"probability the model gave the digit, $p$")
+    ax.set_ylabel(r"surprise $= -\log p$")
+    ax.grid(color=C["grid"])
+    save(fig, "surprise-curve")
+
+    rr = np.linspace(0.08, 3.0, 400)
+    fig, ax = plt.subplots(figsize=(6.0, 4.0))
+    ax.plot(rr, np.log(rr), color=C["dec"], lw=2.6)
+    ax.plot(rr, rr - 1, color=C["z"], lw=2.2, ls=(0, (5, 3)))
+    ax.plot([1], [0], "o", color=C["ink"], ms=8)
+    ax.text(2.05, 1.25, r"$r - 1$", color=C["z"], fontsize=16)
+    ax.text(2.25, 0.45, r"$\log r$", color=C["dec"], fontsize=16)
+    for v, lab in ((0.75, "a 1"), (2.0, "a 7")):
+        ax.plot([v, v], [math.log(v), v - 1], color=C["loss"], lw=2.2)
+        ax.text(v + 0.06, (math.log(v) + v - 1) / 2 - 0.1, rf"{lab}: $r = {v}$", color=C["loss"], fontsize=13)
+    ax.set_xlim(0, 3.05)
+    ax.set_ylim(-1.6, 2.1)
+    ax.axhline(0, color=C["line"], lw=1)
+    ax.set_xlabel(r"$r = Q_i / P_i$")
+    ax.grid(color=C["grid"])
+    save(fig, "kl-tangent")
+
+    nn = np.arange(0, 101)
+    kl_pq = 0.8 * math.log(0.8 / 0.6) + 0.2 * math.log(0.2 / 0.4)
+    fig, ax = plt.subplots(figsize=(7.2, 3.8))
+    ax.semilogy(nn, np.exp(nn * kl_pq), color=C["loss"], lw=2.6)
+    for n_, lab in ((10, "2.5×"), (50, "97×"), (100, "9,400×")):
+        ax.plot([n_], [math.exp(n_ * kl_pq)], "o", color=C["loss"], ms=9, mec="white", mew=1.5)
+        ax.text(n_ - 2, math.exp(n_ * kl_pq) * 1.9, lab, color=C["ink"], fontsize=15, ha="right" if n_ == 100 else "center")
+    ax.set_xlabel("number of digits seen, $n$")
+    ax.set_ylabel(r"$p(\text{data}\mid P)\ /\ p(\text{data}\mid Q)$")
+    ax.set_ylim(0.8, 3e4)
+    ax.grid(color=C["grid"], which="major")
+    save(fig, "kl-evidence")
 
     # Gaussian KL: where does 0.818 come from?
     zg = np.linspace(-4, 4, 800)
@@ -811,6 +920,48 @@ def main():
         v = math.sqrt(abar) * (2 * img - 1) + math.sqrt(1 - abar) * noise
         frames.append(np.clip((v + 1) / 2, 0, 1))
     grid_png(np.array(frames), 1, 6, "noise-strip", scale=5, pad=3)
+
+    # ---------------- conditional VAE: the label picks the digit, z picks the style
+    cv = CondVAE(2).to(DEV)
+    cv.load_state_dict(torch.load(MODELS / "cvae2.pt", map_location=DEV))
+    cv.eval()
+    zc = torch.randn(8, 2, generator=torch.Generator().manual_seed(41)).to(DEV)
+    with torch.no_grad():
+        rows = [torch.sigmoid(cv.decode(zc, torch.full((8,), d, device=DEV))).cpu() for d in range(10)]
+    grid_png(torch.cat(rows).numpy(), 10, 8, "cvae-grid", scale=3, pad=1)
+    grid_png(rows[7].numpy(), 1, 8, "cvae-sevens", scale=4)
+    NUM["cvae"] = dict(recon=r(meta["cvae2"]["history"][-1]["train_recon"], 1), kl=r(meta["cvae2"]["history"][-1]["train_kl"], 1))
+
+    # ---------------- route A worked position on our 3 (filled in once the pixel models exist)
+    bits = x3.reshape(28, 28).int()
+    NUM["digit3_bits"] = bits.flatten().tolist()
+    # the first pixel of a stroke: the 3 pixels to its left are paper, but there is ink just above
+    ink = [(rr, cc) for rr in range(3, 28) for cc in range(3, 24)
+           if bits[rr, cc] and bits[rr, cc - 3:cc].sum() == 0 and bits[rr - 3:rr, cc - 3:cc + 4].sum() > 0]
+    ar_r, ar_c = ink[len(ink) // 2]
+    NUM["routeA"] = dict(r=ar_r, c=ar_c)
+
+    # ---------------- published DiffusionSat crops: caption + metadata as the condition
+    from PIL import Image
+    sat = Image.open(ROOT / "assets" / "gallery" / "satellite-samples.jpg")
+    sat.crop((822, 152, 1180, 327)).save(FIG / "sat-substation.jpg", quality=92)     # August | January, first row
+    sat.crop((406, 152, 765, 327)).save(FIG / "sat-stadium.jpg", quality=92)         # France | USA coordinates
+
+    # ---------------- route A: two pixel-by-pixel models
+    xt = xte.unsqueeze(1)
+    for ctx in ("row3", "window7"):
+        m_ = PixelAR(ctx).to(DEV)
+        m_.load_state_dict(torch.load(MODELS / f"pixelar_{ctx}.pt", map_location=DEV))
+        m_.eval()
+        smp = m_.sample(16, generator=torch.Generator().manual_seed(5)).cpu()
+        grid_png(smp[:, 0].numpy(), 2, 8, f"pixelar-{ctx}-samples", scale=4)
+        with torch.no_grad():
+            x3t = x3.reshape(1, 1, 28, 28).to(DEV)
+            lp = -F.binary_cross_entropy_with_logits(m_(x3t), x3t, reduction="sum").item()
+        with torch.no_grad():
+            NUM["routeA"][f"p_{ctx}"] = r(torch.sigmoid(m_(x3t))[0, 0, ar_r, ar_c].item(), 2)
+        h = meta["pixelar"][0 if ctx == "row3" else 1]["history"][-1]
+        NUM[f"pixelar_{ctx}"] = dict(logp3=r(lp, 1), test_nll=r(h["test_nll"], 1))
 
     # cover: a slow walk in the 16-D VAE
     (FIG / "numbers.json").write_text(json.dumps(NUM, indent=1))

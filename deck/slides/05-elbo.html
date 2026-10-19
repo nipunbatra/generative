@@ -1,12 +1,17 @@
 <!-- ===================================================================== 5 · ELBO -->
 
-<section class="slide sec-elbo opener" id="elbo-open" data-section="The ELBO">
-  <p class="kicker">Part 4 · tool 2</p>
-  <h2>The ELBO: a loss we can actually compute</h2>
-  <p>Goal: give our 3 high probability, as with the names. Problem: for a latent-variable model that probability is an integral nobody can evaluate. Watch it happen on our 3.</p>
+<section class="slide sec-elbo opener break" id="elbo-open" data-section="4 · The ELBO">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 4 of 7</p>
+      <h2>The ELBO: a loss we can actually compute</h2>
+      <p class="why">Back to Part 1's catch: learning needs $p_\theta(x) = \int p(z)\,p_\theta(x\mid z)\,dz$, an integral over every code. The encoder (Part 2) and KL (Part 3) together turn it into a loss. We watch the problem happen on our 3 first.</p>
+    </div>
+    <!--route:4-->
+  </div>
 </section>
 
-<section class="slide sec-elbo" id="pgm" data-section="The ELBO">
+<section class="slide sec-elbo" id="pgm" data-section="4 · The ELBO">
   <p class="kicker">The model, as a picture</p>
   <h2>Two arrows: generate down, infer up</h2>
   <div class="body center"><!--svg:pgm--></div>
@@ -17,7 +22,7 @@
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="evidence" data-section="The ELBO">
+<section class="slide sec-elbo" id="evidence" data-section="4 · The ELBO">
   <p class="kicker">Maximum likelihood for our 3</p>
   <h2>How probable is our 3 under the model?</h2>
   <div class="body">
@@ -38,7 +43,7 @@
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="mc-prior" data-section="The ELBO">
+<section class="slide sec-elbo" id="mc-prior" data-section="4 · The ELBO">
   <p class="kicker">Idea: estimate the integral by sampling</p>
   <h2>Random codes almost never hit the right patch</h2>
   <div class="body">
@@ -57,7 +62,7 @@
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="posterior" data-section="The ELBO">
+<section class="slide sec-elbo" id="posterior" data-section="4 · The ELBO">
   <p class="kicker">Inference, like the coin and the bumps</p>
   <h2>Ask the encoder where to look</h2>
   <div class="body">
@@ -80,7 +85,7 @@
 
 <!-- ------------------------------------------------ the derivation, one move per slide -->
 
-<section class="slide sec-elbo" id="elbo-1" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-1" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · move 1 of 7</p>
   <h2>Start from what we want</h2>
   <div class="body">
@@ -91,7 +96,7 @@
   <aside class="notes"><p>Recall p(x, z) = p(z) p(x | z): prior times decoder. Each of the next six slides makes exactly one change. Ask the class to name the move before you click.</p></aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-2" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-2" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · move 2 of 7</p>
   <h2>Multiply and divide by the encoder's cloud</h2>
   <div class="body">
@@ -102,7 +107,7 @@
   <p class="q" data-b="2">Why bother? Because the next move turns this integral into an average under $q$, and $q$ knows where the patch is.</p>
 </section>
 
-<section class="slide sec-elbo" id="elbo-3" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-3" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · move 3 of 7</p>
   <h2>Read the integral as an average under $q$</h2>
   <div class="body">
@@ -113,7 +118,7 @@
   <p class="q" data-b="2">Still exact. We now average over codes drawn from the encoder's cloud, right where the patch is.</p>
 </section>
 
-<section class="slide sec-elbo" id="jensen" data-section="The ELBO">
+<section class="slide sec-elbo" id="jensen" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · a tool for move 4</p>
   <h2>Jensen's inequality, in one picture</h2>
   <div class="body">
@@ -130,7 +135,7 @@
   <aside class="notes"><p>Read the picture: two orange points on the curve; their chord lies below the curve. The midpoint of the chord (average of logs) sits below the curve at the midpoint (log of the average).</p></aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-4" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-4" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · move 4 of 7</p>
   <h2>Swap the log and the average: the only inequality</h2>
   <div class="body">
@@ -141,7 +146,7 @@
   <p class="q" data-b="2">The log is now inside the average. That is what makes the next three moves possible.</p>
 </section>
 
-<section class="slide sec-elbo" id="elbo-5" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-5" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · move 5 of 7</p>
   <h2>Split the log of a product</h2>
   <div class="body">
@@ -151,7 +156,7 @@
   </div>
 </section>
 
-<section class="slide sec-elbo" id="elbo-6" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-6" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · move 6 of 7</p>
   <h2>The average of a sum is the sum of the averages</h2>
   <div class="body">
@@ -161,7 +166,7 @@
   </div>
 </section>
 
-<section class="slide sec-elbo" id="elbo-7" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-7" data-section="4 · The ELBO">
   <p class="kicker">Deriving the ELBO · move 7 of 7</p>
   <h2>Recognise the second average: it is a KL</h2>
   <div class="body">
@@ -172,7 +177,7 @@
   <p class="q" data-b="2">And for Gaussians we already have its formula: $\tfrac12\sum_j(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2)$.</p>
 </section>
 
-<section class="slide sec-elbo" id="elbo-final" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-final" data-section="4 · The ELBO">
   <p class="kicker">Put the pieces together</p>
   <h2>The ELBO, in symbols and in words</h2>
   <div class="body">
@@ -185,7 +190,7 @@
   <p class="q" data-b="2">The two wishes from the autoencoder slide, derived rather than invented. The loss we minimise is $-\ELBO$.</p>
 </section>
 
-<section class="slide sec-elbo" id="gap-derive" data-section="The ELBO">
+<section class="slide sec-elbo" id="gap-derive" data-section="4 · The ELBO">
   <p class="kicker">What did the inequality cost?</p>
   <h2>A second route: start from the true posterior</h2>
   <div class="body">
@@ -202,7 +207,7 @@
   <p class="q" data-b="4">The gap is a KL, so it is never negative: a second proof that the ELBO is a lower bound.</p>
 </section>
 
-<section class="slide sec-elbo" id="gap" data-section="The ELBO">
+<section class="slide sec-elbo" id="gap" data-section="4 · The ELBO">
   <p class="kicker">The gap, measured on our 3</p>
   <h2>Two different KLs, two different jobs</h2>
   <div class="body">
@@ -224,7 +229,7 @@
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-toy" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-toy" data-section="4 · The ELBO">
   <p class="kicker">Check the identity with numbers you can do by hand</p>
   <h2>Neat or messy writer? A two-value latent</h2>
   <div class="body">
@@ -253,7 +258,7 @@
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="vae-bernoulli" data-section="The ELBO">
+<section class="slide sec-elbo" id="vae-bernoulli" data-section="4 · The ELBO">
   <p class="kicker">The reconstruction term, zoomed in</p>
   <h2>Each pixel is a coin flip with probability $\pi_i$</h2>
   <div class="body">
@@ -270,7 +275,7 @@
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-loss" data-section="The ELBO">
+<section class="slide sec-elbo" id="elbo-loss" data-section="4 · The ELBO">
   <p class="kicker">From theory to the training loss</p>
   <h2>The VAE loss for our 3</h2>
   <div class="body">
@@ -283,4 +288,15 @@
   </div>
   <p class="q" data-b="3">One problem left: $z$ is a random draw, and we need gradients through it.</p>
   <aside class="notes"><p>Using a single z per image per step is standard. The reconstruction term is a one-sample estimate of the expectation; the KL term is computed exactly.</p></aside>
+</section>
+
+<section class="slide sec-elbo" id="recap-4" data-section="4 · The ELBO">
+  <p class="kicker">End of Part 4 · end of Session 1</p>
+  <h2>What we did, and what comes next</h2>
+  <div class="body">
+    <div class="recap">
+      <div><h3>What we did</h3><ol><li>Scoring our 3 needs an integral over all codes; random codes almost never hit the right patch.</li><li>The encoder's cloud $q_\varphi(z\mid x)$ says where to look.</li><li>Seven moves give the ELBO: reconstruction $-\ \KL(q\,\|\,\text{prior})$, a lower bound on $\log p_\theta(x)$.</li><li>The gap is $\KL(q\,\|\,\text{true posterior})$. For our 3: loss $= {{our3.recon}} + {{our3.kl_total}}$.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next session</h3><p class="small">The loss uses a <b>random draw</b> of $z$. Session 2: how gradients pass through it, then training the VAE on MNIST, then GANs.</p></div>
+    </div>
+  </div>
 </section>
