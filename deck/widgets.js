@@ -173,7 +173,7 @@
       $('.gx-samples').src = `figures/data/gmm-explore/d${d}_k${k}.png`;
       $('.gx-var').textContent = `${info.var_kept[d]}%`;
       $('.gx-params').textContent = num(info.params[d][k]);
-      $('.gx-test').textContent = num(info.test[d][k]);
+      $('.gx-test').textContent = Number(info.test[d][k]).toFixed(1).replace('-', '−');
       $('.gx-best').textContent = info.best_k[d];
     };
     dIn.addEventListener('input', update);
