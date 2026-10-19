@@ -104,6 +104,40 @@
   </aside>
 </section>
 
+<section class="slide sec-dist" id="fit-code" data-section="1 · Distributions">
+  <p class="kicker">The same fit, in PyTorch</p>
+  <h2>Learning = gradient descent on the negative log-likelihood</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code"><span class="line" data-hl="=1">x = torch.tensor(data)                  <span class="c"># the 200 numbers</span></span>
+<span class="line" data-hl="=1">mu        = torch.tensor(<span class="n">1.0</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line" data-hl="=1">log_sigma = torch.tensor(<span class="n">0.0</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line">opt = torch.optim.Adam([mu, log_sigma], lr=<span class="n">0.05</span>)</span>
+<span class="line"></span>
+<span class="line" data-hl="=3"><span class="k">for</span> step <span class="k">in</span> range(<span class="n">300</span>):</span>
+<span class="line" data-hl="=2">    dist = Normal(mu, log_sigma.exp())</span>
+<span class="line" data-hl="=2">    loss = -dist.log_prob(x).mean()</span>
+<span class="line" data-hl="=3">    opt.zero_grad(); loss.backward(); opt.step()</span>
+<span class="line"></span>
+<span class="line" data-hl="=4">x_new = dist.sample((<span class="n">30</span>,))              <span class="c"># step 2: generate</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>The parameters</b> $\theta = (\mu, \log\sigma)$, started anywhere. We learn $\log\sigma$ so that $\sigma = e^{\log\sigma}$ is always positive.</p>
+        <p class="small" data-b="=2"><b>The loss</b> is the score from the last slide with a minus sign, averaged: $-\frac1N\sum_i \log\N(x_i;\mu,\sigma^2)$.</p>
+        <p class="small" data-b="=3"><b>The update:</b> nudge $\mu$ and $\log\sigma$ downhill, 300 times. The same loop trains every network in this course.</p>
+        <p class="small" data-b="4"><b>Result:</b> $\mu = {{gd.mu}}$, $\sigma = {{gd.sd}}$, exactly the formula's answer. Then <code>sample</code> is step 2.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>Real run (scripts/make_figures_extra.py). Point out that nothing here is specific to Gaussians: swap <code>Normal</code> for any distribution with a <code>log_prob</code>, and the loop is unchanged. That is how we will fit the two-bump model, and later the VAE.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="fit-watch" data-section="1 · Distributions">
+  <p class="kicker">Watch the fit happen</p>
+  <h2>Four moments of that loop</h2>
+  <div class="body center"><img class="fig" src="figures/data/gd-gauss.svg" style="width:1150px"></div>
+  <p class="q">The curve starts in the wrong place, widens to cover both clumps, and stops at the best single bump. The loss falls from 3.82 to {{gd.nll}}.</p>
+</section>
+
 <section class="slide sec-dist" id="checkpoint-1" data-section="1 · Distributions">
   <p class="kicker">Checkpoint</p>
   <h2>So far: learn and generate work; one bump is not enough</h2>
@@ -115,7 +149,7 @@
       <tr data-b="2"><td>Fix</td><td>a richer model that can make two clumps</td><td>next slide</td></tr>
     </table>
   </div>
-  <aside class="notes"><p>Pause here. Everything else in the lecture follows this recipe with a richer model: VAEs and GANs are different answers to "what model, and how do we learn it".</p></aside>
+  <aside class="notes"><p>Pause here. Everything else in the lecture follows this recipe with a richer model: the VAE is a different answer to "what model, and how do we learn it".</p></aside>
 </section>
 
 <section class="slide sec-dist" id="toy-story" data-section="1 · Distributions">
@@ -137,13 +171,81 @@
   <p class="q">One hidden coin flip made the model rich enough: the samples now fall in the bumps, not in the gap.</p>
   <aside class="notes">
     <p>Read the formula aloud: probability of x through bump A plus probability of x through bump B, each weighted by how likely that bump is. Summing over the hidden choice is called marginalising it out.</p>
-    <p>The A-bump contributes about 2 × 10⁻¹² at x = 1.5: 7 standard deviations away.</p>
+    <p>The A-bump contributes about 9 × 10⁻¹² at x = 1.5 (½ × 1.8 × 10⁻¹¹): 7 standard deviations away.</p>
   </aside>
 </section>
 
+<section class="slide sec-dist" id="mix-code" data-section="1 · Distributions">
+  <p class="kicker">Fitting $K$ bumps in PyTorch</p>
+  <h2>Same loop, a richer <code>log_prob</code></h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code"><span class="line" data-hl="=1">logits = torch.zeros(K, requires_grad=<span class="k">True</span>)   <span class="c"># bump weights</span></span>
+<span class="line" data-hl="=1">means  = torch.randn(K, requires_grad=<span class="k">True</span>)</span>
+<span class="line" data-hl="=1">log_sd = torch.zeros(K, requires_grad=<span class="k">True</span>)</span>
+<span class="line"></span>
+<span class="line"><span class="k">def</span> <span class="f">log_p</span>(x):                                <span class="c"># log p(x), shape [N]</span></span>
+<span class="line" data-hl="=2">    comp = Normal(means, log_sd.exp()).log_prob(x[:, <span class="k">None</span>])   <span class="c"># [N, K]</span></span>
+<span class="line" data-hl="=3">    <span class="k">return</span> torch.logsumexp(log_softmax(logits) + comp, dim=<span class="n">1</span>)</span>
+<span class="line"></span>
+<span class="line" data-hl="=4">loss = -log_p(x).mean()        <span class="c"># then the same 3-line update</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Three parameters per bump:</b> a weight, a centre, a width. <code>softmax</code> turns the weights into probabilities that sum to 1.</p>
+        <p class="small" data-b="=2"><b>Every number under every bump:</b> $\log p(x_i\mid z = k)$ for all $i$ and $k$, a table of $N \times K$ log-densities.</p>
+        <p class="small" data-b="=3"><b>The sum over the hidden choice:</b> $\log\sum_k p(k)\,p(x\mid k)$. <code>logsumexp</code> does it without underflow.</p>
+        <p class="small" data-b="4"><b>Training</b> is unchanged. With $K = 2$ it finds centres {{mixK.1.means.0}} and {{mixK.1.means.1}}, widths {{mixK.1.sds.0}} and {{mixK.1.sds.1}}.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>The hidden recipe was centres −2 and 2, widths 0.5, weights ½ each. Gradient descent recovers it from 200 numbers alone. Compare with the formula slide: there is no closed form for a mixture, so here gradient descent is not just a convenience, it is the method.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mix-sample" data-section="1 · Distributions">
+  <p class="kicker">Step 2 · Generate, from the two-bump fit</p>
+  <h2>Sampling runs the story: choose a bump, then a number</h2>
+  <div class="body">
+    <div class="codewalk" style="grid-template-columns:1fr 1fr">
+      <pre class="code"><span class="line" data-hl="=1">weights = softmax(logits)</span>
+<span class="line" data-hl="=1">k = torch.multinomial(weights, <span class="n">1000</span>,</span>
+<span class="line" data-hl="=1">                      replacement=<span class="k">True</span>)    <span class="c"># the coin</span></span>
+<span class="line" data-hl="=2">x_new = means[k] + log_sd.exp()[k] * torch.randn(<span class="n">1000</span>)</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Step 1:</b> pick a bump for each sample, with the learned weights.</p>
+        <p class="small" data-b="2"><b>Step 2:</b> draw a number from that bump: its centre plus its width times standard noise.</p>
+      </div>
+    </div>
+    <img class="fig" src="figures/data/mix-samples.svg" style="width:900px;margin:12px auto 0" data-b="2">
+  </div>
+  <p class="q" data-b="2">1,000 new numbers that follow the data, and none of them is a copy of a training number.</p>
+</section>
+
+<section class="slide sec-dist" id="how-many" data-section="1 · Distributions">
+  <p class="kicker">But how many bumps should we fit?</p>
+  <h2>More bumps always fit the training data better</h2>
+  <div class="body center"><img class="fig" src="figures/data/mixK-fits.svg" style="width:1150px"></div>
+  <p class="q">1, 2, 3, 4 bumps, each fitted with the same loop. The training score rises every time. So which one do we keep?</p>
+  <aside class="notes"><p>The 3- and 4-bump fits spend their extra bumps on a narrow spike or a small shoulder: a tiny bump of width 0.05 at 3.27 in the 4-bump fit. Training log-likelihood: {{mixK.0.train}}, {{mixK.1.train}}, {{mixK.2.train}}, {{mixK.3.train}}.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="how-many-score" data-section="1 · Distributions">
+  <p class="kicker">Score on data the fit has never seen</p>
+  <h2>New data decides: two bumps</h2>
+  <div class="body">
+    <div class="row" style="gap:34px;align-items:center">
+      <img class="fig" src="figures/data/mixK-score.svg" style="height:400px">
+      <div class="col grow">
+        <p class="small">Draw <b>200 new numbers</b> from the same hidden recipe and score each fit on them.</p>
+        <p class="small" data-b="2">1 → 2 bumps: ${{mixK.0.held}} \to {{mixK.1.held}}$ per number. A real improvement.</p>
+        <p class="small" data-b="3">3 or 4 bumps: the training score creeps up, the new-data score does not. The extra bumps fit noise in the 200 training numbers.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Choose the size of a model by how well it scores data it has not seen. That holds for bumps, and for networks.</p>
+</section>
+
 <section class="slide sec-dist" id="why-backwards" data-section="1 · Distributions">
-  <p class="kicker">Step 1 · Learn, for the two-bump model</p>
-  <h2>To fit two bumps, guess which bump made each point</h2>
+  <p class="kicker">Step 1 · Learn, looked at closely</p>
+  <h2>Hidden in the fit: which bump made each point?</h2>
   <div class="body">
     <div class="steps2">
       <div class="callout plain"><h3>If we knew the coin for every point</h3>fitting is easy: average the A-points for bump A's centre, the B-points for bump B's.</div>
@@ -151,7 +253,7 @@
     </div>
     <img class="fig" src="figures/data/toy-colored.svg" style="width:960px;margin:18px auto 0" data-b="3">
   </div>
-  <p class="q" data-b="3">Running the story backwards, from a number to its likely hidden cause, is called <b>inference</b>. It is part of learning, not a detour.</p>
+  <p class="q" data-b="3">Running the story backwards, from a number to its likely hidden cause, is called <b>inference</b>. The gradient descent we just ran was doing it all along: four slides on, we will see where.</p>
   <aside class="notes">
     <p>Build 3: each of the 200 points coloured by p(B | x), computed on the next slide. Points in the middle are grey: unsure.</p>
     <p>For the curious: alternating "guess the bump" and "refit the bumps" is the EM algorithm. We will not need its details; the point is that learning a hidden-variable model needs this backwards step.</p>
@@ -170,7 +272,7 @@
     </table>
     <div class="mathblock" style="font-size:27px;margin-top:20px" data-b="5">$$p(\mathrm{B}\mid x) = \frac{p(\mathrm{B})\,p(x\mid\mathrm{B})}{p(x)} = {{bayes01.post_b}}$$</div>
   </div>
-  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. Note the total is exactly the $p(x)$ from two slides ago.</p>
+  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. Note the total is exactly the $p(x)$ of the two-bump formula.</p>
   <aside class="notes">
     <p>Build by build: the two likelihoods (both tiny: 0.1 is far from both centres, but closer to B), multiply by the prior, add to get p(x), divide.</p>
     <p>The tiny numbers do not matter, only their ratio. Important for later: the backwards step needs p(x), the sum over all hidden values.</p>
@@ -192,6 +294,32 @@
   </div>
   <p class="q">These are the colours on the 200 points two slides ago.</p>
   <aside class="notes"><p>Derivation of the sigmoid if asked: the log ratio of the two likelihoods is [(x+2)² − (x−2)²]/(2·0.25) = 16x, and the equal priors cancel.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="post-code" data-section="1 · Distributions">
+  <p class="kicker">The backwards step, in one line</p>
+  <h2>Posterior = softmax of (log prior + log likelihood)</h2>
+  <div class="body">
+    <pre class="code" style="width:1000px;margin:0 auto;font-size:19px"><span class="line">log_joint = log_softmax(logits) + Normal(means, log_sd.exp()).log_prob(x)   <span class="c"># [K]</span></span>
+<span class="line" data-hl="2">posterior = softmax(log_joint)                 <span class="c"># divide by the total: Bayes</span></span></pre>
+    <p class="small" style="text-align:center;margin-top:22px" data-b="2">With the fitted bumps, at $x = 0.1$: $p(\mathrm{A}\mid x) = {{mix_post01.0}}$, $p(\mathrm{B}\mid x) = {{mix_post01.1}}$. (With the true recipe it was {{bayes01.post_b}}: the fitted bumps are slightly different.)</p>
+  </div>
+  <p class="q" data-b="2">Softmax is "exponentiate, then divide by the total": exactly the last column of the Bayes table.</p>
+</section>
+
+<section class="slide sec-dist" id="post-grad" data-section="1 · Distributions">
+  <p class="kicker">Why learning needs the backwards step</p>
+  <h2>The gradient of $\log p(x)$ is weighted by the posterior</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:25px">$$\frac{\partial \log p(x)}{\partial \mu_k} \;=\; \hl{p(k\mid x)}\;\cdot\;\frac{x - \mu_k}{\sigma_k^2}$$</div>
+    <img class="fig" src="figures/data/resp-curve.svg" style="width:780px;margin:0 auto" data-b="2">
+    <p class="small" style="text-align:center;margin:0" data-b="3">At $x = 0.1$: bump B's centre is pulled by ${{pull.rb}} \times (0.1 - 2)/0.25 = {{pull.gb}}$, bump A's by ${{pull.ra}} \times (0.1 + 2)/0.25 = {{pull.ga}}$.</p>
+  </div>
+  <p class="q" data-b="3">Each point pulls each bump in proportion to how likely that bump made it. Learning needs the posterior for every point: a 2-row table here, an intractable patch for images.</p>
+  <aside class="notes">
+    <p>Derivation, one line: p(x) = Σ_k π_k N(x; μ_k, σ_k²), so ∂ log p / ∂μ_k = π_k N(x; μ_k, σ_k²) / p(x) · (x − μ_k)/σ_k², and the first factor is Bayes' rule for p(k | x).</p>
+    <p>Numbers use the true recipe (centres ±2, widths 0.5, weights ½). This is the slide to come back to in Part 3: with a decoder instead of two bumps, the same gradient needs p(z | x) over a whole plane of codes.</p>
+  </aside>
 </section>
 
 <section class="slide sec-dist" id="vocab" data-section="1 · Distributions">
@@ -221,91 +349,16 @@
           <li><b>Learn</b> = choose parameters that make the data probable.</li>
           <li><b>Generate</b> = sample from the learned model.</li>
           <li>One bump was too simple; a hidden coin $z$ fixed it.</li>
-          <li>Scoring $x$ sums over $z$; learning needs the backwards step $p(z\mid x)$.</li>
+          <li>Scoring $x$ sums over $z$; learning needs the backwards step $p(z\mid x)$.</li><li>In code: one loop, <code>loss = -log_p(x).mean()</code>; choose the size on new data.</li>
         </ol>
       </div>
       <div class="next" data-b="2">
-        <h3>Next: the same story for images</h3>
-        <p class="small">The coin becomes a short code $z$ of real numbers; each bump becomes a neural network that turns $z$ into an image.</p>
-        <p class="small">Generating stays easy. Learning gets hard: the sum over $z$ becomes a sum over infinitely many codes.</p>
+        <h3>Next: images</h3>
+        <p class="small">784 numbers per example instead of one. Before any probability, a simpler idea: squeeze each image into a few numbers and rebuild it. That is the autoencoder.</p>
+        <p class="small">Part 3 returns to this probabilistic story, with a code $z$ in place of the coin.</p>
       </div>
     </div>
   </div>
   <aside class="notes"><p>The hidden recipe for the 200 numbers was exactly the two-bump story. Reveal it here.</p></aside>
 </section>
 
-<!-- ------------------------------------------------ from a coin to a code, slowly -->
-
-<section class="slide sec-dist" id="coin-to-code" data-section="1 · Distributions">
-  <p class="kicker">From a coin to a code</p>
-  <h2>Same story, bigger pieces</h2>
-  <div class="body">
-    <table class="cmp">
-      <tr><th></th><th>two bumps (so far)</th><th>images (from now on)</th></tr>
-      <tr><td>hidden $z$</td><td>a coin: A or B</td><td data-b="2">2 real numbers $(z_1, z_2)$, drawn from $\N(0, I)$</td></tr>
-      <tr><td>$p(x\mid z)$</td><td>a bump at $-2$ or $+2$</td><td data-b="3">a neural network, the <b>decoder</b>, with weights $\theta$</td></tr>
-      <tr><td>observed $x$</td><td>one number</td><td data-b="4">784 pixels, each ink (1) or paper (0)</td></tr>
-      <tr><td>sum over $z$</td><td>2 terms</td><td data-b="5">every point in a plane: infinitely many</td></tr>
-    </table>
-  </div>
-  <p class="q" data-b="5">Next three slides: generate one image this way, one step at a time.</p>
-  <aside class="notes"><p>Fill in the right column one row at a time, asking the class to guess each entry first. The last row is the problem Parts 2 to 4 solve.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-1" data-section="1 · Distributions">
-  <p class="kicker">Generating an image · step 1 of 3</p>
-  <h2>Draw a code</h2>
-  <div class="body">
-    <div class="row" style="gap:40px;justify-content:center">
-      <img class="fig" src="figures/data/story-plane.svg" style="height:400px">
-      <div class="col" style="width:500px">
-        <div class="mathblock left" style="font-size:28px">$$z \sim \N(0, I)$$</div>
-        <p class="small">Two numbers, each from a standard bell curve: like flipping the coin, but the "coin" can land anywhere in the plane.</p>
-        <p class="small" data-b="2">This draw: $z = ({{story_z.0}},\ {{story_z.1}})$.</p>
-      </div>
-    </div>
-  </div>
-  <p class="q" data-b="2">On its own, $z$ means nothing. The decoder will give it meaning.</p>
-  <aside class="notes"><p>The dashed circles are where most draws land (1, 2, 3 standard deviations). There is no "digit" axis: the meaning of z1 and z2 is whatever the decoder learns.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-2" data-section="1 · Distributions">
-  <p class="kicker">Generating an image · step 2 of 3</p>
-  <h2>Decode it into 784 pixel probabilities</h2>
-  <div class="body center"><!--svg:story-decode--></div>
-  <p class="q">$\pi_i$ is the probability that pixel $i$ is ink. Dark grey = probably ink; white = probably paper.</p>
-  <aside class="notes"><p>This is the trained decoder we build in Part 6. One forward pass: 2 numbers in, 784 numbers between 0 and 1 out (a sigmoid at the end). It plays the role of "which bump": it says what x is likely to look like, given z.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-3" data-section="1 · Distributions">
-  <p class="kicker">Generating an image · step 3 of 3</p>
-  <h2>Flip one coin per pixel</h2>
-  <div class="body">
-    <div class="row" style="gap:40px;justify-content:center">
-      <div class="col" style="align-items:center"><img class="fig pix" src="figures/data/story-pi.png" style="width:280px;border:2.5px solid var(--dec);border-radius:6px"><p class="cap">probabilities $\pi$</p></div>
-      <span class="arrow" style="font-size:40px">→</span>
-      <div class="col" style="align-items:center" data-b="2"><img class="fig pix" src="figures/data/story-sample.png" style="width:280px;border:2.5px solid var(--x);border-radius:6px"><p class="cap">one sample $x$</p></div>
-      <div class="col" style="width:330px" data-b="2">
-        <div class="mathblock left" style="font-size:26px">$$x_i \sim \mathrm{Bernoulli}(\pi_i)$$</div>
-        <p class="small">Each pixel independently: ink with probability $\pi_i$.</p>
-      </div>
-    </div>
-  </div>
-  <p class="q" data-b="2">That is a generated image. In practice we usually display $\pi$ itself, because it looks cleaner.</p>
-  <aside class="notes"><p>The speckle comes from the coin flips. Most papers, and most of this lecture, show π (the mean image) instead of a sample.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-learn" data-section="1 · Distributions">
-  <p class="kicker">The same two steps as before</p>
-  <h2>Generating is easy. Learning is the catch.</h2>
-  <div class="body">
-    <div class="steps2">
-      <div class="callout z"><h3>Generate ✓</h3>draw $z \sim \N(0,I)$, decode, flip pixels. Three slides, done.</div>
-      <div class="callout dec" data-b="2"><h3>Learn ?</h3>choose the decoder's weights $\theta$ to make the training images probable:
-        <div class="mathblock" style="font-size:24px">$$p_\theta(x) = \int p(z)\,p_\theta(x\mid z)\,dz$$</div>
-        the two-bump sum, now over every code in the plane.</div>
-    </div>
-  </div>
-  <p class="q" data-b="2">Parts 2 to 4 are about this one problem. First, a simpler idea that almost works: the autoencoder.</p>
-  <aside class="notes"><p>Link back to the two-bump slides: there, learning needed the sum over z and the backwards step p(z|x). Both become hard with a continuous code and a neural decoder. That is the whole motivation for the encoder, KL and the ELBO.</p></aside>
-</section>

@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Session 1 · Latent variables, KL and the ELBO · ES 667</title>
+<title>Session 1 · Fitting, autoencoders, the probabilistic view · ES 667</title>
 <link rel="stylesheet" href="vendor/katex/katex.min.css">
 <link rel="stylesheet" href="deck/deck.css">
 </head>
@@ -13,7 +14,7 @@
 
 <section class="slide sec-hook cover" id="cover" data-section="Why generate?">
   <p class="kicker">ES 667 · Deep Learning · Generative Modelling I</p>
-  <h2 style="font-size:60px;margin-top:40px">Learning to generate<span class="sub" style="font-size:30px">Autoencoders, VAEs and GANs, built from one handwritten 3</span></h2>
+  <h2 style="font-size:60px;margin-top:40px">Learning to generate<span class="sub" style="font-size:30px">Distributions, autoencoders and VAEs, built from one handwritten 3</span></h2>
   <div class="body">
     <img class="fig pix" src="figures/data/interp-vae16.png" style="width:1150px;margin:0 auto">
     <p class="cap">A 3 turns into a 7. Every frame is decoded from a point on a straight line through the code space of the VAE we train today.</p>
@@ -60,11 +61,11 @@
     </div>
   </div>
   <p class="q" data-b="=1">Six are MNIST test digits, six come from a network. Write down which six are fake.</p>
-  <p class="q" data-b="2">Generated: 1, 3, 6, 7, 8, 10 (teal frames). Six from a small network we will train ourselves, in about 9 minutes.</p>
+  <p class="q" data-b="2">Generated: 1, 3, 6, 7, 8, 10 (teal frames). Six from a small GAN, trained in about 9 minutes: the topic of the next lecture.</p>
   <aside class="notes">
     <p>Give one minute and take a show of hands on two or three tiles, then click to reveal: generated = 1, 3, 6, 7, 8, 10; the rest are real MNIST test digits.</p>
     <p>Worth pointing at: tile 3, with its broken stroke, is the easiest fake to spot; tile 6, a clean 8, is the hardest.</p>
-    <p>In Session 2 we return to these 12 tiles and show what our own trained discriminator said about each one.</p>
+    <p>The GAN lecture returns to these 12 tiles and shows what the trained discriminator said about each one.</p>
   </aside>
 </section>
 
@@ -100,7 +101,7 @@
   <p class="src">pix2pix (Isola et al. 2017) · CycleGAN (Zhu et al. 2017) · Context Encoders (Pathak et al. 2016) · SPADE (Park et al. 2019). All published model outputs.</p>
   <aside class="notes">
     <p>For each pair ask: what does the input fix, and what does the model have to invent? The sketch fixes the outline but not the colour or leather. The hole could be filled many ways. The bird completion is visibly imperfect: point that out.</p>
-    <p>All four were trained with an adversarial (GAN) loss plus task-specific terms. We will see the core of that idea today.</p>
+    <p>All four were trained with an adversarial (GAN) loss plus task-specific terms. GANs get their own lecture; today's route is the VAE.</p>
   </aside>
 </section>
 
@@ -131,7 +132,7 @@
   <p class="q">Training means: adjust $\theta$ until the samples look like the data. But what is the loss?</p>
   <aside class="notes">
     <p>Build 1: the random input. Build 2: a sample. Build 3: an optional condition (a sketch, a class label, a sentence).</p>
-    <p>The difficulty: there is no target image for a random z. Today we see two answers: the VAE (an encoder tells us which z belongs to which image) and the GAN (a second network learns to judge).</p>
+    <p>The difficulty: there is no target image for a random z. Today's answer is the VAE (an encoder tells us which z belongs to which image). The next lecture's is the GAN (a second network learns to judge).</p>
   </aside>
 </section>
 
@@ -165,7 +166,7 @@
   <p class="q" data-b="4">The condition fixes <b>what</b>; the randomness still decides <b>which one</b> of the many matching outputs you get.</p>
   <aside class="notes">
     <p>Text prompts are the most familiar condition (text-to-image systems). DiffusionSat conditions on a caption plus metadata: location, date, ground resolution. The substation turns snowy in January; the stadium looks European or American depending on the coordinates.</p>
-    <p>The 7s come from a conditional VAE trained for this lecture: the one-hot label goes into both the encoder and the decoder. We build the unconditional VAE in Part 6; adding a label is a small change.</p>
+    <p>The 7s come from a conditional VAE trained for this lecture: the one-hot label goes into both the encoder and the decoder. We build the unconditional VAE in Part 7; adding a label is a small change.</p>
   </aside>
 </section>
 
@@ -189,7 +190,7 @@
 </section>
 
 <section class="slide sec-hook" id="names" data-section="Why generate?">
-  <p class="kicker">Part 1 of this course</p>
+  <p class="kicker">Earlier in this course</p>
   <h2>You have already built a generator</h2>
   <div class="body">
     <div class="row top" style="gap:60px;margin-top:6px">
@@ -223,7 +224,7 @@
 </section>
 
 <section class="slide sec-hook" id="name-prob" data-section="Why generate?">
-  <p class="kicker">Part 1 of this course</p>
+  <p class="kicker">Earlier in this course</p>
   <h2>A whole name gets one probability</h2>
   <div class="body">
     <table class="work" style="margin:6px auto 0">
@@ -295,25 +296,29 @@
     </table>
   </div>
   <p class="q" data-b="4">Route A is the name model you already know. Today is route B: what the code is, and how to train a decoder when nobody tells us the right code.</p>
-  <aside class="notes"><p>Route A is not worse; it is a different trade. The "hard" entry for route B is the subject of Parts 2 to 4.</p></aside>
+  <aside class="notes"><p>Route A is not worse; it is a different trade. The "hard" entry for route B is the subject of Parts 3 to 5.</p></aside>
 </section>
 
 <section class="slide sec-hook" id="map" data-section="Why generate?">
   <p class="kicker">The plan</p>
-  <h2>Today's route</h2>
+  <h2>Today's route, in two sessions</h2>
   <div class="body">
-    <ol class="route">
-      <li style="--c:var(--z)"><b>Distributions and hidden causes</b><span>on a 1-D toy dataset</span></li>
-      <li style="--c:var(--enc)"><b>Autoencoders</b><span>and why they cannot generate</span></li>
-      <li style="--c:var(--loss)"><b>KL divergence</b><span>how far apart are two distributions?</span></li>
-      <li style="--c:var(--dec)"><b>The ELBO</b><span>a loss for a model we cannot evaluate exactly</span></li>
-      <li style="--c:var(--z)"><b>Reparameterisation</b><span>backprop through a random draw</span></li>
-      <li style="--c:var(--enc)"><b>The VAE on MNIST</b><span>one digit, end to end, with real numbers</span></li>
-      <li style="--c:var(--disc)"><b>GANs</b><span>learn the judge instead of the likelihood</span></li>
-    </ol>
+    <div class="row top map2" style="gap:56px;justify-content:center">
+      <div class="col"><p class="sess">Session 1</p><ol class="route">
+        <li style="--c:var(--z)"><b>Distributions and fitting</b><span>a 1-D toy: fit, sample, how many bumps</span></li>
+        <li style="--c:var(--enc)"><b>Autoencoders</b><span>plain, denoising, sparse, contractive; why they cannot generate</span></li>
+        <li style="--c:var(--x)"><b>The probabilistic view</b><span>prior, likelihood, an intractable posterior</span></li>
+      </ol></div>
+      <div class="col"><p class="sess">Session 2</p><ol class="route" style="counter-reset:r 3">
+        <li style="--c:var(--loss)"><b>KL divergence</b><span>how far apart are two distributions?</span></li>
+        <li style="--c:var(--dec)"><b>Variational inference and the ELBO</b><span>a loss that never computes $p(x)$</span></li>
+        <li style="--c:var(--z)"><b>Reparameterisation</b><span>backprop through a random draw</span></li>
+        <li style="--c:var(--enc)"><b>The VAE on MNIST</b><span>one digit, end to end, with real numbers</span></li>
+      </ol></div>
+    </div>
   </div>
-  <p class="q take">One running image throughout: test digit #90, a handwritten 3.</p>
-  <aside class="notes"><p>About 120 minutes in full. If short on time, skip the 2-number vs 16-number comparison and the conditional GAN slide.</p></aside>
+  <p class="q take">One running image throughout: test digit #90, a handwritten 3. GANs get their own lecture.</p>
+  <aside class="notes"><p>About 75 minutes per session. If short on time in Session 1, skip the contractive autoencoder and the how-many-bumps slide; in Session 2, skip the 2-number vs 16-number comparison.</p></aside>
 </section>
 
 <!-- ===================================================================== PART 1 · LEARN A DISTRIBUTION, THEN SAMPLE -->
@@ -325,7 +330,7 @@
       <h2>Learn a distribution from examples, then sample from it</h2>
       <p class="why">We have seen what generators can do. Before any network, the whole idea on <b>one number</b>: what does "learning" mean, and how do we then make new samples?</p>
     </div>
-    <ol class="route-mini"><li class="now" style="--c:var(--z)"><span class="dot">1</span>Distributions and hidden causes</li><li class="todo" style="--c:var(--enc)"><span class="dot">2</span>Autoencoders</li><li class="todo" style="--c:var(--loss)"><span class="dot">3</span>KL divergence</li><li class="todo" style="--c:var(--dec)"><span class="dot">4</span>The ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">5</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">6</span>The VAE on MNIST</li><li class="todo" style="--c:var(--disc)"><span class="dot">7</span>GANs</li></ol>
+    <ol class="route-mini"><li class="now" style="--c:var(--z)"><span class="dot">1</span>Distributions and fitting</li><li class="todo" style="--c:var(--enc)"><span class="dot">2</span>Autoencoders</li><li class="todo" style="--c:var(--x)"><span class="dot">3</span>The probabilistic view</li><li class="todo" style="--c:var(--loss)"><span class="dot">4</span>KL divergence</li><li class="todo" style="--c:var(--dec)"><span class="dot">5</span>Variational inference and the ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">6</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">7</span>The VAE on MNIST</li></ol>
   </div>
 </section>
 
@@ -422,6 +427,40 @@
   </aside>
 </section>
 
+<section class="slide sec-dist" id="fit-code" data-section="1 · Distributions">
+  <p class="kicker">The same fit, in PyTorch</p>
+  <h2>Learning = gradient descent on the negative log-likelihood</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code"><span class="line" data-hl="=1">x = torch.tensor(data)                  <span class="c"># the 200 numbers</span></span>
+<span class="line" data-hl="=1">mu        = torch.tensor(<span class="n">1.0</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line" data-hl="=1">log_sigma = torch.tensor(<span class="n">0.0</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line">opt = torch.optim.Adam([mu, log_sigma], lr=<span class="n">0.05</span>)</span>
+<span class="line"></span>
+<span class="line" data-hl="=3"><span class="k">for</span> step <span class="k">in</span> range(<span class="n">300</span>):</span>
+<span class="line" data-hl="=2">    dist = Normal(mu, log_sigma.exp())</span>
+<span class="line" data-hl="=2">    loss = -dist.log_prob(x).mean()</span>
+<span class="line" data-hl="=3">    opt.zero_grad(); loss.backward(); opt.step()</span>
+<span class="line"></span>
+<span class="line" data-hl="=4">x_new = dist.sample((<span class="n">30</span>,))              <span class="c"># step 2: generate</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>The parameters</b> $\theta = (\mu, \log\sigma)$, started anywhere. We learn $\log\sigma$ so that $\sigma = e^{\log\sigma}$ is always positive.</p>
+        <p class="small" data-b="=2"><b>The loss</b> is the score from the last slide with a minus sign, averaged: $-\frac1N\sum_i \log\N(x_i;\mu,\sigma^2)$.</p>
+        <p class="small" data-b="=3"><b>The update:</b> nudge $\mu$ and $\log\sigma$ downhill, 300 times. The same loop trains every network in this course.</p>
+        <p class="small" data-b="4"><b>Result:</b> $\mu = −0.22$, $\sigma = 2.08$, exactly the formula's answer. Then <code>sample</code> is step 2.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>Real run (scripts/make_figures_extra.py). Point out that nothing here is specific to Gaussians: swap <code>Normal</code> for any distribution with a <code>log_prob</code>, and the loop is unchanged. That is how we will fit the two-bump model, and later the VAE.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="fit-watch" data-section="1 · Distributions">
+  <p class="kicker">Watch the fit happen</p>
+  <h2>Four moments of that loop</h2>
+  <div class="body center"><img class="fig" src="figures/data/gd-gauss.svg" style="width:1150px"></div>
+  <p class="q">The curve starts in the wrong place, widens to cover both clumps, and stops at the best single bump. The loss falls from 3.82 to 2.15.</p>
+</section>
+
 <section class="slide sec-dist" id="checkpoint-1" data-section="1 · Distributions">
   <p class="kicker">Checkpoint</p>
   <h2>So far: learn and generate work; one bump is not enough</h2>
@@ -433,7 +472,7 @@
       <tr data-b="2"><td>Fix</td><td>a richer model that can make two clumps</td><td>next slide</td></tr>
     </table>
   </div>
-  <aside class="notes"><p>Pause here. Everything else in the lecture follows this recipe with a richer model: VAEs and GANs are different answers to "what model, and how do we learn it".</p></aside>
+  <aside class="notes"><p>Pause here. Everything else in the lecture follows this recipe with a richer model: the VAE is a different answer to "what model, and how do we learn it".</p></aside>
 </section>
 
 <section class="slide sec-dist" id="toy-story" data-section="1 · Distributions">
@@ -455,13 +494,81 @@
   <p class="q">One hidden coin flip made the model rich enough: the samples now fall in the bumps, not in the gap.</p>
   <aside class="notes">
     <p>Read the formula aloud: probability of x through bump A plus probability of x through bump B, each weighted by how likely that bump is. Summing over the hidden choice is called marginalising it out.</p>
-    <p>The A-bump contributes about 2 × 10⁻¹² at x = 1.5: 7 standard deviations away.</p>
+    <p>The A-bump contributes about 9 × 10⁻¹² at x = 1.5 (½ × 1.8 × 10⁻¹¹): 7 standard deviations away.</p>
   </aside>
 </section>
 
+<section class="slide sec-dist" id="mix-code" data-section="1 · Distributions">
+  <p class="kicker">Fitting $K$ bumps in PyTorch</p>
+  <h2>Same loop, a richer <code>log_prob</code></h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code"><span class="line" data-hl="=1">logits = torch.zeros(K, requires_grad=<span class="k">True</span>)   <span class="c"># bump weights</span></span>
+<span class="line" data-hl="=1">means  = torch.randn(K, requires_grad=<span class="k">True</span>)</span>
+<span class="line" data-hl="=1">log_sd = torch.zeros(K, requires_grad=<span class="k">True</span>)</span>
+<span class="line"></span>
+<span class="line"><span class="k">def</span> <span class="f">log_p</span>(x):                                <span class="c"># log p(x), shape [N]</span></span>
+<span class="line" data-hl="=2">    comp = Normal(means, log_sd.exp()).log_prob(x[:, <span class="k">None</span>])   <span class="c"># [N, K]</span></span>
+<span class="line" data-hl="=3">    <span class="k">return</span> torch.logsumexp(log_softmax(logits) + comp, dim=<span class="n">1</span>)</span>
+<span class="line"></span>
+<span class="line" data-hl="=4">loss = -log_p(x).mean()        <span class="c"># then the same 3-line update</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Three parameters per bump:</b> a weight, a centre, a width. <code>softmax</code> turns the weights into probabilities that sum to 1.</p>
+        <p class="small" data-b="=2"><b>Every number under every bump:</b> $\log p(x_i\mid z = k)$ for all $i$ and $k$, a table of $N \times K$ log-densities.</p>
+        <p class="small" data-b="=3"><b>The sum over the hidden choice:</b> $\log\sum_k p(k)\,p(x\mid k)$. <code>logsumexp</code> does it without underflow.</p>
+        <p class="small" data-b="4"><b>Training</b> is unchanged. With $K = 2$ it finds centres −2.06 and 1.98, widths 0.52 and 0.54.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>The hidden recipe was centres −2 and 2, widths 0.5, weights ½ each. Gradient descent recovers it from 200 numbers alone. Compare with the formula slide: there is no closed form for a mixture, so here gradient descent is not just a convenience, it is the method.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mix-sample" data-section="1 · Distributions">
+  <p class="kicker">Step 2 · Generate, from the two-bump fit</p>
+  <h2>Sampling runs the story: choose a bump, then a number</h2>
+  <div class="body">
+    <div class="codewalk" style="grid-template-columns:1fr 1fr">
+      <pre class="code"><span class="line" data-hl="=1">weights = softmax(logits)</span>
+<span class="line" data-hl="=1">k = torch.multinomial(weights, <span class="n">1000</span>,</span>
+<span class="line" data-hl="=1">                      replacement=<span class="k">True</span>)    <span class="c"># the coin</span></span>
+<span class="line" data-hl="=2">x_new = means[k] + log_sd.exp()[k] * torch.randn(<span class="n">1000</span>)</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Step 1:</b> pick a bump for each sample, with the learned weights.</p>
+        <p class="small" data-b="2"><b>Step 2:</b> draw a number from that bump: its centre plus its width times standard noise.</p>
+      </div>
+    </div>
+    <img class="fig" src="figures/data/mix-samples.svg" style="width:900px;margin:12px auto 0" data-b="2">
+  </div>
+  <p class="q" data-b="2">1,000 new numbers that follow the data, and none of them is a copy of a training number.</p>
+</section>
+
+<section class="slide sec-dist" id="how-many" data-section="1 · Distributions">
+  <p class="kicker">But how many bumps should we fit?</p>
+  <h2>More bumps always fit the training data better</h2>
+  <div class="body center"><img class="fig" src="figures/data/mixK-fits.svg" style="width:1150px"></div>
+  <p class="q">1, 2, 3, 4 bumps, each fitted with the same loop. The training score rises every time. So which one do we keep?</p>
+  <aside class="notes"><p>The 3- and 4-bump fits spend their extra bumps on a narrow spike or a small shoulder: a tiny bump of width 0.05 at 3.27 in the 4-bump fit. Training log-likelihood: −2.15, −1.47, −1.466, −1.462.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="how-many-score" data-section="1 · Distributions">
+  <p class="kicker">Score on data the fit has never seen</p>
+  <h2>New data decides: two bumps</h2>
+  <div class="body">
+    <div class="row" style="gap:34px;align-items:center">
+      <img class="fig" src="figures/data/mixK-score.svg" style="height:400px">
+      <div class="col grow">
+        <p class="small">Draw <b>200 new numbers</b> from the same hidden recipe and score each fit on them.</p>
+        <p class="small" data-b="2">1 → 2 bumps: $−2.153 \to −1.376$ per number. A real improvement.</p>
+        <p class="small" data-b="3">3 or 4 bumps: the training score creeps up, the new-data score does not. The extra bumps fit noise in the 200 training numbers.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Choose the size of a model by how well it scores data it has not seen. That holds for bumps, and for networks.</p>
+</section>
+
 <section class="slide sec-dist" id="why-backwards" data-section="1 · Distributions">
-  <p class="kicker">Step 1 · Learn, for the two-bump model</p>
-  <h2>To fit two bumps, guess which bump made each point</h2>
+  <p class="kicker">Step 1 · Learn, looked at closely</p>
+  <h2>Hidden in the fit: which bump made each point?</h2>
   <div class="body">
     <div class="steps2">
       <div class="callout plain"><h3>If we knew the coin for every point</h3>fitting is easy: average the A-points for bump A's centre, the B-points for bump B's.</div>
@@ -469,7 +576,7 @@
     </div>
     <img class="fig" src="figures/data/toy-colored.svg" style="width:960px;margin:18px auto 0" data-b="3">
   </div>
-  <p class="q" data-b="3">Running the story backwards, from a number to its likely hidden cause, is called <b>inference</b>. It is part of learning, not a detour.</p>
+  <p class="q" data-b="3">Running the story backwards, from a number to its likely hidden cause, is called <b>inference</b>. The gradient descent we just ran was doing it all along: four slides on, we will see where.</p>
   <aside class="notes">
     <p>Build 3: each of the 200 points coloured by p(B | x), computed on the next slide. Points in the middle are grey: unsure.</p>
     <p>For the curious: alternating "guess the bump" and "refit the bumps" is the EM algorithm. We will not need its details; the point is that learning a hidden-variable model needs this backwards step.</p>
@@ -488,7 +595,7 @@
     </table>
     <div class="mathblock" style="font-size:27px;margin-top:20px" data-b="5">$$p(\mathrm{B}\mid x) = \frac{p(\mathrm{B})\,p(x\mid\mathrm{B})}{p(x)} = 0.832$$</div>
   </div>
-  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. Note the total is exactly the $p(x)$ from two slides ago.</p>
+  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. Note the total is exactly the $p(x)$ of the two-bump formula.</p>
   <aside class="notes">
     <p>Build by build: the two likelihoods (both tiny: 0.1 is far from both centres, but closer to B), multiply by the prior, add to get p(x), divide.</p>
     <p>The tiny numbers do not matter, only their ratio. Important for later: the backwards step needs p(x), the sum over all hidden values.</p>
@@ -510,6 +617,32 @@
   </div>
   <p class="q">These are the colours on the 200 points two slides ago.</p>
   <aside class="notes"><p>Derivation of the sigmoid if asked: the log ratio of the two likelihoods is [(x+2)² − (x−2)²]/(2·0.25) = 16x, and the equal priors cancel.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="post-code" data-section="1 · Distributions">
+  <p class="kicker">The backwards step, in one line</p>
+  <h2>Posterior = softmax of (log prior + log likelihood)</h2>
+  <div class="body">
+    <pre class="code" style="width:1000px;margin:0 auto;font-size:19px"><span class="line">log_joint = log_softmax(logits) + Normal(means, log_sd.exp()).log_prob(x)   <span class="c"># [K]</span></span>
+<span class="line" data-hl="2">posterior = softmax(log_joint)                 <span class="c"># divide by the total: Bayes</span></span></pre>
+    <p class="small" style="text-align:center;margin-top:22px" data-b="2">With the fitted bumps, at $x = 0.1$: $p(\mathrm{A}\mid x) = 0.094$, $p(\mathrm{B}\mid x) = 0.906$. (With the true recipe it was 0.832: the fitted bumps are slightly different.)</p>
+  </div>
+  <p class="q" data-b="2">Softmax is "exponentiate, then divide by the total": exactly the last column of the Bayes table.</p>
+</section>
+
+<section class="slide sec-dist" id="post-grad" data-section="1 · Distributions">
+  <p class="kicker">Why learning needs the backwards step</p>
+  <h2>The gradient of $\log p(x)$ is weighted by the posterior</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:25px">$$\frac{\partial \log p(x)}{\partial \mu_k} \;=\; \hl{p(k\mid x)}\;\cdot\;\frac{x - \mu_k}{\sigma_k^2}$$</div>
+    <img class="fig" src="figures/data/resp-curve.svg" style="width:780px;margin:0 auto" data-b="2">
+    <p class="small" style="text-align:center;margin:0" data-b="3">At $x = 0.1$: bump B's centre is pulled by $0.832 \times (0.1 - 2)/0.25 = −6.32$, bump A's by $0.168 \times (0.1 + 2)/0.25 = 1.41$.</p>
+  </div>
+  <p class="q" data-b="3">Each point pulls each bump in proportion to how likely that bump made it. Learning needs the posterior for every point: a 2-row table here, an intractable patch for images.</p>
+  <aside class="notes">
+    <p>Derivation, one line: p(x) = Σ_k π_k N(x; μ_k, σ_k²), so ∂ log p / ∂μ_k = π_k N(x; μ_k, σ_k²) / p(x) · (x − μ_k)/σ_k², and the first factor is Bayes' rule for p(k | x).</p>
+    <p>Numbers use the true recipe (centres ±2, widths 0.5, weights ½). This is the slide to come back to in Part 3: with a decoder instead of two bumps, the same gradient needs p(z | x) over a whole plane of codes.</p>
+  </aside>
 </section>
 
 <section class="slide sec-dist" id="vocab" data-section="1 · Distributions">
@@ -539,105 +672,30 @@
           <li><b>Learn</b> = choose parameters that make the data probable.</li>
           <li><b>Generate</b> = sample from the learned model.</li>
           <li>One bump was too simple; a hidden coin $z$ fixed it.</li>
-          <li>Scoring $x$ sums over $z$; learning needs the backwards step $p(z\mid x)$.</li>
+          <li>Scoring $x$ sums over $z$; learning needs the backwards step $p(z\mid x)$.</li><li>In code: one loop, <code>loss = -log_p(x).mean()</code>; choose the size on new data.</li>
         </ol>
       </div>
       <div class="next" data-b="2">
-        <h3>Next: the same story for images</h3>
-        <p class="small">The coin becomes a short code $z$ of real numbers; each bump becomes a neural network that turns $z$ into an image.</p>
-        <p class="small">Generating stays easy. Learning gets hard: the sum over $z$ becomes a sum over infinitely many codes.</p>
+        <h3>Next: images</h3>
+        <p class="small">784 numbers per example instead of one. Before any probability, a simpler idea: squeeze each image into a few numbers and rebuild it. That is the autoencoder.</p>
+        <p class="small">Part 3 returns to this probabilistic story, with a code $z$ in place of the coin.</p>
       </div>
     </div>
   </div>
   <aside class="notes"><p>The hidden recipe for the 200 numbers was exactly the two-bump story. Reveal it here.</p></aside>
 </section>
 
-<!-- ------------------------------------------------ from a coin to a code, slowly -->
 
-<section class="slide sec-dist" id="coin-to-code" data-section="1 · Distributions">
-  <p class="kicker">From a coin to a code</p>
-  <h2>Same story, bigger pieces</h2>
-  <div class="body">
-    <table class="cmp">
-      <tr><th></th><th>two bumps (so far)</th><th>images (from now on)</th></tr>
-      <tr><td>hidden $z$</td><td>a coin: A or B</td><td data-b="2">2 real numbers $(z_1, z_2)$, drawn from $\N(0, I)$</td></tr>
-      <tr><td>$p(x\mid z)$</td><td>a bump at $-2$ or $+2$</td><td data-b="3">a neural network, the <b>decoder</b>, with weights $\theta$</td></tr>
-      <tr><td>observed $x$</td><td>one number</td><td data-b="4">784 pixels, each ink (1) or paper (0)</td></tr>
-      <tr><td>sum over $z$</td><td>2 terms</td><td data-b="5">every point in a plane: infinitely many</td></tr>
-    </table>
-  </div>
-  <p class="q" data-b="5">Next three slides: generate one image this way, one step at a time.</p>
-  <aside class="notes"><p>Fill in the right column one row at a time, asking the class to guess each entry first. The last row is the problem Parts 2 to 4 solve.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-1" data-section="1 · Distributions">
-  <p class="kicker">Generating an image · step 1 of 3</p>
-  <h2>Draw a code</h2>
-  <div class="body">
-    <div class="row" style="gap:40px;justify-content:center">
-      <img class="fig" src="figures/data/story-plane.svg" style="height:400px">
-      <div class="col" style="width:500px">
-        <div class="mathblock left" style="font-size:28px">$$z \sim \N(0, I)$$</div>
-        <p class="small">Two numbers, each from a standard bell curve: like flipping the coin, but the "coin" can land anywhere in the plane.</p>
-        <p class="small" data-b="2">This draw: $z = (−0.18,\ −1.5)$.</p>
-      </div>
-    </div>
-  </div>
-  <p class="q" data-b="2">On its own, $z$ means nothing. The decoder will give it meaning.</p>
-  <aside class="notes"><p>The dashed circles are where most draws land (1, 2, 3 standard deviations). There is no "digit" axis: the meaning of z1 and z2 is whatever the decoder learns.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-2" data-section="1 · Distributions">
-  <p class="kicker">Generating an image · step 2 of 3</p>
-  <h2>Decode it into 784 pixel probabilities</h2>
-  <div class="body center"><svg viewBox="0 0 1152 340" class="diagram" role="img" aria-label="story-decode"><defs><marker id="story-decode-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="story-decode-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs><rect x="40" y="110" width="100" height="48" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="90.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">−0.18</text><rect x="40" y="158" width="100" height="48" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="90.0" y="188.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">−1.50</text><foreignObject x="-290.0" y="63.5" width="760" height="57.2" overflow="visible"><div class="fo" style="font-size:26px;color:#AA4E08;font-weight:400;text-align:center;height:41.6px;line-height:41.6px">$z$</div></foreignObject><path d="M144,158 L196,158" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#story-decode-ah-AA4E08)"/><polygon points="200,108.0 460,33.0 460,283.0 200,208.0" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round"/><text x="330.0" y="156" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">decoder</text><foreignObject x="180.0" y="159.5" width="300" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:500;text-align:center;height:28.8px;line-height:28.8px">weights $\theta$</div></foreignObject><path d="M464,158 L516,158" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#story-decode-ah-0F766E)"/><image x="522" y="18" width="280" height="280" href="figures/data/story-pi.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="522" y="18" width="280" height="280" rx="6" fill="none" stroke="#0F766E" stroke-width="2.5"/><foreignObject x="282.0" y="305.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#0F766E;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$\pi = \mathrm{sigmoid}(\text{decoder}_\theta(z))$</div></foreignObject><foreignObject x="830.0" y="81.2" width="320" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#4A5160;font-weight:500;text-align:center;height:36.8px;line-height:36.8px">each $\pi_i$ is between 0 and 1</div></foreignObject><foreignObject x="830.0" y="121.2" width="320" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#4A5160;font-weight:500;text-align:center;height:36.8px;line-height:36.8px">$\pi_i$ = probability that</div></foreignObject><foreignObject x="830.0" y="151.2" width="320" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#4A5160;font-weight:500;text-align:center;height:36.8px;line-height:36.8px">pixel $i$ is ink</div></foreignObject></svg></div>
-  <p class="q">$\pi_i$ is the probability that pixel $i$ is ink. Dark grey = probably ink; white = probably paper.</p>
-  <aside class="notes"><p>This is the trained decoder we build in Part 6. One forward pass: 2 numbers in, 784 numbers between 0 and 1 out (a sigmoid at the end). It plays the role of "which bump": it says what x is likely to look like, given z.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-3" data-section="1 · Distributions">
-  <p class="kicker">Generating an image · step 3 of 3</p>
-  <h2>Flip one coin per pixel</h2>
-  <div class="body">
-    <div class="row" style="gap:40px;justify-content:center">
-      <div class="col" style="align-items:center"><img class="fig pix" src="figures/data/story-pi.png" style="width:280px;border:2.5px solid var(--dec);border-radius:6px"><p class="cap">probabilities $\pi$</p></div>
-      <span class="arrow" style="font-size:40px">→</span>
-      <div class="col" style="align-items:center" data-b="2"><img class="fig pix" src="figures/data/story-sample.png" style="width:280px;border:2.5px solid var(--x);border-radius:6px"><p class="cap">one sample $x$</p></div>
-      <div class="col" style="width:330px" data-b="2">
-        <div class="mathblock left" style="font-size:26px">$$x_i \sim \mathrm{Bernoulli}(\pi_i)$$</div>
-        <p class="small">Each pixel independently: ink with probability $\pi_i$.</p>
-      </div>
-    </div>
-  </div>
-  <p class="q" data-b="2">That is a generated image. In practice we usually display $\pi$ itself, because it looks cleaner.</p>
-  <aside class="notes"><p>The speckle comes from the coin flips. Most papers, and most of this lecture, show π (the mean image) instead of a sample.</p></aside>
-</section>
-
-<section class="slide sec-dist" id="story-learn" data-section="1 · Distributions">
-  <p class="kicker">The same two steps as before</p>
-  <h2>Generating is easy. Learning is the catch.</h2>
-  <div class="body">
-    <div class="steps2">
-      <div class="callout z"><h3>Generate ✓</h3>draw $z \sim \N(0,I)$, decode, flip pixels. Three slides, done.</div>
-      <div class="callout dec" data-b="2"><h3>Learn ?</h3>choose the decoder's weights $\theta$ to make the training images probable:
-        <div class="mathblock" style="font-size:24px">$$p_\theta(x) = \int p(z)\,p_\theta(x\mid z)\,dz$$</div>
-        the two-bump sum, now over every code in the plane.</div>
-    </div>
-  </div>
-  <p class="q" data-b="2">Parts 2 to 4 are about this one problem. First, a simpler idea that almost works: the autoencoder.</p>
-  <aside class="notes"><p>Link back to the two-bump slides: there, learning needed the sum over z and the backwards step p(z|x). Both become hard with a continuous code and a neural decoder. That is the whole motivation for the encoder, KL and the ELBO.</p></aside>
-</section>
-
-<!-- ===================================================================== 3 · AUTOENCODERS -->
+<!-- ===================================================================== PART 2 · AUTOENCODERS -->
 
 <section class="slide sec-ae opener break" id="ae-open" data-section="2 · Autoencoders">
   <div class="break-grid">
     <div>
       <p class="kicker">Part 2 of 7</p>
       <h2>First attempt: an autoencoder</h2>
-      <p class="why">Part 1 ended with a catch: to learn a decoder we need to know which code goes with each image. An <b>encoder</b> network could simply tell us. Let us try that, and watch what breaks.</p>
+      <p class="why">Part 1 modelled single numbers; an image has 784. Before any probability, a simpler idea: squeeze each image into a few numbers with an <b>encoder</b>, rebuild it with a <b>decoder</b>, and see how far that gets us towards generating.</p>
     </div>
-    <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and hidden causes</li><li class="now" style="--c:var(--enc)"><span class="dot">2</span>Autoencoders</li><li class="todo" style="--c:var(--loss)"><span class="dot">3</span>KL divergence</li><li class="todo" style="--c:var(--dec)"><span class="dot">4</span>The ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">5</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">6</span>The VAE on MNIST</li><li class="todo" style="--c:var(--disc)"><span class="dot">7</span>GANs</li></ol>
+    <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and fitting</li><li class="now" style="--c:var(--enc)"><span class="dot">2</span>Autoencoders</li><li class="todo" style="--c:var(--x)"><span class="dot">3</span>The probabilistic view</li><li class="todo" style="--c:var(--loss)"><span class="dot">4</span>KL divergence</li><li class="todo" style="--c:var(--dec)"><span class="dot">5</span>Variational inference and the ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">6</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">7</span>The VAE on MNIST</li></ol>
   </div>
 </section>
 
@@ -668,6 +726,32 @@
   <aside class="notes"><p>Same cross-entropy as classification, with one binary "class" per pixel. Summed over 784 pixels per image.</p></aside>
 </section>
 
+<section class="slide sec-ae" id="ae-code" data-section="2 · Autoencoders">
+  <p class="kicker">The autoencoder in PyTorch</p>
+  <h2>Two small networks and one loss</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code"><span class="line" data-hl="=1">encoder = nn.Sequential(nn.Flatten(),</span>
+<span class="line" data-hl="=1">    nn.Linear(<span class="n">784</span>, <span class="n">512</span>), nn.ReLU(),</span>
+<span class="line" data-hl="=1">    nn.Linear(<span class="n">512</span>, <span class="n">256</span>), nn.ReLU(), nn.Linear(<span class="n">256</span>, d))</span>
+<span class="line" data-hl="=2">decoder = nn.Sequential(nn.Linear(d, <span class="n">256</span>), nn.ReLU(),</span>
+<span class="line" data-hl="=2">    nn.Linear(<span class="n">256</span>, <span class="n">512</span>), nn.ReLU(), nn.Linear(<span class="n">512</span>, <span class="n">784</span>))</span>
+<span class="line"></span>
+<span class="line" data-hl="=3">z      = encoder(x)                    <span class="c"># [B, d]   the code</span></span>
+<span class="line" data-hl="=3">logits = decoder(z)                    <span class="c"># [B, 784] one per pixel</span></span>
+<span class="line" data-hl="=4">loss = F.binary_cross_entropy_with_logits(</span>
+<span class="line" data-hl="=4">          logits, x.flatten(<span class="n">1</span>), reduction=<span class="f">"none"</span>).sum(<span class="n">1</span>).mean()</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Encoder:</b> 784 pixels in, $d$ numbers out. Each layer narrower than the last.</p>
+        <p class="small" data-b="=2"><b>Decoder:</b> the mirror image, $d$ numbers back up to 784.</p>
+        <p class="small" data-b="=3"><b>Forward pass:</b> image to code to one logit per pixel; $\mathrm{sigmoid}$ of a logit is the probability of ink.</p>
+        <p class="small" data-b="4"><b>Loss:</b> binary cross-entropy summed over the 784 pixels of each image, then averaged over the batch. Train with the same three-line update as the bumps.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>This is the model trained for these slides (scripts/train_models.py), 30 epochs on 60,000 binarised MNIST digits. Ask: where are the labels? There are none. The input is the target.</p></aside>
+</section>
+
 <section class="slide sec-ae" id="ae-recon" data-section="2 · Autoencoders">
   <p class="kicker">Trained on 60,000 digits</p>
   <h2>It reconstructs very well</h2>
@@ -677,6 +761,109 @@
   </div>
   <p class="q">784 pixels squeezed into 16 numbers and back. Average loss 44.9 nats per image. Can we now make new digits?</p>
   <aside class="notes"><p>This is an autoencoder with a 16-number code. Same architecture as before otherwise. Test-set reconstruction loss: 44.9 nats per image.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-bottleneck" data-section="2 · Autoencoders">
+  <p class="kicker">How narrow can the middle be?</p>
+  <h2>2 numbers or 16 numbers per image</h2>
+  <div class="body">
+    <div class="col" style="gap:6px;align-items:center">
+      <p class="small" style="margin:0">a 2-number code · loss 128.1 nats per image</p>
+      <img class="fig pix" src="figures/data/ae-recon.png" style="width:860px">
+      <p class="small" style="margin:14px 0 0" data-b="2">a 16-number code · loss 44.9 nats per image</p>
+      <img class="fig pix" src="figures/data/ae16-recon.png" style="width:860px" data-b="2">
+    </div>
+  </div>
+  <p class="q" data-b="2">Each pair of rows: test digits on top, reconstructions below. Two numbers keep the digit's identity; sixteen also keep its slant and stroke.</p>
+  <aside class="notes"><p>Same architecture apart from the width of the middle layer. The 2-number version matters later because we can draw its code space on a slide.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-kinds" data-section="2 · Autoencoders">
+  <p class="kicker">One idea, several variations</p>
+  <h2>The autoencoder family</h2>
+  <div class="body">
+    <table class="cmp kinds">
+      <tr><th>variant</th><th>what changes</th><th>what it encourages</th></tr>
+      <tr><td>plain</td><td>nothing: compress, rebuild</td><td>a short code that keeps what matters</td></tr>
+      <tr data-b="2"><td>denoising</td><td>corrupt the input, rebuild the <b>clean</b> image</td><td>features that ignore noise</td></tr>
+      <tr data-b="3"><td>sparse</td><td>penalty: only a few code units may be on</td><td>each unit means one part of a digit</td></tr>
+      <tr data-b="4"><td>contractive</td><td>penalty: the code barely moves when the input moves a little</td><td>smooth, robust codes</td></tr>
+      <tr data-b="5"><td><b class="cenc">variational</b></td><td>each image becomes a <b>cloud</b> of codes near $\N(0, I)$</td><td>a code space you can <b>sample</b> from</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="5">The first four change the loss or the input. The last one changes what a code is, and it is where today is going.</p>
+  <p class="src">Following Lilian Weng, "From Autoencoder to Beta-VAE" (2018)</p>
+  <aside class="notes"><p>Next three slides: the denoising and sparse versions trained on MNIST for this lecture, and the contractive version explained.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-denoise" data-section="2 · Autoencoders">
+  <p class="kicker">Variant 1 · denoising autoencoder</p>
+  <h2>Feed it a damaged image, ask for the clean one</h2>
+  <div class="body">
+    <div class="row" style="gap:28px;align-items:center">
+      <div class="dae-labels"><span>input: 20% of pixels flipped</span><span data-b="2">plain autoencoder</span><span data-b="3">denoising autoencoder</span><span data-b="3">the clean original</span></div>
+      <div class="stack" style="width:780px">
+        <img class="fig pix" src="figures/data/dae-rows.png" style="width:780px">
+        <div class="dae-cover" data-gone="2"></div>
+        <div class="dae-cover2" data-gone="3"></div>
+      </div>
+    </div>
+    <pre class="code" style="width:860px;margin:16px auto 0;font-size:17px"><span class="line">noisy = flip_pixels(x, rate=<span class="n">0.2</span>)                   <span class="c"># the only new line</span></span>
+<span class="line">loss  = bce_with_logits(decoder(encoder(noisy)), x)  <span class="c"># target: the CLEAN x</span></span></pre>
+  </div>
+  <p class="q" data-b="3">The plain autoencoder copies the noise. Trained to undo damage, the code must hold the digit, not the specks.</p>
+  <aside class="notes"><p>Both models have a 16-number code and the same architecture; only the training input differs. The idea (Vincent et al., 2008) predates dropout: corrupting inputs during training is a form of regularisation.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-sparse" data-section="2 · Autoencoders">
+  <p class="kicker">Variant 2 · sparse autoencoder</p>
+  <h2>A wide code, but only a few units allowed on</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:23px">$$\text{loss} = \text{reconstruction} + \lambda \textstyle\sum_{j=1}^{64} |h_j|, \qquad h = \mathrm{ReLU}(\text{encoder}(x))$$</div>
+    <img class="fig" src="figures/data/sparse-codes.svg" style="height:350px;margin:4px auto 0" data-b="2">
+  </div>
+  <p class="q" data-b="2">The 64-number code of our 3. Averaged over test digits: 34.9 units on without the penalty, 8.8 with it.</p>
+  <aside class="notes"><p>The penalty costs reconstruction quality (30.1 vs 66.2 nats per image): a trade between a short description and a precise one. Each surviving unit tends to stand for a stroke or a part.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-contractive" data-section="2 · Autoencoders">
+  <p class="kicker">Variant 3 · contractive autoencoder (not trained here)</p>
+  <h2>Nudge the input; the code should barely move</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:27px">$$\text{loss} = \text{reconstruction} + \lambda \,\Big\| \frac{\partial h}{\partial x} \Big\|_F^2 \;=\; \text{reconstruction} + \lambda\sum_{j,i}\Big(\frac{\partial h_j}{\partial x_i}\Big)^2$$</div>
+    <div class="steps2" style="margin-top:14px">
+      <div class="callout plain" data-b="2"><h3>Read the penalty</h3>for every code unit $h_j$ and every pixel $x_i$: how much does $h_j$ change if $x_i$ changes a little? Add up the squares.</div>
+      <div class="callout enc" data-b="3"><h3>What it buys</h3>two slightly different 3s get almost the same code. Nearby inputs, nearby codes: a first step towards a smooth code space.</div>
+    </div>
+  </div>
+  <aside class="notes"><p>Rifai et al., 2011. Denoising and contractive autoencoders are closely related: adding small noise during training and penalising the Jacobian both make the code insensitive to small input changes.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-uses" data-section="2 · Autoencoders">
+  <p class="kicker">What autoencoders are used for</p>
+  <h2>Compress, clean, search, and spot the odd one out</h2>
+  <div class="body">
+    <div class="row top" style="gap:30px">
+      <div class="col" style="width:470px">
+        <p class="small"><b>Compress:</b> 784 pixels → 16 numbers, 49× fewer.</p>
+        <p class="small"><b>Clean:</b> the denoising slide.</p>
+        <p class="small"><b>Search:</b> similar images have nearby codes, so search the codes.</p>
+        <p class="small" data-b="2"><b>Spot anomalies:</b> an image the model has never seen anything like gets a large reconstruction error.</p>
+      </div>
+      <div class="col" style="align-items:center" data-b="2">
+        <img class="fig pix" src="figures/data/ae-anomaly.png" style="width:600px">
+        <div class="row" style="width:600px;justify-content:space-between"><p class="cap">top: typical test digits, loss ≈ 40.5</p><p class="cap">bottom: the 8 worst of 10,000, loss up to 218.0</p></div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">Useful, all of it. But none of it <b>generates</b> a new image. Can the decoder do that on its own?</p>
+  <aside class="notes"><p>The worst-reconstructed test digits are mostly badly written or cut-off digits: the reconstruction error works as an "unusual" score, with no labels needed.</p></aside>
+</section>
+
+<section class="slide sec-ae opener" id="ae-can-generate" data-section="2 · Autoencoders">
+  <p class="kicker">Part 2, second half</p>
+  <h2>Can an autoencoder generate?</h2>
+  <p>The decoder turns codes into digits. If we pick a code ourselves, do we get a new digit?</p>
 </section>
 
 <section class="slide sec-ae" id="ae-gen" data-section="2 · Autoencoders">
@@ -740,9 +927,9 @@
   <h2>Random draws all land in one small spot</h2>
   <div class="body">
     <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/ae-scatter-prior.svg" style="height:470px">
+      <img class="fig" src="figures/data/ae-scatter-prior.svg" style="height:450px">
       <div class="col grow">
-        <p class="small">Now add 150 random codes from $\N(0, I)$ (orange), the kind we fed the decoder two slides ago. Dashed circles: radius 1 and 2. On this map they all fall into one small crowded patch.</p>
+        <p class="small">Now add 150 random codes from $\N(0, I)$ (black ×), the kind we fed the decoder two slides ago. Dashed circles: radius 1 and 2. On this map they all fall into one small crowded patch (zoomed, bottom right).</p>
         <img class="fig pix" src="figures/data/ae-prior-decodes.png" style="width:540px" data-b="2">
         <p class="cap" data-b="2" style="text-align:left">ten of them decoded: some digits, some smudges</p>
         <p class="small" data-b="3">And we can never generate a 1: the 1s live near $z_1 \approx 20$.</p>
@@ -797,7 +984,7 @@
   <h2>The same plot for a VAE</h2>
   <div class="body">
     <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/vae-scatter-prior.svg" style="height:470px">
+      <img class="fig" src="figures/data/vae-scatter-prior.svg" style="height:450px">
       <div class="col grow">
         <p class="small">Same data, same 2-number code, same random draws. Now the codes sit inside $\N(0, I)$.</p>
         <img class="fig pix" src="figures/data/vae-prior-decodes.png" style="width:540px" data-b="2">
@@ -805,8 +992,8 @@
       </div>
     </div>
   </div>
-  <p class="q">To get here we need two tools: a distance between distributions (KL), and a principled loss (the ELBO).</p>
-  <aside class="notes"><p>Show the contrast with the previous plot: axes now run from −4 to 4, every class sits inside the dashed circles, and decoded draws are digits.</p></aside>
+  <p class="q">To get here: make the model probabilistic (Part 3), measure how close two distributions are (Part 4), and derive the loss (Part 5).</p>
+  <aside class="notes"><p>Show the contrast with the previous plot: axes now run from −4 to 4, most of every class sits inside the outer dashed circle (a few clusters, the 3s among them, reach its edge), and decoded draws are digits.</p></aside>
 </section>
 
 <section class="slide sec-ae" id="recap-2" data-section="2 · Autoencoders">
@@ -814,267 +1001,111 @@
   <h2>What we did, and what comes next</h2>
   <div class="body">
     <div class="recap">
-      <div><h3>What we did</h3><ol><li>An encoder squeezes an image into a short code; a decoder rebuilds it. The image is its own target.</li><li>Random codes from $\N(0, I)$ decode to scribbles.</li><li>The codes spread over an arbitrary range, and the decoder never saw the space between them.</li><li>The wish: encode each image to a <b>cloud</b>, and keep every cloud near $\N(0, I)$.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next: a distance between distributions</h3><p class="small">"Keep the cloud near $\N(0, I)$" needs one number for how far one distribution is from another. That number is the KL divergence.</p></div>
+      <div><h3>What we did</h3><ol><li>An encoder squeezes an image into a short code; a decoder rebuilds it. The image is its own target.</li><li>Random codes from $\N(0, I)$ decode to scribbles.</li><li>The codes spread over an arbitrary range, and the decoder never saw the space between them.</li><li>Variants change the input (denoising) or add a penalty (sparse, contractive).</li><li>The wish: encode each image to a <b>cloud</b>, and keep every cloud near $\N(0, I)$.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next: the probabilistic view</h3><p class="small">Turn the decoder into a probability model with a prior over codes, and ask what it would take to train it by maximum likelihood, as in Part 1.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ===================================================================== 4 · KL -->
+<!-- ===================================================================== PART 3 · THE PROBABILISTIC VIEW -->
 
-<section class="slide sec-kl opener break" id="kl-open" data-section="3 · KL divergence">
+<section class="slide sec-prob opener break" id="prob-open" data-section="3 · Probabilistic view">
   <div class="break-grid">
     <div>
       <p class="kicker">Part 3 of 7</p>
-      <h2>KL divergence: how far apart are two distributions?</h2>
-      <p class="why">The fix for the autoencoder was to keep each image's cloud of codes close to $\N(0, I)$. To say <b>close</b> we need one number for the gap between two distributions. We build it from two bars.</p>
+      <h2>The probabilistic view: a decoder is a likelihood</h2>
+      <p class="why">The autoencoder could not generate because nothing said where codes live. Part 1 had exactly what is missing: a <b>prior</b> over the hidden choice. Put Part 1's story and Part 2's decoder together.</p>
     </div>
-    <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and hidden causes</li><li class="done" style="--c:var(--enc)"><span class="dot">✓</span>Autoencoders</li><li class="now" style="--c:var(--loss)"><span class="dot">3</span>KL divergence</li><li class="todo" style="--c:var(--dec)"><span class="dot">4</span>The ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">5</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">6</span>The VAE on MNIST</li><li class="todo" style="--c:var(--disc)"><span class="dot">7</span>GANs</li></ol>
+    <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and fitting</li><li class="done" style="--c:var(--enc)"><span class="dot">✓</span>Autoencoders</li><li class="now" style="--c:var(--x)"><span class="dot">3</span>The probabilistic view</li><li class="todo" style="--c:var(--loss)"><span class="dot">4</span>KL divergence</li><li class="todo" style="--c:var(--dec)"><span class="dot">5</span>Variational inference and the ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">6</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">7</span>The VAE on MNIST</li></ol>
   </div>
 </section>
 
-<section class="slide sec-kl" id="kl-bars" data-section="3 · KL divergence">
-  <p class="kicker">Two distributions over the same two outcomes</p>
-  <h2>The data says 80/20. The model says 60/40.</h2>
+<section class="slide sec-prob" id="coin-to-code" data-section="3 · Probabilistic view">
+  <p class="kicker">From a coin to a code</p>
+  <h2>Same story, bigger pieces</h2>
   <div class="body">
-    <div class="row" style="justify-content:center;gap:120px;margin-top:20px">
-      <div class="col" style="align-items:center">
-        <p class="small cx" style="font-weight:650">$P$: the data</p>
-        <div class="vbars"><div style="--h:0.8;--c:var(--x)"><span>0.8</span></div><div style="--h:0.2;--c:var(--x)"><span>0.2</span></div></div>
-        <div class="vlabs"><span>a 1</span><span>a 7</span></div>
-      </div>
-      <div class="col" style="align-items:center" data-b="2">
-        <p class="small cdec" style="font-weight:650">$Q$: our model</p>
-        <div class="vbars"><div style="--h:0.6;--c:var(--dec)"><span>0.6</span></div><div style="--h:0.4;--c:var(--dec)"><span>0.4</span></div></div>
-        <div class="vlabs"><span>a 1</span><span>a 7</span></div>
-      </div>
-    </div>
-  </div>
-  <p class="q" data-b="2">A dataset of 1s and 7s, 80% 1s. The model believes 60/40. How wrong is it, as one number?</p>
-  <aside class="notes"><p>Keep the story concrete: draw digits from the data, ask the model how probable each was. When a 1 shows up, the model said 0.6 when it should have said 0.8.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-surprise" data-section="3 · KL divergence">
-  <p class="kicker">Ingredient: surprise</p>
-  <h2>Surprise $= -\log(\text{probability})$</h2>
-  <div class="body">
-    <table class="work" style="margin:10px auto 0;font-size:24px">
-      <tr><th>outcome</th><th>$P$</th><th>$Q$</th><th>surprise if you believe $P$</th><th>surprise if you believe $Q$</th></tr>
-      <tr><td>a 1</td><td>0.8</td><td>0.6</td><td>$-\log 0.8 = 0.223$</td><td data-b="2">$-\log 0.6 = 0.511$</td></tr>
-      <tr><td>a 7</td><td>0.2</td><td>0.4</td><td>$-\log 0.2 = 1.609$</td><td data-b="2">$-\log 0.4 = 0.916$</td></tr>
-    </table>
-    <div class="row" style="justify-content:center;gap:40px;margin-top:26px" data-b="3">
-      <div class="callout plain" style="width:470px">Certain events cost 0. Rare events cost a lot. Natural logs, so the unit is the <b>nat</b>.</div>
-      <div class="callout loss" style="width:470px">Believing $Q$, a 1 surprises us more than it should ($0.511$ vs $0.223$), a 7 less ($0.916$ vs $1.609$).</div>
-    </div>
-  </div>
-  <aside class="notes"><p>This is the same −log p that appeared in the name model and in cross-entropy. Nothing new, just a name for it.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-extra" data-section="3 · KL divergence">
-  <p class="kicker">KL, step 1 of 3</p>
-  <h2>For each outcome: how much extra surprise does $Q$ cause?</h2>
-  <div class="body">
-    <div class="mathblock" style="font-size:28px">$$\underbrace{-\log Q_i}_{\text{surprise under } Q} \;-\; \underbrace{(-\log P_i)}_{\text{surprise under } P} \;=\; \log\frac{P_i}{Q_i}$$</div>
-    <table class="work" style="margin:14px auto 0;font-size:24px">
-      <tr><th>outcome</th><th>$-\log Q_i$</th><th>$-\log P_i$</th><th>extra surprise $\log(P_i/Q_i)$</th></tr>
-      <tr data-b="2"><td>a 1</td><td>0.511</td><td>0.223</td><td>$0.511 - 0.223 = 0.288$</td></tr>
-      <tr data-b="3"><td>a 7</td><td>0.916</td><td>1.609</td><td>$0.916 - 1.609 = -0.693$</td></tr>
+    <table class="cmp">
+      <tr><th></th><th>two bumps (so far)</th><th>images (from now on)</th></tr>
+      <tr><td>hidden $z$</td><td>a coin: A or B</td><td data-b="2">2 real numbers $(z_1, z_2)$, drawn from $\N(0, I)$</td></tr>
+      <tr><td>$p(x\mid z)$</td><td>a bump at $-2$ or $+2$</td><td data-b="3">a neural network, the <b>decoder</b>, with weights $\theta$</td></tr>
+      <tr><td>observed $x$</td><td>one number</td><td data-b="4">784 pixels, each ink (1) or paper (0)</td></tr>
+      <tr><td>sum over $z$</td><td>2 terms</td><td data-b="5">every point in a plane: infinitely many</td></tr>
     </table>
   </div>
-  <p class="q" data-b="3">Negative for the 7: $Q$ over-predicts 7s, so a 7 surprises it less than it should.</p>
+  <p class="q" data-b="5">Next three slides: generate one image this way, one step at a time.</p>
+  <aside class="notes"><p>Fill in the right column one row at a time, asking the class to guess each entry first. The last row is the problem Parts 3 to 5 solve.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-weight" data-section="3 · KL divergence">
-  <p class="kicker">KL, step 2 of 3</p>
-  <h2>Weight each outcome by how often it really happens</h2>
+<section class="slide sec-prob" id="story-1" data-section="3 · Probabilistic view">
+  <p class="kicker">Generating an image · step 1 of 3</p>
+  <h2>Draw a code</h2>
   <div class="body">
-    <table class="work" style="margin:10px auto 0;font-size:24px">
-      <tr><th>outcome</th><th>how often: $P_i$</th><th>extra surprise</th><th>weighted: $P_i\log(P_i/Q_i)$</th></tr>
-      <tr><td>a 1</td><td>0.8</td><td>0.288</td><td data-b="2">$0.8 \times 0.288 = 0.230$</td></tr>
-      <tr><td>a 7</td><td>0.2</td><td>$-0.693$</td><td data-b="3">$0.2 \times (-0.693) = -0.139$</td></tr>
-    </table>
-  </div>
-  <p class="q" data-b="3">Real data is 80% 1s, so the 1 row counts four times as much as the 7 row.</p>
-  <aside class="notes"><p>Why weight by P and not by Q? Because P is what actually happens. We ask: on the data we really see, how much extra surprise does the model cause per example?</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-sum" data-section="3 · KL divergence">
-  <p class="kicker">KL, step 3 of 3</p>
-  <h2>Add them up: that is the KL divergence</h2>
-  <div class="body">
-    <div class="mathblock big">$$\KL(P\,\|\,Q) \;=\; \sum_i P_i \log\frac{P_i}{Q_i}$$</div>
-    <div class="mathblock" style="font-size:28px" data-b="2">$$= 0.230 + (-0.139) = 0.092 \text{ nats}$$</div>
-    <div class="row" style="justify-content:center;gap:24px;margin-top:18px" data-b="3">
-      <div class="callout plain" style="width:470px">One row was negative, yet the total can never be: $\KL \ge 0$.</div>
-      <div class="callout plain" style="width:470px">$\KL = 0$ only when $Q = P$ exactly.</div>
-    </div>
-  </div>
-  <p class="q" data-b="3">KL is the average extra surprise you pay for believing $Q$ when the truth is $P$.</p>
-  <aside class="notes"><p>Why can't the total be negative? To over-predict 7s, Q had to under-predict 1s, and 1s carry more weight. Gibbs' inequality makes this precise.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="expectation" data-section="3 · KL divergence">
-  <p class="kicker">Notation we will use all lecture</p>
-  <h2>$\E$ means "average over"</h2>
-  <div class="body">
-    <div class="erows" style="margin:0 auto">
-      <div class="mathblock left" style="font-size:25px">$$\E_{x\sim P}\big[f(x)\big] = \sum_x P(x)\,f(x)$$</div><span class="lab">exact, for a sum over outcomes</span>
-      <div class="mathblock left" style="font-size:25px" data-b="2">$$\E_{z\sim q}\big[f(z)\big] = \int q(z)\,f(z)\,dz$$</div><span class="lab" data-b="2">exact, for a continuous variable</span>
-      <div class="mathblock left" style="font-size:25px" data-b="3">$$\E_{x\sim P}\big[f(x)\big] \approx \frac1S\sum_{s=1}^{S} f(x_s),\quad x_s\sim P$$</div><span class="lab" data-b="3">estimated from samples</span>
-    </div>
-    <div class="callout x" style="margin-top:14px" data-b="4">KL is an average: $\KL(P\|Q) = \E_{x\sim P}\big[\log\tfrac{P(x)}{Q(x)}\big]$. Five draws 1, 1, 7, 1, 1 give $\tfrac15(4\times 0.288 - 0.693) = 0.092$.</div>
-  </div>
-  <aside class="notes">
-    <p>The subscript says which distribution the average is taken under: x ∼ P means "x is drawn from P". This matters because KL changes when you swap it.</p>
-    <p>Those five draws happen to be exactly 80/20, so the estimate matches. With random draws it would fluctuate around 0.092.</p>
-  </aside>
-</section>
-
-<section class="slide sec-kl" id="kl-order" data-section="3 · KL divergence">
-  <p class="kicker">Not a distance</p>
-  <h2>Swap the arguments, get a different number</h2>
-  <div class="body">
-    <div class="row" style="gap:30px">
-      <div class="col" style="width:470px">
-        <div class="mathblock left" style="font-size:25px">$$\KL(Q\|P) = 0.6\log\frac{0.6}{0.8} + 0.4\log\frac{0.4}{0.2}$$</div>
-        <div class="mathblock left" style="font-size:25px">$$= -0.173 + 0.277 = 0.105$$</div>
-        <p class="small" data-b="2">$0.105 \neq 0.092$: KL is not symmetric. "How wrong is $Q$ about $P$" differs from "how wrong is $P$ about $Q$".</p>
-        <p class="small" data-b="3">Push $q \to 0$ and $\KL(P\|Q) \to \infty$. Never give zero probability to something that happens.</p>
-      </div>
-      <img class="fig" src="figures/data/kl-vs-q.svg" style="width:640px">
-    </div>
-    <div class="ctrl interactive" data-widget="kl" style="justify-content:center;margin-top:4px">
-      <span>model's $q$ =</span><input type="range" min="0.01" max="0.99" step="0.01" value="0.6"><span class="readout">0.60</span>
-      <span>$\KL(P\|Q)$ = <span class="readout kl-pq">0.092</span></span><span>$\KL(Q\|P)$ = <span class="readout kl-qp">0.105</span></span>
-    </div>
-  </div>
-  <aside class="notes"><p>Drag the slider live. Both curves are zero at q = 0.8. Near q = 0 the red curve explodes: the data has 1s but the model says they never happen.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-ce" data-section="3 · KL divergence">
-  <p class="kicker">You have minimised a KL many times</p>
-  <h2>Cross-entropy = entropy + KL</h2>
-  <div class="body">
-    <div class="ladder" style="margin:0 auto;width:1080px;font-size:26px">
-      <span class="lhs">$H(P,Q)$</span><span>$=$</span><span>$\displaystyle -\sum_i P_i\log Q_i$</span>
-      <span></span><span></span><span class="why">cross-entropy: the loss you train classifiers with</span>
-      <span class="lhs" data-b="2"></span><span data-b="2">$=$</span><span data-b="2">$\displaystyle -\sum_i P_i\log P_i \;+\; \sum_i P_i\big(\log P_i - \log Q_i\big)$</span>
-      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">add and subtract $\sum_i P_i\log P_i$</span>
-      <span class="lhs" data-b="3"></span><span data-b="3">$=$</span><span data-b="3">$\displaystyle \underbrace{H(P)}_{\text{entropy: fixed by the data}} \;+\; \KL(P\,\|\,Q)$</span>
-    </div>
-    <div class="stackbar" style="margin:22px auto 0;width:980px" data-b="4">
-      <div style="flex:0.500;background:var(--x-t);border-color:var(--x)"><b>$H(P) = 0.500$</b><span>does not depend on the model</span></div>
-      <div style="flex:0.092;background:var(--loss-t);border-color:var(--loss)"><b>$0.092$</b><span>KL</span></div>
-    </div>
-  </div>
-  <p class="q" data-b="4">Lowering cross-entropy can only lower the KL part. So does maximum likelihood: it minimises $\KL(\text{data}\,\|\,\text{model})$.</p>
-  <aside class="notes"><p>Together: H(P, Q) = 0.592 nats. Remember the direction: data first. That direction will explain why VAEs blur.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-gauss" data-section="3 · KL divergence">
-  <p class="kicker">The version the VAE needs</p>
-  <h2>KL between two bumps: an area</h2>
-  <div class="body">
-    <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/kl-gauss.svg" style="width:600px">
-      <div class="col grow">
-        <p class="small">For continuous variables the sum becomes an integral:</p>
-        <div class="mathblock left" style="font-size:26px">$$\KL(q\|p) = \int q(z)\,\log\frac{q(z)}{p(z)}\,dz$$</div>
-        <p class="small" data-b="2">Take $q = \N(1, 0.5^2)$, the encoder's cloud, and $p = \N(0,1)$, the prior.</p>
-        <p class="small" data-b="3">The shaded area, computed numerically, is <b>0.818</b> nats.</p>
+    <div class="row" style="gap:40px;justify-content:center">
+      <img class="fig" src="figures/data/story-plane.svg" style="height:400px">
+      <div class="col" style="width:500px">
+        <div class="mathblock left" style="font-size:28px">$$z \sim \N(0, I)$$</div>
+        <p class="small">Two numbers, each from a standard bell curve: like flipping the coin, but the "coin" can land anywhere in the plane.</p>
+        <p class="small" data-b="2">This draw: $z = (−0.18,\ −1.5)$.</p>
       </div>
     </div>
   </div>
-  <p class="q" data-b="3">Can we get 0.818 without a computer? Yes: for two Gaussians the integral has a formula. Three steps.</p>
-  <aside class="notes"><p>Numerical integral of the lower curve: 0.8181. The grey part is where q is below p and contributes negatively, like the 7 row earlier.</p></aside>
+  <p class="q" data-b="2">On its own, $z$ means nothing. The decoder will give it meaning.</p>
+  <aside class="notes"><p>The dashed circles are where most draws land (1, 2, 3 standard deviations). There is no "digit" axis: the meaning of z1 and z2 is whatever the decoder learns.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-gauss-2" data-section="3 · KL divergence">
-  <p class="kicker">Gaussian KL, step 1 of 2</p>
-  <h2>Write out the log of the ratio</h2>
+<section class="slide sec-prob" id="story-2" data-section="3 · Probabilistic view">
+  <p class="kicker">Generating an image · step 2 of 3</p>
+  <h2>Decode it into 784 pixel probabilities</h2>
+  <div class="body center"><svg viewBox="0 0 1152 340" class="diagram" role="img" aria-label="story-decode"><defs><marker id="story-decode-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="story-decode-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs><rect x="40" y="110" width="100" height="48" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="90.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">−0.18</text><rect x="40" y="158" width="100" height="48" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="90.0" y="188.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">−1.50</text><foreignObject x="-290.0" y="63.5" width="760" height="57.2" overflow="visible"><div class="fo" style="font-size:26px;color:#AA4E08;font-weight:400;text-align:center;height:41.6px;line-height:41.6px">$z$</div></foreignObject><path d="M144,158 L196,158" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#story-decode-ah-AA4E08)"/><polygon points="200,108.0 460,33.0 460,283.0 200,208.0" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round"/><text x="330.0" y="156" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">decoder</text><foreignObject x="180.0" y="159.5" width="300" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:500;text-align:center;height:28.8px;line-height:28.8px">weights $\theta$</div></foreignObject><path d="M464,158 L516,158" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#story-decode-ah-0F766E)"/><image x="522" y="18" width="280" height="280" href="figures/data/story-pi.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="522" y="18" width="280" height="280" rx="6" fill="none" stroke="#0F766E" stroke-width="2.5"/><foreignObject x="282.0" y="305.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#0F766E;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$\pi = \mathrm{sigmoid}(\text{decoder}_\theta(z))$</div></foreignObject><foreignObject x="830.0" y="81.2" width="320" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#4A5160;font-weight:500;text-align:center;height:36.8px;line-height:36.8px">each $\pi_i$ is between 0 and 1</div></foreignObject><foreignObject x="830.0" y="121.2" width="320" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#4A5160;font-weight:500;text-align:center;height:36.8px;line-height:36.8px">$\pi_i$ = probability that</div></foreignObject><foreignObject x="830.0" y="151.2" width="320" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#4A5160;font-weight:500;text-align:center;height:36.8px;line-height:36.8px">pixel $i$ is ink</div></foreignObject></svg></div>
+  <p class="q">$\pi_i$ is the probability that pixel $i$ is ink. Dark grey = probably ink; white = probably paper.</p>
+  <aside class="notes"><p>This is the trained decoder we build in Part 7. One forward pass: 2 numbers in, 784 numbers between 0 and 1 out (a sigmoid at the end). It plays the role of "which bump": it says what x is likely to look like, given z.</p></aside>
+</section>
+
+<section class="slide sec-prob" id="story-3" data-section="3 · Probabilistic view">
+  <p class="kicker">Generating an image · step 3 of 3</p>
+  <h2>Flip one coin per pixel</h2>
   <div class="body">
-    <div class="ladder" style="margin:0 auto;width:1060px;font-size:26px">
-      <span class="lhs">$\log q(z)$</span><span>$=$</span><span>$\displaystyle -\log\sigma - \tfrac12\log 2\pi - \frac{(z-\mu)^2}{2\sigma^2}$</span>
-      <span></span><span></span><span class="why">log of $\N(z;\mu,\sigma^2)$</span>
-      <span class="lhs" data-b="2">$\log p(z)$</span><span data-b="2">$=$</span><span data-b="2">$\displaystyle -\tfrac12\log 2\pi - \frac{z^2}{2}$</span>
-      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">log of $\N(z;0,1)$</span>
-      <span class="lhs" data-b="3">$\log\dfrac{q(z)}{p(z)}$</span><span data-b="3">$=$</span><span data-b="3">$\displaystyle -\log\sigma - \frac{(z-\mu)^2}{2\sigma^2} + \frac{z^2}{2}$</span>
-      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">subtract: the $\tfrac12\log 2\pi$ terms cancel</span>
+    <div class="row" style="gap:40px;justify-content:center">
+      <div class="col" style="align-items:center"><img class="fig pix" src="figures/data/story-pi.png" style="width:280px;border:2.5px solid var(--dec);border-radius:6px"><p class="cap">probabilities $\pi$</p></div>
+      <span class="arrow" style="font-size:40px">→</span>
+      <div class="col" style="align-items:center" data-b="2"><img class="fig pix" src="figures/data/story-sample.png" style="width:280px;border:2.5px solid var(--x);border-radius:6px"><p class="cap">one sample $x$</p></div>
+      <div class="col" style="width:330px" data-b="2">
+        <div class="mathblock left" style="font-size:26px">$$x_i \sim \mathrm{Bernoulli}(\pi_i)$$</div>
+        <p class="small">Each pixel independently: ink with probability $\pi_i$.</p>
+      </div>
     </div>
   </div>
-  <p class="q" data-b="3">Three terms. Next: average each one over $z \sim q$.</p>
+  <p class="q" data-b="2">That is a generated image. In practice we usually display $\pi$ itself, because it looks cleaner.</p>
+  <aside class="notes"><p>The speckle comes from the coin flips. Most papers, and most of this lecture, show π (the mean image) instead of a sample.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="kl-gauss-3" data-section="3 · KL divergence">
-  <p class="kicker">Gaussian KL, step 2 of 2</p>
-  <h2>Average each term over the cloud $q$</h2>
+<section class="slide sec-prob" id="story-learn" data-section="3 · Probabilistic view">
+  <p class="kicker">The same two steps as before</p>
+  <h2>Generating is easy. Learning is the catch.</h2>
   <div class="body">
-    <div class="row" style="justify-content:center;gap:24px">
-      <div class="callout enc" style="width:500px">$\E_q\big[(z-\mu)^2\big] = \sigma^2$ <span class="muted">(that is the variance)</span></div>
-      <div class="callout enc" style="width:500px">$\E_q\big[z^2\big] = \mu^2 + \sigma^2$ <span class="muted">(mean squared + variance)</span></div>
-    </div>
-    <div class="mathblock" style="font-size:27px;margin-top:16px" data-b="2">$$\KL = -\log\sigma - \frac{\sigma^2}{2\sigma^2} + \frac{\mu^2+\sigma^2}{2} = \frac12\Big(\mu^2 + \sigma^2 - 1 - \log\sigma^2\Big)$$</div>
-    <div class="mathblock" style="font-size:25px" data-b="3">$$\mu = 1,\ \sigma = 0.5:\quad \tfrac12\big(1 + 0.25 - 1 + 1.386\big) = 0.818 \ \checkmark$$</div>
-  </div>
-  <p class="q" data-b="3">Moving the mean away costs $\mu^2$; shrinking $\sigma$ costs $-\log\sigma^2$. For a code with several coordinates, add one such term per coordinate.</p>
-  <aside class="notes"><p>The check matches the shaded area from two slides ago. This exact formula is what the VAE code computes.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-direction" data-section="3 · KL divergence">
-  <p class="kicker">Back to our two bumps</p>
-  <h2>Fit one Gaussian: the KL direction decides what you get</h2>
-  <div class="body">
-    <div class="row" style="justify-content:center;gap:30px">
-      <div class="col" style="align-items:center"><img class="fig" src="figures/data/kl-fwd.svg" style="width:530px">
-        <p class="small" style="text-align:center">minimise $\KL(\text{data}\,\|\,q)$: cover everything.<br>This is the maximum-likelihood fit from before.</p></div>
-      <div class="col" style="align-items:center" data-b="2"><img class="fig" src="figures/data/kl-rev.svg" style="width:530px">
-        <p class="small" style="text-align:center">minimise $\KL(q\,\|\,\text{data})$: never put mass where<br>data is absent, so pick one bump.</p></div>
+    <div class="steps2">
+      <div class="callout z"><h3>Generate ✓</h3>draw $z \sim \N(0,I)$, decode, flip pixels. Three slides, done.</div>
+      <div class="callout dec" data-b="2"><h3>Learn ?</h3>choose the decoder's weights $\theta$ to make the training images probable:
+        <div class="mathblock" style="font-size:24px">$$p_\theta(x) = \int p(z)\,p_\theta(x\mid z)\,dz$$</div>
+        the two-bump sum, now over every code in the plane.</div>
     </div>
   </div>
-  <p class="q" data-b="2">Mode-covering vs mode-seeking. Keep this picture: it explains blurry VAEs and mode-collapsing GANs.</p>
-  <aside class="notes">
-    <p>Both fits found by brute-force search over (μ, σ). Forward: 𝒩(0.0, 2.06²), the same as the moment-matched maximum-likelihood fit. Reverse: 𝒩(−2.0, 0.5²), sitting on one bump.</p>
-    <p>Why: KL(p‖q) is weighted by p, so q is punished wherever data exists and q is small. KL(q‖p) is weighted by q, so q is punished wherever it puts mass and the data is absent.</p>
-  </aside>
+  <p class="q" data-b="2">The rest of this part: why this integral is so hard, and the three ways people get around it.</p>
+  <aside class="notes"><p>Link back to the two-bump slides: there, learning needed the sum over z and the backwards step p(z|x). Both become hard with a continuous code and a neural decoder. That is the whole motivation for Parts 3 to 5.</p></aside>
 </section>
 
-<section class="slide sec-kl" id="recap-3" data-section="3 · KL divergence">
-  <p class="kicker">End of Part 3</p>
-  <h2>What we did, and what comes next</h2>
-  <div class="body">
-    <div class="recap">
-      <div><h3>What we did</h3><ol><li>Surprise $= -\log p$. KL $=$ the average extra surprise from believing $Q$ when the truth is $P$.</li><li>$\KL \ge 0$, zero only when the two match, and not symmetric.</li><li>Cross-entropy $=$ entropy $+$ KL: training a classifier already minimises a KL.</li><li>For Gaussians, per coordinate: $\KL = \tfrac12(\mu^2 + \sigma^2 - 1 - \log\sigma^2)$.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next: the loss itself</h3><p class="small">Part 1's catch: learning needs $p_\theta(x)$, an integral over every code. With the encoder and KL in hand, Part 4 turns that integral into a loss we can compute: the ELBO.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===================================================================== 5 · ELBO -->
-
-<section class="slide sec-elbo opener break" id="elbo-open" data-section="4 · The ELBO">
-  <div class="break-grid">
-    <div>
-      <p class="kicker">Part 4 of 7</p>
-      <h2>The ELBO: a loss we can actually compute</h2>
-      <p class="why">Back to Part 1's catch: learning needs $p_\theta(x) = \int p(z)\,p_\theta(x\mid z)\,dz$, an integral over every code. The encoder (Part 2) and KL (Part 3) together turn it into a loss. We watch the problem happen on our 3 first.</p>
-    </div>
-    <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and hidden causes</li><li class="done" style="--c:var(--enc)"><span class="dot">✓</span>Autoencoders</li><li class="done" style="--c:var(--loss)"><span class="dot">✓</span>KL divergence</li><li class="now" style="--c:var(--dec)"><span class="dot">4</span>The ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">5</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">6</span>The VAE on MNIST</li><li class="todo" style="--c:var(--disc)"><span class="dot">7</span>GANs</li></ol>
-  </div>
-</section>
-
-<section class="slide sec-elbo" id="pgm" data-section="4 · The ELBO">
+<section class="slide sec-prob" id="pgm" data-section="3 · Probabilistic view">
   <p class="kicker">The model, as a picture</p>
   <h2>Two arrows: generate down, infer up</h2>
-  <div class="body center"><svg viewBox="0 0 1152 330" class="diagram" role="img" aria-label="pgm"><defs><marker id="pgm-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="pgm-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker><marker id="pgm-ah-8B2CDE" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8B2CDE"/></marker></defs><g data-b="1"><foreignObject x="-210.0" y="171.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#AA4E08;font-weight:400;text-align:center;height:33.6px;line-height:33.6px">$p(z) = \N(0, I)$</div></foreignObject><path d="M272,190 L330,190" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#pgm-ah-AA4E08)"/><circle cx="390" cy="190" r="56" fill="#fff" stroke="#AA4E08" stroke-width="3"/><foreignObject x="10.0" y="159.0" width="760" height="79.2" overflow="visible"><div class="fo" style="font-size:36px;color:#AA4E08;font-weight:400;text-align:center;height:57.6px;line-height:57.6px">$z$</div></foreignObject><text x="390" y="276" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="500" fill="#6B7280" text-anchor="middle">hidden code</text><circle cx="760" cy="190" r="56" fill="#E4ECFF" stroke="#245EDB" stroke-width="3"/><foreignObject x="380.0" y="159.0" width="760" height="79.2" overflow="visible"><div class="fo" style="font-size:36px;color:#245EDB;font-weight:400;text-align:center;height:57.6px;line-height:57.6px">$x$</div></foreignObject><text x="760" y="276" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="500" fill="#6B7280" text-anchor="middle">observed image (shaded)</text><path d="M448,190 L700,190" fill="none" stroke="#0F766E" stroke-width="3" stroke-linejoin="round" marker-end="url(#pgm-ah-0F766E)"/><foreignObject x="195.0" y="148.0" width="760" height="52.8" overflow="visible"><div class="fo" style="font-size:24px;color:#0F766E;font-weight:400;text-align:center;height:38.4px;line-height:38.4px">$p_\theta(x\mid z)$</div></foreignObject><text x="575" y="220" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="650" fill="#0F766E" text-anchor="middle">decoder: generate</text></g><g data-b="2"><path d="M712,146 C640,70 510,70 436,142" fill="none" stroke="#8B2CDE" stroke-width="3" stroke-dasharray="9 6" marker-end="url(#pgm-ah-8B2CDE)"/><foreignObject x="195.0" y="21.5" width="760" height="57.2" overflow="visible"><div class="fo" style="font-size:26px;color:#8B2CDE;font-weight:400;text-align:center;height:41.6px;line-height:41.6px">$q_\varphi(z\mid x)$</div></foreignObject><foreignObject x="125.0" y="293.8" width="900" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#8B2CDE;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">encoder: infer $z$ from $x$ (dashed = an approximation we learn)</div></foreignObject></g></svg></div>
+  <div class="body center"><svg viewBox="0 0 1152 330" class="diagram" role="img" aria-label="pgm"><defs><marker id="pgm-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="pgm-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker><marker id="pgm-ah-6B7280" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker></defs><g data-b="1"><foreignObject x="-210.0" y="171.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#AA4E08;font-weight:400;text-align:center;height:33.6px;line-height:33.6px">$p(z) = \N(0, I)$</div></foreignObject><path d="M272,190 L330,190" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#pgm-ah-AA4E08)"/><circle cx="390" cy="190" r="56" fill="#fff" stroke="#AA4E08" stroke-width="3"/><foreignObject x="10.0" y="159.0" width="760" height="79.2" overflow="visible"><div class="fo" style="font-size:36px;color:#AA4E08;font-weight:400;text-align:center;height:57.6px;line-height:57.6px">$z$</div></foreignObject><text x="390" y="276" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="500" fill="#6B7280" text-anchor="middle">hidden code</text><circle cx="760" cy="190" r="56" fill="#E4ECFF" stroke="#245EDB" stroke-width="3"/><foreignObject x="380.0" y="159.0" width="760" height="79.2" overflow="visible"><div class="fo" style="font-size:36px;color:#245EDB;font-weight:400;text-align:center;height:57.6px;line-height:57.6px">$x$</div></foreignObject><text x="760" y="276" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="500" fill="#6B7280" text-anchor="middle">observed image (shaded)</text><path d="M448,190 L700,190" fill="none" stroke="#0F766E" stroke-width="3" stroke-linejoin="round" marker-end="url(#pgm-ah-0F766E)"/><foreignObject x="195.0" y="148.0" width="760" height="52.8" overflow="visible"><div class="fo" style="font-size:24px;color:#0F766E;font-weight:400;text-align:center;height:38.4px;line-height:38.4px">$p_\theta(x\mid z)$</div></foreignObject><text x="575" y="220" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="650" fill="#0F766E" text-anchor="middle">decoder: generate</text></g><g data-b="2"><path d="M712,146 C640,70 510,70 436,142" fill="none" stroke="#6B7280" stroke-width="3" stroke-dasharray="9 6" marker-end="url(#pgm-ah-6B7280)"/><foreignObject x="195.0" y="21.5" width="760" height="57.2" overflow="visible"><div class="fo" style="font-size:26px;color:#4A5160;font-weight:400;text-align:center;height:41.6px;line-height:41.6px">$p_\theta(z\mid x)$</div></foreignObject><foreignObject x="125.0" y="293.8" width="900" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#4A5160;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">infer: which $z$ made this $x$? Bayes, but it divides by $p_\theta(x)$ (dashed: out of reach)</div></foreignObject></g></svg></div>
   <div class="mathblock" style="font-size:27px">$$p_\theta(x, z) = \cz{p(z)}\;\cdec{p_\theta(x\mid z)}$$</div>
   <aside class="notes">
-    <p>Solid arrow: the generative model we want, prior times decoder. Dashed arrow: an approximate inference network we add only to make training possible. θ are decoder weights, φ are encoder weights.</p>
+    <p>Solid arrow: the generative model we want, prior times decoder, with weights θ. Dashed arrow: the true posterior, the backwards step from Part 1. It is out of reach because it divides by p(x); the rest of this part shows why, and what people do about it.</p>
     <p>Same story as the coin and the bumps; z is now a 2-D code and p(x|z) is a neural network.</p>
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="evidence" data-section="4 · The ELBO">
+<section class="slide sec-prob" id="evidence" data-section="3 · Probabilistic view">
   <p class="kicker">Maximum likelihood for our 3</p>
   <h2>How probable is our 3 under the model?</h2>
   <div class="body">
@@ -1085,270 +1116,128 @@
         <div class="mathblock left" style="font-size:24px">$$p(x) = \sum_{z\in\{\mathrm A,\mathrm B\}} p(z)\,p(x\mid z)$$</div>
         <p class="small" data-b="2">A code can be any point in the plane, so the sum becomes an integral:</p>
         <div class="mathblock left" style="font-size:24px" data-b="2">$$p_\theta(x) = \int \cz{p(z)}\;\cdec{p_\theta(x\mid z)}\,dz$$</div>
-        <p class="small" data-b="3">2 numbers per code, so we can afford a 901 × 901 grid of decoder calls: $\log p_\theta(x) = −128.7$ nats. With 16 numbers it would be $901^{16}$ calls.</p>
+        <p class="small" data-b="3">2 numbers per code, so we can afford a 901 × 901 grid of decoder calls: $\log p_\theta(x) = −128.7$ nats.</p>
       </div>
     </div>
   </div>
   <aside class="notes">
     <p>The map shows log p(x | z) for our 3 at every code z: dark = codes that decode to something like our 3. Dashed circles: 1, 2, 3 prior standard deviations.</p>
-    <p>Real computation on the trained 2-D VAE decoder: 811,801 decoder calls, then log-sum-exp.</p>
+    <p>Real computation: 811,801 decoder calls, then log-sum-exp. The decoder behind every number in Parts 3 and 5 is the 2-number one trained in Part 7; here it is simply "a trained decoder".</p>
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="mc-prior" data-section="4 · The ELBO">
+<section class="slide sec-prob" id="intractable" data-section="3 · Probabilistic view">
+  <p class="kicker">Why not just compute $p_\theta(x)$?</p>
+  <h2>The integral is intractable</h2>
+  <div class="body">
+    <div class="row top" style="gap:34px">
+      <div class="col" style="width:560px">
+        <p class="small"><b>No formula.</b> With two bumps, $p(x)$ was a sum of 2 terms. Here it is $\int p(z)\,p_\theta(x\mid z)\,dz$ with a neural network inside: no algebra gives the answer.</p>
+        <p class="small" data-b="2"><b>Too many terms to add up.</b> Put a grid of 901 points on every axis of the code and add up the decoder's answers:</p>
+        <p class="small" data-b="3"><b>"Intractable"</b> means exactly this: no formula, and far too many terms to sum.</p>
+      </div>
+      <table class="work" style="font-size:22px" data-b="2">
+        <tr><th>numbers in $z$</th><th>decoder calls</th></tr>
+        <tr><td>1</td><td>901</td></tr>
+        <tr><td>2 (our 3)</td><td>$8.1\times 10^{5}$ · a second</td></tr>
+        <tr><td>4</td><td>$6.6\times 10^{11}$ · a week</td></tr>
+        <tr><td>8</td><td>$4.3\times 10^{23}$</td></tr>
+        <tr><td>16</td><td>$1.9\times 10^{47}$</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="3">And we need $p_\theta(x)$ for every image, at every training step.</p>
+  <aside class="notes"><p>Times assume about a million decoder calls per second. With 16 numbers, even a billion GPUs running since the Big Bang would not finish. Random sampling instead of a grid is the next slide: it fails for a different reason.</p></aside>
+</section>
+
+<section class="slide sec-prob" id="mc-prior" data-section="3 · Probabilistic view">
   <p class="kicker">Idea: estimate the integral by sampling</p>
   <h2>Random codes almost never hit the right patch</h2>
   <div class="body">
-    <div class="mathblock" style="font-size:27px">$$p_\theta(x) = \E_{z\sim p(z)}\big[\,p_\theta(x\mid z)\,\big] \approx \frac1S\sum_{s=1}^{S} p_\theta(x\mid z_s)$$</div>
+    <div class="mathblock" style="font-size:27px">$$p_\theta(x) = \underbrace{\E_{z\sim p(z)}\big[\,p_\theta(x\mid z)\,\big]}_{\text{the average over codes from the prior}} \approx \frac1S\sum_{s=1}^{S} p_\theta(x\mid z_s)$$</div>
     <div class="row" style="justify-content:center;gap:28px;margin-top:22px">
       <div class="stat" data-b="2"><b>100,000</b><span>random codes $z_s\sim\N(0,I)$</span></div>
-      <div class="stat" data-b="3"><b>0.07%</b><span>land inside our 3's patch</span></div>
-      <div class="stat" data-b="4"><b>−363.9</b><span>typical $\log p(x\mid z)$ of a random code</span></div>
-      <div class="stat" data-b="4"><b>−121.0</b><span>the best code's $\log p(x\mid z)$</span></div>
+      <div class="stat" data-b="3"><b>0.07%</b><span>land within 2 widths of our 3's patch</span></div>
+      <div class="stat" data-b="4"><b>−363.9</b><span>median $\log p(x\mid z)$ of a random code</span></div>
+      <div class="stat" data-b="4"><b>−121.0</b><span>the best of the 100,000: $\log p(x\mid z)$</span></div>
     </div>
   </div>
   <p class="q" data-b="4">A typical random code makes our 3 about $e^{243}$ times less probable than the best code. Blind sampling wastes almost every draw.</p>
   <aside class="notes">
     <p>The estimate is unbiased but its variance is enormous: the average is dominated by the rare draws that hit the patch, and with 16 or 100 dimensions you would essentially never hit it.</p>
-    <p>Better: ask someone where the patch is. That "someone" is the encoder.</p>
+    <p>Better: know where the patch is before sampling. That is what the rest of this part, and Part 5, are about. 𝔼 means "average over"; Part 4 makes it precise.</p>
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="posterior" data-section="4 · The ELBO">
+<section class="slide sec-prob" id="posterior" data-section="3 · Probabilistic view">
   <p class="kicker">Inference, like the coin and the bumps</p>
-  <h2>Ask the encoder where to look</h2>
+  <h2>The backwards step: which codes could have made our 3?</h2>
   <div class="body">
     <div class="row" style="gap:28px">
-      <img class="fig" src="figures/data/posterior-vs-q.svg" style="height:430px">
+      <img class="fig" src="figures/data/posterior-alone.svg" style="height:430px">
       <div class="col grow">
-        <p class="small">The patch, normalised, is the true posterior:</p>
-        <div class="mathblock left" style="font-size:25px">$$p_\theta(z\mid x) = \frac{p(z)\,p_\theta(x\mid z)}{p_\theta(x)}$$</div>
-        <p class="small" data-b="2">It needs $p_\theta(x)$, the impossible integral. So we train a network to guess it:</p>
-        <div class="mathblock left" style="font-size:25px" data-b="2">$$\cenc{q_\varphi(z\mid x)} = \N\big(\mu_\varphi(x),\, \sigma_\varphi(x)^2\big)$$</div>
-        <p class="small" data-b="3">For our 3: $\mu = (0.3,\ −1.93)$ and $\sigma = (0.047,\ 0.05)$. Close to the truth, not identical.</p>
+        <p class="small">Part 1's Bayes table, with a plane of codes instead of two bumps:</p>
+        <div class="mathblock left" style="font-size:25px">$$p_\theta(z\mid x) = \frac{p(z)\,p_\theta(x\mid z)}{\hl{p_\theta(x)}}$$</div>
+        <p class="small" data-b="2">The bottom is the evidence: the same impossible integral. So the posterior is out of reach too.</p>
+        <p class="small" data-b="3">From the 2-number grid we can still look at it: a small, slightly tilted patch near $(0.25,\ −1.88)$, about 0.05 wide. The prior is 1 wide: one image pins its code down tightly.</p>
       </div>
     </div>
   </div>
+  <p class="q" data-b="3">Training needs this patch for every image. Next: three ways to approximate a posterior we cannot compute.</p>
   <aside class="notes">
-    <p>Zoomed view around our 3. Shaded: the true posterior from the grid. Purple ellipses: one and two standard deviations of the encoder's Gaussian. The true posterior is slightly tilted and offset; a diagonal Gaussian cannot tilt.</p>
-    <p>Notice the scale: σ ≈ 0.05 while the prior has σ = 1. The encoder is very confident about where our 3 lives.</p>
+    <p>Zoomed view around our 3; shaded: the true posterior, normalised on the fine grid. Only possible because this code has 2 numbers.</p>
+    <p>Why training needs the posterior: to improve the decoder for our 3, we need to know which codes our 3 came from, exactly as the two-bump fit needed p(bump | x).</p>
   </aside>
 </section>
 
-<!-- ------------------------------------------------ the derivation, one move per slide -->
-
-<section class="slide sec-elbo" id="elbo-1" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · move 1 of 7</p>
-  <h2>Start from what we want</h2>
+<section class="slide sec-prob" id="approx-methods" data-section="3 · Probabilistic view">
+  <p class="kicker">When the posterior cannot be computed, approximate it</p>
+  <h2>Three ways, all run on our 3's real posterior</h2>
   <div class="body">
-    <div class="mathblock big">$$\log p_\theta(x) = \log \int p_\theta(x,z)\,dz$$</div>
-    <div class="callout plain why" style="margin:16px auto 0;width:900px">Maximum likelihood wants this number large for our 3, and for every image in the data. The integral over all codes is the part we cannot compute.</div>
+    <img class="fig" src="figures/data/posterior-methods.svg" style="width:960px;margin:0 auto">
+    <div class="row" style="gap:20px;margin-top:4px">
+      <p class="small" style="flex:1;margin:0"><b>Laplace:</b> find the peak, fit a Gaussian to the curvature there. Fast, local.</p>
+      <p class="small" style="flex:1;margin:0" data-b="2"><b>MCMC:</b> a random walk that visits regions in proportion to the posterior. Exact in the long run, slow.</p>
+      <p class="small" style="flex:1;margin:0" data-b="3"><b>Variational:</b> choose a simple family $q$ and optimise it to be as close as possible. Fast, trainable.</p>
+    </div>
   </div>
-  <p class="q">We will rewrite this line until it becomes something we can compute and differentiate.</p>
-  <aside class="notes"><p>Recall p(x, z) = p(z) p(x | z): prior times decoder. Each of the next six slides makes exactly one change. Ask the class to name the move before you click.</p></aside>
+  <p class="q" data-b="3">Today: only the variational one. It turns inference into optimisation, which is what neural networks are good at.</p>
+  <aside class="notes">
+    <p>All three computed for these slides on the trained 2-number VAE decoder, for test digit #90. Shaded: the true posterior on a fine grid. Laplace: peak at (0.25, −1.88), standard deviations 0.05 and 0.059. MCMC: random-walk Metropolis, 1000 kept samples, acceptance 0.7. Variational: diagonal Gaussian, 800 gradient steps.</p>
+    <p>Students have met these in the probabilistic machine learning course; here they only need the idea of each and why we pick VI.</p>
+  </aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-2" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · move 2 of 7</p>
-  <h2>Multiply and divide by the encoder's cloud</h2>
+<section class="slide sec-prob" id="vi-idea" data-section="3 · Probabilistic view">
+  <p class="kicker">The variational idea, for our 3</p>
+  <h2>Propose a simple $q$, then pull it towards the true posterior</h2>
   <div class="body">
-    <div class="deriv-prev mathblock">$$\log \int p_\theta(x,z)\,dz$$</div>
-    <div class="mathblock big">$$= \log \int \hl{q_\varphi(z\mid x)}\;\frac{p_\theta(x,z)}{\hl{q_\varphi(z\mid x)}}\,dz$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Multiplying and dividing by the same positive number changes nothing. We are free to choose any $q$; we choose the encoder's Gaussian, which is positive everywhere.</div>
-  </div>
-  <p class="q" data-b="2">Why bother? Because the next move turns this integral into an average under $q$, and $q$ knows where the patch is.</p>
-</section>
-
-<section class="slide sec-elbo" id="elbo-3" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · move 3 of 7</p>
-  <h2>Read the integral as an average under $q$</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\log \int q_\varphi(z\mid x)\,\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\,dz$$</div>
-    <div class="mathblock big">$$= \log\; \hl{\E_{z\sim q_\varphi(z\mid x)}}\!\left[\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">From the $\E$ slide: $\int q(z)\,f(z)\,dz = \E_{z\sim q}[f(z)]$. Here $f(z)$ is the ratio $p_\theta(x,z)/q_\varphi(z\mid x)$: one number for each code.</div>
-  </div>
-  <p class="q" data-b="2">Still exact. We now average over codes drawn from the encoder's cloud, right where the patch is.</p>
-</section>
-
-<section class="slide sec-elbo" id="jensen" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · a tool for move 4</p>
-  <h2>Jensen's inequality, in one picture</h2>
-  <div class="body">
-    <div class="row" style="gap:24px">
-      <img class="fig" src="figures/data/jensen.svg" style="width:580px">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/posterior-q.svg" style="height:410px">
       <div class="col grow">
-        <p class="small">$\log$ curves downwards (it is concave), so every chord lies below the curve.</p>
-        <p class="small" data-b="2">Two values, $R=1$ and $R=4$:</p>
-        <div class="mathblock left" style="font-size:24px" data-b="2">$$\underbrace{\log 2.5}_{\log \text{ of the average}} = 0.916 \;\ge\; \underbrace{\tfrac12(0 + 1.386)}_{\text{average of the logs}} = 0.693$$</div>
-        <div class="mathblock left" style="font-size:26px" data-b="3">$$\log \E[R] \;\ge\; \E[\log R]$$</div>
+        <div class="mathblock left" style="font-size:26px">$$q(z) = \N\big(m,\ \mathrm{diag}(s_1^2, s_2^2)\big)$$</div>
+        <p class="small">Four numbers to choose: a centre $m = (m_1, m_2)$ and two widths $s_1, s_2$.</p>
+        <p class="small" data-b="2">Goal: make $q(z)$ as close as possible to $p_\theta(z\mid x)$, the shaded patch.</p>
+        <p class="small" data-b="3">"As close as possible" needs a <b>number</b> for how far apart two distributions are.</p>
       </div>
     </div>
   </div>
-  <aside class="notes"><p>Read the picture: two orange points on the curve; their chord lies below the curve. The midpoint of the chord (average of logs) sits below the curve at the midpoint (log of the average).</p></aside>
+  <p class="q" data-b="3">That number is the KL divergence: the first thing in Session 2.</p>
+  <aside class="notes"><p>The purple ellipses (one and two standard deviations) are the q that variational inference finds in Part 5: centre (0.28, −1.88), widths 0.042 and 0.064. A diagonal Gaussian cannot tilt, so it can match the patch closely but not exactly.</p></aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-4" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · move 4 of 7</p>
-  <h2>Swap the log and the average: the only inequality</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\log p_\theta(x) = \log\,\E_{q}\!\left[\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right]$$</div>
-    <div class="mathblock big">$$\log p_\theta(x) \;\hl{\ge}\; \E_{q}\!\left[\log\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right] \;=:\; \ELBO$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Jensen with $R = p_\theta(x,z)/q_\varphi(z\mid x)$. The right side is the <b>E</b>vidence <b>L</b>ower <b>BO</b>und: it can never exceed $\log p_\theta(x)$.</div>
-  </div>
-  <p class="q" data-b="2">The log is now inside the average. That is what makes the next three moves possible.</p>
-</section>
-
-<section class="slide sec-elbo" id="elbo-5" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · move 5 of 7</p>
-  <h2>Split the log of a product</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\ELBO = \E_{q}\!\left[\log\frac{p_\theta(x\mid z)\,p(z)}{q_\varphi(z\mid x)}\right]$$</div>
-    <div class="mathblock big">$$= \E_{q}\Big[\hl{\log p_\theta(x\mid z) + \log p(z) - \log q_\varphi(z\mid x)}\Big]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">First write $p_\theta(x,z) = p_\theta(x\mid z)\,p(z)$: decoder times prior. Then $\log\frac{ab}{c} = \log a + \log b - \log c$.</div>
-  </div>
-</section>
-
-<section class="slide sec-elbo" id="elbo-6" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · move 6 of 7</p>
-  <h2>The average of a sum is the sum of the averages</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\Big[\log p_\theta(x\mid z) + \log p(z) - \log q_\varphi(z\mid x)\Big]$$</div>
-    <div class="mathblock big">$$= \hl{\E_{q}\big[\log p_\theta(x\mid z)\big]} \;+\; \hl{\E_{q}\big[\log p(z) - \log q_\varphi(z\mid x)\big]}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">$\E[a + b] = \E[a] + \E[b]$. Group the decoder term on its own, and the two terms that only involve $z$ together.</div>
-  </div>
-</section>
-
-<section class="slide sec-elbo" id="elbo-7" data-section="4 · The ELBO">
-  <p class="kicker">Deriving the ELBO · move 7 of 7</p>
-  <h2>Recognise the second average: it is a KL</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\big[\log p(z) - \log q_\varphi(z\mid x)\big]$$</div>
-    <div class="mathblock big">$$= -\,\E_{q}\!\left[\log\frac{q_\varphi(z\mid x)}{p(z)}\right] = \hl{-\KL\big(q_\varphi(z\mid x)\,\|\,p(z)\big)}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Flip the sign to flip the fraction. Then use the definition: $\KL(q\|p) = \E_{z\sim q}\big[\log\frac{q(z)}{p(z)}\big]$, the average extra surprise.</div>
-  </div>
-  <p class="q" data-b="2">And for Gaussians we already have its formula: $\tfrac12\sum_j(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2)$.</p>
-</section>
-
-<section class="slide sec-elbo" id="elbo-final" data-section="4 · The ELBO">
-  <p class="kicker">Put the pieces together</p>
-  <h2>The ELBO, in symbols and in words</h2>
-  <div class="body">
-    <div class="mathblock" style="font-size:36px;margin-top:10px">$$\ELBO = \underbrace{\E_{z\sim\cenc q}\big[\cx{\log p_\theta(x\mid z)}\big]}_{\text{rebuild } x \text{ from codes in its cloud}} \;-\; \underbrace{\closs{\KL\big(q_\varphi(z\mid x)\,\|\,p(z)\big)}}_{\text{keep the cloud near } \N(0,I)}$$</div>
-    <div class="row" style="justify-content:center;gap:24px;margin-top:20px" data-b="2">
-      <div class="callout x" style="width:520px">First term: the autoencoder's reconstruction score, with the code drawn from the cloud.</div>
-      <div class="callout loss" style="width:520px">Second term: the Gaussian KL we just derived.</div>
-    </div>
-  </div>
-  <p class="q" data-b="2">The two wishes from the autoencoder slide, derived rather than invented. The loss we minimise is $-\ELBO$.</p>
-</section>
-
-<section class="slide sec-elbo" id="gap-derive" data-section="4 · The ELBO">
-  <p class="kicker">What did the inequality cost?</p>
-  <h2>A second route: start from the true posterior</h2>
-  <div class="body">
-    <div class="ladder" style="margin:0 auto;width:1100px;font-size:25px">
-      <span class="lhs">$\KL\big(q\,\|\,p_\theta(z\mid x)\big)$</span><span>$=$</span><span>$\E_q\big[\log q_\varphi(z\mid x) - \log p_\theta(z\mid x)\big]$</span>
-      <span></span><span></span><span class="why">definition of KL, now against the <b>true posterior</b></span>
-      <span class="lhs" data-b="2"></span><span data-b="2">$=$</span><span data-b="2">$\E_q\big[\log q_\varphi(z\mid x) - \log p_\theta(x,z)\big] + \log p_\theta(x)$</span>
-      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">Bayes: $\log p_\theta(z\mid x) = \log p_\theta(x,z) - \log p_\theta(x)$, and $\log p_\theta(x)$ has no $z$ in it</span>
-      <span class="lhs" data-b="3"></span><span data-b="3">$=$</span><span data-b="3">$-\ELBO + \log p_\theta(x)$</span>
-      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">the average is exactly minus the ELBO from move 4</span>
-    </div>
-    <div class="mathblock" style="font-size:31px;margin-top:10px" data-b="4">$$\log p_\theta(x) = \ELBO + \KL\big(q_\varphi(z\mid x)\,\|\,p_\theta(z\mid x)\big)$$</div>
-  </div>
-  <p class="q" data-b="4">The gap is a KL, so it is never negative: a second proof that the ELBO is a lower bound.</p>
-</section>
-
-<section class="slide sec-elbo" id="gap" data-section="4 · The ELBO">
-  <p class="kicker">The gap, measured on our 3</p>
-  <h2>Two different KLs, two different jobs</h2>
-  <div class="body">
-    <div class="numline" style="margin:24px auto 0">
-      <div class="nl-track"></div>
-      <div class="nl-mark" style="left:8%;--c:var(--dec)"><b>ELBO</b><span>−129.3</span></div>
-      <div class="nl-mark" style="left:92%;--c:var(--x)"><b>$\log p_\theta(x)$</b><span>−128.7</span></div>
-      <div class="nl-gap" style="left:8%;width:84%" data-b="2"><span>gap $= \KL(q\,\|\,\text{true posterior}) = 0.61$</span></div>
-    </div>
-    <div class="row" style="justify-content:center;gap:24px;margin-top:40px" data-b="3">
-      <div class="callout loss" style="width:540px"><b>In the loss:</b> $\KL(q\,\|\,\text{prior}) = 6.97$ nats. Computable by formula.</div>
-      <div class="callout enc" style="width:540px"><b>In the gap:</b> $\KL(q\,\|\,\text{true posterior}) = 0.61$ nats. Needs $p_\theta(x)$; we only got it from the grid.</div>
-    </div>
-  </div>
-  <p class="q" data-b="3">Raising the ELBO raises $\log p_\theta(x)$ or shrinks the gap. Both are what we want.</p>
-  <aside class="notes">
-    <p>All numbers for our 3 from the trained 2-D VAE: ELBO estimated with 20,000 draws from q; log p(x) from the grid; the gap computed independently as E_q[log q − log p(z|x)] = 0.61, matching the difference.</p>
-    <p>Students routinely mix up these two KLs. Ask: which one can we compute during training?</p>
-  </aside>
-</section>
-
-<section class="slide sec-elbo" id="elbo-toy" data-section="4 · The ELBO">
-  <p class="kicker">Check the identity with numbers you can do by hand</p>
-  <h2>Neat or messy writer? A two-value latent</h2>
-  <div class="body">
-    <div class="row top" style="gap:36px">
-      <div class="col" style="width:520px">
-        <p class="small">$z\in\{\text{neat},\text{messy}\}$, prior $\tfrac12, \tfrac12$. Observation $x$: a thick stroke.</p>
-        <p class="small">$p(x\mid\text{neat}) = 0.8,\quad p(x\mid\text{messy}) = 0.2$</p>
-        <p class="small" data-b="2">evidence $p(x) = 0.5$ · true posterior $(0.8,\ 0.2)$</p>
-        <p class="small" data-b="3">Our guess $q = (q_0,\ 1-q_0)$:</p>
-        <div class="ctrl interactive" data-widget="elbo" data-b="3"><span>$q_0$ =</span><input type="range" min="0.02" max="0.98" step="0.01" value="0.6"><span class="readout q0">0.60</span></div>
-      </div>
-      <table class="work elbo-table" style="font-size:22px" data-b="3">
-        <tr><th>quantity</th><th>value</th></tr>
-        <tr><td>$\E_q[\log p(x\mid z)]$</td><td class="v-ell">−0.778</td></tr>
-        <tr><td>$-\,\KL(q\,\|\,\text{prior})$</td><td class="v-klp">−0.020</td></tr>
-        <tr class="total"><td>$\ELBO$</td><td class="v-elbo">−0.798</td></tr>
-        <tr><td>$+\,\KL(q\,\|\,\text{posterior})$</td><td class="v-gap">0.105</td></tr>
-        <tr class="total"><td>$\log p(x)$</td><td class="v-lpx">−0.693</td></tr>
-      </table>
-    </div>
-  </div>
-  <p class="q" data-b="3">Move $q$: the ELBO and the gap change, their sum never does. At $q$ = posterior $(0.8)$ the gap is 0.</p>
-  <aside class="notes">
-    <p>At q = (0.6, 0.4) the gap is KL((0.6,0.4) ‖ (0.8,0.2)) = 0.105, the same "KL(Q‖P)" we computed with the 1s and 7s.</p>
-    <p>Drag the slider live. ELBO + gap = log 0.5 = −0.693 for every q0.</p>
-  </aside>
-</section>
-
-<section class="slide sec-elbo" id="vae-bernoulli" data-section="4 · The ELBO">
-  <p class="kicker">The reconstruction term, zoomed in</p>
-  <h2>Each pixel is a coin flip with probability $\pi_i$</h2>
-  <div class="body">
-    <div class="row" style="gap:20px">
-      <div class="col" style="align-items:center;width:220px"><img class="fig" src="figures/data/digit3-patch.svg" style="width:210px"><p class="cap">our 3, one 5 × 5 patch</p></div>
-      <div class="grow"><svg viewBox="0 0 920 360" class="diagram" role="img" aria-label="pixels"><defs></defs><g data-b="1"><foreignObject x="-227.5" y="4.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#245EDB;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\text{observed } x_i$</div></foreignObject><rect x="10" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="37.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="67" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="94.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="124" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="151.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="181" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="208.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="238" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="265.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="10" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="37.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="67" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="94.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="124" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="151.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="181" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="208.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="238" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="10" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="37.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="67" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="94.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="124" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="151.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="181" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="208.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="238" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="10" y="221" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="37.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="67" y="221" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="94.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="124" y="221" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="151.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="181" y="221" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="208.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="238" y="221" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="10" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="37.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="67" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="94.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="124" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="151.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="181" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="208.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="238" y="278" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text></g><g data-b="2"><foreignObject x="77.5" y="4.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#0F766E;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\text{decoder's } \pi_i$</div></foreignObject><rect x="315" y="50" width="54" height="54" rx="4" fill="rgb(175,175,175)" stroke="#D9DDE5"/><text x="342.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.38</text><rect x="372" y="50" width="54" height="54" rx="4" fill="rgb(196,196,196)" stroke="#D9DDE5"/><text x="399.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.28</text><rect x="429" y="50" width="54" height="54" rx="4" fill="rgb(227,227,227)" stroke="#D9DDE5"/><text x="456.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.13</text><rect x="486" y="50" width="54" height="54" rx="4" fill="rgb(244,244,244)" stroke="#D9DDE5"/><text x="513.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.05</text><rect x="543" y="50" width="54" height="54" rx="4" fill="rgb(250,250,250)" stroke="#D9DDE5"/><text x="570.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.02</text><rect x="315" y="107" width="54" height="54" rx="4" fill="rgb(68,68,68)" stroke="#D9DDE5"/><text x="342.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.89</text><rect x="372" y="107" width="54" height="54" rx="4" fill="rgb(82,82,82)" stroke="#D9DDE5"/><text x="399.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.82</text><rect x="429" y="107" width="54" height="54" rx="4" fill="rgb(118,118,118)" stroke="#D9DDE5"/><text x="456.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.65</text><rect x="486" y="107" width="54" height="54" rx="4" fill="rgb(168,168,168)" stroke="#D9DDE5"/><text x="513.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.41</text><rect x="543" y="107" width="54" height="54" rx="4" fill="rgb(217,217,217)" stroke="#D9DDE5"/><text x="570.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.18</text><rect x="315" y="164" width="54" height="54" rx="4" fill="rgb(93,93,93)" stroke="#D9DDE5"/><text x="342.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.77</text><rect x="372" y="164" width="54" height="54" rx="4" fill="rgb(89,89,89)" stroke="#D9DDE5"/><text x="399.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.79</text><rect x="429" y="164" width="54" height="54" rx="4" fill="rgb(95,95,95)" stroke="#D9DDE5"/><text x="456.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.76</text><rect x="486" y="164" width="54" height="54" rx="4" fill="rgb(114,114,114)" stroke="#D9DDE5"/><text x="513.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.67</text><rect x="543" y="164" width="54" height="54" rx="4" fill="rgb(171,171,171)" stroke="#D9DDE5"/><text x="570.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.40</text><rect x="315" y="221" width="54" height="54" rx="4" fill="rgb(168,168,168)" stroke="#D9DDE5"/><text x="342.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.41</text><rect x="372" y="221" width="54" height="54" rx="4" fill="rgb(145,145,145)" stroke="#D9DDE5"/><text x="399.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.52</text><rect x="429" y="221" width="54" height="54" rx="4" fill="rgb(114,114,114)" stroke="#D9DDE5"/><text x="456.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.67</text><rect x="486" y="221" width="54" height="54" rx="4" fill="rgb(116,116,116)" stroke="#D9DDE5"/><text x="513.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.66</text><rect x="543" y="221" width="54" height="54" rx="4" fill="rgb(147,147,147)" stroke="#D9DDE5"/><text x="570.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.51</text><rect x="315" y="278" width="54" height="54" rx="4" fill="rgb(208,208,208)" stroke="#D9DDE5"/><text x="342.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.22</text><rect x="372" y="278" width="54" height="54" rx="4" fill="rgb(181,181,181)" stroke="#D9DDE5"/><text x="399.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.35</text><rect x="429" y="278" width="54" height="54" rx="4" fill="rgb(139,139,139)" stroke="#D9DDE5"/><text x="456.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.55</text><rect x="486" y="278" width="54" height="54" rx="4" fill="rgb(129,129,129)" stroke="#D9DDE5"/><text x="513.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.60</text><rect x="543" y="278" width="54" height="54" rx="4" fill="rgb(154,154,154)" stroke="#D9DDE5"/><text x="570.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.48</text></g><g data-b="3"><foreignObject x="382.5" y="4.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$-\log p(x_i\mid z)$</div></foreignObject><rect x="620" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.28)" stroke="#D9DDE5"/><text x="647.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.48</text><rect x="677" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.22)" stroke="#D9DDE5"/><text x="704.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.33</text><rect x="734" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.14)" stroke="#D9DDE5"/><text x="761.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.14</text><rect x="791" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.10)" stroke="#D9DDE5"/><text x="818.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.05</text><rect x="848" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.09)" stroke="#D9DDE5"/><text x="875.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.02</text><rect x="620" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.13)" stroke="#D9DDE5"/><text x="647.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.11</text><rect x="677" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.16)" stroke="#D9DDE5"/><text x="704.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.19</text><rect x="734" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.26)" stroke="#D9DDE5"/><text x="761.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.43</text><rect x="791" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.45)" stroke="#D9DDE5"/><text x="818.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.89</text><rect x="848" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.79)" stroke="#D9DDE5"/><text x="875.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1.71</text><rect x="620" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.19)" stroke="#D9DDE5"/><text x="647.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.26</text><rect x="677" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.18)" stroke="#D9DDE5"/><text x="704.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.24</text><rect x="734" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.20)" stroke="#D9DDE5"/><text x="761.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.28</text><rect x="791" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.25)" stroke="#D9DDE5"/><text x="818.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.40</text><rect x="848" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.46)" stroke="#D9DDE5"/><text x="875.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.91</text><rect x="620" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.45)" stroke="#D9DDE5"/><text x="647.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.89</text><rect x="677" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.39)" stroke="#D9DDE5"/><text x="704.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.74</text><rect x="734" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.55)" stroke="#D9DDE5"/><text x="761.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1.12</text><rect x="791" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.53)" stroke="#D9DDE5"/><text x="818.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1.09</text><rect x="848" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.36)" stroke="#D9DDE5"/><text x="875.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.67</text><rect x="620" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.18)" stroke="#D9DDE5"/><text x="647.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.25</text><rect x="677" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.26)" stroke="#D9DDE5"/><text x="704.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.44</text><rect x="734" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.41)" stroke="#D9DDE5"/><text x="761.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.79</text><rect x="791" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.47)" stroke="#D9DDE5"/><text x="818.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.93</text><rect x="848" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.39)" stroke="#D9DDE5"/><text x="875.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.74</text></g><g data-b="3"><text x="763" y="352" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#BE123C" text-anchor="middle">this 5 × 5 patch: 14.1 nats</text></g></svg></div>
-    </div>
-    <div class="mathblock" style="font-size:25px" data-b="3">$$-\log p_\theta(x\mid z) = -\sum_{i=1}^{784}\Big[x_i\log\pi_i + (1-x_i)\log(1-\pi_i)\Big] = 122.3\ \text{nats}$$</div>
-  </div>
-  <p class="q" data-b="3">Binary cross-entropy is not a design choice: it is the Bernoulli log-likelihood. Gaussian pixels would give squared error.</p>
-  <aside class="notes">
-    <p>The patch is on the top stroke of our 3. Where x = 1 the loss is −log π; where x = 0 it is −log(1 − π). Ink predicted at 0.89 costs 0.11; ink predicted at 0.18 costs 1.71.</p>
-    <p>In code we pass logits to binary_cross_entropy_with_logits for numerical stability; π = sigmoid(logits) is only for display.</p>
-  </aside>
-</section>
-
-<section class="slide sec-elbo" id="elbo-loss" data-section="4 · The ELBO">
-  <p class="kicker">From theory to the training loss</p>
-  <h2>The VAE loss for our 3</h2>
-  <div class="body">
-    <div class="mathblock" style="font-size:27px">$$\mathcal L(x) = -\ELBO \approx \underbrace{\closs{-\log p_\theta(x\mid z)}}_{\text{BCE over 784 pixels}} \;+\; \underbrace{\closs{\tfrac12\sum_{j=1}^{2}\big(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2\big)}}_{\text{KL over 2 coordinates}},\qquad z\sim q_\varphi(z\mid x)$$</div>
-    <div class="row" style="justify-content:center;gap:24px;margin-top:26px">
-      <div class="stat" data-b="2"><b>122.3</b><span>reconstruction, one draw of $z$</span></div>
-      <div class="stat" data-b="2"><b>+ 6.97</b><span>KL, exact formula</span></div>
-      <div class="stat" data-b="3"><b>= 129.2</b><span>loss for our 3</span></div>
-    </div>
-  </div>
-  <p class="q" data-b="3">One problem left: $z$ is a random draw, and we need gradients through it.</p>
-  <aside class="notes"><p>Using a single z per image per step is standard. The reconstruction term is a one-sample estimate of the expectation; the KL term is computed exactly.</p></aside>
-</section>
-
-<section class="slide sec-elbo" id="recap-4" data-section="4 · The ELBO">
-  <p class="kicker">End of Part 4 · end of Session 1</p>
+<section class="slide sec-prob" id="recap-3" data-section="3 · Probabilistic view">
+  <p class="kicker">End of Part 3 · end of Session 1</p>
   <h2>What we did, and what comes next</h2>
   <div class="body">
     <div class="recap">
-      <div><h3>What we did</h3><ol><li>Scoring our 3 needs an integral over all codes; random codes almost never hit the right patch.</li><li>The encoder's cloud $q_\varphi(z\mid x)$ says where to look.</li><li>Seven moves give the ELBO: reconstruction $-\ \KL(q\,\|\,\text{prior})$, a lower bound on $\log p_\theta(x)$.</li><li>The gap is $\KL(q\,\|\,\text{true posterior})$. For our 3: loss $= 122.3 + 6.97$.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next session</h3><p class="small">The loss uses a <b>random draw</b> of $z$. Session 2: how gradients pass through it, then training the VAE on MNIST, then GANs.</p></div>
+      <div><h3>What we did</h3><ol>
+        <li>Learn = make the data probable; generate = sample. Code: one loop.</li>
+        <li>Autoencoders compress and rebuild (plain, denoising, sparse, contractive), but cannot generate.</li>
+        <li>As a probability model: prior $p(z) = \N(0, I)$, likelihood $p_\theta(x\mid z)$ from the decoder.</li>
+        <li>Training needs $p_\theta(x)$ and the posterior $p_\theta(z\mid x)$: both intractable.</li>
+        <li>Variational idea: a simple $q$, pulled close to the posterior.</li></ol></div>
+      <div class="next" data-b="2"><h3>Session 2</h3><p class="small">A distance between distributions (KL), the loss that pulls $q$ close without ever computing $p_\theta(x)$ (the ELBO), gradients through random draws, and the VAE on MNIST.</p></div>
     </div>
   </div>
 </section>

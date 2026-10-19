@@ -7,6 +7,7 @@ the slide runtime reveals them. Numbers come from figures/data/numbers.json, so
 the diagram for "our 3" shows what the trained model actually computed.
 """
 import json
+import math
 import re
 from pathlib import Path
 
@@ -14,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "figures" / "diagrams"
 OUT.mkdir(parents=True, exist_ok=True)
 NUM = json.loads((ROOT / "figures" / "data" / "numbers.json").read_text())
+NUM_X = json.loads((ROOT / "figures" / "data" / "numbers-extra.json").read_text())
 
 INK, INK2, INK3, LINE = "#14171F", "#4A5160", "#6B7280", "#D9DDE5"
 ROLE = {
@@ -585,9 +587,9 @@ def pgm():
     d.text(575, 220, "decoder: generate", 17, C["dec"], 650)
     d.end()
     d.begin(2)
-    d.curve("M712,146 C640,70 510,70 436,142", C["enc"], 3, dash="9 6")
-    d.math(575, 54, r"q_\varphi(z\mid x)", 26, C["enc"])
-    d.label(575, 320, r"encoder: infer $z$ from $x$ (dashed = an approximation we learn)", 17, C["enc"], 650, width=900)
+    d.curve("M712,146 C640,70 510,70 436,142", INK3, 3, dash="9 6")
+    d.math(575, 54, r"p_\theta(z\mid x)", 26, INK2)
+    d.label(575, 320, r"infer: which $z$ made this $x$? Bayes, but it divides by $p_\theta(x)$ (dashed: out of reach)", 17, INK2, 650, width=900)
     d.end()
     d.save()
 
@@ -621,6 +623,7 @@ def vae_shapes():
 
 def pixels():
     p = NUM["patch"]
+    tot_shown = 0.0
     d = SVG("pixels", 920, 360)
     s_, gap = 54, 3
     titles = [(r"\text{observed } x_i", "x"), (r"\text{decoder's } \pi_i", "dec"), (r"-\log p(x_i\mid z)", "loss")]
@@ -639,7 +642,10 @@ def pixels():
                     shade = int(255 - 210 * v)
                     fill, txt, col = f"rgb({shade},{shade},{shade})", f"{v:.2f}", ("#fff" if v > 0.55 else INK)
                 else:
-                    v = p["loss"][r_][c_]
+                    # from the rounded probability shown in the middle grid, so every cell can be checked by hand
+                    pi_ = round(p["pi"][r_][c_], 2)
+                    v = -math.log(pi_) if p["x"][r_][c_] else -math.log(1 - pi_)
+                    tot_shown = tot_shown + round(v, 2) if (r_, c_) != (0, 0) else round(v, 2)
                     a = min(v / 1.8, 1)
                     fill, txt, col = f"rgba(190,18,60,{0.08 + 0.75 * a:.2f})", f"{v:.2f}", ("#fff" if a > 0.6 else INK)
                 d.add(f'<rect x="{xx}" y="{yy}" width="{s_}" height="{s_}" rx="4" fill="{fill}" stroke="#D9DDE5"/>')
@@ -647,7 +653,7 @@ def pixels():
                       f'font-size="17" fill="{col}" text-anchor="middle">{txt}</text>')
         d.end()
     d.begin(3)
-    d.text(763, 352, f"this 5 × 5 patch: {p['total']:.1f} nats", 18, C["loss"], 650)
+    d.text(763, 352, f"this 5 × 5 patch: {tot_shown:.1f} nats", 18, C["loss"], 650)
     d.end()
     d.save()
 
@@ -896,7 +902,7 @@ def recipes():
     d = SVG("recipes", 1152, 430)
     rows = [("autoregressive", "one token at a time", "exact likelihood · slow sampling", "x"),
             ("VAE", "random z, decode once", "trained on the ELBO · tends to blur", "enc"),
-            ("GAN", "random z, generate once", "trained against a judge · may miss modes", "disc")]
+            ("GAN", "random z, generate once", "next lecture · trained against a judge", "disc")]
     for i, (name, how, props, role) in enumerate(rows):
         y = 20 + i * 140
         d.begin(i + 1)
@@ -1020,10 +1026,44 @@ def story_decode():
     d.save()
 
 
+def amortise():
+    """Per-image VI (one optimisation each) vs an encoder that predicts q for any image in one pass."""
+    d = SVG("amortise", 1152, 380)
+    vi = NUM_X["vi"]
+    d.begin(1)
+    d.text(280, 28, "VI by hand: one optimisation per image", 20, INK, 650)
+    for i, (img, y) in enumerate((("digit3.png", 62), ("digit7.png", 186))):
+        d.image(24, y, 84, 84, img, "x", sw=2)
+        d.line([(114, y + 42), (152, y + 42)], C["x"])
+        d.node(146, y + 12, 200, 60, "grey", "800 steps", "Adam on the ELBO")
+        d.curve(f"M {196} {y + 10} C {196} {y - 20}, {296} {y - 20}, {296} {y + 6}", INK3, 1.8)
+        d.line([(350, y + 42), (380, y + 42)], C["enc"])
+        vals = [vi["mu"][0], vi["mu"][1], vi["sigma"][0], vi["sigma"][1]] if i == 0 else ["·", "·", "·", "·"]
+        d.vec(384, y + 22, vals, "enc", cw=48, ch=40, vertical=False, fmt="{:.2f}", size=13)
+        d.label(480, y + 88, r"its own $q$: $m_1, m_2, s_1, s_2$", 15, C["enc"], 650, width=260)
+    d.text(280, 318, "× 60,000 training images, redone each time the decoder changes,", 16, INK2)
+    d.text(280, 342, "and again for every new image", 16, INK2)
+    d.end()
+    d.add(f'<line x1="586" y1="20" x2="586" y2="360" stroke="{LINE}" stroke-width="2" stroke-dasharray="5 5"/>')
+    d.begin(2)
+    d.text(880, 28, "Amortised: one network predicts q", 20, C["enc"], 650)
+    for i, (img, y) in enumerate((("digit3.png", 62), ("digit7.png", 186))):
+        d.image(618, y, 84, 84, img, "x", sw=2)
+        d.line([(708, y + 42), (752, 190 + (i * 2 - 1) * 40)], C["x"])
+    d.trapezoid(756, 190, 160, 230, 110, "enc", "encoder", r"weights $\varphi$")
+    for i, y in enumerate((118, 262)):
+        d.line([(920, 190 + (i * 2 - 1) * 26), (962, y)], C["enc"])
+        d.label(1050, y + 7, r"$\mu_\varphi(x),\ \sigma_\varphi(x)$", 18, C["enc"], 650, width=200)
+    d.text(880, 318, "trained once, alongside the decoder;", 16, INK2)
+    d.text(880, 342, "then any image, even a new one: one forward pass", 16, C["enc"], 650)
+    d.end()
+    d.save()
+
+
 def main():
     for f in (common, two_ways, mixture_story, latent_story, ae, ae_generate, cloud_vs_point, vae_encode, vae_sample,
               vae_decode, vae, vae_generate, pgm, vae_shapes, pixels, task, route_a, story_decode, reparam_before, reparam_after, reparam_numbers,
-              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes):
+              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes, amortise):
         f()
     print("wrote", len(list(OUT.glob("*.svg"))), "diagrams")
 

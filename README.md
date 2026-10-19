@@ -1,16 +1,17 @@
-# Learning to generate · ES 667 Generative Modelling I
+# Learning to generate · ES 667 Generative Modelling I (VAEs)
 
-A rebuilt lecture: autoencoders, KL divergence, the ELBO, reparameterisation, the VAE and GANs,
-taught slowly around **one running example** (MNIST test digit #90, a handwritten 3) and one 1-D toy dataset (two bumps at ±2).
-Every figure and every number on the slides comes from models trained by the scripts below.
+A rebuilt lecture: distributions and fitting, autoencoders, the probabilistic view, KL divergence, variational inference
+and the ELBO, reparameterisation, and the VAE, taught slowly around **one running example** (MNIST test digit #90, a handwritten 3)
+and one 1-D toy dataset (two bumps at ±2). Every figure and every number on the slides comes from models trained by the scripts below.
+GANs are a separate lecture (`deck/slides/10-gan.html` is kept here as its source; it is not in these decks).
 
-Two 75-minute sessions:
+Two 75-minute sessions, seven parts:
 
 | Deck | Slides | Content |
 |---|---|---|
-| `part1.html` · [exports/session1.pdf](exports/session1.pdf) | 63 | why generate, distributions, autoencoders, KL, the ELBO (derived one move per slide), the Bernoulli loss |
-| `part2.html` · [exports/session2.pdf](exports/session2.pdf) | 51 | recap, reparameterisation, the VAE on MNIST, GANs, wrap-up |
-| `index.html` · [exports/lecture.pdf](exports/lecture.pdf) | 114 | both sessions in one deck |
+| `part1.html` · [exports/session1.pdf](exports/session1.pdf) | 73 | why generate · **1** distributions and fitting (PyTorch fitting, how many bumps, sampling, Bayes, why the gradient needs the posterior) · **2** autoencoders (plain, denoising, sparse, contractive; why they cannot generate) · **3** the probabilistic view (prior, decoder as likelihood, the intractable evidence and posterior, Laplace / MCMC / VI) |
+| `part2.html` · [exports/session2.pdf](exports/session2.pdf) | 79 | recap · **4** KL divergence, the slow way (a betting game, surprise, entropy, cross-entropy) · **5** variational inference and the ELBO (derived from KL(q ‖ posterior), VI by hand for our 3, importance sampling, amortisation = the VAE) · **6** reparameterisation · **7** the VAE on MNIST · wrap-up · appendix (the ELBO through Jensen) |
+| `index.html` · [exports/lecture.pdf](exports/lecture.pdf) | 152 | both sessions in one deck |
 
 `*-builds.pdf` versions show every click.
 
@@ -52,7 +53,9 @@ are defined once in `scripts/build_deck.py`. The PDF export fails if any maths c
 ```sh
 PY=/Users/nipun/git/clip-lab/.venv/bin/python   # any Python with torch + torchvision + matplotlib
 $PY scripts/train_models.py     # ~10 min on an M-series GPU; MNIST read from $MNIST_ROOT, nothing downloaded
-$PY scripts/make_figures.py     # figures/data/*.svg|png and figures/data/numbers.json
+$PY scripts/make_figures.py     # figures/data/*.svg|png and figures/data/numbers.json (~4 min)
+$PY scripts/make_figures_extra.py   # fitting, how-many-bumps, AE variants, Laplace/MCMC/VI, VI by hand; numbers-extra.json
+$PY scripts/export_explorer.py  # decoder weights for the in-browser latent explorers
 $PY scripts/diagrams.py         # figures/diagrams/*.svg (hand-built SVG, numbers read from numbers.json)
 $PY scripts/build_deck.py       # inlines diagrams, fills {{numbers}}, writes part1.html, part2.html, index.html
 node scripts/export_pdf.mjs     # session1/2 and lecture PDFs (+ -builds), and the maths check
@@ -62,10 +65,10 @@ node scripts/export_pdf.mjs     # session1/2 and lecture PDFs (+ -builds), and t
 
 | Edit this | To change |
 |---|---|
-| `deck/slides/01-hook.html` … `09-wrap.html` | slide text, builds (`data-b="2"`), speaker notes (`<aside class="notes">`). 01–05 = session 1, 06–09 = session 2 |
+| `deck/slides/01-hook.html` … `09-wrap.html` | slide text, builds (`data-b="2"`), speaker notes (`<aside class="notes">`). 01–04 = session 1, 05–09 = session 2 |
 | `scripts/diagrams.py` | the SVG diagrams (encoder/decoder, VAE, reparameterisation, GAN steps …) |
-| `scripts/make_figures.py` | every chart and digit grid, and `numbers.json` |
-| `scripts/train_models.py` | the AE / VAE / GAN models and the exact `gan_step` shown on the slides |
+| `scripts/make_figures.py`, `scripts/make_figures_extra.py` | every chart and digit grid, `numbers.json` and `numbers-extra.json` |
+| `scripts/train_models.py` | all models: AE (2, 16, 64 and sparse-64 numbers), denoising AE, VAE (2, 16, β = 8), conditional VAE, PixelAR, and the GAN-lecture models |
 | `deck/deck.css`, `deck/deck.js`, `deck/widgets.js`, `deck/annotate.js` | look, navigation, the three live widgets, and right-click review notes |
 
 Build syntax: `data-b="3"` appears from click 3 on, `data-b="2-4"` only during clicks 2–4, `data-b="=1"` only on click 1, `data-hl="2"` highlights from click 2.
@@ -73,9 +76,12 @@ Build syntax: `data-b="3"` appears from click 3 on, `data-b="2-4"` only during c
 ## What is real
 
 - AE and VAE (2- and 16-number codes, plus a β = 8 variant): binarised MNIST, MLP 784-512-256-z, 30–40 epochs.
-- MNIST GAN: grey-level MNIST, small DCGAN, 30 epochs, trained with the same `gan_step` as on the slides.
-- 1-D GANs: 8 seeds on the two-bump data (all cover both bumps by step 3,000), plus one run with a 4-unit generator that collapses to one bump.
-- ELBO gap for our 3: log p(x) by grid integration over the 2-D code space (−128.7), ELBO by 20,000 samples (−129.3), and the gap computed independently as KL(q ‖ true posterior) = 0.61.
+- Autoencoder variants: a denoising AE (16 numbers, 20% of pixels flipped) and a 64-unit AE with and without an L1 penalty on the code.
+- Part 1 fits: one Gaussian by gradient descent, and mixtures of 1–4 bumps scored on 200 held-out numbers.
+- Part 3 and 5 inference on our 3, all on the trained 2-number decoder: Laplace (autograd Hessian at the peak), random-walk Metropolis,
+  and variational inference by hand (a diagonal Gaussian, 800 Adam steps on the ELBO: −128.83, against −129.30 for the encoder's one pass;
+  log p(x) = −128.75 on a fine grid around the posterior, so the gaps are 0.08 and 0.55 nats).
+- Layout checks: `node scripts/_overflow.mjs index.html` and `node scripts/_overlap.mjs index.html` (with the review server running) list any slide whose content leaves the frame or runs into its title or take-away line.
 - Opening images are published model outputs (StyleGAN, pix2pix, CycleGAN, Context Encoders, SPADE), with sources on each slide.
 
 ## The previous (Codex) version

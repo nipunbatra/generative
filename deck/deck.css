@@ -73,6 +73,7 @@ body.reading { background: #E9EBEF; }
 .sec-dist  { --sec: #AA4E08; }
 .sec-ae    { --sec: #8B2CDE; }
 .sec-kl    { --sec: #BE123C; }
+.sec-prob  { --sec: #245EDB; }
 .sec-elbo  { --sec: #0F766E; }
 .sec-rep   { --sec: #AA4E08; }
 .sec-vae   { --sec: #8B2CDE; }
@@ -410,3 +411,49 @@ body.print .lx-static, .lx-offline + .lx-static { display: block; }
 .cond img.fig { height: 132px; width: auto; max-width: 100%; object-fit: contain; align-self: flex-start; }
 .cond img.pix { height: 66px; }
 .condgrid { gap: 10px 34px; }
+
+/* code walk-throughs: code on the left, the explanation of the highlighted lines on the right */
+.codewalk { display: grid; grid-template-columns: 1.35fr 1fr; gap: 28px; align-items: start; }
+.codewalk pre.code { font-size: 17px; line-height: 1.55; }
+.codewalk .notes-col p.small { margin: 0 0 10px; }
+.codewalk .notes-col .callout { font-size: 20px; }
+.kinds td:nth-child(2), .kinds td:nth-child(3) { font-size: 19px; }
+
+.dae-labels { display: grid; grid-template-rows: repeat(4, 1fr); height: 312px; font-size: 18px; color: var(--ink-2); text-align: right; align-items: center; width: 250px; }
+.dae-cover, .dae-cover2 { position: absolute; left: 0; right: 0; bottom: 0; background: var(--paper); }
+.dae-cover { top: 25%; }
+.dae-cover2 { top: 50%; }
+
+.game-row { display: grid; grid-template-columns: 190px auto 290px; align-items: center; gap: 16px; margin: 16px auto 0; width: 1100px; }
+.game-row .who { font-size: 21px; font-weight: 650; text-align: right; }
+.game-row .prod { font-size: 22px; }
+.dgs { display: flex; gap: 6px; }
+.dg { display: flex; flex-direction: column; align-items: center; width: 50px; border: 1.5px solid var(--line); border-radius: 8px; background: #fff; padding: 4px 0; }
+.dg b { font-size: 26px; }
+.dg i { font-style: normal; font-size: 15px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.dg.seven { border-color: var(--loss); }
+
+/* Bishop-style picture: log p(x) = ELBO + gap, for two choices of q */
+.bound { width: 1040px; margin: 6px auto 0; }
+.bound-brace { margin: 40px 0 8px 176px; border: 2.5px solid var(--x); border-bottom: none; height: 16px; border-radius: 9px 9px 0 0; position: relative; }
+.bound-brace > span { position: absolute; top: -36px; left: 0; right: 0; text-align: center; color: var(--x); font-size: 20px; font-weight: 650; white-space: nowrap; }
+.bound-row { display: grid; grid-template-columns: 160px 1fr; gap: 16px; align-items: center; margin-top: 10px; }
+.bound-row .who { text-align: right; font-size: 20px; font-weight: 650; color: var(--ink-2); }
+.bound .stackbar { height: 72px; }
+.map2 ol.route li { display: grid; grid-template-columns: 40px 1fr; column-gap: 16px; row-gap: 0; font-size: 24px; }
+.map2 ol.route li::before { grid-row: span 2; }
+.map2 ol.route li > span { grid-column: 2; font-size: 18px; padding: 0; }
+.map2 > .col { width: 520px; }
+.sess { font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 0 0 6px; }
+
+.stat.wide { width: 430px; }
+.stat.wide b { font-size: 30px; }
+.katex { text-transform: none; }
+
+/* the ELBO lower bound on our 3, as number lines */
+.bound-lines { display: grid; grid-template-columns: 190px 900px; column-gap: 26px; row-gap: 4px; align-items: start; width: 1120px; margin: 12px auto 0; }
+.bound-lines .who { font-size: 18px; font-weight: 650; color: var(--ink-2); text-align: right; padding-top: 50px; line-height: 1.3; }
+.bound-lines .numline { width: 900px; height: 142px; }
+.bound-lines .numline.short { height: 100px; }
+.bound-lines .nl-mark { transform: translateX(-50%); }
+.numline.short .nl-track { top: 76px; }

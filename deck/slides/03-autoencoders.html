@@ -1,11 +1,11 @@
-<!-- ===================================================================== 3 · AUTOENCODERS -->
+<!-- ===================================================================== PART 2 · AUTOENCODERS -->
 
 <section class="slide sec-ae opener break" id="ae-open" data-section="2 · Autoencoders">
   <div class="break-grid">
     <div>
       <p class="kicker">Part 2 of 7</p>
       <h2>First attempt: an autoencoder</h2>
-      <p class="why">Part 1 ended with a catch: to learn a decoder we need to know which code goes with each image. An <b>encoder</b> network could simply tell us. Let us try that, and watch what breaks.</p>
+      <p class="why">Part 1 modelled single numbers; an image has 784. Before any probability, a simpler idea: squeeze each image into a few numbers with an <b>encoder</b>, rebuild it with a <b>decoder</b>, and see how far that gets us towards generating.</p>
     </div>
     <!--route:2-->
   </div>
@@ -38,6 +38,32 @@
   <aside class="notes"><p>Same cross-entropy as classification, with one binary "class" per pixel. Summed over 784 pixels per image.</p></aside>
 </section>
 
+<section class="slide sec-ae" id="ae-code" data-section="2 · Autoencoders">
+  <p class="kicker">The autoencoder in PyTorch</p>
+  <h2>Two small networks and one loss</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code"><span class="line" data-hl="=1">encoder = nn.Sequential(nn.Flatten(),</span>
+<span class="line" data-hl="=1">    nn.Linear(<span class="n">784</span>, <span class="n">512</span>), nn.ReLU(),</span>
+<span class="line" data-hl="=1">    nn.Linear(<span class="n">512</span>, <span class="n">256</span>), nn.ReLU(), nn.Linear(<span class="n">256</span>, d))</span>
+<span class="line" data-hl="=2">decoder = nn.Sequential(nn.Linear(d, <span class="n">256</span>), nn.ReLU(),</span>
+<span class="line" data-hl="=2">    nn.Linear(<span class="n">256</span>, <span class="n">512</span>), nn.ReLU(), nn.Linear(<span class="n">512</span>, <span class="n">784</span>))</span>
+<span class="line"></span>
+<span class="line" data-hl="=3">z      = encoder(x)                    <span class="c"># [B, d]   the code</span></span>
+<span class="line" data-hl="=3">logits = decoder(z)                    <span class="c"># [B, 784] one per pixel</span></span>
+<span class="line" data-hl="=4">loss = F.binary_cross_entropy_with_logits(</span>
+<span class="line" data-hl="=4">          logits, x.flatten(<span class="n">1</span>), reduction=<span class="f">"none"</span>).sum(<span class="n">1</span>).mean()</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Encoder:</b> 784 pixels in, $d$ numbers out. Each layer narrower than the last.</p>
+        <p class="small" data-b="=2"><b>Decoder:</b> the mirror image, $d$ numbers back up to 784.</p>
+        <p class="small" data-b="=3"><b>Forward pass:</b> image to code to one logit per pixel; $\mathrm{sigmoid}$ of a logit is the probability of ink.</p>
+        <p class="small" data-b="4"><b>Loss:</b> binary cross-entropy summed over the 784 pixels of each image, then averaged over the batch. Train with the same three-line update as the bumps.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>This is the model trained for these slides (scripts/train_models.py), 30 epochs on 60,000 binarised MNIST digits. Ask: where are the labels? There are none. The input is the target.</p></aside>
+</section>
+
 <section class="slide sec-ae" id="ae-recon" data-section="2 · Autoencoders">
   <p class="kicker">Trained on 60,000 digits</p>
   <h2>It reconstructs very well</h2>
@@ -47,6 +73,109 @@
   </div>
   <p class="q">784 pixels squeezed into 16 numbers and back. Average loss {{ae16_final.recon}} nats per image. Can we now make new digits?</p>
   <aside class="notes"><p>This is an autoencoder with a 16-number code. Same architecture as before otherwise. Test-set reconstruction loss: {{ae16_final.recon}} nats per image.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-bottleneck" data-section="2 · Autoencoders">
+  <p class="kicker">How narrow can the middle be?</p>
+  <h2>2 numbers or 16 numbers per image</h2>
+  <div class="body">
+    <div class="col" style="gap:6px;align-items:center">
+      <p class="small" style="margin:0">a 2-number code · loss {{ae2_final.recon}} nats per image</p>
+      <img class="fig pix" src="figures/data/ae-recon.png" style="width:860px">
+      <p class="small" style="margin:14px 0 0" data-b="2">a 16-number code · loss {{ae16_final.recon}} nats per image</p>
+      <img class="fig pix" src="figures/data/ae16-recon.png" style="width:860px" data-b="2">
+    </div>
+  </div>
+  <p class="q" data-b="2">Each pair of rows: test digits on top, reconstructions below. Two numbers keep the digit's identity; sixteen also keep its slant and stroke.</p>
+  <aside class="notes"><p>Same architecture apart from the width of the middle layer. The 2-number version matters later because we can draw its code space on a slide.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-kinds" data-section="2 · Autoencoders">
+  <p class="kicker">One idea, several variations</p>
+  <h2>The autoencoder family</h2>
+  <div class="body">
+    <table class="cmp kinds">
+      <tr><th>variant</th><th>what changes</th><th>what it encourages</th></tr>
+      <tr><td>plain</td><td>nothing: compress, rebuild</td><td>a short code that keeps what matters</td></tr>
+      <tr data-b="2"><td>denoising</td><td>corrupt the input, rebuild the <b>clean</b> image</td><td>features that ignore noise</td></tr>
+      <tr data-b="3"><td>sparse</td><td>penalty: only a few code units may be on</td><td>each unit means one part of a digit</td></tr>
+      <tr data-b="4"><td>contractive</td><td>penalty: the code barely moves when the input moves a little</td><td>smooth, robust codes</td></tr>
+      <tr data-b="5"><td><b class="cenc">variational</b></td><td>each image becomes a <b>cloud</b> of codes near $\N(0, I)$</td><td>a code space you can <b>sample</b> from</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="5">The first four change the loss or the input. The last one changes what a code is, and it is where today is going.</p>
+  <p class="src">Following Lilian Weng, "From Autoencoder to Beta-VAE" (2018)</p>
+  <aside class="notes"><p>Next three slides: the denoising and sparse versions trained on MNIST for this lecture, and the contractive version explained.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-denoise" data-section="2 · Autoencoders">
+  <p class="kicker">Variant 1 · denoising autoencoder</p>
+  <h2>Feed it a damaged image, ask for the clean one</h2>
+  <div class="body">
+    <div class="row" style="gap:28px;align-items:center">
+      <div class="dae-labels"><span>input: 20% of pixels flipped</span><span data-b="2">plain autoencoder</span><span data-b="3">denoising autoencoder</span><span data-b="3">the clean original</span></div>
+      <div class="stack" style="width:780px">
+        <img class="fig pix" src="figures/data/dae-rows.png" style="width:780px">
+        <div class="dae-cover" data-gone="2"></div>
+        <div class="dae-cover2" data-gone="3"></div>
+      </div>
+    </div>
+    <pre class="code" style="width:860px;margin:16px auto 0;font-size:17px"><span class="line">noisy = flip_pixels(x, rate=<span class="n">0.2</span>)                   <span class="c"># the only new line</span></span>
+<span class="line">loss  = bce_with_logits(decoder(encoder(noisy)), x)  <span class="c"># target: the CLEAN x</span></span></pre>
+  </div>
+  <p class="q" data-b="3">The plain autoencoder copies the noise. Trained to undo damage, the code must hold the digit, not the specks.</p>
+  <aside class="notes"><p>Both models have a 16-number code and the same architecture; only the training input differs. The idea (Vincent et al., 2008) predates dropout: corrupting inputs during training is a form of regularisation.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-sparse" data-section="2 · Autoencoders">
+  <p class="kicker">Variant 2 · sparse autoencoder</p>
+  <h2>A wide code, but only a few units allowed on</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:23px">$$\text{loss} = \text{reconstruction} + \lambda \textstyle\sum_{j=1}^{64} |h_j|, \qquad h = \mathrm{ReLU}(\text{encoder}(x))$$</div>
+    <img class="fig" src="figures/data/sparse-codes.svg" style="height:350px;margin:4px auto 0" data-b="2">
+  </div>
+  <p class="q" data-b="2">The 64-number code of our 3. Averaged over test digits: {{sparse.avg_plain}} units on without the penalty, {{sparse.avg_sparse}} with it.</p>
+  <aside class="notes"><p>The penalty costs reconstruction quality ({{sparse.recon_plain}} vs {{sparse.recon_sparse}} nats per image): a trade between a short description and a precise one. Each surviving unit tends to stand for a stroke or a part.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-contractive" data-section="2 · Autoencoders">
+  <p class="kicker">Variant 3 · contractive autoencoder (not trained here)</p>
+  <h2>Nudge the input; the code should barely move</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:27px">$$\text{loss} = \text{reconstruction} + \lambda \,\Big\| \frac{\partial h}{\partial x} \Big\|_F^2 \;=\; \text{reconstruction} + \lambda\sum_{j,i}\Big(\frac{\partial h_j}{\partial x_i}\Big)^2$$</div>
+    <div class="steps2" style="margin-top:14px">
+      <div class="callout plain" data-b="2"><h3>Read the penalty</h3>for every code unit $h_j$ and every pixel $x_i$: how much does $h_j$ change if $x_i$ changes a little? Add up the squares.</div>
+      <div class="callout enc" data-b="3"><h3>What it buys</h3>two slightly different 3s get almost the same code. Nearby inputs, nearby codes: a first step towards a smooth code space.</div>
+    </div>
+  </div>
+  <aside class="notes"><p>Rifai et al., 2011. Denoising and contractive autoencoders are closely related: adding small noise during training and penalising the Jacobian both make the code insensitive to small input changes.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-uses" data-section="2 · Autoencoders">
+  <p class="kicker">What autoencoders are used for</p>
+  <h2>Compress, clean, search, and spot the odd one out</h2>
+  <div class="body">
+    <div class="row top" style="gap:30px">
+      <div class="col" style="width:470px">
+        <p class="small"><b>Compress:</b> 784 pixels → 16 numbers, 49× fewer.</p>
+        <p class="small"><b>Clean:</b> the denoising slide.</p>
+        <p class="small"><b>Search:</b> similar images have nearby codes, so search the codes.</p>
+        <p class="small" data-b="2"><b>Spot anomalies:</b> an image the model has never seen anything like gets a large reconstruction error.</p>
+      </div>
+      <div class="col" style="align-items:center" data-b="2">
+        <img class="fig pix" src="figures/data/ae-anomaly.png" style="width:600px">
+        <div class="row" style="width:600px;justify-content:space-between"><p class="cap">top: typical test digits, loss ≈ {{anomaly.median}}</p><p class="cap">bottom: the 8 worst of 10,000, loss up to {{anomaly.worst.0}}</p></div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">Useful, all of it. But none of it <b>generates</b> a new image. Can the decoder do that on its own?</p>
+  <aside class="notes"><p>The worst-reconstructed test digits are mostly badly written or cut-off digits: the reconstruction error works as an "unusual" score, with no labels needed.</p></aside>
+</section>
+
+<section class="slide sec-ae opener" id="ae-can-generate" data-section="2 · Autoencoders">
+  <p class="kicker">Part 2, second half</p>
+  <h2>Can an autoencoder generate?</h2>
+  <p>The decoder turns codes into digits. If we pick a code ourselves, do we get a new digit?</p>
 </section>
 
 <section class="slide sec-ae" id="ae-gen" data-section="2 · Autoencoders">
@@ -110,9 +239,9 @@
   <h2>Random draws all land in one small spot</h2>
   <div class="body">
     <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/ae-scatter-prior.svg" style="height:470px">
+      <img class="fig" src="figures/data/ae-scatter-prior.svg" style="height:450px">
       <div class="col grow">
-        <p class="small">Now add 150 random codes from $\N(0, I)$ (orange), the kind we fed the decoder two slides ago. Dashed circles: radius 1 and 2. On this map they all fall into one small crowded patch.</p>
+        <p class="small">Now add 150 random codes from $\N(0, I)$ (black ×), the kind we fed the decoder two slides ago. Dashed circles: radius 1 and 2. On this map they all fall into one small crowded patch (zoomed, bottom right).</p>
         <img class="fig pix" src="figures/data/ae-prior-decodes.png" style="width:540px" data-b="2">
         <p class="cap" data-b="2" style="text-align:left">ten of them decoded: some digits, some smudges</p>
         <p class="small" data-b="3">And we can never generate a 1: the 1s live near $z_1 \approx 20$.</p>
@@ -167,7 +296,7 @@
   <h2>The same plot for a VAE</h2>
   <div class="body">
     <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/vae-scatter-prior.svg" style="height:470px">
+      <img class="fig" src="figures/data/vae-scatter-prior.svg" style="height:450px">
       <div class="col grow">
         <p class="small">Same data, same 2-number code, same random draws. Now the codes sit inside $\N(0, I)$.</p>
         <img class="fig pix" src="figures/data/vae-prior-decodes.png" style="width:540px" data-b="2">
@@ -175,8 +304,8 @@
       </div>
     </div>
   </div>
-  <p class="q">To get here we need two tools: a distance between distributions (KL), and a principled loss (the ELBO).</p>
-  <aside class="notes"><p>Show the contrast with the previous plot: axes now run from −4 to 4, every class sits inside the dashed circles, and decoded draws are digits.</p></aside>
+  <p class="q">To get here: make the model probabilistic (Part 3), measure how close two distributions are (Part 4), and derive the loss (Part 5).</p>
+  <aside class="notes"><p>Show the contrast with the previous plot: axes now run from −4 to 4, most of every class sits inside the outer dashed circle (a few clusters, the 3s among them, reach its edge), and decoded draws are digits.</p></aside>
 </section>
 
 <section class="slide sec-ae" id="recap-2" data-section="2 · Autoencoders">
@@ -184,8 +313,8 @@
   <h2>What we did, and what comes next</h2>
   <div class="body">
     <div class="recap">
-      <div><h3>What we did</h3><ol><li>An encoder squeezes an image into a short code; a decoder rebuilds it. The image is its own target.</li><li>Random codes from $\N(0, I)$ decode to scribbles.</li><li>The codes spread over an arbitrary range, and the decoder never saw the space between them.</li><li>The wish: encode each image to a <b>cloud</b>, and keep every cloud near $\N(0, I)$.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next: a distance between distributions</h3><p class="small">"Keep the cloud near $\N(0, I)$" needs one number for how far one distribution is from another. That number is the KL divergence.</p></div>
+      <div><h3>What we did</h3><ol><li>An encoder squeezes an image into a short code; a decoder rebuilds it. The image is its own target.</li><li>Random codes from $\N(0, I)$ decode to scribbles.</li><li>The codes spread over an arbitrary range, and the decoder never saw the space between them.</li><li>Variants change the input (denoising) or add a penalty (sparse, contractive).</li><li>The wish: encode each image to a <b>cloud</b>, and keep every cloud near $\N(0, I)$.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next: the probabilistic view</h3><p class="small">Turn the decoder into a probability model with a prior over codes, and ask what it would take to train it by maximum likelihood, as in Part 1.</p></div>
     </div>
   </div>
 </section>

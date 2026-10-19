@@ -12,6 +12,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 NUM = json.loads((ROOT / "figures" / "data" / "numbers.json").read_text())
+_extra = ROOT / "figures" / "data" / "numbers-extra.json"   # from scripts/make_figures_extra.py
+if _extra.exists():
+    NUM.update(json.loads(_extra.read_text()))
 
 
 def fmt(v):
@@ -63,15 +66,16 @@ MACROS = {
 
 # Two teaching sessions (about 75 minutes each). index.html holds both.
 SESSIONS = {
-    "part1.html": ("Session 1 · Latent variables, KL and the ELBO", ["01", "02", "03", "04", "05"]),
-    "part2.html": ("Session 2 · Training VAEs and GANs", ["06", "07", "08", "09"]),
-    "index.html": ("Generative Modelling I", ["01", "02", "03", "04", "05", "06", "07", "08", "09"]),
+    "part1.html": ("Session 1 · Fitting, autoencoders, the probabilistic view", ["01", "02", "03", "04"]),
+    "part2.html": ("Session 2 · KL, variational inference, the VAE", ["05", "06", "07", "08", "09"]),
+    "index.html": ("Generative Modelling I · VAEs", ["01", "02", "03", "04", "05", "06", "07", "08", "09"]),
 }
 
 
 PARTS = [
-    ("--z", "Distributions and hidden causes"), ("--enc", "Autoencoders"), ("--loss", "KL divergence"),
-    ("--dec", "The ELBO"), ("--z", "Reparameterisation"), ("--enc", "The VAE on MNIST"), ("--disc", "GANs"),
+    ("--z", "Distributions and fitting"), ("--enc", "Autoencoders"), ("--x", "The probabilistic view"),
+    ("--loss", "KL divergence"), ("--dec", "Variational inference and the ELBO"), ("--z", "Reparameterisation"),
+    ("--enc", "The VAE on MNIST"),
 ]
 
 
@@ -111,6 +115,7 @@ def page(title, body):
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title} · ES 667</title>
 <link rel="stylesheet" href="vendor/katex/katex.min.css">

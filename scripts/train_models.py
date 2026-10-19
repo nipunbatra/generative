@@ -134,6 +134,80 @@ def train_autoencoder(name, data, latent, variational, beta=1.0, epochs=30, seed
                 seed=seed, history=history)
 
 
+# ----------------------------------------------------------------------------- autoencoder variants
+def salt_pepper(x, rate, generator=None):
+    """Flip each pixel with probability `rate` (the corruption a denoising autoencoder learns to undo)."""
+    flip = (torch.rand(x.shape, generator=generator) < rate).to(x.device)
+    return torch.where(flip, 1 - x, x)
+
+
+def train_denoising(data, latent=16, rate=0.2, epochs=20, seed=0):
+    torch.manual_seed(seed)
+    model = AutoEncoder(latent, variational=False).to(DEVICE)
+    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+    xtr, ytr = data["train"]
+    gen = torch.Generator().manual_seed(seed)
+    history = []
+    for epoch in range(1, epochs + 1):
+        tot, count = 0.0, 0
+        for xb, _ in batches(xtr, ytr, 128, gen):
+            noisy = salt_pepper(xb, rate, gen).to(DEVICE)
+            logits, _, _, _ = model(noisy)
+            recon = F.binary_cross_entropy_with_logits(logits, xb.flatten(1).to(DEVICE), reduction="none").sum(1)
+            loss = recon.mean()
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            opt.step()
+            tot += recon.sum().item()
+            count += len(xb)
+        history.append(dict(epoch=epoch, train_recon=tot / count))
+        print(f"dae epoch {epoch:2d}  recon of the clean image {tot / count:7.2f}", flush=True)
+    torch.save(model.state_dict(), OUT / "dae16.pt")
+    return dict(name="dae16", latent=latent, variational=False, rate=rate, epochs=epochs, history=history)
+
+
+class SparseAE(nn.Module):
+    """64 non-negative code units; an L1 penalty pushes most of them to exactly zero for any one image."""
+
+    def __init__(self, units=64):
+        super().__init__()
+        self.enc = nn.Sequential(nn.Flatten(), nn.Linear(784, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, units), nn.ReLU())
+        self.dec = nn.Sequential(nn.Linear(units, 256), nn.ReLU(), nn.Linear(256, 512), nn.ReLU(), nn.Linear(512, 784))
+
+    def forward(self, x):
+        h = self.enc(x)
+        return self.dec(h), h
+
+
+def train_sparse(data, lam, name, epochs=20, seed=0):
+    torch.manual_seed(seed)
+    model = SparseAE().to(DEVICE)
+    opt = torch.optim.Adam(model.parameters(), lr=1e-3)
+    xtr, ytr = data["train"]
+    xte, _ = data["test"]
+    gen = torch.Generator().manual_seed(seed)
+    history = []
+    for epoch in range(1, epochs + 1):
+        tot, count = 0.0, 0
+        for xb, _ in batches(xtr, ytr, 128, gen):
+            xb = xb.to(DEVICE)
+            logits, h = model(xb)
+            recon = F.binary_cross_entropy_with_logits(logits, xb.flatten(1), reduction="none").sum(1)
+            loss = (recon + lam * h.abs().sum(1)).mean()
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            opt.step()
+            tot += recon.sum().item()
+            count += len(xb)
+        with torch.no_grad():
+            _, h = model(xte[:2000].to(DEVICE))
+            active = (h > 1e-3).float().sum(1).mean().item()
+        history.append(dict(epoch=epoch, train_recon=tot / count, active_units=active))
+        print(f"{name} epoch {epoch:2d}  recon {tot / count:7.2f}  active units per image {active:5.1f} / 64", flush=True)
+    torch.save(model.state_dict(), OUT / f"{name}.pt")
+    return dict(name=name, lam=lam, epochs=epochs, history=history)
+
+
 # ----------------------------------------------------------------------------- conditional VAE
 class CondVAE(nn.Module):
     """A VAE told which digit to draw: the one-hot label c goes into both encoder and decoder."""
@@ -394,7 +468,7 @@ def main():
     meta_path = OUT / "training.json"
     meta = json.loads(meta_path.read_text()) if meta_path.exists() else {}
     t0 = time.time()
-    need_data = a.only in ("all", "ae2", "ae16", "vae2", "vae2b8", "vae16", "gan", "cvae2", "pixelar")
+    need_data = a.only in ("all", "ae2", "ae16", "vae2", "vae2b8", "vae16", "gan", "cvae2", "pixelar", "variants")
     data = load_mnist() if need_data else None
     jobs = {
         "ae2": lambda: train_autoencoder("ae2", data, 2, False, epochs=30),
@@ -404,6 +478,7 @@ def main():
         "vae16": lambda: train_autoencoder("vae16", data, 16, True, beta=1.0, epochs=40),
         "gan": lambda: train_mnist_gan(load_mnist(binary=False), epochs=30),
         "cvae2": lambda: train_cvae(data),
+        "variants": lambda: [train_denoising(data), train_sparse(data, 0.0, "ae64"), train_sparse(data, 0.5, "sparse64")],
         "pixelar": lambda: [train_pixel_ar(data, "row3"), train_pixel_ar(data, "window7")],
     }
     for name, job in jobs.items():

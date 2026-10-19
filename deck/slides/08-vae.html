@@ -1,17 +1,17 @@
 <!-- ===================================================================== 7 · VAE ON MNIST -->
 
-<section class="slide sec-vae opener break" id="vae-open" data-section="6 · The VAE">
+<section class="slide sec-vae opener break" id="vae-open" data-section="7 · The VAE">
   <div class="break-grid">
     <div>
-      <p class="kicker">Part 6 of 7</p>
+      <p class="kicker">Part 7 of 7</p>
       <h2>The variational autoencoder, end to end</h2>
       <p class="why">Every piece is in place: encoder, cloud, KL, ELBO, reparameterisation. Follow our 3 through the trained network, then generate.</p>
     </div>
-    <!--route:6-->
+    <!--route:7-->
   </div>
 </section>
 
-<section class="slide sec-vae" id="vae-encode" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-encode" data-section="7 · The VAE">
   <p class="kicker">Our 3 through the trained VAE · 1 of 3</p>
   <h2>Encode: the image becomes a cloud</h2>
   <div class="body center"><!--svg:vae-encode--></div>
@@ -19,38 +19,53 @@
   <aside class="notes"><p>Real outputs for test digit #{{digit3_index}}. The encoder has two heads: one for the centre μ, one for log σ². Exponentiating half of log σ² gives σ.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-sample" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-sample" data-section="7 · The VAE">
   <p class="kicker">Our 3 through the trained VAE · 2 of 3</p>
   <h2>Sample: one code from inside the cloud</h2>
   <div class="body center"><!--svg:vae-sample--></div>
   <aside class="notes"><p>The reparameterisation from the last part, with real numbers. Because σ is tiny, z lands very close to μ: the noise moves it by only a few hundredths.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-decode" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-decode" data-section="7 · The VAE">
   <p class="kicker">Our 3 through the trained VAE · 3 of 3</p>
   <h2>Decode, then score against the real 3</h2>
   <div class="body center"><!--svg:vae-decode--></div>
   <p class="q" data-b="3">Loss for our 3: ${{our3.recon}} + {{our3.kl_total}} = {{our3.loss}}$ nats. Backpropagate it into both $\theta$ and $\varphi$.</p>
-  <aside class="notes"><p>The reconstruction term compares π with the real binary pixels (the Bernoulli slide from Session 1). The KL term uses the formula on μ and σ from step 1.</p></aside>
+  <aside class="notes"><p>The reconstruction term compares π with the real binary pixels (zoomed in on the next slide). The KL term uses the formula on μ and σ from step 1.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-our3" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-bernoulli" data-section="7 · The VAE">
+  <p class="kicker">Step 3, zoomed in: the reconstruction term</p>
+  <h2>Each pixel is a coin flip with probability $\pi_i$</h2>
+  <div class="body">
+    <div class="row" style="gap:20px">
+      <div class="col" style="align-items:center;width:200px"><img class="fig" src="figures/data/digit3-patch.svg" style="width:190px"><p class="cap">our 3, one 5 × 5 patch</p></div>
+      <div class="grow" style="max-width:860px"><!--svg:pixels--></div>
+    </div>
+    <div class="mathblock" style="font-size:25px" data-b="3">$$-\log p_\theta(x\mid z) = -\sum_{i=1}^{784}\Big[x_i\log\pi_i + (1-x_i)\log(1-\pi_i)\Big] = {{our3.recon}}\ \text{nats}$$</div>
+  </div>
+  <p class="q" data-b="3">Binary cross-entropy is not a design choice: it is the Bernoulli log-likelihood. Gaussian pixels would give squared error.</p>
+  <aside class="notes">
+    <p>The patch is on the top stroke of our 3. Where x = 1 the loss is −log π; where x = 0 it is −log(1 − π). Ink predicted at 0.89 costs −log 0.89 = 0.12; ink predicted at 0.18 costs 1.71.</p>
+    <p>In code we pass logits to binary_cross_entropy_with_logits for numerical stability; π = sigmoid(logits) is only for display.</p>
+  </aside>
+</section>
+
+<section class="slide sec-vae" id="vae-our3" data-section="7 · The VAE">
   <p class="kicker">All three steps on one page</p>
   <h2>The whole VAE, for our 3</h2>
   <div class="body center"><!--svg:vae--></div>
   <aside class="notes"><p>The same numbers as the previous three slides, as one picture to keep in mind. log σ² ≈ −6 means σ ≈ 0.05: a very tight cloud, and the KL term charges for that tightness.</p></aside>
 </section>
 
-
-<section class="slide sec-vae" id="vae-shapes" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-shapes" data-section="7 · The VAE">
   <p class="kicker">The same network as tensors</p>
   <h2>Shapes, layer by layer</h2>
   <div class="body center"><!--svg:vae-shapes--></div>
   <aside class="notes"><p>Two heads, one sampled tensor: μ and log σ² each have 2 numbers; z also has 2. The decoder never sees μ or σ directly, only z.</p></aside>
 </section>
 
-
-<section class="slide sec-vae" id="vae-kl3" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-kl3" data-section="7 · The VAE">
   <p class="kicker">The KL term for our 3</p>
   <h2>A tight cloud is expensive</h2>
   <div class="body">
@@ -67,7 +82,7 @@
   <aside class="notes"><p>If σ were 1 and μ 0, the KL would be 0, but then the code would carry no information about which digit this is, and reconstruction would be poor. The tension between the two terms shapes the code space.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-step" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-step" data-section="7 · The VAE">
   <p class="kicker">One training step</p>
   <h2>The whole algorithm fits on a slide</h2>
   <div class="body">
@@ -92,7 +107,7 @@
   <aside class="notes"><p>Exactly the code in <code>scripts/train_models.py</code>. 60,000 binarised MNIST digits, batch 128, Adam 1e-3, 40 epochs; about 90 seconds on a laptop GPU.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-train" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-train" data-section="7 · The VAE">
   <p class="kicker">Training run, test set</p>
   <h2>Reconstruction falls, KL rises, then both settle</h2>
   <div class="body">
@@ -105,7 +120,7 @@
   <aside class="notes"><p>Two charts, not one with two axes: the scales differ by 20×. The KL rises early because the encoder starts using the code: an informative code must move away from the prior.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-generate" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-generate" data-section="7 · The VAE">
   <p class="kicker">The payoff</p>
   <h2>Generate: random code → decoder. No encoder.</h2>
   <div class="body">
@@ -115,7 +130,7 @@
   <aside class="notes"><p>Ask: do we need any image to generate? No. Prior and decoder only. The encoder is used for training and for encoding existing images.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-samples" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-samples" data-section="7 · The VAE">
   <p class="kicker">48 random codes each</p>
   <h2>Samples from two VAEs</h2>
   <div class="body">
@@ -128,7 +143,7 @@
   <aside class="notes"><p>Both models: same architecture apart from the code size, same training. The 16-number VAE pays more KL ({{vae16_final.kl}} vs {{vae2_final.kl}}) to reconstruct much better.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-map" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-map" data-section="7 · The VAE">
   <p class="kicker">Because the code is 2-D, we can draw the whole map</p>
   <h2>Every point in the code space is a digit</h2>
   <div class="body">
@@ -143,7 +158,7 @@
   <aside class="notes"><p>The grid follows Kingma & Welling's figure: points are placed at evenly spaced probabilities of N(0, 1), so the edges reach further out. Compare the colours on the left with the digits on the right: the 1s, 0s and 7s sit in the same places. Hover over the map in the browser to see one cell enlarged.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae2-explore" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae2-explore" data-section="7 · The VAE">
   <p class="kicker">Try it: the trained VAE, in your browser</p>
   <h2>The same app, now for the VAE</h2>
   <div class="body">
@@ -166,7 +181,7 @@
   <aside class="notes"><p>Same controls as the autoencoder app in Session 1. Compare: the axes now run from −4 to 4, and the dashed circles cover the data.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-walk" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-walk" data-section="7 · The VAE">
   <p class="kicker">The cover, explained</p>
   <h2>Walk in a straight line from our 3 to a 7</h2>
   <div class="body center col" style="gap:14px">
@@ -178,12 +193,12 @@
   <aside class="notes"><p>Honest note: a plain autoencoder with 16 numbers also interpolates smoothly between these two digits. The VAE's real advantage is that random codes are valid, as we saw earlier.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-beta" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-beta" data-section="7 · The VAE">
   <p class="kicker">The tug of war, made visible</p>
   <h2>No KL, normal KL, too much KL</h2>
   <div class="body">
     <div class="beta3">
-      <div class="col" style="align-items:center"><p class="small" style="font-weight:650">autoencoder (no KL)</p><img class="fig" src="figures/data/beta-ae2-scatter.svg" style="width:300px"><img class="fig pix" src="figures/data/beta-ae2-recon.png" style="width:330px"><img class="fig pix" src="figures/data/beta-ae2-samples.png" style="width:330px"><p class="cap">recon {{beta.ae2.recon}} · KL 0</p></div>
+      <div class="col" style="align-items:center"><p class="small" style="font-weight:650">autoencoder (no KL)</p><img class="fig" src="figures/data/beta-ae2-scatter.svg" style="width:300px"><img class="fig pix" src="figures/data/beta-ae2-recon.png" style="width:330px"><img class="fig pix" src="figures/data/beta-ae2-samples.png" style="width:330px"><p class="cap">recon {{beta.ae2.recon}} · no KL term</p></div>
       <div class="col" style="align-items:center" data-b="2"><p class="small" style="font-weight:650">VAE, loss = recon + KL</p><img class="fig" src="figures/data/beta-vae2-scatter.svg" style="width:300px"><img class="fig pix" src="figures/data/beta-vae2-recon.png" style="width:330px"><img class="fig pix" src="figures/data/beta-vae2-samples.png" style="width:330px"><p class="cap">recon {{beta.vae2.recon}} · KL {{beta.vae2.kl}}</p></div>
       <div class="col" style="align-items:center" data-b="3"><p class="small" style="font-weight:650">recon + 8 × KL</p><img class="fig" src="figures/data/beta-vae2b8-scatter.svg" style="width:300px"><img class="fig pix" src="figures/data/beta-vae2b8-recon.png" style="width:330px"><img class="fig pix" src="figures/data/beta-vae2b8-samples.png" style="width:330px"><p class="cap">recon {{beta.vae2b8.recon}} · KL {{beta.vae2b8.kl}}</p></div>
     </div>
@@ -192,7 +207,7 @@
   <aside class="notes"><p>Three separately trained 2-D models. The weight 8 is a modified objective (β-VAE style), not the ELBO. β = 1 is the vanilla ELBO. Same 8 random codes decoded in each column.</p></aside>
 </section>
 
-<section class="slide sec-vae" id="vae-blur" data-section="6 · The VAE">
+<section class="slide sec-vae" id="vae-blur" data-section="7 · The VAE">
   <p class="kicker">An honest look</p>
   <h2>Why are VAE samples blurry?</h2>
   <div class="body">
@@ -203,7 +218,7 @@
         <p class="small" data-b="3"><b>3. We show $\pi$, the mean,</b> not a sample. A sample would be speckled instead of grey.</p>
       </div>
       <div class="col grow" style="align-items:center">
-        <img class="fig" src="figures/data/kl-fwd.svg" style="width:440px">
+        <img class="fig" src="figures/data/kl-fwd.svg" style="width:410px">
         <div class="row" style="gap:20px" data-b="3"><div class="col" style="align-items:center"><img class="fig pix" src="figures/data/story-pi.png" style="width:150px"><p class="cap">$\pi$ (the mean)</p></div><div class="col" style="align-items:center"><img class="fig pix" src="figures/data/story-sample.png" style="width:150px"><p class="cap">a sample</p></div></div>
       </div>
     </div>
@@ -212,13 +227,13 @@
   <aside class="notes"><p>Bridge to GANs: what if, instead of asking for high likelihood of every training image, we asked for samples that a judge cannot tell apart from real ones?</p></aside>
 </section>
 
-<section class="slide sec-vae" id="recap-6" data-section="6 · The VAE">
-  <p class="kicker">End of Part 6</p>
+<section class="slide sec-vae" id="recap-7" data-section="7 · The VAE">
+  <p class="kicker">End of Part 7</p>
   <h2>What we did, and what comes next</h2>
   <div class="body">
     <div class="recap">
       <div><h3>What we did</h3><ol><li>Our 3: encode to a cloud, sample a code, decode, score: loss $= {{our3.loss}}$.</li><li>Training: reconstruction falls, KL rises, both settle.</li><li>Generation needs only the prior and the decoder.</li><li>The KL weight trades sharp reconstructions against a usable code space; samples blur.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next: a different idea</h3><p class="small">VAEs maximise a bound on $p_\theta(x)$. GANs skip $p_\theta(x)$ entirely: a second network learns to judge real from fake.</p></div>
+      <div class="next" data-b="2"><h3>Next lecture: a different idea</h3><p class="small">VAEs maximise a bound on $p_\theta(x)$. GANs skip $p_\theta(x)$ entirely: a second network learns to judge real from fake.</p></div>
     </div>
   </div>
 </section>

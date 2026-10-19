@@ -1821,5 +1821,310 @@
     }
    ]
   }
+ ],
+ "variants": [
+  {
+   "name": "dae16",
+   "latent": 16,
+   "variational": false,
+   "rate": 0.2,
+   "epochs": 20,
+   "history": [
+    {
+     "epoch": 1,
+     "train_recon": 179.88291695963542
+    },
+    {
+     "epoch": 2,
+     "train_recon": 121.6591686360677
+    },
+    {
+     "epoch": 3,
+     "train_recon": 107.93488190104166
+    },
+    {
+     "epoch": 4,
+     "train_recon": 100.33086713867188
+    },
+    {
+     "epoch": 5,
+     "train_recon": 95.50427254231771
+    },
+    {
+     "epoch": 6,
+     "train_recon": 92.22515192057291
+    },
+    {
+     "epoch": 7,
+     "train_recon": 89.62430833333333
+    },
+    {
+     "epoch": 8,
+     "train_recon": 87.70957233072917
+    },
+    {
+     "epoch": 9,
+     "train_recon": 86.189773828125
+    },
+    {
+     "epoch": 10,
+     "train_recon": 85.02289990234375
+    },
+    {
+     "epoch": 11,
+     "train_recon": 84.07217642415364
+    },
+    {
+     "epoch": 12,
+     "train_recon": 83.14105638834636
+    },
+    {
+     "epoch": 13,
+     "train_recon": 82.52783993326823
+    },
+    {
+     "epoch": 14,
+     "train_recon": 81.92806953125
+    },
+    {
+     "epoch": 15,
+     "train_recon": 81.37375651041667
+    },
+    {
+     "epoch": 16,
+     "train_recon": 80.79586251627605
+    },
+    {
+     "epoch": 17,
+     "train_recon": 80.38950196940104
+    },
+    {
+     "epoch": 18,
+     "train_recon": 80.04095481770834
+    },
+    {
+     "epoch": 19,
+     "train_recon": 79.70010337727865
+    },
+    {
+     "epoch": 20,
+     "train_recon": 79.28807739257813
+    }
+   ]
+  },
+  {
+   "name": "ae64",
+   "lam": 0.0,
+   "epochs": 20,
+   "history": [
+    {
+     "epoch": 1,
+     "train_recon": 153.64813907877604,
+     "active_units": 33.08549880981445
+    },
+    {
+     "epoch": 2,
+     "train_recon": 84.9397423828125,
+     "active_units": 34.37900161743164
+    },
+    {
+     "epoch": 3,
+     "train_recon": 68.93981791178385,
+     "active_units": 34.63850021362305
+    },
+    {
+     "epoch": 4,
+     "train_recon": 59.62327273763021,
+     "active_units": 34.77750015258789
+    },
+    {
+     "epoch": 5,
+     "train_recon": 53.50568247070313,
+     "active_units": 34.79249954223633
+    },
+    {
+     "epoch": 6,
+     "train_recon": 49.411417610677084,
+     "active_units": 34.78499984741211
+    },
+    {
+     "epoch": 7,
+     "train_recon": 46.09085261230469,
+     "active_units": 34.8380012512207
+    },
+    {
+     "epoch": 8,
+     "train_recon": 43.51825570882161,
+     "active_units": 34.82749938964844
+    },
+    {
+     "epoch": 9,
+     "train_recon": 41.20233968098958,
+     "active_units": 34.85449981689453
+    },
+    {
+     "epoch": 10,
+     "train_recon": 39.31971942952474,
+     "active_units": 34.865501403808594
+    },
+    {
+     "epoch": 11,
+     "train_recon": 37.92036662597656,
+     "active_units": 34.86000061035156
+    },
+    {
+     "epoch": 12,
+     "train_recon": 36.57079724527995,
+     "active_units": 34.86949920654297
+    },
+    {
+     "epoch": 13,
+     "train_recon": 35.448587312825524,
+     "active_units": 34.875
+    },
+    {
+     "epoch": 14,
+     "train_recon": 34.48278868815104,
+     "active_units": 34.856998443603516
+    },
+    {
+     "epoch": 15,
+     "train_recon": 33.64664286295573,
+     "active_units": 34.855499267578125
+    },
+    {
+     "epoch": 16,
+     "train_recon": 32.797928959147136,
+     "active_units": 34.88399887084961
+    },
+    {
+     "epoch": 17,
+     "train_recon": 32.07326247151693,
+     "active_units": 34.881500244140625
+    },
+    {
+     "epoch": 18,
+     "train_recon": 31.30071023763021,
+     "active_units": 34.88050079345703
+    },
+    {
+     "epoch": 19,
+     "train_recon": 30.616347831217446,
+     "active_units": 34.88750076293945
+    },
+    {
+     "epoch": 20,
+     "train_recon": 30.0938559773763,
+     "active_units": 34.894500732421875
+    }
+   ]
+  },
+  {
+   "name": "sparse64",
+   "lam": 0.5,
+   "epochs": 20,
+   "history": [
+    {
+     "epoch": 1,
+     "train_recon": 169.50990115559895,
+     "active_units": 6.802000045776367
+    },
+    {
+     "epoch": 2,
+     "train_recon": 105.04737443033854,
+     "active_units": 7.793499946594238
+    },
+    {
+     "epoch": 3,
+     "train_recon": 93.10843943684895,
+     "active_units": 8.611000061035156
+    },
+    {
+     "epoch": 4,
+     "train_recon": 85.90376303710937,
+     "active_units": 8.696499824523926
+    },
+    {
+     "epoch": 5,
+     "train_recon": 81.77758383789063,
+     "active_units": 8.729499816894531
+    },
+    {
+     "epoch": 6,
+     "train_recon": 78.92762299804687,
+     "active_units": 8.756999969482422
+    },
+    {
+     "epoch": 7,
+     "train_recon": 76.76022048339844,
+     "active_units": 8.757499694824219
+    },
+    {
+     "epoch": 8,
+     "train_recon": 75.10538860677083,
+     "active_units": 8.748499870300293
+    },
+    {
+     "epoch": 9,
+     "train_recon": 73.70110296223959,
+     "active_units": 8.795000076293945
+    },
+    {
+     "epoch": 10,
+     "train_recon": 72.55450721028646,
+     "active_units": 8.79800033569336
+    },
+    {
+     "epoch": 11,
+     "train_recon": 71.53296727701823,
+     "active_units": 8.817999839782715
+    },
+    {
+     "epoch": 12,
+     "train_recon": 70.6677270345052,
+     "active_units": 8.816499710083008
+    },
+    {
+     "epoch": 13,
+     "train_recon": 69.86629051920573,
+     "active_units": 8.83549976348877
+    },
+    {
+     "epoch": 14,
+     "train_recon": 69.20651155598958,
+     "active_units": 8.824999809265137
+    },
+    {
+     "epoch": 15,
+     "train_recon": 68.56504545898437,
+     "active_units": 8.791000366210938
+    },
+    {
+     "epoch": 16,
+     "train_recon": 68.01944999186198,
+     "active_units": 8.853500366210938
+    },
+    {
+     "epoch": 17,
+     "train_recon": 67.4605364827474,
+     "active_units": 8.855500221252441
+    },
+    {
+     "epoch": 18,
+     "train_recon": 67.00024990234375,
+     "active_units": 8.864500045776367
+    },
+    {
+     "epoch": 19,
+     "train_recon": 66.6174443359375,
+     "active_units": 8.835000038146973
+    },
+    {
+     "epoch": 20,
+     "train_recon": 66.18634814453125,
+     "active_units": 8.849499702453613
+    }
+   ]
+  }
  ]
 }

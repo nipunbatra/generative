@@ -2,7 +2,7 @@
 
 <section class="slide sec-hook cover" id="cover" data-section="Why generate?">
   <p class="kicker">ES 667 · Deep Learning · Generative Modelling I</p>
-  <h2 style="font-size:60px;margin-top:40px">Learning to generate<span class="sub" style="font-size:30px">Autoencoders, VAEs and GANs, built from one handwritten 3</span></h2>
+  <h2 style="font-size:60px;margin-top:40px">Learning to generate<span class="sub" style="font-size:30px">Distributions, autoencoders and VAEs, built from one handwritten 3</span></h2>
   <div class="body">
     <img class="fig pix" src="figures/data/interp-vae16.png" style="width:1150px;margin:0 auto">
     <p class="cap">A 3 turns into a 7. Every frame is decoded from a point on a straight line through the code space of the VAE we train today.</p>
@@ -38,11 +38,11 @@
     </div>
   </div>
   <p class="q" data-b="=1">Six are MNIST test digits, six come from a network. Write down which six are fake.</p>
-  <p class="q" data-b="2">Generated: {{vote_fakes}} (teal frames). Six from a small network we will train ourselves, in about 9 minutes.</p>
+  <p class="q" data-b="2">Generated: {{vote_fakes}} (teal frames). Six from a small GAN, trained in about 9 minutes: the topic of the next lecture.</p>
   <aside class="notes">
     <p>Give one minute and take a show of hands on two or three tiles, then click to reveal: generated = {{vote_fakes}}; the rest are real MNIST test digits.</p>
     <p>Worth pointing at: tile 3, with its broken stroke, is the easiest fake to spot; tile 6, a clean 8, is the hardest.</p>
-    <p>In Session 2 we return to these 12 tiles and show what our own trained discriminator said about each one.</p>
+    <p>The GAN lecture returns to these 12 tiles and shows what the trained discriminator said about each one.</p>
   </aside>
 </section>
 
@@ -78,7 +78,7 @@
   <p class="src">pix2pix (Isola et al. 2017) · CycleGAN (Zhu et al. 2017) · Context Encoders (Pathak et al. 2016) · SPADE (Park et al. 2019). All published model outputs.</p>
   <aside class="notes">
     <p>For each pair ask: what does the input fix, and what does the model have to invent? The sketch fixes the outline but not the colour or leather. The hole could be filled many ways. The bird completion is visibly imperfect: point that out.</p>
-    <p>All four were trained with an adversarial (GAN) loss plus task-specific terms. We will see the core of that idea today.</p>
+    <p>All four were trained with an adversarial (GAN) loss plus task-specific terms. GANs get their own lecture; today's route is the VAE.</p>
   </aside>
 </section>
 
@@ -109,7 +109,7 @@
   <p class="q">Training means: adjust $\theta$ until the samples look like the data. But what is the loss?</p>
   <aside class="notes">
     <p>Build 1: the random input. Build 2: a sample. Build 3: an optional condition (a sketch, a class label, a sentence).</p>
-    <p>The difficulty: there is no target image for a random z. Today we see two answers: the VAE (an encoder tells us which z belongs to which image) and the GAN (a second network learns to judge).</p>
+    <p>The difficulty: there is no target image for a random z. Today's answer is the VAE (an encoder tells us which z belongs to which image). The next lecture's is the GAN (a second network learns to judge).</p>
   </aside>
 </section>
 
@@ -143,7 +143,7 @@
   <p class="q" data-b="4">The condition fixes <b>what</b>; the randomness still decides <b>which one</b> of the many matching outputs you get.</p>
   <aside class="notes">
     <p>Text prompts are the most familiar condition (text-to-image systems). DiffusionSat conditions on a caption plus metadata: location, date, ground resolution. The substation turns snowy in January; the stadium looks European or American depending on the coordinates.</p>
-    <p>The 7s come from a conditional VAE trained for this lecture: the one-hot label goes into both the encoder and the decoder. We build the unconditional VAE in Part 6; adding a label is a small change.</p>
+    <p>The 7s come from a conditional VAE trained for this lecture: the one-hot label goes into both the encoder and the decoder. We build the unconditional VAE in Part 7; adding a label is a small change.</p>
   </aside>
 </section>
 
@@ -167,7 +167,7 @@
 </section>
 
 <section class="slide sec-hook" id="names" data-section="Why generate?">
-  <p class="kicker">Part 1 of this course</p>
+  <p class="kicker">Earlier in this course</p>
   <h2>You have already built a generator</h2>
   <div class="body">
     <div class="row top" style="gap:60px;margin-top:6px">
@@ -201,7 +201,7 @@
 </section>
 
 <section class="slide sec-hook" id="name-prob" data-section="Why generate?">
-  <p class="kicker">Part 1 of this course</p>
+  <p class="kicker">Earlier in this course</p>
   <h2>A whole name gets one probability</h2>
   <div class="body">
     <table class="work" style="margin:6px auto 0">
@@ -273,23 +273,27 @@
     </table>
   </div>
   <p class="q" data-b="4">Route A is the name model you already know. Today is route B: what the code is, and how to train a decoder when nobody tells us the right code.</p>
-  <aside class="notes"><p>Route A is not worse; it is a different trade. The "hard" entry for route B is the subject of Parts 2 to 4.</p></aside>
+  <aside class="notes"><p>Route A is not worse; it is a different trade. The "hard" entry for route B is the subject of Parts 3 to 5.</p></aside>
 </section>
 
 <section class="slide sec-hook" id="map" data-section="Why generate?">
   <p class="kicker">The plan</p>
-  <h2>Today's route</h2>
+  <h2>Today's route, in two sessions</h2>
   <div class="body">
-    <ol class="route">
-      <li style="--c:var(--z)"><b>Distributions and hidden causes</b><span>on a 1-D toy dataset</span></li>
-      <li style="--c:var(--enc)"><b>Autoencoders</b><span>and why they cannot generate</span></li>
-      <li style="--c:var(--loss)"><b>KL divergence</b><span>how far apart are two distributions?</span></li>
-      <li style="--c:var(--dec)"><b>The ELBO</b><span>a loss for a model we cannot evaluate exactly</span></li>
-      <li style="--c:var(--z)"><b>Reparameterisation</b><span>backprop through a random draw</span></li>
-      <li style="--c:var(--enc)"><b>The VAE on MNIST</b><span>one digit, end to end, with real numbers</span></li>
-      <li style="--c:var(--disc)"><b>GANs</b><span>learn the judge instead of the likelihood</span></li>
-    </ol>
+    <div class="row top map2" style="gap:56px;justify-content:center">
+      <div class="col"><p class="sess">Session 1</p><ol class="route">
+        <li style="--c:var(--z)"><b>Distributions and fitting</b><span>a 1-D toy: fit, sample, how many bumps</span></li>
+        <li style="--c:var(--enc)"><b>Autoencoders</b><span>plain, denoising, sparse, contractive; why they cannot generate</span></li>
+        <li style="--c:var(--x)"><b>The probabilistic view</b><span>prior, likelihood, an intractable posterior</span></li>
+      </ol></div>
+      <div class="col"><p class="sess">Session 2</p><ol class="route" style="counter-reset:r 3">
+        <li style="--c:var(--loss)"><b>KL divergence</b><span>how far apart are two distributions?</span></li>
+        <li style="--c:var(--dec)"><b>Variational inference and the ELBO</b><span>a loss that never computes $p(x)$</span></li>
+        <li style="--c:var(--z)"><b>Reparameterisation</b><span>backprop through a random draw</span></li>
+        <li style="--c:var(--enc)"><b>The VAE on MNIST</b><span>one digit, end to end, with real numbers</span></li>
+      </ol></div>
+    </div>
   </div>
-  <p class="q take">One running image throughout: test digit #{{digit3_index}}, a handwritten 3.</p>
-  <aside class="notes"><p>About 120 minutes in full. If short on time, skip the 2-number vs 16-number comparison and the conditional GAN slide.</p></aside>
+  <p class="q take">One running image throughout: test digit #{{digit3_index}}, a handwritten 3. GANs get their own lecture.</p>
+  <aside class="notes"><p>About 75 minutes per session. If short on time in Session 1, skip the contractive autoencoder and the how-many-bumps slide; in Session 2, skip the 2-number vs 16-number comparison.</p></aside>
 </section>

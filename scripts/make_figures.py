@@ -170,7 +170,7 @@ def main():
     tile_png(pimu.numpy(), "digit3-recon")
     NUM["our3"] = dict(mu=[r(v, 2) for v in mu3], logvar=[r(v, 2) for v in lv3], sigma=[r(v, 3) for v in sd3],
                        eps=[r(v, 2) for v in eps3], z=[r(v, 2) for v in z3], recon=r(recon3, 1),
-                       kl=[r(v, 2) for v in kl3], kl_total=r(kl3.sum(), 2), loss=r(recon3 + kl3.sum().item(), 1),
+                       kl=[r(v, 2) for v in kl3], kl_total=r(kl3.sum(), 2), loss=r(r(recon3, 1) + r(kl3.sum(), 2), 1),  # the sum of the numbers shown
                        ink_pixels=int(x3.sum().item()))
 
     # Bernoulli pixel patch: a 5x5 window on the stroke edge
@@ -384,9 +384,26 @@ def main():
             ax.plot([star[0]], [star[1]], marker="*", ms=24, color=C["x"], mec="white", mew=1.5, zorder=9)
         if circle:
             for k in (1, 2):
-                ax.add_patch(Ellipse((0, 0), 2 * k, 2 * k, fill=False, ec=C["z"], lw=1.6, ls=(0, (4, 3)), zorder=5))
+                ax.add_patch(Ellipse((0, 0), 2 * k, 2 * k, fill=False, ec=C["z"], lw=1.6, ls=(0, (4, 3)), zorder=8))
         if with_prior:
-            ax.scatter(prior[:150, 0], prior[:150, 1], s=13, color=C["z"], zorder=6, lw=0.5, ec="white")
+            # random codes on top of everything, as black crosses so they cannot be mistaken for a digit class
+            ax.scatter(prior[:150, 0], prior[:150, 1], s=24, marker="x", color=C["ink"], zorder=6, lw=1.2)
+        if with_prior and lim is not None and lim[0][1] - lim[0][0] > 12:
+            # wide autoencoder map: the draws sit in a tiny patch, so add a zoom on [-3, 3]^2
+            ins = ax.inset_axes([0.6, 0.03, 0.37, 0.37])
+            scatter(ins, mu, ys_te, s=3, alpha=.22, lab=False)
+            for k in (1, 2):
+                ins.add_patch(Ellipse((0, 0), 2 * k, 2 * k, fill=False, ec=C["z"], lw=1.4, ls=(0, (4, 3)), zorder=8))
+            ins.scatter(prior[:150, 0], prior[:150, 1], s=20, marker="x", color=C["ink"], zorder=10, lw=1.2)
+            ins.set_xlim(-3, 3)
+            ins.set_ylim(-3, 3)
+            ins.set_xticks([])
+            ins.set_yticks([])
+            ins.set_facecolor("white")
+            ins.set_title("zoom: $[-3, 3]^2$", fontsize=11, color=C["ink2"], pad=3)
+            for sp in ins.spines.values():
+                sp.set_edgecolor(C["ink3"])
+            ax.indicate_inset_zoom(ins, edgecolor=C["ink3"], lw=1)
         if lim is not None:
             ax.set_xlim(*lim[0])
             ax.set_ylim(*lim[1])
@@ -659,11 +676,11 @@ def main():
     ax.plot(rr, np.log(rr), color=C["dec"], lw=2.6)
     ax.plot(rr, rr - 1, color=C["z"], lw=2.2, ls=(0, (5, 3)))
     ax.plot([1], [0], "o", color=C["ink"], ms=8)
-    ax.text(2.05, 1.25, r"$r - 1$", color=C["z"], fontsize=16)
-    ax.text(2.25, 0.45, r"$\log r$", color=C["dec"], fontsize=16)
-    for v, lab in ((0.75, "a 1"), (2.0, "a 7")):
-        ax.plot([v, v], [math.log(v), v - 1], color=C["loss"], lw=2.2)
-        ax.text(v + 0.06, (math.log(v) + v - 1) / 2 - 0.1, rf"{lab}: $r = {v}$", color=C["loss"], fontsize=13)
+    ax.text(2.3, 1.62, r"$r - 1$", color=C["z"], fontsize=17)
+    ax.text(2.55, 0.62, r"$\log r$", color=C["dec"], fontsize=17)
+    for v, lab, ty in ((0.75, "a 1", -0.62), (2.0, "a 7", 0.38)):
+        ax.plot([v, v], [math.log(v), v - 1], color=C["loss"], lw=2.4)
+        ax.text(v + 0.05, ty, rf"{lab}: $r = {v}$", color=C["loss"], fontsize=14)
     ax.set_xlim(0, 3.05)
     ax.set_ylim(-1.6, 2.1)
     ax.axhline(0, color=C["line"], lw=1)
