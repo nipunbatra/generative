@@ -15,10 +15,15 @@ NUM = json.loads((ROOT / "figures" / "data" / "numbers.json").read_text())
 _extra = ROOT / "figures" / "data" / "numbers-extra.json"   # from scripts/make_figures_extra.py
 if _extra.exists():
     NUM.update(json.loads(_extra.read_text()))
+_gmm = ROOT / "figures" / "data" / "numbers-gmm.json"       # from scripts/make_figures_gmm.py, as {{gmm.*}}
+if _gmm.exists():
+    NUM["gmm"] = json.loads(_gmm.read_text())
 
 
 def fmt(v):
     """numbers.json is already rounded for display; only swap in a typographic minus."""
+    if isinstance(v, int) and not isinstance(v, bool) and abs(v) >= 1000:
+        return f"{v:,}".replace("-", "−")                    # 307720 -> 307,720
     return str(v).replace("-", "−") if isinstance(v, (int, float)) else str(v)
 
 

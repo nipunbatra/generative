@@ -9,9 +9,9 @@ Two 75-minute sessions, seven parts:
 
 | Deck | Slides | Content |
 |---|---|---|
-| `part1.html` · [exports/session1.pdf](exports/session1.pdf) | 73 | why generate · **1** distributions and fitting (PyTorch fitting, how many bumps, sampling, Bayes, why the gradient needs the posterior) · **2** autoencoders (plain, denoising, sparse, contractive; why they cannot generate) · **3** the probabilistic view (prior, decoder as likelihood, the intractable evidence and posterior, Laplace / MCMC / VI) |
+| `part1.html` · [exports/session1.pdf](exports/session1.pdf) | 87 | why generate · **1** distributions and fitting (PyTorch fitting, how many bumps, sampling, Bayes, why the gradient needs the posterior, and a second half on MNIST: PCA and inverse PCA, Gaussian mixtures over d PCA numbers with a live d × K explorer, held-out vs AIC vs BIC, a mixture of Bernoullis on raw pixels, and why the recipe does not scale) · **2** autoencoders (plain, denoising, sparse, contractive; why they cannot generate) · **3** the probabilistic view (prior, decoder as likelihood, the intractable evidence and posterior, Laplace / MCMC / VI) |
 | `part2.html` · [exports/session2.pdf](exports/session2.pdf) | 79 | recap · **4** KL divergence, the slow way (a betting game, surprise, entropy, cross-entropy) · **5** variational inference and the ELBO (derived from KL(q ‖ posterior), VI by hand for our 3, importance sampling, amortisation = the VAE) · **6** reparameterisation · **7** the VAE on MNIST · wrap-up · appendix (the ELBO through Jensen) |
-| `index.html` · [exports/lecture.pdf](exports/lecture.pdf) | 152 | both sessions in one deck |
+| `index.html` · [exports/lecture.pdf](exports/lecture.pdf) | 166 | both sessions in one deck |
 
 `*-builds.pdf` versions show every click.
 
@@ -55,6 +55,7 @@ PY=/Users/nipun/git/clip-lab/.venv/bin/python   # any Python with torch + torchv
 $PY scripts/train_models.py     # ~10 min on an M-series GPU; MNIST read from $MNIST_ROOT, nothing downloaded
 $PY scripts/make_figures.py     # figures/data/*.svg|png and figures/data/numbers.json (~4 min)
 $PY scripts/make_figures_extra.py   # fitting, how-many-bumps, AE variants, Laplace/MCMC/VI, VI by hand; numbers-extra.json
+$PY scripts/make_figures_gmm.py     # MNIST mixtures: every (d, K) for the explorer, AIC/BIC, Bernoulli mixture (~30 min CPU first time, cached after)
 $PY scripts/export_explorer.py  # decoder weights for the in-browser latent explorers
 $PY scripts/diagrams.py         # figures/diagrams/*.svg (hand-built SVG, numbers read from numbers.json)
 $PY scripts/build_deck.py       # inlines diagrams, fills {{numbers}}, writes part1.html, part2.html, index.html

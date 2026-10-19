@@ -661,6 +661,250 @@
   <aside class="notes"><p>Keep these four colours in mind: amber for z and the prior, teal for the decoder and the likelihood, blue for observed data, purple for the posterior.</p></aside>
 </section>
 
+<section class="slide sec-dist opener" id="mn-break" data-section="1 · Distributions">
+  <p class="kicker">Part 1, second half</p>
+  <h2>The same recipe, on real images</h2>
+  <p>Learn a distribution, then sample from it: can Gaussian bumps generate handwritten digits? How far does this simple toolkit get us, and where does it run out?</p>
+</section>
+
+<section class="slide sec-dist" id="mn-open" data-section="1 · Distributions">
+  <p class="kicker">The plan, as a picture</p>
+  <h2>Squeeze, fit bumps, sample, un-squeeze</h2>
+  <div class="body center"><svg viewBox="0 0 1152 350" class="diagram" role="img" aria-label="gmm-pipeline"><defs><marker id="gmm-pipeline-ah-245EDB" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#245EDB"/></marker><marker id="gmm-pipeline-ah-6B7280" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker><marker id="gmm-pipeline-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="gmm-pipeline-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs><g data-b="1"><text x="364" y="30" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="700" fill="#4A5160" text-anchor="middle">learn</text><path d="M74,44 L74,38 L676,38 L676,44" fill="none" stroke="#D9DDE5" stroke-width="2"/><image x="74" y="87" width="90" height="90" href="figures/data/digit3.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="74" y="87" width="90" height="90" rx="6" fill="none" stroke="#245EDB" stroke-width="2"/><text x="119" y="214" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="650" fill="#245EDB" text-anchor="middle">784 pixels</text><path d="M168,132 L194,132" fill="none" stroke="#245EDB" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#gmm-pipeline-ah-245EDB)"/><polygon points="198,84.0 310,106.0 310,158.0 198,180.0" fill="#F3F4F6" stroke="#9AA1AD" stroke-width="2.4" stroke-linejoin="round"/><text x="254.0" y="140" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#9AA1AD" text-anchor="middle">PCA</text><foreignObject x="144.0" y="223.0" width="220" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#4A5160;font-weight:500;text-align:center;height:32.0px;line-height:32.0px">$z = V^{\top}(x - \bar x)$</div></foreignObject><path d="M314,132 L338,132" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#gmm-pipeline-ah-6B7280)"/><rect x="342" y="77" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="366.0" y="94.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">0.3</text><rect x="342" y="99" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="366.0" y="116.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">−1.2</text><rect x="342" y="121" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="366.0" y="138.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">2.1</text><rect x="342" y="143" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="366.0" y="160.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">...</text><rect x="342" y="165" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="366.0" y="182.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">0.8</text><foreignObject x="286.0" y="189.0" width="160" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#AA4E08;font-weight:650;text-align:center;height:32.0px;line-height:32.0px">$d$ numbers</div></foreignObject><path d="M394,132 L420,132" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#gmm-pipeline-ah-AA4E08)"/><rect x="424" y="70" width="252" height="124" rx="12" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.2"/><text x="550" y="96" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="700" fill="#0F766E" text-anchor="middle">K Gaussian bumps</text><ellipse cx="486" cy="136" rx="30" ry="14" transform="rotate(-25 486 136)" fill="#0F766E" fill-opacity="0.18" stroke="#0F766E" stroke-width="2"/><circle cx="486" cy="136" r="3.5" fill="#0F766E"/><ellipse cx="552" cy="122" rx="34" ry="13" transform="rotate(20 552 122)" fill="#0F766E" fill-opacity="0.18" stroke="#0F766E" stroke-width="2"/><circle cx="552" cy="122" r="3.5" fill="#0F766E"/><ellipse cx="618" cy="140" rx="28" ry="15" transform="rotate(-60 618 140)" fill="#0F766E" fill-opacity="0.18" stroke="#0F766E" stroke-width="2"/><circle cx="618" cy="140" r="3.5" fill="#0F766E"/><foreignObject x="430.0" y="159.5" width="240" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#0F766E;font-weight:600;text-align:center;height:28.8px;line-height:28.8px">each over the $d$ numbers</div></foreignObject><foreignObject x="370.0" y="225.5" width="360" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#4A5160;font-weight:500;text-align:center;height:28.8px;line-height:28.8px">weight + centre ($d$) + covariance ($d(d{+}1)/2$)</div></foreignObject></g><g data-b="2"><text x="859" y="30" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="700" fill="#4A5160" text-anchor="middle">generate</text><path d="M696,44 L696,38 L1029,38 L1029,44" fill="none" stroke="#D9DDE5" stroke-width="2"/><path d="M680,132 L706,132" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#gmm-pipeline-ah-0F766E)"/><rect x="710" y="77" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="734.0" y="94.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">−0.4</text><rect x="710" y="99" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="734.0" y="116.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">1.7</text><rect x="710" y="121" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="734.0" y="138.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">0.2</text><rect x="710" y="143" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="734.0" y="160.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">...</text><rect x="710" y="165" width="48" height="22" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="734.0" y="182.0" font-family="SF Mono, Menlo, monospace" font-size="12" fill="#14171F" text-anchor="middle">−1.1</text><foreignObject x="648.0" y="189.0" width="180" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#AA4E08;font-weight:650;text-align:center;height:32.0px;line-height:32.0px">new $d$ numbers</div></foreignObject><path d="M762,132 L788,132" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#gmm-pipeline-ah-AA4E08)"/><polygon points="792,106.0 904,84.0 904,180.0 792,158.0" fill="#F3F4F6" stroke="#9AA1AD" stroke-width="2.4" stroke-linejoin="round"/><text x="848.0" y="130" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#9AA1AD" text-anchor="middle">inverse</text><text x="848.0" y="154" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="middle">PCA</text><foreignObject x="748.0" y="223.0" width="200" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#4A5160;font-weight:500;text-align:center;height:32.0px;line-height:32.0px">$\hat x = \bar x + V z$</div></foreignObject><path d="M908,132 L934,132" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#gmm-pipeline-ah-6B7280)"/><image x="938" y="87" width="90" height="90" href="figures/data/gmm-sample-one.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="938" y="87" width="90" height="90" rx="6" fill="none" stroke="#0F766E" stroke-width="2"/><text x="983" y="214" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="650" fill="#0F766E" text-anchor="middle">784 pixels</text></g></svg></div>
+  <p class="q" data-b="2">Two questions before any code: each bump is a Gaussian over <b>what</b>? And how many bumps?</p>
+  <aside class="notes"><p>Idea from Jake VanderPlas, Python Data Science Handbook, "In Depth: Gaussian Mixture Models": the same pipeline on 8 × 8 digits, with AIC to choose the number of components. Here we keep our own fitting loop from the toy, and compare three ways of choosing the number of bumps.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-dims" data-section="1 · Distributions">
+  <p class="kicker">Which dimension is each Gaussian?</p>
+  <h2>One bump, three possible sizes</h2>
+  <div class="body">
+    <table class="work" style="margin:0 auto;font-size:22px">
+      <tr><th>each bump is a Gaussian over</th><th>centre</th><th>covariance</th><th>numbers per bump, with its weight</th></tr>
+      <tr><td>1 number (the toy)</td><td>1</td><td>1 (a width)</td><td>3</td></tr>
+      <tr data-b="2"><td>784 pixels, every pixel on its own</td><td>784</td><td>784 widths</td><td>1,569</td></tr>
+      <tr data-b="3"><td>784 pixels, with all pixel pairs</td><td>784</td><td>307,720</td><td>308,505</td></tr>
+      <tr data-b="4" class="total"><td><b>50 PCA numbers (what we fit)</b></td><td>50</td><td>1,275</td><td>1,326</td></tr>
+    </table>
+    <div class="row" style="gap:20px;align-items:center;justify-content:center;margin-top:16px" data-b="2">
+      <img class="fig pix" src="figures/data/gauss784-diag.png" style="width:640px">
+      <p class="small" style="width:420px;margin:0">Samples from one 784-pixel Gaussian with independent pixels: each pixel jitters on its own, so you get static around the average digit. Strokes need pixels that move <b>together</b>.</p>
+    </div>
+  </div>
+  <p class="q" data-b="4">Keep the covariance, shrink the dimension: a full Gaussian over 50 numbers costs about 230 times less than one over 784 pixels.</p>
+  <aside class="notes">
+    <p>The full 784-pixel covariance has 784 × 785 / 2 = 307,720 numbers per bump; 200 such bumps would be 62 million parameters from 60,000 images. With 50 numbers it is 50 × 51 / 2 = 1,275.</p>
+    <p>After the inverse PCA, each bump is still a Gaussian over the 784 pixels, but a flat one: it can only spread along the 50 PCA directions. That is also why its samples are smooth rather than speckled.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="mn-pca" data-section="1 · Distributions">
+  <p class="kicker">The squeeze, and the way back</p>
+  <h2>PCA and inverse PCA: generation needs both</h2>
+  <div class="body">
+    <div class="row top" style="gap:30px">
+      <div class="col" style="width:500px">
+        <p class="small"><b>PCA</b>, image to $d$ numbers: coordinates along the $d$ directions in which digits vary most.</p>
+        <div class="mathblock left" style="font-size:24px">$$\underbrace{z}_{d} = \underbrace{V^{\top}}_{d\times 784}\,(\underbrace{x - \bar x}_{784})$$</div>
+        <p class="small" data-b="2"><b>Inverse PCA</b>, $d$ numbers back to an image: add the directions back onto the mean digit.</p>
+        <div class="mathblock left" style="font-size:24px" data-b="2">$$\underbrace{\hat x}_{784} = \bar x + \underbrace{V}_{784\times d}\,\underbrace{z}_{d}$$</div>
+      </div>
+      <div class="col grow" data-b="3" style="align-items:center;gap:6px">
+        <img class="fig pix" src="figures/data/pca-recon.png" style="width:640px">
+        <p class="cap">top: test digits, our 3 among them · bottom: PCA to 50 numbers, then inverse PCA</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">The bumps only ever see $z$. Every generated sample is $d$ numbers until the inverse PCA turns it into pixels. With $d = 50$, 82.5% of the variation survives the round trip.</p>
+  <aside class="notes"><p>V holds the top d right-singular vectors of the centred 60,000 × 784 training matrix (one SVD). Because its columns are orthonormal, the inverse is just V itself; nothing is learned for the way back. Average squared error of the round trip at d = 50: 7.9 (sum over 784 grey levels).</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-2d" data-section="1 · Distributions">
+  <p class="kicker">Squeeze all the way to 2 numbers</p>
+  <h2>In 2-D you can see every bump</h2>
+  <div class="body">
+    <div class="row top" style="gap:24px">
+      <img class="fig" src="figures/data/gmm-2d.svg" style="height:440px">
+      <div class="col grow" style="gap:8px">
+        <p class="small">4,000 test digits by their 2 PCA numbers, coloured by label (the model never saw labels). Black: 10 fitted bumps, 1 and 2 widths. Red ×: 24 samples.</p>
+        <div class="row" style="gap:14px;align-items:center" data-b="2">
+          <img class="fig pix" src="figures/data/pca2-grid.png" style="width:220px">
+          <p class="small" style="margin:0">Inverse PCA of a grid over the plane: every point is a blend of a few blurry shapes.</p>
+        </div>
+        <div data-b="3"><img class="fig pix" src="figures/data/gmm-2d-samples.png" style="width:470px"><p class="cap" style="margin:2px 0 0">the 24 red × after inverse PCA</p></div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">2 numbers keep only 16.8% of the variation. Every bump is visible, every sample is a ghost: interpretable is not the same as good.</p>
+</section>
+
+<section class="slide sec-dist" id="mn-code" data-section="1 · Distributions">
+  <p class="kicker">The two-bump code, scaled up</p>
+  <h2>PCA, fit $K$ bumps, sample, inverse PCA</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code"><span class="line" data-hl="=1">x = mnist_train.flatten(<span class="n">1</span>)                 <span class="c"># [60000, 784], grey levels</span></span>
+<span class="line" data-hl="=1">mean = x.mean(<span class="n">0</span>)</span>
+<span class="line" data-hl="=1">_, _, Vt = torch.linalg.svd(x - mean, full_matrices=<span class="k">False</span>)</span>
+<span class="line" data-hl="=1">V = Vt[:d].T                              <span class="c"># [784, d]</span></span>
+<span class="line" data-hl="=1">z = (x - mean) @ V                         <span class="c"># PCA: [60000, d]</span></span>
+<span class="line"></span>
+<span class="line" data-hl="=2">gmm = MixtureSameFamily(Categorical(logits=logits),</span>
+<span class="line" data-hl="=2">                        MultivariateNormal(means, scale_tril=L))</span>
+<span class="line" data-hl="=3">loss = -gmm.log_prob(z_batch).mean()       <span class="c"># the same 3-line update</span></span>
+<span class="line"></span>
+<span class="line" data-hl="=4">z_new = gmm.sample((<span class="n">24</span>,))                  <span class="c"># step 2: generate</span></span>
+<span class="line" data-hl="=4">x_new = (mean + z_new @ V.T).clamp(<span class="n">0</span>, <span class="n">1</span>)    <span class="c"># inverse PCA: [24, 784]</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>PCA:</b> one SVD gives the directions; each image becomes $d$ numbers.</p>
+        <p class="small" data-b="=2"><b>The mixture:</b> <code>logits</code> [K], <code>means</code> [K, d], <code>L</code> [K, d, d] lower-triangular, so each covariance $LL^\top$ is always valid.</p>
+        <p class="small" data-b="=3"><b>Learning:</b> the loop that fitted the two bumps, unchanged: minus the average log-probability, Adam.</p>
+        <p class="small" data-b="4"><b>Generating:</b> pick a bump by its weight, draw $d$ numbers from it, inverse PCA to 784 pixels.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>Real run: scripts/make_figures_gmm.py, 2,000 Adam steps of 1,000 images for each (d, K), on a laptop CPU. Bumps start at k-means centres, as scikit-learn's GaussianMixture does; started at random images, many bumps lose all their images to a neighbour and stay unused. scikit-learn fits the same model with EM instead of gradient descent: the "guess the bump, refit" loop from a few slides back.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-explore" data-section="1 · Distributions">
+  <p class="kicker">Try it: every combination below was fitted</p>
+  <h2>Slide the dimension and the number of bumps</h2>
+  <div class="body">
+    <div class="gmmx interactive" data-widget="gmmx">
+      <div class="gx-ctrl">
+        <label><span>PCA numbers $d$</span><b class="gx-dv">50</b><input type="range" class="gx-d" min="0" max="4" step="1" value="4"></label>
+        <label><span>bumps $K$</span><b class="gx-kv">100</b><input type="range" class="gx-k" min="0" max="7" step="1" value="6"></label>
+        <p class="gx-stats">variation kept by $d$ numbers: <b class="gx-var">82.5%</b><br>parameters: <b class="gx-params">132,599</b><br>score on new images: <b class="gx-test">−16.5</b><br>new images prefer $K$ = <b class="gx-best">100</b> at this $d$</p>
+      </div>
+      <div class="gx-out">
+        <img src="figures/data/gmm-explore/originals.png" style="width:620px">
+        <p class="cap" style="margin:0">test digits</p>
+        <img class="gx-recon" src="figures/data/gmm-explore/recon_d50.png" style="width:620px">
+        <p class="cap" style="margin:0">after PCA to $d$ numbers and back</p>
+        <img class="gx-samples" src="figures/data/gmm-explore/d50_k100.png" style="width:744px;margin-top:8px">
+        <p class="cap" style="margin:0">24 samples from the $K$-bump fit, after inverse PCA</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Suggested walk: d = 2 with any K (ghosts); d = 50, K = 1 (one smudge), then K = 10 and K = 100; then d = 10 or 20 at the same K (fewer numbers: blurrier, but easier to fit). Larger d sharpens the squeeze but gives each bump d(d + 1)/2 covariance numbers to learn: at d = 100 our 2,000-step fits became unstable, so the slider stops at 50.</p>
+    <p>Scores for different d are densities over spaces of different size, so compare K within one d, and compare d by eye.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="mn-how-many" data-section="1 · Distributions">
+  <p class="kicker">How many bumps for MNIST?</p>
+  <h2>The toy's rule: score on images the model has not seen</h2>
+  <div class="body">
+    <div class="row" style="gap:34px;align-items:center">
+      <img class="fig" src="figures/data/gmm-score.svg" style="height:410px">
+      <div class="col grow">
+        <p class="small">$d = 50$. Fit $K$ = 1, 2, 5, 10, 20, 50, 100, 200, 400, 800 bumps to the 60,000 training images.</p>
+        <p class="small" data-b="2">Training images: more bumps fit them better, as with the toy.</p>
+        <p class="small" data-b="3">10,000 new test images: the score stops improving at <b>$K = 100$</b>. Doubling to 200 bumps changes the score by +0.2 nats. At 800 even the training score drops: that many bumps are more than 2,000 steps can fit.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Pick the smallest $K$ that does as well as any on new images: $K = 100$, 132,599 parameters, each bump a Gaussian over 50 numbers.</p>
+  <aside class="notes"><p>Scores are average log-densities of the 50 PCA numbers, in nats per image. K = 1: train -56.0, test -55.9, AIC 6,722,650, BIC 6,734,578, bumps used 1; K = 2: train -48.8, test -48.6, AIC 5,861,302, BIC 5,885,167, bumps used 2; K = 5: train -38.6, test -38.6, AIC 4,645,258, BIC 4,704,933, bumps used 5; K = 10: train -31.5, test -31.5, AIC 3,806,518, BIC 3,925,877, bumps used 10; K = 20: train -24.6, test -25.1, AIC 3,005,038, BIC 3,243,765, bumps used 20; K = 50: train -17.8, test -19.3, AIC 2,268,598, BIC 2,865,428, bumps used 49; K = 100: train -13.6, test -16.5, AIC 1,897,198, BIC 3,090,867, bumps used 92; K = 200: train -12.2, test -16.3, AIC 1,994,398, BIC 4,381,746, bumps used 123; K = 400: train -12.4, test -16.5, AIC 2,548,798, BIC 7,323,503, bumps used 115; K = 800: train -13.0, test -16.7, AIC 3,681,598, BIC 13,231,017, bumps used 99.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-aic" data-section="1 · Distributions">
+  <p class="kicker">Choosing $K$ without held-out images</p>
+  <h2>AIC and BIC: charge for every parameter</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:30px">$$\mathrm{AIC} = 2p - 2\log L \qquad\qquad \mathrm{BIC} = p\,\log N - 2\log L$$</div>
+    <p class="small" style="text-align:center">$\log L$: the training log-likelihood, summed over all $N$ = 60,000 images · $p$: the number of parameters · smaller is better</p>
+    <table class="work" style="margin:12px auto 0;font-size:22px" data-b="2">
+      <tr><th>rule</th><th>needs</th><th>price per parameter</th><th>picks</th></tr>
+      <tr><td>score on new images</td><td>10,000 extra images</td><td>none, it is measured</td><td>$K = 100$</td></tr>
+      <tr><td>AIC</td><td>training data only</td><td>2</td><td>$K = 100$</td></tr>
+      <tr><td>BIC</td><td>training data only</td><td>$\log 60{,}000 = 11.0$</td><td>$K = 50$</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="2">New images and AIC agree on $K = 100$; BIC, which charges more per parameter, keeps only 50. With plenty of data, measure on new data; with little, AIC or BIC.</p>
+  <aside class="notes"><p>p = K(50 + 1,275) + (K − 1). VanderPlas's handbook chapter uses AIC on the 8 × 8 digits. Values: K = 1: train -56.0, test -55.9, AIC 6,722,650, BIC 6,734,578, bumps used 1; K = 2: train -48.8, test -48.6, AIC 5,861,302, BIC 5,885,167, bumps used 2; K = 5: train -38.6, test -38.6, AIC 4,645,258, BIC 4,704,933, bumps used 5; K = 10: train -31.5, test -31.5, AIC 3,806,518, BIC 3,925,877, bumps used 10; K = 20: train -24.6, test -25.1, AIC 3,005,038, BIC 3,243,765, bumps used 20; K = 50: train -17.8, test -19.3, AIC 2,268,598, BIC 2,865,428, bumps used 49; K = 100: train -13.6, test -16.5, AIC 1,897,198, BIC 3,090,867, bumps used 92; K = 200: train -12.2, test -16.3, AIC 1,994,398, BIC 4,381,746, bumps used 123; K = 400: train -12.4, test -16.5, AIC 2,548,798, BIC 7,323,503, bumps used 115; K = 800: train -13.0, test -16.7, AIC 3,681,598, BIC 13,231,017, bumps used 99.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-means" data-section="1 · Distributions">
+  <p class="kicker">What the bumps learned</p>
+  <h2>Each bump's centre is a style of digit</h2>
+  <div class="body center col" style="gap:8px">
+    <img class="fig pix" src="figures/data/gmm-means.png" style="width:1000px">
+    <p class="cap">the centres of the 100-bump fit, after inverse PCA, heaviest bump first (the heaviest has weight 3.9%)</p>
+  </div>
+  <p class="q">The hidden coin now has 100 sides, one prototype each, found without the labels. The backwards step $p(z\mid x)$ is still just a 100-row table.</p>
+  <aside class="notes"><p>8 of the 100 bumps ended with a weight under 0.1%.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-samples" data-section="1 · Distributions">
+  <p class="kicker">Step 2 · Generate</p>
+  <h2>Samples, as the number of bumps grows</h2>
+  <div class="body center col" style="gap:4px">
+    <p class="cap" style="margin:0">1 bump: a single Gaussian over the 50 numbers of every digit</p>
+    <img class="fig pix" src="figures/data/gmm-samples-k1.png" style="width:880px">
+    <p class="cap" style="margin:6px 0 0" data-b="2">10 bumps</p>
+    <img class="fig pix" src="figures/data/gmm-samples-k10.png" style="width:880px" data-b="2">
+    <p class="cap" style="margin:6px 0 0" data-b="3">100 bumps, the size chosen on new images</p>
+    <img class="fig pix" src="figures/data/gmm-samples-k100.png" style="width:880px" data-b="3">
+  </div>
+  <aside class="notes"><p>Same random seed for every row. One bump: smudges around the average digit, because a single Gaussian has to cover every digit at once. More bumps: each sample starts from one prototype and wiggles it along that bump's covariance directions.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-bern" data-section="1 · Distributions">
+  <p class="kicker">Or skip PCA: model the 784 pixels directly</p>
+  <h2>A mixture of Bernoullis: each bump is 784 ink probabilities</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:25px">$$\log p(x\mid k) = \sum_{i=1}^{784}\Big[x_i\log\pi_{ki} + (1 - x_i)\log(1 - \pi_{ki})\Big]$$</div>
+    <div class="row top" style="gap:30px;margin-top:8px">
+      <div class="col" style="align-items:center;gap:4px" data-b="2"><img class="fig pix" src="figures/data/bern-means.png" style="width:520px"><p class="cap">the 20 heaviest of 200 bumps: $\pi_k$, ink probability per pixel</p></div>
+      <div class="col" style="align-items:center;gap:4px" data-b="3"><img class="fig pix" src="figures/data/bern-samples.png" style="width:600px"><p class="cap">samples: pick a bump, flip each pixel's coin</p></div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Inside a bump every pixel is on its own, so samples are speckled; only the choice of bump ties pixels together. Same lesson as the 784-pixel Gaussian.</p>
+  <aside class="notes"><p>Binarised MNIST, the same loop with a different log_prob (the formula above inside a logsumexp over bumps), bumps started at k-means centres, K = 200, the largest we tried: the score on new images was still improving there. Bishop, Pattern Recognition and Machine Learning, section 9.3.3, shows the same model fitted with EM. Also the decoder's likelihood in Part 7: one coin per pixel.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="mn-verdict" data-section="1 · Distributions">
+  <p class="kicker">An honest look</p>
+  <h2>New digits, not copies, and not yet sharp</h2>
+  <div class="body">
+    <div class="row top" style="gap:34px">
+      <div class="col" style="align-items:center;gap:6px;width:560px">
+        <img class="fig pix" src="figures/data/gmm-nearest.png" style="width:540px">
+        <p class="cap">top: 8 samples · bottom: the closest of the 60,000 training images</p>
+      </div>
+      <div class="col grow">
+        <div class="callout dec" data-b="2"><h3>What worked</h3>The Part 1 loop, unchanged, learns a distribution over images and samples digit-like shapes, close to real digits but not copies of them.</div>
+        <div class="callout loss" data-b="3"><h3>What did not</h3>Blur from the straight-line squeeze, and each bump can only stretch its template along fixed directions, not bend a stroke.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide sec-dist" id="mn-scale" data-section="1 · Distributions">
+  <p class="kicker">Why we cannot stop here</p>
+  <h2>This recipe does not scale</h2>
+  <div class="body">
+    <div class="row top" style="gap:30px">
+      <table class="work" style="font-size:21px">
+        <tr><th>image</th><th>numbers</th><th>covariance per bump</th></tr>
+        <tr><td>MNIST, 28 × 28 grey</td><td>784</td><td>307,720</td></tr>
+        <tr data-b="2"><td>32 × 32 colour</td><td>3,072</td><td>4.7 million</td></tr>
+        <tr data-b="2"><td>64 × 64 colour face</td><td>12,288</td><td>75.5 million</td></tr>
+        <tr data-b="2"><td>256 × 256 colour photo</td><td>196,608</td><td>19.3 billion</td></tr>
+      </table>
+      <div class="col grow" style="gap:10px" data-b="3">
+        <div class="callout plain"><b>Squeeze first?</b> A straight-line squeeze needs more and more numbers for richer images, and still blurs.</div>
+        <div class="callout plain"><b>More bumps?</b> Each bump is one template plus a Gaussian wiggle. Every pose, style and lighting needs its own templates.</div>
+        <div class="callout plain"><b>Nothing is shared:</b> the bump for a slanted 7 learns nothing from the bump for an upright 7.</div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">We need a squeeze that can bend, learned by a network, and parts that are shared. Part 2: the autoencoder.</p>
+  <aside class="notes"><p>Covariance numbers are n(n + 1)/2 for n numbers per image. Even the diagonal shortcut (one width per pixel) gives static, as two slides back on the 784-pixel Gaussian.</p></aside>
+</section>
+
 <section class="slide sec-dist" id="recap-1" data-section="1 · Distributions">
   <p class="kicker">End of Part 1</p>
   <h2>What we did, and what comes next</h2>
@@ -673,11 +917,12 @@
           <li><b>Generate</b> = sample from the learned model.</li>
           <li>One bump was too simple; a hidden coin $z$ fixed it.</li>
           <li>Scoring $x$ sums over $z$; learning needs the backwards step $p(z\mid x)$.</li><li>In code: one loop, <code>loss = -log_p(x).mean()</code>; choose the size on new data.</li>
+          <li>On MNIST: PCA to 50 numbers, 100 Gaussian bumps over them, inverse PCA: digit-like samples, but blurry, and the recipe does not scale.</li>
         </ol>
       </div>
       <div class="next" data-b="2">
         <h3>Next: images</h3>
-        <p class="small">784 numbers per example instead of one. Before any probability, a simpler idea: squeeze each image into a few numbers and rebuild it. That is the autoencoder.</p>
+        <p class="small">PCA squeezed each image along straight lines. Next, learn the squeeze with a network: encode each image into a few numbers and rebuild it. That is the autoencoder.</p>
         <p class="small">Part 3 returns to this probabilistic story, with a code $z$ in place of the coin.</p>
       </div>
     </div>
@@ -1203,7 +1448,7 @@
   </div>
   <p class="q" data-b="3">Today: only the variational one. It turns inference into optimisation, which is what neural networks are good at.</p>
   <aside class="notes">
-    <p>All three computed for these slides on the trained 2-number VAE decoder, for test digit #90. Shaded: the true posterior on a fine grid. Laplace: peak at (0.25, −1.88), standard deviations 0.05 and 0.059. MCMC: random-walk Metropolis, 1000 kept samples, acceptance 0.7. Variational: diagonal Gaussian, 800 gradient steps.</p>
+    <p>All three computed for these slides on the trained 2-number VAE decoder, for test digit #90. Shaded: the true posterior on a fine grid. Laplace: peak at (0.25, −1.88), standard deviations 0.05 and 0.059. MCMC: random-walk Metropolis, 1,000 kept samples, acceptance 0.7. Variational: diagonal Gaussian, 800 gradient steps.</p>
     <p>Students have met these in the probabilistic machine learning course; here they only need the idea of each and why we pick VI.</p>
   </aside>
 </section>

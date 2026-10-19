@@ -158,7 +158,30 @@
     setZ(0, 0);
   }
 
-  const widgets = { kl, elbo, explorer, latent };
+  // MNIST as a Gaussian mixture: pick the PCA size d and the number of bumps K, see real samples from that fit
+  async function gmmx(root) {
+    let info;
+    try { info = await (await fetch('figures/data/gmm-explore/index.json')).json(); } catch { return; }
+    const [dIn, kIn] = [root.querySelector('.gx-d'), root.querySelector('.gx-k')];
+    const $ = c => root.querySelector(c);
+    const num = v => Number(v).toLocaleString('en-US').replace('-', '−');
+    const update = () => {
+      const d = info.d_grid[+dIn.value], k = info.k_grid[+kIn.value];
+      $('.gx-dv').textContent = d;
+      $('.gx-kv').textContent = k;
+      $('.gx-recon').src = `figures/data/gmm-explore/recon_d${d}.png`;
+      $('.gx-samples').src = `figures/data/gmm-explore/d${d}_k${k}.png`;
+      $('.gx-var').textContent = `${info.var_kept[d]}%`;
+      $('.gx-params').textContent = num(info.params[d][k]);
+      $('.gx-test').textContent = num(info.test[d][k]);
+      $('.gx-best').textContent = info.best_k[d];
+    };
+    dIn.addEventListener('input', update);
+    kIn.addEventListener('input', update);
+    update();
+  }
+
+  const widgets = { kl, elbo, explorer, latent, gmmx };
   document.querySelectorAll('[data-widget]').forEach(el => {
     const w = widgets[el.dataset.widget];
     if (w) w(el);

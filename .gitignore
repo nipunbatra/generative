@@ -5,3 +5,6 @@ work/
 qa/screenshots/
 .DS_Store
 review/
+
+# fitted MNIST mixtures (scripts/make_figures_gmm.py rebuilds them)
+assets/models/gmm-cache/

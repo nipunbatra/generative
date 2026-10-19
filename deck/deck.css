@@ -457,3 +457,14 @@ body.print .lx-static, .lx-offline + .lx-static { display: block; }
 .bound-lines .numline.short { height: 100px; }
 .bound-lines .nl-mark { transform: translateX(-50%); }
 .numline.short .nl-track { top: 76px; }
+
+/* MNIST mixture explorer: two sliders, the squeeze quality and 24 samples */
+.gmmx { display: grid; grid-template-columns: 330px 1fr; gap: 30px; align-items: start; }
+.gmmx .gx-ctrl { display: flex; flex-direction: column; gap: 18px; }
+.gmmx label { display: flex; flex-direction: column; gap: 6px; font-size: 19px; color: var(--ink-2); }
+.gmmx label b { font-size: 26px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.gmmx input[type=range] { width: 300px; accent-color: var(--z); }
+.gmmx .gx-stats { font-size: 17px; color: var(--ink-3); line-height: 1.5; }
+.gmmx .gx-stats b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.gmmx .gx-out { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.gmmx .gx-out img { image-rendering: pixelated; }

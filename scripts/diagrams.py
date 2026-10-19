@@ -1060,10 +1060,51 @@ def amortise():
     d.save()
 
 
+def gmm_pipeline():
+    """Part 1, second half: where each Gaussian lives. 784 pixels -> PCA -> d numbers -> K bumps -> inverse PCA -> 784."""
+    d = SVG("gmm-pipeline", 1152, 350)
+    o = 64
+    cy = 132
+    d.begin(1)
+    d.text(o + 300, 30, "learn", 20, INK2, 700)
+    d.add(f'<path d="M{o + 10},44 L{o + 10},38 L{o + 612},38 L{o + 612},44" fill="none" stroke="{LINE}" stroke-width="2"/>')
+    d.image(o + 10, cy - 45, 90, 90, "digit3.png", "x", sw=2)
+    d.text(o + 55, cy + 82, "784 pixels", 16, C["x"], 650)
+    d.line([(o + 104, cy), (o + 130, cy)], C["x"])
+    d.trapezoid(o + 134, cy, 112, 96, 52, "grey", "PCA", None)
+    d.label(o + 190, cy + 116, r"$z = V^{\top}(x - \bar x)$", 16, INK2, width=220)
+    d.line([(o + 250, cy), (o + 274, cy)], INK3)
+    d.vec(o + 278, cy - 55, ["0.3", "-1.2", "2.1", "...", "0.8"], "z", cw=48, ch=22, size=12)
+    d.label(o + 302, cy + 82, r"$d$ numbers", 16, C["z"], 650, width=160)
+    d.line([(o + 330, cy), (o + 356, cy)], C["z"])
+    c, t = ROLE["dec"]
+    d.rect(o + 360, cy - 62, 252, 124, c, t)
+    d.text(o + 486, cy - 36, "K Gaussian bumps", 18, c, 700)
+    for (ex, ey, rx, ry, ang) in ((o + 422, cy + 4, 30, 14, -25), (o + 488, cy - 10, 34, 13, 20), (o + 554, cy + 8, 28, 15, -60)):
+        d.add(f'<ellipse cx="{ex}" cy="{ey}" rx="{rx}" ry="{ry}" transform="rotate({ang} {ex} {ey})" fill="{c}" fill-opacity="0.18" stroke="{c}" stroke-width="2"/>')
+        d.add(f'<circle cx="{ex}" cy="{ey}" r="3.5" fill="{c}"/>')
+    d.label(o + 486, cy + 50, r"each over the $d$ numbers", 14, c, 600, width=240)
+    d.label(o + 486, cy + 116, r"weight + centre ($d$) + covariance ($d(d{+}1)/2$)", 15, INK2, width=360)
+    d.end()
+    d.begin(2)
+    d.text(o + 795, 30, "generate", 20, INK2, 700)
+    d.add(f'<path d="M{o + 632},44 L{o + 632},38 L{o + 965},38 L{o + 965},44" fill="none" stroke="{LINE}" stroke-width="2"/>')
+    d.line([(o + 616, cy), (o + 642, cy)], C["dec"])
+    d.vec(o + 646, cy - 55, ["-0.4", "1.7", "0.2", "...", "-1.1"], "z", cw=48, ch=22, size=12)
+    d.label(o + 674, cy + 82, r"new $d$ numbers", 16, C["z"], 650, width=180)
+    d.line([(o + 698, cy), (o + 724, cy)], C["z"])
+    d.trapezoid(o + 728, cy, 112, 52, 96, "grey", "inverse", "PCA")
+    d.label(o + 784, cy + 116, r"$\hat x = \bar x + V z$", 16, INK2, width=200)
+    d.line([(o + 844, cy), (o + 870, cy)], INK3)
+    d.image(o + 874, cy - 45, 90, 90, "gmm-sample-one.png", "dec", sw=2)
+    d.text(o + 919, cy + 82, "784 pixels", 16, C["dec"], 650)
+    d.end()
+    d.save()
+
 def main():
     for f in (common, two_ways, mixture_story, latent_story, ae, ae_generate, cloud_vs_point, vae_encode, vae_sample,
               vae_decode, vae, vae_generate, pgm, vae_shapes, pixels, task, route_a, story_decode, reparam_before, reparam_after, reparam_numbers,
-              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes, amortise):
+              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes, amortise, gmm_pipeline):
         f()
     print("wrote", len(list(OUT.glob("*.svg"))), "diagrams")
 

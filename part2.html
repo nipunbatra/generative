@@ -720,7 +720,7 @@
     <div class="mathblock" style="font-size:23px">$$\E_\eps\big[f\big] = \E\big[(\mu+\sigma\eps)^2\big] = \mu^2 + \sigma^2 \quad\Rightarrow\quad \frac{\partial}{\partial\mu}\E[f] = 2\mu = 2, \qquad \frac{\partial}{\partial\sigma}\E[f] = 2\sigma = 1$$</div>
     <img class="fig" src="figures/data/reparam-grads.svg" style="height:300px;margin:4px auto 0" data-b="2">
   </div>
-  <p class="q" data-b="2">Our single $\eps$ gave 1.6 and $-0.64$. Averaged over 10000 draws: 2.01 and 1.02. SGD only needs the right answer on average.</p>
+  <p class="q" data-b="2">Our single $\eps$ gave 1.6 and $-0.64$. Averaged over 10,000 draws: 2.01 and 1.02. SGD only needs the right answer on average.</p>
   <aside class="notes"><p>Each histogram: the per-sample gradient for 10,000 values of ε. The red dashed line is our ε = −0.4. The solid line, the average, sits on the exact gradient of the expected loss. Noisy but unbiased: exactly what stochastic gradient descent needs.</p></aside>
 </section>
 
