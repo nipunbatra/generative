@@ -1,0 +1,5 @@
+{
+  "states": 265,
+  "failures": [],
+  "method": "SVG text bounding boxes, 2-unit sampled strokes and node borders, viewBox containment; all reveals plus slider endpoints and Gaussian parameter corners. Two units horizontal / three units vertical tolerance excludes font metric padding. Does not replace full-size visual review or inspect glyph outlines."
+}

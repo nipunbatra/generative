@@ -1,0 +1,24 @@
+{
+  "expressions": [
+    "p(x_1,\\ldots,x_T)=\\prod_t p(x_t\\mid x_{<t})",
+    "p(x)=\\prod_{j=1}^{784}p(x_j\\mid x_{<j})",
+    "\\mu_\\phi(x),\\ \\log\\sigma_\\phi^2(x)\\in\\mathbb R^d,\\qquad q_\\phi(z\\mid x)=\\mathcal N\\!\\left(\\mu_\\phi(x),\\operatorname{diag}(\\sigma_\\phi^2(x))\\right)",
+    "\\mathcal L_{\\rm recon}=-\\mathbb E_q[\\log p_\\theta(x\\mid z)]",
+    "\\mathcal L_{\\rm KL}=D_{\\rm KL}(q_\\phi(z\\mid x)\\|p(z))",
+    "\\mathcal L_{\\rm VAE}=-\\mathbb E_q[\\log p_\\theta(x\\mid z)]+D_{\\rm KL}(q_\\phi(z\\mid x)\\|p(z))",
+    "\\sigma=\\exp(\\tfrac12\\log\\sigma^2)",
+    "-\\log p_\\theta(x\\mid z)\\;\\text{depends on the observation model}",
+    "x=f(z)",
+    "z=f^{-1}(x)",
+    "\\log p_\\theta(x)=\\operatorname{ELBO}(x)+D_{\\rm KL}\\!\\left(q_\\phi(z\\mid x)\\,\\|\\,p_\\theta(z\\mid x)\\right)",
+    "\\operatorname{ELBO}(x)=\\mathbb E_q[\\log p_\\theta(x\\mid z)]-D_{\\rm KL}(q\\|p)",
+    "D_{\\rm KL}\\!\\left(\\mathcal N(\\mu,\\operatorname{diag}(\\sigma^2))\\,\\|\\,\\mathcal N(0,I)\\right)=\\frac12\\sum_{j=1}^d\\left(\\mu_j^2+\\sigma_j^2-\\log\\sigma_j^2-1\\right)",
+    "\\min_G\\max_D\\;\\mathbb E_{\\rm data}\\log D(x)+\\mathbb E_z\\log(1-D(G(z)))",
+    "L_G^{\\rm non\\text{-}saturating}=-\\mathbb E_z\\log D(G(z))"
+  ],
+  "rendered": 15,
+  "renderer": "KaTeX",
+  "main_screens": 87,
+  "main_builds": 208,
+  "duration_seconds": 5700
+}

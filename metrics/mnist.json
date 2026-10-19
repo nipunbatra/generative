@@ -1,0 +1,331 @@
+{
+  "seed": 667,
+  "epochs": 15,
+  "train_examples": 60000,
+  "test_examples": 10000,
+  "batch_size": 256,
+  "lr": 0.001,
+  "optimizer": "Adam",
+  "device": "CPU",
+  "deterministic_algorithms": true,
+  "architecture": "784\u2192256 ReLU\u2192128 ReLU\u2192mu/logvar; d\u2192128 ReLU\u2192256 ReLU\u2192784 logits",
+  "preprocessing": "fixed binary threshold uint8 > 127",
+  "data_source": "https://storage.googleapis.com/cvdf-datasets/mnist/",
+  "data_sha256": {
+    "train-images-idx3-ubyte.gz": "440fcabf73cc546fa21475e81ea370265605f56be210a4024d2ca8f203523609",
+    "train-labels-idx1-ubyte.gz": "3552534a0a558bbed6aed32b30c495cca23d567ec52cac8be1a0730e8010255c",
+    "t10k-images-idx3-ubyte.gz": "8d422c7b0a1c1c79245a5bcf07fe86e33eeafee792b84584aec276f5a2dbc4e6",
+    "t10k-labels-idx1-ubyte.gz": "f7ae60f92e00ec6debd23a6088c31dbd2371eca3ffa0defaefb259924204aec6"
+  },
+  "versions": {
+    "torch": "2.13.0",
+    "numpy": "2.5.3",
+    "python": "3.12.9"
+  },
+  "test_evaluation": "one posterior draw per held-out example, seed 668; no test data used for training",
+  "image_protocol": "reconstructions and grids are decoder Bernoulli means; -prior-draws images sample binary x; first test examples, fixed seed, no selection or retouching",
+  "seconds": 41.69995594024658,
+  "models": {
+    "ae2": {
+      "history": [
+        {
+          "epoch": 1,
+          "reconstruction_nats": 202.39469225260416,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 2,
+          "reconstruction_nats": 159.61573381347657,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 3,
+          "reconstruction_nats": 151.28708150227865,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 4,
+          "reconstruction_nats": 147.15717275390625,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 5,
+          "reconstruction_nats": 143.86509404296876,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 6,
+          "reconstruction_nats": 141.3822771077474,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 7,
+          "reconstruction_nats": 139.5302413574219,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 8,
+          "reconstruction_nats": 138.0139392985026,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 9,
+          "reconstruction_nats": 136.6545404622396,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 10,
+          "reconstruction_nats": 135.61022315266928,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 11,
+          "reconstruction_nats": 134.6899562825521,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 12,
+          "reconstruction_nats": 133.87309108072915,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 13,
+          "reconstruction_nats": 132.9736324951172,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 14,
+          "reconstruction_nats": 132.17456682942708,
+          "kl_nats": 0.0
+        },
+        {
+          "epoch": 15,
+          "reconstruction_nats": 131.61020926920574,
+          "kl_nats": 0.0
+        }
+      ],
+      "test_reconstruction_nats": 133.1967315673828,
+      "test_kl_nats": 0.0,
+      "test_negative_elbo_nats": null,
+      "latent_mean": [
+        -0.6182150840759277,
+        1.9200265407562256
+      ],
+      "latent_std": [
+        5.528364658355713,
+        4.921047687530518
+      ],
+      "checkpoint_sha256": "d9531a1f3a5d58065c53bbdd624fa13dad052e7be1088f5c0a18b7bc8117fe3a"
+    },
+    "vae2": {
+      "history": [
+        {
+          "epoch": 1,
+          "reconstruction_nats": 201.5863721923828,
+          "kl_nats": 3.390683588820696
+        },
+        {
+          "epoch": 2,
+          "reconstruction_nats": 163.8286740966797,
+          "kl_nats": 4.700496923573811
+        },
+        {
+          "epoch": 3,
+          "reconstruction_nats": 157.29381936035156,
+          "kl_nats": 4.983846002960205
+        },
+        {
+          "epoch": 4,
+          "reconstruction_nats": 152.31663688964844,
+          "kl_nats": 5.268867153422038
+        },
+        {
+          "epoch": 5,
+          "reconstruction_nats": 147.9371299967448,
+          "kl_nats": 5.559914057159424
+        },
+        {
+          "epoch": 6,
+          "reconstruction_nats": 145.00326080729167,
+          "kl_nats": 5.767505551910401
+        },
+        {
+          "epoch": 7,
+          "reconstruction_nats": 142.8318602701823,
+          "kl_nats": 5.895303574625651
+        },
+        {
+          "epoch": 8,
+          "reconstruction_nats": 140.98828459472657,
+          "kl_nats": 5.990899359893799
+        },
+        {
+          "epoch": 9,
+          "reconstruction_nats": 139.45053803710937,
+          "kl_nats": 6.080376102956136
+        },
+        {
+          "epoch": 10,
+          "reconstruction_nats": 138.28538354492187,
+          "kl_nats": 6.14800154800415
+        },
+        {
+          "epoch": 11,
+          "reconstruction_nats": 137.18553525390624,
+          "kl_nats": 6.2120965980529785
+        },
+        {
+          "epoch": 12,
+          "reconstruction_nats": 136.2943275390625,
+          "kl_nats": 6.261217342122396
+        },
+        {
+          "epoch": 13,
+          "reconstruction_nats": 135.35397793782553,
+          "kl_nats": 6.307949480946859
+        },
+        {
+          "epoch": 14,
+          "reconstruction_nats": 134.63720652669272,
+          "kl_nats": 6.365499781036377
+        },
+        {
+          "epoch": 15,
+          "reconstruction_nats": 133.97887518717448,
+          "kl_nats": 6.391893041229248
+        }
+      ],
+      "test_reconstruction_nats": 135.3921356201172,
+      "test_kl_nats": 6.3387770652771,
+      "test_negative_elbo_nats": 141.7309126853943,
+      "latent_mean": [
+        0.1192852258682251,
+        -0.05578482151031494
+      ],
+      "latent_std": [
+        1.2282038927078247,
+        1.1370646953582764
+      ],
+      "checkpoint_sha256": "071dfce716d4fc5cac590d5d88d58330378aaf4759c5e6abcc30b1abd28db842"
+    },
+    "vae16": {
+      "history": [
+        {
+          "epoch": 1,
+          "reconstruction_nats": 207.65257930501303,
+          "kl_nats": 3.718663831361135
+        },
+        {
+          "epoch": 2,
+          "reconstruction_nats": 144.86196416015625,
+          "kl_nats": 10.985361425272623
+        },
+        {
+          "epoch": 3,
+          "reconstruction_nats": 112.96409018147787,
+          "kl_nats": 15.65557642923991
+        },
+        {
+          "epoch": 4,
+          "reconstruction_nats": 98.22646794840495,
+          "kl_nats": 17.947029288736978
+        },
+        {
+          "epoch": 5,
+          "reconstruction_nats": 90.42147096354167,
+          "kl_nats": 19.121150529988608
+        },
+        {
+          "epoch": 6,
+          "reconstruction_nats": 85.74962052408854,
+          "kl_nats": 19.74973356628418
+        },
+        {
+          "epoch": 7,
+          "reconstruction_nats": 82.46155568440756,
+          "kl_nats": 20.142697035725913
+        },
+        {
+          "epoch": 8,
+          "reconstruction_nats": 79.9390324584961,
+          "kl_nats": 20.486216604614256
+        },
+        {
+          "epoch": 9,
+          "reconstruction_nats": 77.83916656494141,
+          "kl_nats": 20.73099246927897
+        },
+        {
+          "epoch": 10,
+          "reconstruction_nats": 76.20018800048828,
+          "kl_nats": 20.95298993021647
+        },
+        {
+          "epoch": 11,
+          "reconstruction_nats": 74.76404403483073,
+          "kl_nats": 21.154612626139322
+        },
+        {
+          "epoch": 12,
+          "reconstruction_nats": 73.53931034342448,
+          "kl_nats": 21.326034866333007
+        },
+        {
+          "epoch": 13,
+          "reconstruction_nats": 72.43037295328776,
+          "kl_nats": 21.487619357299806
+        },
+        {
+          "epoch": 14,
+          "reconstruction_nats": 71.38351448160807,
+          "kl_nats": 21.679340116373698
+        },
+        {
+          "epoch": 15,
+          "reconstruction_nats": 70.3517409790039,
+          "kl_nats": 21.89983976542155
+        }
+      ],
+      "test_reconstruction_nats": 69.96261596679688,
+      "test_kl_nats": 22.023386001586914,
+      "test_negative_elbo_nats": 91.98600196838379,
+      "latent_mean": [
+        0.101629339158535,
+        -0.09934049099683762,
+        -0.010370884090662003,
+        0.02786846272647381,
+        -0.03195954114198685,
+        -0.10432253777980804,
+        0.013255487196147442,
+        -0.046418506652116776,
+        -0.1028362512588501,
+        0.11471085250377655,
+        0.009702041745185852,
+        0.19216276705265045,
+        -0.010587477125227451,
+        -0.001174299861304462,
+        -0.007911046966910362,
+        0.005089359823614359
+      ],
+      "latent_std": [
+        1.1241117715835571,
+        0.9941884875297546,
+        0.6494242548942566,
+        1.0707875490188599,
+        0.07612447440624237,
+        1.0307193994522095,
+        0.9426724910736084,
+        1.0170629024505615,
+        0.9668144583702087,
+        1.0670459270477295,
+        0.9977549910545349,
+        1.0354485511779785,
+        0.4007469415664673,
+        0.23511143028736115,
+        1.1572389602661133,
+        0.9805039763450623
+      ],
+      "checkpoint_sha256": "a2ec0c4f9431cf65e10a5c5c546fc0d3541f658368a7fa7f744d572b02fc0fee"
+    }
+  }
+}

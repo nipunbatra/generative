@@ -1,0 +1,47 @@
+{
+  "reparameterization": {
+    "z": 1.600000023841858,
+    "dL_dmu": 3.0,
+    "dL_dsigma": -2.4000000953674316
+  },
+  "logvar": {
+    "dz_dlogvar": -0.20000000298023224,
+    "dL_dlogvar": -0.6000000238418579
+  },
+  "kl": {
+    "library": 0.8181471824645996,
+    "formula": 0.8181471805599454,
+    "at_prior": 0.0
+  },
+  "location_scale": {
+    "sample_mean": 1.9997818037703354,
+    "sample_variance": 0.24934196297029212,
+    "expected_mean": 2,
+    "expected_variance": 0.25
+  },
+  "frozen_D": {
+    "G_grad_norm": 0.02905735932290554,
+    "D_gradients_absent": true
+  },
+  "flow": {
+    "inverse_error": 0.0,
+    "determinant": 1.0,
+    "stretch2_log_inverse_jacobian": -0.6931471805599453
+  },
+  "gaussian_interval_probability": 0.6826894921370859,
+  "fixed_variance_mle": {
+    "data": [
+      -0.5,
+      0.5,
+      1.5
+    ],
+    "mle_mean": 0.5,
+    "max_log_likelihood": -3.756815599614018
+  },
+  "checkpoint_hashes_match": true,
+  "EM_fit": {
+    "iterations": 24,
+    "likelihood_nondecreasing": true,
+    "weights_sum": 1.0
+  }
+}

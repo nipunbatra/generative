@@ -1,0 +1,10 @@
+/* Keep equations, edge labels and data panels in separate, stable lanes. */
+.interactive[data-kind^="ped-"] .plot>svg{height:390px;max-height:390px}
+.interactive[data-kind^="ped-"] .readout{font-size:18px;max-width:1050px;margin:9px auto;line-height:1.35}
+.interactive[data-kind^="ped-"] .controls{margin-top:10px}
+#start .interactive .plot>svg{height:415px;max-height:415px}
+#start .body{gap:0}
+#kl-meaning .plot>svg,#elbo-gap .plot>svg{height:365px;max-height:365px}
+#autograd-sampling .plot>svg{height:380px;max-height:380px}
+.interactive[data-kind^="ped-"] svg text{font-variant-numeric:tabular-nums}
+@media(max-width:760px){.read .interactive[data-kind^="ped-"] .plot>svg{height:auto;max-height:none}.read .interactive[data-kind^="ped-"] .readout{font-size:16px}.read #start .plot>svg{height:auto}}

@@ -1,0 +1,292 @@
+{
+  "beta_protocol": {
+    "train_examples": 12000,
+    "test_examples": 10000,
+    "epochs": 12,
+    "latent_dim": 2,
+    "batch_size": 256,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "seed": 667,
+    "test_seed": 668,
+    "prior_seed": 669,
+    "pixel_seed": 670,
+    "reduction": "BCE summed over 784 pixels; KL summed over 2 latent dimensions; both averaged over examples",
+    "evaluation": "One posterior sample per test example. Reconstruction images decode posterior means. Same seeds, initialization and minibatch order across beta. Single seed; instructional comparison, not a benchmark.",
+    "architecture": "Same Model class as train_mnist.py",
+    "torch": "2.13.0"
+  },
+  "beta": [
+    {
+      "beta": 0.0,
+      "test_reconstruction_nats": 152.88278198242188,
+      "test_kl_nats": 42.70679473876953,
+      "checkpoint_sha256": "68cd621b143fa293b6dd012344276e94f84b79bb77b6e75cc0d66b00d7d038af",
+      "history": [
+        {
+          "epoch": 1,
+          "reconstruction_nats": 279.1112352294922,
+          "kl_nats": 6.840791809807221
+        },
+        {
+          "epoch": 2,
+          "reconstruction_nats": 195.3525352376302,
+          "kl_nats": 15.500782608032226
+        },
+        {
+          "epoch": 3,
+          "reconstruction_nats": 180.06199161783854,
+          "kl_nats": 19.539771881103515
+        },
+        {
+          "epoch": 4,
+          "reconstruction_nats": 171.6835487060547,
+          "kl_nats": 21.15653151957194
+        },
+        {
+          "epoch": 5,
+          "reconstruction_nats": 167.14970833333334,
+          "kl_nats": 22.424270309448243
+        },
+        {
+          "epoch": 6,
+          "reconstruction_nats": 163.6487745361328,
+          "kl_nats": 24.388797999064128
+        },
+        {
+          "epoch": 7,
+          "reconstruction_nats": 160.5342215576172,
+          "kl_nats": 28.106036020914715
+        },
+        {
+          "epoch": 8,
+          "reconstruction_nats": 157.92010135904948,
+          "kl_nats": 31.350244588216146
+        },
+        {
+          "epoch": 9,
+          "reconstruction_nats": 155.4975732421875,
+          "kl_nats": 35.461606150309244
+        },
+        {
+          "epoch": 10,
+          "reconstruction_nats": 153.65946915690105,
+          "kl_nats": 38.92075528971354
+        },
+        {
+          "epoch": 11,
+          "reconstruction_nats": 152.05894266764324,
+          "kl_nats": 41.84303245035807
+        },
+        {
+          "epoch": 12,
+          "reconstruction_nats": 150.47074532063803,
+          "kl_nats": 43.547856018066405
+        }
+      ]
+    },
+    {
+      "beta": 1.0,
+      "test_reconstruction_nats": 156.21839904785156,
+      "test_kl_nats": 5.162355422973633,
+      "checkpoint_sha256": "7ac0f1ccf36237b990d93243421c52171959999bc65660f3fa8156a82751cda9",
+      "history": [
+        {
+          "epoch": 1,
+          "reconstruction_nats": 279.35443208821613,
+          "kl_nats": 3.4356337751646837
+        },
+        {
+          "epoch": 2,
+          "reconstruction_nats": 197.87008341471355,
+          "kl_nats": 2.694600908279419
+        },
+        {
+          "epoch": 3,
+          "reconstruction_nats": 185.35978186035157,
+          "kl_nats": 3.031647455215454
+        },
+        {
+          "epoch": 4,
+          "reconstruction_nats": 174.1616416015625,
+          "kl_nats": 4.0210978418986
+        },
+        {
+          "epoch": 5,
+          "reconstruction_nats": 169.57673852539062,
+          "kl_nats": 4.318036947886149
+        },
+        {
+          "epoch": 6,
+          "reconstruction_nats": 166.4046404215495,
+          "kl_nats": 4.555235677083333
+        },
+        {
+          "epoch": 7,
+          "reconstruction_nats": 163.56465694173178,
+          "kl_nats": 4.746777019500732
+        },
+        {
+          "epoch": 8,
+          "reconstruction_nats": 160.74155904134113,
+          "kl_nats": 4.9542579981486
+        },
+        {
+          "epoch": 9,
+          "reconstruction_nats": 158.34005631510416,
+          "kl_nats": 5.135751834869385
+        },
+        {
+          "epoch": 10,
+          "reconstruction_nats": 156.60477860514322,
+          "kl_nats": 5.209973915100098
+        },
+        {
+          "epoch": 11,
+          "reconstruction_nats": 155.08110685221354,
+          "kl_nats": 5.23930097579956
+        },
+        {
+          "epoch": 12,
+          "reconstruction_nats": 153.781944539388,
+          "kl_nats": 5.335288920084635
+        }
+      ]
+    },
+    {
+      "beta": 4.0,
+      "test_reconstruction_nats": 162.81605529785156,
+      "test_kl_nats": 3.042499303817749,
+      "checkpoint_sha256": "a1be50e4fc23bc3feca0303e28c39aac87a1271e0e2faea60053f142ccd395fc",
+      "history": [
+        {
+          "epoch": 1,
+          "reconstruction_nats": 281.327676961263,
+          "kl_nats": 1.1295273510317008
+        },
+        {
+          "epoch": 2,
+          "reconstruction_nats": 201.46302010091145,
+          "kl_nats": 0.5684381383260091
+        },
+        {
+          "epoch": 3,
+          "reconstruction_nats": 190.8405895996094,
+          "kl_nats": 1.204141292889913
+        },
+        {
+          "epoch": 4,
+          "reconstruction_nats": 187.4349618733724,
+          "kl_nats": 1.3538081976572673
+        },
+        {
+          "epoch": 5,
+          "reconstruction_nats": 185.58599491373698,
+          "kl_nats": 1.4677678187688192
+        },
+        {
+          "epoch": 6,
+          "reconstruction_nats": 181.460443359375,
+          "kl_nats": 1.8089063460032144
+        },
+        {
+          "epoch": 7,
+          "reconstruction_nats": 175.58429528808594,
+          "kl_nats": 2.2315627981821695
+        },
+        {
+          "epoch": 8,
+          "reconstruction_nats": 171.34868688964843,
+          "kl_nats": 2.5234690386454264
+        },
+        {
+          "epoch": 9,
+          "reconstruction_nats": 167.58656583658853,
+          "kl_nats": 2.7487635688781737
+        },
+        {
+          "epoch": 10,
+          "reconstruction_nats": 164.88005000813803,
+          "kl_nats": 2.917689335505168
+        },
+        {
+          "epoch": 11,
+          "reconstruction_nats": 162.96505053710936,
+          "kl_nats": 2.997888650894165
+        },
+        {
+          "epoch": 12,
+          "reconstruction_nats": 161.47026684570312,
+          "kl_nats": 3.0944853534698487
+        }
+      ]
+    }
+  ],
+  "data_sha256": {
+    "train-images-idx3-ubyte.gz": "440fcabf73cc546fa21475e81ea370265605f56be210a4024d2ca8f203523609",
+    "train-labels-idx1-ubyte.gz": "3552534a0a558bbed6aed32b30c495cca23d567ec52cac8be1a0730e8010255c",
+    "t10k-images-idx3-ubyte.gz": "8d422c7b0a1c1c79245a5bcf07fe86e33eeafee792b84584aec276f5a2dbc4e6",
+    "t10k-labels-idx1-ubyte.gz": "f7ae60f92e00ec6debd23a6088c31dbd2371eca3ffa0defaefb259924204aec6"
+  },
+  "autograd": {
+    "sample_requires_grad": false,
+    "mu_grad": 3.0,
+    "sigma_grad": -2.4000000953674316,
+    "rsample_mu_grad": 1.0,
+    "rsample_sigma_grad": -0.9787107706069946
+  },
+  "toy": {
+    "prior": [
+      0.2,
+      0.5,
+      0.3
+    ],
+    "likelihood": [
+      0.1,
+      0.8,
+      0.2
+    ],
+    "evidence": 0.48000000000000004,
+    "posterior": [
+      0.04166666666666667,
+      0.8333333333333333,
+      0.12499999999999999
+    ],
+    "log_evidence": -0.7339691750802003,
+    "states": [
+      {
+        "q": [
+          0.4,
+          0.3,
+          0.3
+        ],
+        "recon": -1.4708084763221112,
+        "prior_kl": 0.12401118509418088,
+        "gap": 0.860850486336092,
+        "elbo": -1.5948196614162922
+      },
+      {
+        "q": [
+          0.15,
+          0.7,
+          0.15
+        ],
+        "recon": -0.7430039367341686,
+        "prior_kl": 0.08840617768309005,
+        "gap": 0.0974409393370584,
+        "elbo": -0.8314101144172586
+      },
+      {
+        "q": [
+          0.04166666666666667,
+          0.8333333333333333,
+          0.12499999999999999
+        ],
+        "recon": -0.4830737440241891,
+        "prior_kl": 0.25089543105601114,
+        "gap": 0.0,
+        "elbo": -0.7339691750802002
+      }
+    ]
+  }
+}

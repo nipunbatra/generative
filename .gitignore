@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+work/
+experiments/data/
+node_modules
+.DS_Store
+
+# Generative Modelling II is a separate project.
+/diffusion/
+
+# Reproducible local exports; retain PDFs and compact QA reports in Git.
+/output/*.zip
+/output/qa/
+/output/rebuild-qa/*.png
+/output/rebuild-qa/*.jpg
