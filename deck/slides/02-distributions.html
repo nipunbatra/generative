@@ -1,0 +1,160 @@
+<!-- ===================================================================== 2 · DISTRIBUTIONS -->
+
+<section class="slide sec-dist opener" id="dist-open" data-section="Distributions">
+  <p class="kicker">Part 1</p>
+  <h2>What does it mean to learn a distribution?</h2>
+  <p>Before images, one number. Everything we need (fitting, sampling, hidden causes, inference) fits on a number line.</p>
+</section>
+
+<section class="slide sec-dist" id="toy-data" data-section="Distributions">
+  <p class="kicker">Our 1-D toy data</p>
+  <h2>200 numbers in two clumps</h2>
+  <div class="body center"><img class="fig" src="figures/data/toy-data.svg" style="width:1080px"></div>
+  <p class="q">Pretend each number is an image squashed to one value. How would you produce a 201st that looks like it belongs?</p>
+  <aside class="notes">
+    <p>Data: 200 draws, half from 𝒩(−2, 0.5²) and half from 𝒩(2, 0.5²). Students do not need to know that yet; they should see two clumps.</p>
+    <p>Typical answers: "pick a random existing point" (memorising, no new data), "use the average" (next slide), "fit a distribution and sample" (yes).</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-mean" data-section="Distributions">
+  <p class="kicker">A tempting answer</p>
+  <h2>The average is a terrible sample</h2>
+  <div class="body center"><img class="fig" src="figures/data/toy-mean.svg" style="width:1080px"></div>
+  <p class="q">A model that predicts the mean always outputs something that never occurs. Regression thinking does not give generation.</p>
+  <aside class="notes"><p>This is why "train a network with MSE to output an image" gives blurry averages. We will see a softer version of this later when VAE samples look blurry.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="toy-gauss" data-section="Distributions">
+  <p class="kicker">Fit, then sample</p>
+  <h2>The best single Gaussian, by maximum likelihood</h2>
+  <div class="body">
+    <div class="stack center">
+      <img class="fig" src="figures/data/toy-gauss.svg" style="width:1040px" data-b="=1">
+      <img class="fig" src="figures/data/toy-gauss-samples.svg" style="width:1040px" data-b="2">
+    </div>
+    <div class="row" style="justify-content:center;gap:50px">
+      <div class="mathblock" style="font-size:24px">$$\hat\mu = \frac1N\sum_{i=1}^{N} x_i = {{toy.mean}} \qquad \hat\sigma^2 = \frac1N \sum_{i=1}^{N} (x_i-\hat\mu)^2 = {{toy.var}}$$</div>
+      <div class="mathblock" style="font-size:24px" data-b="2">$$x_{\text{new}} = \hat\mu + \hat\sigma\,\eps,\quad \eps \sim \N(0,1)$$</div>
+    </div>
+  </div>
+  <p class="q" data-b="=1">These two numbers make the observed data as probable as any Gaussian can.</p>
+  <p class="q" data-b="2">{{toy.gauss_samples_in_gap}} of 30 samples land in the empty gap. Best fit within the family, wrong shape.</p>
+  <aside class="notes">
+    <p>The maximum-likelihood Gaussian has the sample mean and the 1/N variance. Students derived this in the probability lectures.</p>
+    <p>Lesson: optimisation worked perfectly; the model family was too simple. Better optimisation cannot fix that.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-story" data-section="Distributions">
+  <p class="kicker">A richer model: tell a story</p>
+  <h2>Hidden choice first, then the number</h2>
+  <div class="body center"><!--svg:mixture-story--></div>
+  <p class="q">The coin is never written down in the data. We only ever see $x$. The coin $z$ is a hidden (latent) variable.</p>
+  <aside class="notes">
+    <p>Read the sampling recipe aloud: flip a coin, pick that bump, draw a point from it. Two simple steps make a two-bump distribution that one Gaussian could not.</p>
+    <p>This "generative story" pattern is exactly the VAE: first draw a hidden code z, then draw the image x given z.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="gauss-density" data-section="Distributions">
+  <p class="kicker">One ingredient, worked by hand</p>
+  <h2>How high is bump B at $x = 1.5$?</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <div class="col" style="width:600px">
+        <div class="mathblock" style="font-size:27px">$$\N(x;\mu,\sigma^2) = \frac{1}{\sigma\sqrt{2\pi}}\,\exp\!\Big(-\frac{(x-\mu)^2}{2\sigma^2}\Big)$$</div>
+        <div class="mathblock" style="font-size:24px" data-b="2">$$\frac{x-\mu}{\sigma} = \frac{1.5 - 2}{0.5} = -1$$</div>
+        <div class="mathblock" style="font-size:24px" data-b="3">$$\exp\!\big(-\tfrac12\cdot(-1)^2\big) = e^{-0.5} = {{gauss_15.expo}}$$</div>
+        <div class="mathblock" style="font-size:24px" data-b="4">$$\frac{1}{0.5\sqrt{2\pi}} = {{gauss_15.norm}} \qquad\Rightarrow\qquad {{gauss_15.norm}}\times{{gauss_15.expo}} = \mathbf{ {{gauss_15.value}} }$$</div>
+      </div>
+      <img class="fig" src="figures/data/gauss-density.svg" style="width:500px">
+    </div>
+  </div>
+  <p class="q" data-b="4">A density is a height, not a probability: it can exceed 1 for a narrow bump. Only areas are probabilities.</p>
+  <aside class="notes">
+    <p>The formula has two parts: how many standard deviations away x is (squared, inside the exponent), and a constant that makes the area under the curve 1.</p>
+    <p>One standard deviation from the centre always gives e^{−1/2} ≈ 0.61 of the peak height.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-mixture" data-section="Distributions">
+  <p class="kicker">From the story to a probability</p>
+  <h2>To score $x$, add over every hidden value</h2>
+  <div class="body">
+    <img class="fig" src="figures/data/toy-mixture-samples.svg" style="width:960px;margin:0 auto">
+    <div class="mathblock" style="font-size:27px">$$p(x) = \sum_{z\in\{\mathrm{A},\mathrm{B}\}} \cz{p(z)}\,\cdec{p(x\mid z)} = \tfrac12\,\N(x;-2,0.5^2) + \tfrac12\,\N(x;\,2,0.5^2)$$</div>
+    <div class="mathblock" style="font-size:24px" data-b="2">$$\text{at } x=1.5:\quad \tfrac12\cdot 0.000 + \tfrac12\cdot {{gauss_15.value}} = 0.242$$</div>
+  </div>
+  <p class="q">Samples now fall in the bumps. Remember this sum. With images it becomes an integral we cannot compute.</p>
+  <aside class="notes">
+    <p>The A-bump contributes about 2 × 10⁻¹² at x = 1.5: 7 standard deviations away.</p>
+    <p>"Marginalising out z": the probability of what we observe is an average over everything we cannot observe.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="bayes-table" data-section="Distributions">
+  <p class="kicker">Run the story backwards</p>
+  <h2>You see $x = 0.1$. Which bump made it?</h2>
+  <div class="body">
+    <table class="work" style="margin:0 auto;font-size:24px">
+      <tr><th>bump $z$</th><th>prior $p(z)$</th><th>likelihood $p(x\mid z)$</th><th>prior × likelihood</th><th>÷ total = posterior</th></tr>
+      <tr><td>A, centre $-2$</td><td>0.5</td><td data-b="2">${{bayes01.lik_a}}$</td><td data-b="3">${{bayes01.joint_a}}$</td><td data-b="5">{{bayes01.post_a}}</td></tr>
+      <tr><td>B, centre $2$</td><td>0.5</td><td data-b="2">${{bayes01.lik_b}}$</td><td data-b="3">${{bayes01.joint_b}}$</td><td data-b="5"><b>{{bayes01.post_b}}</b></td></tr>
+      <tr class="total" data-b="4"><td>total $= p(x)$</td><td></td><td></td><td>${{bayes01.evidence}}$</td><td data-b="5">1.000</td></tr>
+    </table>
+    <div class="mathblock" style="font-size:27px;margin-top:20px" data-b="5">$$p(\mathrm{B}\mid x) = \frac{p(\mathrm{B})\,p(x\mid\mathrm{B})}{p(x)} = {{bayes01.post_b}}$$</div>
+  </div>
+  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. $x = 0.1$ is close to the middle, so we stay unsure.</p>
+  <aside class="notes">
+    <p>Build by build: the two likelihoods (both tiny: 0.1 is far from both centres, but closer to B), multiply by the prior, add to get the evidence, divide.</p>
+    <p>The tiny numbers do not matter: only their ratio does. This will matter for images, where likelihoods are like 10⁻⁵⁰.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-posterior" data-section="Distributions">
+  <p class="kicker">Do it for every $x$</p>
+  <h2>The posterior, as a curve</h2>
+  <div class="body">
+    <div class="row" style="gap:36px">
+      <img class="fig" src="figures/data/toy-posterior.svg" style="width:640px">
+      <div class="col grow">
+        <p class="small">Repeat the table for every $x$ and plot $p(\mathrm{B}\mid x)$.</p>
+        <p class="small" data-b="2">Far right: certainly B. Far left: certainly A. Near 0: unsure.</p>
+        <p class="small muted" data-b="3">For these two bumps the curve is exactly $\mathrm{sigmoid}(16x)$: a logistic regression in disguise.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q">Going from an observation back to its hidden cause is called <b>inference</b>. The VAE's encoder will learn to do it.</p>
+  <aside class="notes">
+    <p>Derivation of the sigmoid if asked: the log ratio of the two likelihoods is [(x+2)² − (x−2)²]/(2·0.25) = 16x, and the equal priors cancel.</p>
+    <p>Here inference is exact because we can compute p(x). For images, p(x) is the hard part, so the posterior will be hard too.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="vocab" data-section="Distributions">
+  <p class="kicker">Four words we will use all lecture</p>
+  <h2>Prior, likelihood, evidence, posterior</h2>
+  <div class="body">
+    <table class="work vocab" style="margin:4px auto 0;font-size:23px">
+      <tr><th>name</th><th>symbol</th><th>question it answers</th><th>at $x = 0.1$</th></tr>
+      <tr><td><b class="cz">prior</b></td><td>$p(z)$</td><td>what do we believe about $z$ before seeing $x$?</td><td>0.5, 0.5</td></tr>
+      <tr data-b="2"><td><b class="cdec">likelihood</b></td><td>$p(x\mid z)$</td><td>if $z$ were known, how probable is this $x$?</td><td>${{bayes01.lik_b}}$ for B</td></tr>
+      <tr data-b="3"><td><b class="cx">evidence</b></td><td>$p(x)$</td><td>how probable is $x$ overall, summing over $z$?</td><td>${{bayes01.evidence}}$</td></tr>
+      <tr data-b="4"><td><b class="cenc">posterior</b></td><td>$p(z\mid x)$</td><td>having seen $x$, which $z$ explains it?</td><td>B: {{bayes01.post_b}}</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="4">Bayes ties them together: posterior = prior × likelihood ÷ evidence.</p>
+  <aside class="notes"><p>Keep these four colours in mind: amber for z and the prior, teal for the decoder/likelihood, blue for observed data, purple for the encoder/posterior.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="latent-story" data-section="Distributions">
+  <p class="kicker">From a coin to a code</p>
+  <h2>The same story for images</h2>
+  <div class="body center"><!--svg:latent-story--></div>
+  <p class="q">The code is 2 real numbers instead of a coin, and a network maps it to 784 pixel probabilities. Nobody tells it what $z$ means.</p>
+  <aside class="notes">
+    <p>Real outputs of the decoder we train later. Step 2 gives a probability per pixel (a grey image). Step 3 flips a coin per pixel. Most papers show step 2 as "the sample" because it looks cleaner.</p>
+    <p>If we had this decoder, generating would be trivial. The whole difficulty is training it.</p>
+  </aside>
+</section>

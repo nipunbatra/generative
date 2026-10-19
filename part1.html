@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Session 1 · Latent variables, KL and the ELBO · ES 667</title>
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="deck/deck.css">
+</head>
+<body>
+<main id="deck">
+<!-- ===================================================================== 1 · HOOK -->
+
+<section class="slide sec-hook cover" id="cover" data-section="Why generate?">
+  <p class="kicker">ES 667 · Deep Learning · Generative Modelling I</p>
+  <h2 style="font-size:60px;margin-top:40px">Learning to generate<span class="sub" style="font-size:30px">Autoencoders, VAEs and GANs, built from one handwritten 3</span></h2>
+  <div class="body">
+    <img class="fig pix" src="figures/data/interp-vae16.png" style="width:1150px;margin:0 auto">
+    <p class="cap">A 3 turns into a 7. Every frame is decoded from a point on a straight line through the code space of the VAE we train today.</p>
+  </div>
+  <p class="tiny" style="margin:0">Nipun Batra · IIT Gandhinagar</p>
+  <aside class="notes">
+    <p>Open with the strip. Every image here was generated, not drawn: we encoded a real 3 and a real 7, drew a straight line between their codes, and decoded 12 points on that line.</p>
+    <p>By the end of the lecture students should be able to explain every step of that sentence.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="faces" data-section="Why generate?">
+  <p class="kicker">Start with a question</p>
+  <h2>Who are these people?</h2>
+  <div class="body center">
+    <img class="fig" src="assets/gallery/stylegan-faces.jpg" style="height:420px;border-radius:10px">
+  </div>
+  <p class="q" data-b="=1">Look closely: skin, hair, glasses, lighting, background. Anything odd?</p>
+  <p class="q" data-b="2">No one. Each face is a random vector of 512 numbers pushed through a trained network.</p>
+  <p class="src">Karras, Laine &amp; Aila, <i>A Style-Based Generator Architecture for GANs</i> (StyleGAN), 2019 · CC BY-NC 4.0</p>
+  <aside class="notes">
+    <p>Let students look for 20 seconds. Common answers: "celebrities", "stock photos". Reveal: none of them exist.</p>
+    <p>Question to leave hanging: what would a network have to learn to produce a new, plausible face, and how would you even train it? There is no "correct answer" image for a face that has never existed.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="vote" data-section="Why generate?">
+  <p class="kicker">Your turn to be the judge</p>
+  <h2>Real or generated?</h2>
+  <div class="body">
+    <div class="tiles" style="grid-template-columns:repeat(6,150px);gap:18px 26px;justify-content:center;margin-top:8px">
+      <div><img src="figures/data/vote-01.png"><p class="tile-lab">1</p></div>
+      <div><img src="figures/data/vote-02.png"><p class="tile-lab">2</p></div>
+      <div><img src="figures/data/vote-03.png"><p class="tile-lab">3</p></div>
+      <div><img src="figures/data/vote-04.png"><p class="tile-lab">4</p></div>
+      <div><img src="figures/data/vote-05.png"><p class="tile-lab">5</p></div>
+      <div><img src="figures/data/vote-06.png"><p class="tile-lab">6</p></div>
+      <div><img src="figures/data/vote-07.png"><p class="tile-lab">7</p></div>
+      <div><img src="figures/data/vote-08.png"><p class="tile-lab">8</p></div>
+      <div><img src="figures/data/vote-09.png"><p class="tile-lab">9</p></div>
+      <div><img src="figures/data/vote-10.png"><p class="tile-lab">10</p></div>
+      <div><img src="figures/data/vote-11.png"><p class="tile-lab">11</p></div>
+      <div><img src="figures/data/vote-12.png"><p class="tile-lab">12</p></div>
+    </div>
+  </div>
+  <p class="q">Six are MNIST test digits, six come from a network. Write down which six are fake.</p>
+  <aside class="notes">
+    <p>Give one minute. Ask for a show of hands on two or three tiles. Do not reveal: we come back to this vote in the GAN section, where our own discriminator also votes.</p>
+    <p>The six generated digits come from the small GAN we train later in this lecture (about 9 minutes on a laptop GPU).</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="apps" data-section="Why generate?">
+  <p class="kicker">Generation is not only "make a random picture"</p>
+  <h2>Predict the output, then look</h2>
+  <div class="body">
+    <div class="appgrid">
+      <div class="app">
+        <p class="app-t">a sketch → a photo</p>
+        <div class="app-row"><img src="assets/gallery/shoe-input.jpg"><span class="arrow">→</span>
+          <div class="stack app-out"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/shoe-output.jpg" data-b="2"></div></div>
+      </div>
+      <div class="app">
+        <p class="app-t">a horse → a zebra</p>
+        <div class="app-row"><img src="assets/gallery/crops/horse.jpg"><span class="arrow">→</span>
+          <div class="stack app-out"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/crops/zebra.jpg" data-b="2"></div></div>
+      </div>
+      <div class="app">
+        <p class="app-t">fill a hole</p>
+        <div class="app-row"><img src="assets/gallery/crops/inpaint-in.jpg"><span class="arrow">→</span>
+          <div class="stack app-out"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/crops/inpaint-out.jpg" data-b="2"></div></div>
+      </div>
+      <div class="app">
+        <p class="app-t">a label map → a landscape</p>
+        <div class="app-row"><img src="assets/gallery/crops/spade-layout.jpg" style="width:150px"><span class="arrow">→</span>
+          <div class="stack app-out" style="width:150px"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/crops/spade-out-0.jpg" data-b="2" style="width:150px"></div></div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="=1">What should come out on the right? Is there exactly one right answer?</p>
+  <p class="q" data-b="2">Each input allows many plausible outputs. A generator must pick one that looks real.</p>
+  <p class="src">pix2pix (Isola et al. 2017) · CycleGAN (Zhu et al. 2017) · Context Encoders (Pathak et al. 2016) · SPADE (Park et al. 2019). All published model outputs.</p>
+  <aside class="notes">
+    <p>For each pair ask: what does the input fix, and what does the model have to invent? The sketch fixes the outline but not the colour or leather. The hole could be filled many ways. The bird completion is visibly imperfect: point that out.</p>
+    <p>All four were trained with an adversarial (GAN) loss plus task-specific terms. We will see the core of that idea today.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="spade-many" data-section="Why generate?">
+  <p class="kicker">One input, many answers</p>
+  <h2>The same label map, three different photographs</h2>
+  <div class="body">
+    <div class="row" style="justify-content:center;gap:22px;margin-top:20px">
+      <div class="col" style="align-items:center"><img src="assets/gallery/crops/spade-layout.jpg" style="width:250px;border-radius:6px"><p class="cap">the condition</p></div>
+      <span class="arrow" style="font-size:44px">→</span>
+      <div class="col" style="align-items:center" data-b="2"><img src="assets/gallery/crops/spade-out-0.jpg" style="width:250px;border-radius:6px"><p class="cap">sample 1</p></div>
+      <div class="col" style="align-items:center" data-b="3"><img src="assets/gallery/crops/spade-out-1.jpg" style="width:250px;border-radius:6px"><p class="cap">sample 2</p></div>
+      <div class="col" style="align-items:center" data-b="3"><img src="assets/gallery/crops/spade-out-2.jpg" style="width:250px;border-radius:6px"><p class="cap">sample 3</p></div>
+    </div>
+  </div>
+  <p class="q" data-b="3">A generator does not learn one answer. It learns a distribution of answers and draws from it.</p>
+  <p class="src">SPADE / GauGAN, Park et al. 2019, teaser figure: here the variation comes from a style image given to the generator.</p>
+  <aside class="notes">
+    <p>This is the key shift from the classifiers and regressors students know: the target is not a single value. For one input there is a whole distribution of acceptable outputs.</p>
+    <p>Precision: in SPADE these three differ because the authors supplied different style images, not purely random codes. The point stands: one layout, several valid photographs.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="common" data-section="Why generate?">
+  <p class="kicker">What all of these share</p>
+  <h2>Randomness in, a learned network, a sample out</h2>
+  <div class="body center"><svg viewBox="0 0 1152 330" class="diagram" role="img" aria-label="common"><defs><marker id="common-ah-9AA1AD" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9AA1AD"/></marker><marker id="common-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="common-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs><g data-b="1"><rect x="70" y="115" width="70" height="70" rx="10" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.4"/><circle cx="88.9" cy="133.9" r="5.25" fill="#AA4E08"/><circle cx="121.1" cy="133.9" r="5.25" fill="#AA4E08"/><circle cx="105.0" cy="150.0" r="5.25" fill="#AA4E08"/><circle cx="88.9" cy="166.1" r="5.25" fill="#AA4E08"/><circle cx="121.1" cy="166.1" r="5.25" fill="#AA4E08"/><text x="105" y="225" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#AA4E08" text-anchor="middle">randomness</text><foreignObject x="-275.0" y="231.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#4A5160;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$z \sim \N(0, I)$</div></foreignObject></g><g data-b="3"><rect x="40" y="10" width="150" height="64" rx="12" fill="#F3F4F6" stroke="#9AA1AD" stroke-width="2.2" stroke-dasharray="6 4"/><text x="115.0" y="40.0" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#9AA1AD" text-anchor="middle">condition</text><text x="115.0" y="60.9" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="middle">optional</text><path d="M190,42 L330,120" fill="none" stroke="#9AA1AD" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#common-ah-9AA1AD)"/><text x="105" y="300" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="middle">e.g. a sketch, a label, a sentence</text></g><g data-b="1"><path d="M150,150 L330,150" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#common-ah-AA4E08)"/><polygon points="340,95.0 640,35.0 640,265.0 340,205.0" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round"/><text x="490.0" y="148" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">learned generator</text><foreignObject x="340.0" y="151.5" width="300" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:500;text-align:center;height:28.8px;line-height:28.8px">a neural network with weights $\theta$</div></foreignObject><path d="M650,150 L790,150" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#common-ah-0F766E)"/></g><g data-b="2"><image x="800" y="40" width="220" height="220" href="figures/data/vae-prior-one.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="800" y="40" width="220" height="220" rx="6" fill="none" stroke="#0F766E" stroke-width="2.5"/><foreignObject x="530.0" y="269.2" width="760" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#0F766E;font-weight:650;text-align:center;height:36.8px;line-height:36.8px">a new sample $x$</div></foreignObject></g></svg></div>
+  <p class="q">Training means: adjust $\theta$ until the samples look like the data. But what is the loss?</p>
+  <aside class="notes">
+    <p>Build 1: the random input. Build 2: a sample. Build 3: an optional condition (a sketch, a class label, a sentence).</p>
+    <p>The difficulty: there is no target image for a random z. Today we see two answers: the VAE (an encoder tells us which z belongs to which image) and the GAN (a second network learns to judge).</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="names" data-section="Why generate?">
+  <p class="kicker">Part 1 of this course</p>
+  <h2>You have already built a generator</h2>
+  <div class="body">
+    <div class="row top" style="gap:60px;margin-top:6px">
+      <div class="col" style="width:520px">
+        <p class="small">Our name model reads three characters and gives a probability for every next character.</p>
+        <p class="small muted" style="margin-bottom:4px">after <span class="mono">a a b</span>, the trained model says:</p>
+        <div class="bars" style="--c:var(--x)">
+          <span class="lab">–</span><div><div class="bar" style="width:92%"></div></div><span class="val">0.46</span>
+          <span class="lab">i</span><div><div class="bar" style="width:24%"></div></div><span class="val">0.12</span>
+          <span class="lab">h</span><div><div class="bar" style="width:18%"></div></div><span class="val">0.09</span>
+          <span class="lab">r</span><div><div class="bar" style="width:16%"></div></div><span class="val">0.08</span>
+          <span class="lab">b</span><div><div class="bar" style="width:12%"></div></div><span class="val">0.06</span>
+          <span class="lab">s</span><div><div class="bar" style="width:8%"></div></div><span class="val">0.04</span>
+          <span class="lab">other 21</span><div><div class="bar" style="width:30%;background:#C7CCD4"></div></div><span class="val">0.15</span>
+        </div>
+      </div>
+      <div class="col grow" data-b="2">
+        <p class="small"><b>Generate:</b> sample a character, append it, repeat.</p>
+        <div class="row chain" style="gap:6px;flex-wrap:nowrap;margin-top:6px">
+          <span class="node x">a</span><span class="arrow">→</span><span class="node x">a</span><span class="arrow">→</span><span class="node x">b</span><span class="arrow">→</span><span class="node x">i</span><span class="arrow">→</span><span class="node x">d</span><span class="arrow">→</span><span class="node ghost">–</span>
+        </div>
+        <p class="small" style="margin-top:18px" data-b="3">A different random draw at any step gives a different name. That is a generative model: it gives probabilities, and we sample from them.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q">Same idea today: learn a distribution, then sample from it. Only now the samples are images.</p>
+  <aside class="notes">
+    <p>The bars are the actual probabilities from the trained Part 1 model bundled with that lecture ("–" is the end marker). Students have seen this exact chart.</p>
+    <p>Ask: if we always took the most likely character, would we ever get "aabid"? No: after aab we would stop. Sampling, not taking the argmax, is what makes generation varied.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="name-prob" data-section="Why generate?">
+  <p class="kicker">Part 1 of this course</p>
+  <h2>A whole name gets one probability</h2>
+  <div class="body">
+    <table class="work" style="margin:6px auto 0">
+      <tr><th>context</th><th>next</th><th>probability</th><th>−log p</th></tr>
+      <tr><td class="mono">– – –</td><td class="mono">a</td><td>0.08</td><td>2.53</td></tr>
+      <tr><td class="mono">– – a</td><td class="mono">a</td><td>0.08</td><td>2.53</td></tr>
+      <tr><td class="mono">– a a</td><td class="mono">b</td><td>0.02</td><td>3.91</td></tr>
+      <tr><td class="mono">a a b</td><td class="mono">i</td><td>0.12</td><td>2.12</td></tr>
+      <tr><td class="mono">a b i</td><td class="mono">d</td><td>0.09</td><td>2.41</td></tr>
+      <tr><td class="mono">b i d</td><td class="mono">–</td><td>0.23</td><td>1.47</td></tr>
+      <tr class="total" data-b="2"><td>aabid</td><td></td><td>3.2 × 10⁻⁷</td><td>14.96</td></tr>
+    </table>
+    <div class="mathblock" data-b="2" style="margin-top:6px;font-size:26px">$$p_\theta(\text{aabid}) = \prod_{t} p_\theta(x_t \mid x_{\lt t}) \qquad -\log p_\theta(\text{aabid}) = \sum_{t} -\log p_\theta(x_t \mid x_{\lt t})$$</div>
+  </div>
+  <p class="q" data-b="3">Training made this number large for every name in the data. That is maximum likelihood, and it is what we want for images too.</p>
+  <aside class="notes">
+    <p>Numbers are the bundled Part 1 model's target probabilities for "aabid". The product is tiny (3.2e-7) because there are many possible names; the log turns the product into a sum of per-step losses, the cross-entropy they already trained with.</p>
+    <p>Bridge: "Give the data high probability" is the goal for every model today. The difficulty for images will be computing that probability at all.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="two-ways" data-section="Why generate?">
+  <p class="kicker">From names to digits</p>
+  <h2>Two ways to generate a 28 × 28 digit</h2>
+  <div class="body center"><svg viewBox="0 0 1152 400" class="diagram" role="img" aria-label="two-ways"><defs><marker id="two-ways-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="two-ways-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs><g data-b="1"><text x="260" y="28" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#14171F" text-anchor="middle">A · one pixel at a time</text><rect x="130" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="60" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="86" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="86" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="86" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="86" width="24" height="24" rx="3" fill="#14171F" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="86" width="24" height="24" rx="3" fill="#14171F" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="86" width="24" height="24" rx="3" fill="#14171F" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="86" width="24" height="24" rx="3" fill="#14171F" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="86" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="86" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="86" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="112" width="24" height="24" rx="3" fill="#14171F" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="112" width="24" height="24" rx="3" fill="#14171F" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="112" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="138" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="138" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="138" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="138" width="24" height="24" rx="3" fill="#FFFFFF" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="138" width="24" height="24" rx="3" fill="#AA4E08" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="138" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="138" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="138" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="138" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="138" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="164" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="190" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="216" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="242" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="268" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="130" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="156" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="182" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="208" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="234" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="260" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="286" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="312" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="338" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><rect x="364" y="294" width="24" height="24" rx="3" fill="#F0F1F4" stroke="#D9DDE5" stroke-width="1"/><path d="M116,72.0 L394,72.0" fill="none" stroke="#AA4E08" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="3 3" marker-end="url(#two-ways-ah-AA4E08)"/><path d="M116,98.0 L394,98.0" fill="none" stroke="#AA4E08" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="3 3" marker-end="url(#two-ways-ah-AA4E08)"/><path d="M116,124.0 L394,124.0" fill="none" stroke="#AA4E08" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="3 3" marker-end="url(#two-ways-ah-AA4E08)"/><path d="M116,150.0 L394,150.0" fill="none" stroke="#AA4E08" stroke-width="1.6" stroke-linejoin="round" stroke-dasharray="3 3" marker-end="url(#two-ways-ah-AA4E08)"/><text x="260" y="348" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="500" fill="#4A5160" text-anchor="middle">784 predictions in a row, like our names</text><foreignObject x="-120.0" y="358.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#4A5160;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$p(x) = \prod_{i} p(x_i \mid x_{&lt;i})$</div></foreignObject></g><g data-b="2"><line x1="560" y1="40" x2="560" y2="370" stroke="#D9DDE5" stroke-width="2"/><text x="860" y="28" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#14171F" text-anchor="middle">B · all pixels from one random vector</text><rect x="620" y="140" width="86" height="44" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="663.0" y="168.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.33</text><rect x="620" y="184" width="86" height="44" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="663.0" y="212.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">−1.99</text><foreignObject x="283.0" y="98.0" width="760" height="52.8" overflow="visible"><div class="fo" style="font-size:24px;color:#AA4E08;font-weight:400;text-align:center;height:38.4px;line-height:38.4px">$z$</div></foreignObject><path d="M712,185 L742,185" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#two-ways-ah-AA4E08)"/><polygon points="746,140.0 916,85.0 916,285.0 746,230.0" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round"/><text x="831.0" y="193" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">decoder</text><path d="M920,185 L950,185" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#two-ways-ah-0F766E)"/><image x="956" y="95" width="180" height="180" href="figures/data/digit3-pi.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="956" y="95" width="180" height="180" rx="6" fill="none" stroke="#0F766E" stroke-width="2.5"/><text x="860" y="348" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="500" fill="#4A5160" text-anchor="middle">one pass: 2 numbers in, 784 pixels out</text><foreignObject x="480.0" y="358.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#4A5160;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$x = \text{decoder}(z)$</div></foreignObject></g></svg></div>
+  <p class="q" data-b="2">Today: route B. Two questions: where does $z$ come from, and how do we train a decoder when no one tells us the right $z$?</p>
+  <aside class="notes">
+    <p>Route A is exactly the name model with pixels as tokens (PixelRNN/PixelCNN): it works but needs 784 sequential steps per image.</p>
+    <p>Route B makes the whole image in one pass from a short random vector. The rest of the lecture is about training that decoder. The code values shown, (0.33, −1.99), are the actual code of our running "3".</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="map" data-section="Why generate?">
+  <p class="kicker">The plan</p>
+  <h2>Today's route</h2>
+  <div class="body">
+    <ol class="route">
+      <li style="--c:var(--z)"><b>Distributions and hidden causes</b><span>on a 1-D toy dataset</span></li>
+      <li style="--c:var(--enc)"><b>Autoencoders</b><span>and why they cannot generate</span></li>
+      <li style="--c:var(--loss)"><b>KL divergence</b><span>how far apart are two distributions?</span></li>
+      <li style="--c:var(--dec)"><b>The ELBO</b><span>a loss for a model we cannot evaluate exactly</span></li>
+      <li style="--c:var(--z)"><b>Reparameterisation</b><span>backprop through a random draw</span></li>
+      <li style="--c:var(--enc)"><b>The VAE on MNIST</b><span>one digit, end to end, with real numbers</span></li>
+      <li style="--c:var(--disc)"><b>GANs</b><span>learn the judge instead of the likelihood</span></li>
+    </ol>
+  </div>
+  <p class="q take">One running image throughout: test digit #90, a handwritten 3.</p>
+  <aside class="notes"><p>About 120 minutes in full. If short on time, skip the 2-number vs 16-number comparison and the conditional GAN slide.</p></aside>
+</section>
+
+<!-- ===================================================================== 2 · DISTRIBUTIONS -->
+
+<section class="slide sec-dist opener" id="dist-open" data-section="Distributions">
+  <p class="kicker">Part 1</p>
+  <h2>What does it mean to learn a distribution?</h2>
+  <p>Before images, one number. Everything we need (fitting, sampling, hidden causes, inference) fits on a number line.</p>
+</section>
+
+<section class="slide sec-dist" id="toy-data" data-section="Distributions">
+  <p class="kicker">Our 1-D toy data</p>
+  <h2>200 numbers in two clumps</h2>
+  <div class="body center"><img class="fig" src="figures/data/toy-data.svg" style="width:1080px"></div>
+  <p class="q">Pretend each number is an image squashed to one value. How would you produce a 201st that looks like it belongs?</p>
+  <aside class="notes">
+    <p>Data: 200 draws, half from 𝒩(−2, 0.5²) and half from 𝒩(2, 0.5²). Students do not need to know that yet; they should see two clumps.</p>
+    <p>Typical answers: "pick a random existing point" (memorising, no new data), "use the average" (next slide), "fit a distribution and sample" (yes).</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-mean" data-section="Distributions">
+  <p class="kicker">A tempting answer</p>
+  <h2>The average is a terrible sample</h2>
+  <div class="body center"><img class="fig" src="figures/data/toy-mean.svg" style="width:1080px"></div>
+  <p class="q">A model that predicts the mean always outputs something that never occurs. Regression thinking does not give generation.</p>
+  <aside class="notes"><p>This is why "train a network with MSE to output an image" gives blurry averages. We will see a softer version of this later when VAE samples look blurry.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="toy-gauss" data-section="Distributions">
+  <p class="kicker">Fit, then sample</p>
+  <h2>The best single Gaussian, by maximum likelihood</h2>
+  <div class="body">
+    <div class="stack center">
+      <img class="fig" src="figures/data/toy-gauss.svg" style="width:1040px" data-b="=1">
+      <img class="fig" src="figures/data/toy-gauss-samples.svg" style="width:1040px" data-b="2">
+    </div>
+    <div class="row" style="justify-content:center;gap:50px">
+      <div class="mathblock" style="font-size:24px">$$\hat\mu = \frac1N\sum_{i=1}^{N} x_i = −0.22 \qquad \hat\sigma^2 = \frac1N \sum_{i=1}^{N} (x_i-\hat\mu)^2 = 4.31$$</div>
+      <div class="mathblock" style="font-size:24px" data-b="2">$$x_{\text{new}} = \hat\mu + \hat\sigma\,\eps,\quad \eps \sim \N(0,1)$$</div>
+    </div>
+  </div>
+  <p class="q" data-b="=1">These two numbers make the observed data as probable as any Gaussian can.</p>
+  <p class="q" data-b="2">11 of 30 samples land in the empty gap. Best fit within the family, wrong shape.</p>
+  <aside class="notes">
+    <p>The maximum-likelihood Gaussian has the sample mean and the 1/N variance. Students derived this in the probability lectures.</p>
+    <p>Lesson: optimisation worked perfectly; the model family was too simple. Better optimisation cannot fix that.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-story" data-section="Distributions">
+  <p class="kicker">A richer model: tell a story</p>
+  <h2>Hidden choice first, then the number</h2>
+  <div class="body center"><svg viewBox="0 0 1152 270" class="diagram" role="img" aria-label="mixture-story"><defs><marker id="mixture-story-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker></defs><g data-b="1"><text x="140" y="28" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#AA4E08" text-anchor="middle">step 1 · hidden choice</text><circle cx="95" cy="110" r="44" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.5"/><text x="95" y="122" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="34" font-weight="700" fill="#AA4E08" text-anchor="middle">A</text><circle cx="185" cy="110" r="44" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.5"/><text x="185" y="122" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="34" font-weight="700" fill="#AA4E08" text-anchor="middle">B</text><text x="140" y="190" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="500" fill="#4A5160" text-anchor="middle">flip a fair coin:</text><foreignObject x="-240.0" y="203.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#4A5160;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$p(z{=}\mathrm{A}) = p(z{=}\mathrm{B}) = \tfrac12$</div></foreignObject></g><g data-b="2"><path d="M250,110 L330,110" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#mixture-story-ah-AA4E08)"/><text x="720" y="28" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">step 2 · draw x from the chosen bump</text><polyline points="434.0,189.3 436.2,189.2 438.4,189.0 440.6,188.8 442.8,188.6 445.0,188.4 447.2,188.1 449.3,187.8 451.5,187.4 453.7,187.0 455.9,186.6 458.1,186.1 460.3,185.5 462.5,184.8 464.7,184.1 466.9,183.3 469.1,182.4 471.3,181.3 473.5,180.2 475.7,179.0 477.9,177.7 480.0,176.2 482.2,174.6 484.4,172.9 486.6,171.0 488.8,169.0 491.0,166.8 493.2,164.5 495.4,162.0 497.6,159.4 499.8,156.6 502.0,153.7 504.2,150.7 506.4,147.4 508.5,144.1 510.7,140.7 512.9,137.1 515.1,133.4 517.3,129.7 519.5,125.9 521.7,122.1 523.9,118.2 526.1,114.3 528.3,110.4 530.5,106.6 532.7,102.9 534.9,99.2 537.1,95.6 539.2,92.2 541.4,89.0 543.6,85.9 545.8,83.1 548.0,80.4 550.2,78.1 552.4,76.0 554.6,74.2 556.8,72.7 559.0,71.5 561.2,70.7 563.4,70.2 565.6,70.0 567.7,70.2 569.9,70.7 572.1,71.5 574.3,72.7 576.5,74.2 578.7,76.0 580.9,78.1 583.1,80.4 585.3,83.1 587.5,85.9 589.7,89.0 591.9,92.2 594.1,95.6 596.3,99.2 598.4,102.9 600.6,106.6 602.8,110.4 605.0,114.3 607.2,118.2 609.4,122.1 611.6,125.9 613.8,129.7 616.0,133.4 618.2,137.1 620.4,140.7 622.6,144.1 624.8,147.4 626.9,150.7 629.1,153.7 631.3,156.6 633.5,159.4 635.7,162.0 637.9,164.5 640.1,166.8 642.3,169.0 644.5,171.0 646.7,172.9 648.9,174.6 651.1,176.2 653.3,177.7 655.5,179.0 657.6,180.2 659.8,181.3 662.0,182.4 664.2,183.3 666.4,184.1 668.6,184.8 670.8,185.5 673.0,186.1 675.2,186.6 677.4,187.0 679.6,187.4 681.8,187.8 684.0,188.1 686.1,188.4 688.3,188.6 690.5,188.8 692.7,189.0 694.9,189.2 697.1,189.3" fill="none" stroke="#C7CCD4" stroke-width="2.6"/><polyline points="762.9,189.3 765.1,189.2 767.3,189.0 769.5,188.8 771.7,188.6 773.9,188.4 776.0,188.1 778.2,187.8 780.4,187.4 782.6,187.0 784.8,186.6 787.0,186.1 789.2,185.5 791.4,184.8 793.6,184.1 795.8,183.3 798.0,182.4 800.2,181.3 802.4,180.2 804.5,179.0 806.7,177.7 808.9,176.2 811.1,174.6 813.3,172.9 815.5,171.0 817.7,169.0 819.9,166.8 822.1,164.5 824.3,162.0 826.5,159.4 828.7,156.6 830.9,153.7 833.1,150.7 835.2,147.4 837.4,144.1 839.6,140.7 841.8,137.1 844.0,133.4 846.2,129.7 848.4,125.9 850.6,122.1 852.8,118.2 855.0,114.3 857.2,110.4 859.4,106.6 861.6,102.9 863.7,99.2 865.9,95.6 868.1,92.2 870.3,89.0 872.5,85.9 874.7,83.1 876.9,80.4 879.1,78.1 881.3,76.0 883.5,74.2 885.7,72.7 887.9,71.5 890.1,70.7 892.3,70.2 894.4,70.0 896.6,70.2 898.8,70.7 901.0,71.5 903.2,72.7 905.4,74.2 907.6,76.0 909.8,78.1 912.0,80.4 914.2,83.1 916.4,85.9 918.6,89.0 920.8,92.2 922.9,95.6 925.1,99.2 927.3,102.9 929.5,106.6 931.7,110.4 933.9,114.3 936.1,118.2 938.3,122.1 940.5,125.9 942.7,129.7 944.9,133.4 947.1,137.1 949.3,140.7 951.5,144.1 953.6,147.4 955.8,150.7 958.0,153.7 960.2,156.6 962.4,159.4 964.6,162.0 966.8,164.5 969.0,166.8 971.2,169.0 973.4,171.0 975.6,172.9 977.8,174.6 980.0,176.2 982.1,177.7 984.3,179.0 986.5,180.2 988.7,181.3 990.9,182.4 993.1,183.3 995.3,184.1 997.5,184.8 999.7,185.5 1001.9,186.1 1004.1,186.6 1006.3,187.0 1008.5,187.4 1010.7,187.8 1012.8,188.1 1015.0,188.4 1017.2,188.6 1019.4,188.8 1021.6,189.0 1023.8,189.2 1026.0,189.3" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.6"/><line x1="360" y1="190" x2="1100" y2="190" stroke="#9AA1AD" stroke-width="1.5"/><foreignObject x="21.1" y="195.5" width="760" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:400;text-align:center;height:28.8px;line-height:28.8px">$-4$</div></foreignObject><foreignObject x="185.6" y="195.5" width="760" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:400;text-align:center;height:28.8px;line-height:28.8px">$-2$</div></foreignObject><foreignObject x="350.0" y="195.5" width="760" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:400;text-align:center;height:28.8px;line-height:28.8px">$0$</div></foreignObject><foreignObject x="514.4" y="195.5" width="760" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:400;text-align:center;height:28.8px;line-height:28.8px">$2$</div></foreignObject><foreignObject x="678.9" y="195.5" width="760" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:400;text-align:center;height:28.8px;line-height:28.8px">$4$</div></foreignObject><text x="565.5555555555555" y="58" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="500" fill="#6B7280" text-anchor="middle">bump A</text><foreignObject x="514.4" y="33.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#0F766E;font-weight:650;text-align:center;height:32.0px;line-height:32.0px">bump B &nbsp;← $z = \mathrm{B}$</div></foreignObject></g><g data-b="3"><circle cx="863.2" cy="190" r="10" fill="#AA4E08" stroke="#fff" stroke-width="2"/><foreignObject x="483.2" y="227.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#AA4E08;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$x = 1.62$</div></foreignObject></g></svg></div>
+  <p class="q">The coin is never written down in the data. We only ever see $x$. The coin $z$ is a hidden (latent) variable.</p>
+  <aside class="notes">
+    <p>Read the sampling recipe aloud: flip a coin, pick that bump, draw a point from it. Two simple steps make a two-bump distribution that one Gaussian could not.</p>
+    <p>This "generative story" pattern is exactly the VAE: first draw a hidden code z, then draw the image x given z.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="gauss-density" data-section="Distributions">
+  <p class="kicker">One ingredient, worked by hand</p>
+  <h2>How high is bump B at $x = 1.5$?</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <div class="col" style="width:600px">
+        <div class="mathblock" style="font-size:27px">$$\N(x;\mu,\sigma^2) = \frac{1}{\sigma\sqrt{2\pi}}\,\exp\!\Big(-\frac{(x-\mu)^2}{2\sigma^2}\Big)$$</div>
+        <div class="mathblock" style="font-size:24px" data-b="2">$$\frac{x-\mu}{\sigma} = \frac{1.5 - 2}{0.5} = -1$$</div>
+        <div class="mathblock" style="font-size:24px" data-b="3">$$\exp\!\big(-\tfrac12\cdot(-1)^2\big) = e^{-0.5} = 0.607$$</div>
+        <div class="mathblock" style="font-size:24px" data-b="4">$$\frac{1}{0.5\sqrt{2\pi}} = 0.798 \qquad\Rightarrow\qquad 0.798\times0.607 = \mathbf{ 0.484 }$$</div>
+      </div>
+      <img class="fig" src="figures/data/gauss-density.svg" style="width:500px">
+    </div>
+  </div>
+  <p class="q" data-b="4">A density is a height, not a probability: it can exceed 1 for a narrow bump. Only areas are probabilities.</p>
+  <aside class="notes">
+    <p>The formula has two parts: how many standard deviations away x is (squared, inside the exponent), and a constant that makes the area under the curve 1.</p>
+    <p>One standard deviation from the centre always gives e^{−1/2} ≈ 0.61 of the peak height.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-mixture" data-section="Distributions">
+  <p class="kicker">From the story to a probability</p>
+  <h2>To score $x$, add over every hidden value</h2>
+  <div class="body">
+    <img class="fig" src="figures/data/toy-mixture-samples.svg" style="width:960px;margin:0 auto">
+    <div class="mathblock" style="font-size:27px">$$p(x) = \sum_{z\in\{\mathrm{A},\mathrm{B}\}} \cz{p(z)}\,\cdec{p(x\mid z)} = \tfrac12\,\N(x;-2,0.5^2) + \tfrac12\,\N(x;\,2,0.5^2)$$</div>
+    <div class="mathblock" style="font-size:24px" data-b="2">$$\text{at } x=1.5:\quad \tfrac12\cdot 0.000 + \tfrac12\cdot 0.484 = 0.242$$</div>
+  </div>
+  <p class="q">Samples now fall in the bumps. Remember this sum. With images it becomes an integral we cannot compute.</p>
+  <aside class="notes">
+    <p>The A-bump contributes about 2 × 10⁻¹² at x = 1.5: 7 standard deviations away.</p>
+    <p>"Marginalising out z": the probability of what we observe is an average over everything we cannot observe.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="bayes-table" data-section="Distributions">
+  <p class="kicker">Run the story backwards</p>
+  <h2>You see $x = 0.1$. Which bump made it?</h2>
+  <div class="body">
+    <table class="work" style="margin:0 auto;font-size:24px">
+      <tr><th>bump $z$</th><th>prior $p(z)$</th><th>likelihood $p(x\mid z)$</th><th>prior × likelihood</th><th>÷ total = posterior</th></tr>
+      <tr><td>A, centre $-2$</td><td>0.5</td><td data-b="2">$1.18\times 10^{-4}$</td><td data-b="3">$5.89\times 10^{-5}$</td><td data-b="5">0.168</td></tr>
+      <tr><td>B, centre $2$</td><td>0.5</td><td data-b="2">$5.84\times 10^{-4}$</td><td data-b="3">$2.92\times 10^{-4}$</td><td data-b="5"><b>0.832</b></td></tr>
+      <tr class="total" data-b="4"><td>total $= p(x)$</td><td></td><td></td><td>$3.51\times 10^{-4}$</td><td data-b="5">1.000</td></tr>
+    </table>
+    <div class="mathblock" style="font-size:27px;margin-top:20px" data-b="5">$$p(\mathrm{B}\mid x) = \frac{p(\mathrm{B})\,p(x\mid\mathrm{B})}{p(x)} = 0.832$$</div>
+  </div>
+  <p class="q" data-b="5">Bayes' rule is just this table: multiply, then divide by the total. $x = 0.1$ is close to the middle, so we stay unsure.</p>
+  <aside class="notes">
+    <p>Build by build: the two likelihoods (both tiny: 0.1 is far from both centres, but closer to B), multiply by the prior, add to get the evidence, divide.</p>
+    <p>The tiny numbers do not matter: only their ratio does. This will matter for images, where likelihoods are like 10⁻⁵⁰.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="toy-posterior" data-section="Distributions">
+  <p class="kicker">Do it for every $x$</p>
+  <h2>The posterior, as a curve</h2>
+  <div class="body">
+    <div class="row" style="gap:36px">
+      <img class="fig" src="figures/data/toy-posterior.svg" style="width:640px">
+      <div class="col grow">
+        <p class="small">Repeat the table for every $x$ and plot $p(\mathrm{B}\mid x)$.</p>
+        <p class="small" data-b="2">Far right: certainly B. Far left: certainly A. Near 0: unsure.</p>
+        <p class="small muted" data-b="3">For these two bumps the curve is exactly $\mathrm{sigmoid}(16x)$: a logistic regression in disguise.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q">Going from an observation back to its hidden cause is called <b>inference</b>. The VAE's encoder will learn to do it.</p>
+  <aside class="notes">
+    <p>Derivation of the sigmoid if asked: the log ratio of the two likelihoods is [(x+2)² − (x−2)²]/(2·0.25) = 16x, and the equal priors cancel.</p>
+    <p>Here inference is exact because we can compute p(x). For images, p(x) is the hard part, so the posterior will be hard too.</p>
+  </aside>
+</section>
+
+<section class="slide sec-dist" id="vocab" data-section="Distributions">
+  <p class="kicker">Four words we will use all lecture</p>
+  <h2>Prior, likelihood, evidence, posterior</h2>
+  <div class="body">
+    <table class="work vocab" style="margin:4px auto 0;font-size:23px">
+      <tr><th>name</th><th>symbol</th><th>question it answers</th><th>at $x = 0.1$</th></tr>
+      <tr><td><b class="cz">prior</b></td><td>$p(z)$</td><td>what do we believe about $z$ before seeing $x$?</td><td>0.5, 0.5</td></tr>
+      <tr data-b="2"><td><b class="cdec">likelihood</b></td><td>$p(x\mid z)$</td><td>if $z$ were known, how probable is this $x$?</td><td>$5.84\times 10^{-4}$ for B</td></tr>
+      <tr data-b="3"><td><b class="cx">evidence</b></td><td>$p(x)$</td><td>how probable is $x$ overall, summing over $z$?</td><td>$3.51\times 10^{-4}$</td></tr>
+      <tr data-b="4"><td><b class="cenc">posterior</b></td><td>$p(z\mid x)$</td><td>having seen $x$, which $z$ explains it?</td><td>B: 0.832</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="4">Bayes ties them together: posterior = prior × likelihood ÷ evidence.</p>
+  <aside class="notes"><p>Keep these four colours in mind: amber for z and the prior, teal for the decoder/likelihood, blue for observed data, purple for the encoder/posterior.</p></aside>
+</section>
+
+<section class="slide sec-dist" id="latent-story" data-section="Distributions">
+  <p class="kicker">From a coin to a code</p>
+  <h2>The same story for images</h2>
+  <div class="body center"><svg viewBox="0 0 1152 340" class="diagram" role="img" aria-label="latent-story"><defs><marker id="latent-story-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="latent-story-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker><marker id="latent-story-ah-245EDB" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#245EDB"/></marker></defs><g data-b="1"><text x="150" y="26" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#AA4E08" text-anchor="middle">1 · draw a code</text><line x1="45" y1="160" x2="255" y2="160" stroke="#C7CCD4" stroke-width="1.4"/><line x1="150" y1="55" x2="150" y2="265" stroke="#C7CCD4" stroke-width="1.4"/><circle cx="150" cy="160" r="31.878" fill="none" stroke="#AA4E08" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="4 3"/><circle cx="150" cy="160" r="63.756" fill="none" stroke="#AA4E08" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="4 3"/><circle cx="150" cy="160" r="96.60000000000001" fill="none" stroke="#AA4E08" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="4 3"/><foreignObject x="-501.0" y="157.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#6B7280;font-weight:400;text-align:right;height:33.6px;line-height:33.6px">$z_1$</div></foreignObject><foreignObject x="164.0" y="40.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#6B7280;font-weight:400;text-align:left;height:33.6px;line-height:33.6px">$z_2$</div></foreignObject><circle cx="144.24" cy="208.0" r="9" fill="#AA4E08" stroke="#fff" stroke-width="2"/><foreignObject x="-230.0" y="278.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#4A5160;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$z \sim \N(0, I),\ \ z = (-0.18,\, -1.50)$</div></foreignObject></g><g data-b="2"><path d="M270,160 L310,160" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#latent-story-ah-AA4E08)"/><polygon points="316,120.0 466,75.0 466,245.0 316,200.0" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round"/><text x="391.0" y="158" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">decoder</text><foreignObject x="241.0" y="161.5" width="300" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#6B7280;font-weight:500;text-align:center;height:28.8px;line-height:28.8px">weights $\theta$</div></foreignObject><path d="M470,160 L505,160" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#latent-story-ah-0F766E)"/><text x="610" y="26" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">2 · decode probabilities</text><image x="512" y="62" width="196" height="196" href="figures/data/story-pi.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="512" y="62" width="196" height="196" rx="6" fill="none" stroke="#0F766E" stroke-width="2.5"/><foreignObject x="230.0" y="278.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#4A5160;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\pi = \mathrm{sigmoid}(\text{decoder}(z))$</div></foreignObject></g><g data-b="3"><path d="M714,160 L790,160" fill="none" stroke="#245EDB" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#latent-story-ah-245EDB)"/><text x="958" y="26" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#245EDB" text-anchor="middle">3 · flip each pixel</text><image x="860" y="62" width="196" height="196" href="figures/data/story-sample.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="860" y="62" width="196" height="196" rx="6" fill="none" stroke="#245EDB" stroke-width="2.5"/><foreignObject x="578.0" y="278.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#4A5160;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$x_i \sim \mathrm{Bernoulli}(\pi_i)$</div></foreignObject></g></svg></div>
+  <p class="q">The code is 2 real numbers instead of a coin, and a network maps it to 784 pixel probabilities. Nobody tells it what $z$ means.</p>
+  <aside class="notes">
+    <p>Real outputs of the decoder we train later. Step 2 gives a probability per pixel (a grey image). Step 3 flips a coin per pixel. Most papers show step 2 as "the sample" because it looks cleaner.</p>
+    <p>If we had this decoder, generating would be trivial. The whole difficulty is training it.</p>
+  </aside>
+</section>
+
+<!-- ===================================================================== 3 · AUTOENCODERS -->
+
+<section class="slide sec-ae opener" id="ae-open" data-section="Autoencoders">
+  <p class="kicker">Part 2</p>
+  <h2>First attempt: an autoencoder</h2>
+  <p>Compress an image into a few numbers, then rebuild it. Then we try to generate with it, and watch that fail.</p>
+</section>
+
+<section class="slide sec-ae" id="ae-arch" data-section="Autoencoders">
+  <p class="kicker">Squeeze, then rebuild</p>
+  <h2>An autoencoder on our 3</h2>
+  <div class="body center"><svg viewBox="0 0 1152 410" class="diagram" role="img" aria-label="ae"><defs><marker id="ae-ah-245EDB" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#245EDB"/></marker><marker id="ae-ah-8B2CDE" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8B2CDE"/></marker><marker id="ae-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="ae-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker><marker id="ae-ah-BE123C" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#BE123C"/></marker></defs><g data-b="1"><image x="20" y="40" width="200" height="200" href="figures/data/digit3.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="20" y="40" width="200" height="200" rx="6" fill="none" stroke="#245EDB" stroke-width="2.5"/><foreignObject x="-260.0" y="251.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#245EDB;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">$x$: 28 × 28 = 784 pixels</div></foreignObject><path d="M226,140 L262,140" fill="none" stroke="#245EDB" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#ae-ah-245EDB)"/><polygon points="266,25.0 476,98.0 476,182.0 266,255.0" fill="#F1E5FC" stroke="#8B2CDE" stroke-width="2.4" stroke-linejoin="round"/><text x="371.0" y="138" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#8B2CDE" text-anchor="middle">encoder</text><text x="371.0" y="162" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="middle">784 → 512 → 256 → 2</text></g><g data-b="2"><path d="M480,140 L512,140" fill="none" stroke="#8B2CDE" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#ae-ah-8B2CDE)"/><rect x="516" y="98" width="92" height="42" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="562.0" y="125.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.3</text><rect x="516" y="140" width="92" height="42" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2"/><text x="562.0" y="167.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">1.2</text><foreignObject x="182.0" y="51.5" width="760" height="57.2" overflow="visible"><div class="fo" style="font-size:26px;color:#AA4E08;font-weight:400;text-align:center;height:41.6px;line-height:41.6px">$z$</div></foreignObject><text x="562" y="216" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="500" fill="#4A5160" text-anchor="middle">the code:</text><text x="562" y="240" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="500" fill="#4A5160" text-anchor="middle">2 numbers</text></g><g data-b="3"><path d="M612,140 L644,140" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#ae-ah-AA4E08)"/><polygon points="648,98.0 858,25.0 858,255.0 648,182.0" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round"/><text x="753.0" y="138" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">decoder</text><text x="753.0" y="162" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="middle">2 → 256 → 512 → 784</text><path d="M862,140 L898,140" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#ae-ah-0F766E)"/><image x="904" y="40" width="200" height="200" href="figures/data/digit3-ae2-recon.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="904" y="40" width="200" height="200" rx="6" fill="none" stroke="#0F766E" stroke-width="2.5"/><foreignObject x="624.0" y="251.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#0F766E;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">$\hat x$: the reconstruction</div></foreignObject></g><g data-b="4"><path d="M1004,292 C1004,330 120,330 120,288" fill="none" stroke="#BE123C" stroke-width="2.6" marker-end="url(#ae-ah-BE123C)"/><foreignObject x="182.0" y="357.2" width="760" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#BE123C;font-weight:650;text-align:center;height:36.8px;line-height:36.8px">loss: how badly does $\hat x$ match $x$, pixel by pixel?</div></foreignObject></g></svg></div>
+  <p class="q">No labels needed: the image is its own target. The 2 numbers in the middle are all the decoder gets.</p>
+  <aside class="notes">
+    <p>Real numbers: our test digit #90 goes through a trained MLP autoencoder with a 2-number code, giving z = (0.3, 1.2).</p>
+    <p>The bottleneck forces the network to keep only what matters for rebuilding the image: roughly which digit, its slant, its thickness.</p>
+  </aside>
+</section>
+
+<section class="slide sec-ae" id="ae-loss" data-section="Autoencoders">
+  <p class="kicker">Comparing the rebuild with the original</p>
+  <h2>Binary cross-entropy, one pixel at a time</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:27px">$$\text{loss}(x,\hat x) = -\sum_{i=1}^{784} \Big[\, x_i \log \hat x_i + (1-x_i)\log(1-\hat x_i) \,\Big]$$</div>
+    <table class="work" style="margin:18px auto 0">
+      <tr><th>pixel</th><th>true value</th><th>predicted</th><th>loss</th></tr>
+      <tr><td>ink, predicted well</td><td>1</td><td>0.90</td><td>$-\log 0.90 = 0.11$</td></tr>
+      <tr data-b="2"><td>paper, predicted well</td><td>0</td><td>0.10</td><td>$-\log 0.90 = 0.11$</td></tr>
+      <tr data-b="3"><td>ink, missed</td><td>1</td><td>0.20</td><td>$-\log 0.20 = 1.61$</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="3">Pixels are 0 or 1 here (we binarise MNIST). Later we will see this is exactly a log-likelihood.</p>
+  <aside class="notes"><p>Same cross-entropy as classification, with one binary "class" per pixel. Summed over 784 pixels per image.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-recon" data-section="Autoencoders">
+  <p class="kicker">Trained on 60,000 digits</p>
+  <h2>It reconstructs very well</h2>
+  <div class="body center col" style="gap:4px">
+    <img class="fig pix" src="figures/data/ae16-recon.png" style="width:1000px">
+    <div class="row" style="width:1000px;justify-content:space-between"><p class="cap">top: test digits it never saw</p><p class="cap">bottom: decoded from a 16-number code</p></div>
+  </div>
+  <p class="q">784 pixels squeezed into 16 numbers and back. Average loss 44.9 nats per image. Can we now make new digits?</p>
+  <aside class="notes"><p>This is an autoencoder with a 16-number code. Same architecture as before otherwise. Test-set reconstruction loss: 44.9 nats per image.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-gen" data-section="Autoencoders">
+  <p class="kicker">The obvious idea</p>
+  <h2>Keep the decoder, feed it a random code</h2>
+  <div class="body center"><svg viewBox="0 0 1152 300" class="diagram" role="img" aria-label="ae-generate"><defs><marker id="ae-generate-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="ae-generate-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker></defs><g data-b="1"><g opacity=".35"><image x="20" y="50" width="160" height="160" href="figures/data/digit3.png" preserveAspectRatio="none" style="image-rendering:pixelated"/><rect x="20" y="50" width="160" height="160" rx="6" fill="none" stroke="#9AA1AD" stroke-width="2.5"/><polygon points="206,35.0 396,92.0 396,168.0 206,225.0" fill="#F3F4F6" stroke="#9AA1AD" stroke-width="2.4" stroke-linejoin="round"/><text x="301.0" y="138" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#9AA1AD" text-anchor="middle">encoder</text></g><path d="M260,90 L340,170 M340,90 L260,170" stroke="#BE123C" stroke-width="6" stroke-linecap="round"/><text x="210" y="270" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#4A5160" text-anchor="middle">throw the encoder away</text></g><g data-b="2"><rect x="454" y="84" width="60" height="60" rx="10" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.4"/><circle cx="470.2" cy="100.2" r="4.5" fill="#AA4E08"/><circle cx="497.8" cy="100.2" r="4.5" fill="#AA4E08"/><circle cx="484.0" cy="114.0" r="4.5" fill="#AA4E08"/><circle cx="470.2" cy="127.8" r="4.5" fill="#AA4E08"/><circle cx="497.8" cy="127.8" r="4.5" fill="#AA4E08"/><foreignObject x="104.0" y="161.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#AA4E08;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$z \sim \N(0, I)$</div></foreignObject><text x="484" y="214" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="500" fill="#4A5160" text-anchor="middle">pick a random code</text><path d="M522,114 L580,114" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#ae-generate-ah-AA4E08)"/><polygon points="586,76.0 796,14.0 796,214.0 586,152.0" fill="#D9F2EF" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round"/><text x="691.0" y="112" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">decoder</text><text x="691.0" y="136" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="middle">same weights as before</text><path d="M800,114 L840,114" fill="none" stroke="#0F766E" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#ae-generate-ah-0F766E)"/></g><g data-b="3"><rect x="846" y="24" width="180" height="180" rx="8" fill="#fff" stroke="#0F766E" stroke-width="2.2" stroke-dasharray="7 5"/><text x="936" y="136" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="80" font-weight="700" fill="#0F766E" text-anchor="middle">?</text><text x="936" y="240" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="23" font-weight="650" fill="#0F766E" text-anchor="middle">a new digit?</text></g></svg></div>
+  <p class="q">The decoder turns codes into digits. So a random code should give a random digit. Right?</p>
+  <aside class="notes"><p>Let students commit to a prediction before the next slide.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-scribbles" data-section="Autoencoders">
+  <p class="kicker">What actually comes out</p>
+  <h2>Random codes give scribbles</h2>
+  <div class="body center col" style="gap:10px">
+    <img class="fig pix" src="figures/data/ae16-prior-decodes-2x5.png" style="width:760px">
+    <p class="cap">ten codes drawn from $\N(0, I)$ in 16 dimensions, through the trained decoder</p>
+  </div>
+  <p class="q">The decoder only ever saw codes made by the encoder. Where do those codes live?</p>
+  <aside class="notes">
+    <p>Nothing in the training loss mentioned 𝒩(0, I). The encoder was free to put codes anywhere: shifted, stretched, with large gaps. A random code lands somewhere the decoder never trained on.</p>
+    <p>We cannot plot 16 dimensions, so next we retrain the same autoencoder with a 2-number code and look.</p>
+  </aside>
+</section>
+
+<section class="slide sec-ae" id="ae-scatter" data-section="Autoencoders">
+  <p class="kicker">Look inside (2-number version)</p>
+  <h2>Where 5,000 test digits land</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/ae-scatter.svg" style="height:470px">
+      <div class="col grow">
+        <p class="small">Each dot is one test digit's code, coloured by its true label. The star is our 3.</p>
+        <p class="small" data-b="2">Same digits cluster together. Nobody asked for that; it just helps reconstruction.</p>
+        <p class="small" data-b="3">Look at the axes: $z_1$ runs from −18.5 to 40.4. The dashed circles mark where $\N(0, I)$ puts its samples.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">The code space has an arbitrary shape, scale and position.</p>
+  <aside class="notes"><p>The encoder never saw labels. Clustering by digit emerges because similar images are cheapest to decode from nearby codes.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-prior" data-section="Autoencoders">
+  <p class="kicker">Overlay random codes</p>
+  <h2>Random draws all land in one small spot</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/ae-scatter-prior.svg" style="height:470px">
+      <div class="col grow">
+        <p class="small">150 draws from $\N(0, I)$ in amber: all inside one tiny crowded patch.</p>
+        <img class="fig pix" src="figures/data/ae-prior-decodes.png" style="width:540px" data-b="2">
+        <p class="cap" data-b="2" style="text-align:left">ten of them decoded: some digits, some smudges</p>
+        <p class="small" data-b="3">And we can never generate a 1: the 1s live near $z_1 \approx 20$.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">To sample, we need to know where the codes are, and every point there must decode to something sensible.</p>
+  <aside class="notes">
+    <p>Two separate failures. (1) Coverage: the region where we sample does not match where codes live, so whole classes are missing. (2) Holes: between clusters the decoder was never trained, so it produces smudges.</p>
+  </aside>
+</section>
+
+<section class="slide sec-ae" id="ae-wishes" data-section="Autoencoders">
+  <p class="kicker">What we want instead</p>
+  <h2>Encode to a cloud, not a point</h2>
+  <div class="body center"><svg viewBox="0 0 1152 360" class="diagram" role="img" aria-label="cloud-vs-point"><defs></defs><g data-b="1"><text x="290" y="28" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#14171F" text-anchor="middle">autoencoder: a point</text><line x1="150" y1="190" x2="430" y2="190" stroke="#C7CCD4" stroke-width="1.4"/><line x1="290" y1="50" x2="290" y2="330" stroke="#C7CCD4" stroke-width="1.4"/><foreignObject x="-326.0" y="187.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#6B7280;font-weight:400;text-align:right;height:33.6px;line-height:33.6px">$z_1$</div></foreignObject><foreignObject x="304.0" y="35.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#6B7280;font-weight:400;text-align:left;height:33.6px;line-height:33.6px">$z_2$</div></foreignObject><circle cx="220" cy="140" r="8" fill="#8B2CDE"/><circle cx="350" cy="230" r="8" fill="#8B2CDE"/><text x="220" y="122" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="650" fill="#8B2CDE" text-anchor="middle">a 3</text><text x="350" y="264" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="650" fill="#8B2CDE" text-anchor="middle">a 7</text><circle cx="300" cy="180" r="8" fill="none" stroke="#AA4E08" stroke-width="3"/><text x="326" y="186" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="26" font-weight="700" fill="#AA4E08" text-anchor="middle">?</text><text x="290" y="345" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="500" fill="#4A5160" text-anchor="middle">nothing tells the decoder what lives between codes</text></g><g data-b="2"><text x="860" y="28" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#8B2CDE" text-anchor="middle">VAE: a cloud</text><line x1="720" y1="190" x2="1000" y2="190" stroke="#C7CCD4" stroke-width="1.4"/><line x1="860" y1="50" x2="860" y2="330" stroke="#C7CCD4" stroke-width="1.4"/><circle cx="860" cy="190" r="42.504000000000005" fill="none" stroke="#AA4E08" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="4 3"/><circle cx="860" cy="190" r="85.00800000000001" fill="none" stroke="#AA4E08" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="4 3"/><circle cx="860" cy="190" r="128.8" fill="none" stroke="#AA4E08" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="4 3"/><foreignObject x="244.0" y="187.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#6B7280;font-weight:400;text-align:right;height:33.6px;line-height:33.6px">$z_1$</div></foreignObject><foreignObject x="874.0" y="35.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#6B7280;font-weight:400;text-align:left;height:33.6px;line-height:33.6px">$z_2$</div></foreignObject><ellipse cx="790" cy="140" rx="46.0" ry="30.0" fill="#8B2CDE" fill-opacity="0.14"/><ellipse cx="790" cy="140" rx="32.199999999999996" ry="21.0" fill="#8B2CDE" fill-opacity="0.22"/><ellipse cx="790" cy="140" rx="18.400000000000002" ry="12.0" fill="#8B2CDE" fill-opacity="0.35"/><ellipse cx="790" cy="140" rx="46" ry="30" fill="none" stroke="#8B2CDE" stroke-width="2"/><ellipse cx="920" cy="230" rx="40.0" ry="34.0" fill="#8B2CDE" fill-opacity="0.14"/><ellipse cx="920" cy="230" rx="28.0" ry="23.799999999999997" fill="#8B2CDE" fill-opacity="0.22"/><ellipse cx="920" cy="230" rx="16.0" ry="13.600000000000001" fill="#8B2CDE" fill-opacity="0.35"/><ellipse cx="920" cy="230" rx="40" ry="34" fill="none" stroke="#8B2CDE" stroke-width="2"/><circle cx="772" cy="148" r="5" fill="#AA4E08"/><circle cx="804" cy="130" r="5" fill="#AA4E08"/><circle cx="820" cy="146" r="5" fill="#AA4E08"/><foreignObject x="410.0" y="73.5" width="760" height="39.6" overflow="visible"><div class="fo" style="font-size:18px;color:#8B2CDE;font-weight:500;text-align:center;height:28.8px;line-height:28.8px">every $z$ here must decode to this 3</div></foreignObject><foreignObject x="480.0" y="322.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#4A5160;font-weight:500;text-align:center;height:32.0px;line-height:32.0px">codes are spread out, overlap, and stay near $\N(0, I)$</div></foreignObject></g></svg></div>
+  <div class="row" style="gap:20px;justify-content:center" data-b="2">
+    <div class="callout z" style="width:520px"><b>Known:</b> pull every cloud towards $\N(0, I)$, so random draws land on real codes.</div>
+    <div class="callout enc" style="width:520px"><b>Smooth:</b> every point in a cloud must decode to that image, so neighbourhoods are meaningful.</div>
+  </div>
+  <aside class="notes">
+    <p>If the encoder outputs a small region instead of a point, and the decoder must reconstruct x from any point in that region, then the space between nearby codes gets trained. Pulling all regions towards 𝒩(0, I) makes the space compact and tells us where to sample.</p>
+    <p>That is the variational autoencoder in one picture. The rest of the theory explains why this is the principled loss, not just a trick.</p>
+  </aside>
+</section>
+
+<section class="slide sec-ae" id="vae-preview" data-section="Autoencoders">
+  <p class="kicker">A preview of where we are going</p>
+  <h2>The same plot for a VAE</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vae-scatter-prior.svg" style="height:470px">
+      <div class="col grow">
+        <p class="small">Same data, same 2-number code, same random draws. Now the codes sit inside $\N(0, I)$.</p>
+        <img class="fig pix" src="figures/data/vae-prior-decodes.png" style="width:540px" data-b="2">
+        <p class="cap" data-b="2" style="text-align:left">the same kind of random codes, decoded</p>
+      </div>
+    </div>
+  </div>
+  <p class="q">To get here we need two tools: a distance between distributions (KL), and a principled loss (the ELBO).</p>
+  <aside class="notes"><p>Show the contrast with the previous plot: axes now run from −4 to 4, every class sits inside the dashed circles, and decoded draws are digits.</p></aside>
+</section>
+
+<!-- ===================================================================== 4 · KL -->
+
+<section class="slide sec-kl opener" id="kl-open" data-section="KL divergence">
+  <p class="kicker">Part 3 · tool 1</p>
+  <h2>KL divergence: how far is one distribution from another?</h2>
+  <p>We need a number for "this cloud is far from $\N(0, I)$". Build it from surprise, with two bars first.</p>
+</section>
+
+<section class="slide sec-kl" id="kl-bars" data-section="KL divergence">
+  <p class="kicker">Two distributions over the same two outcomes</p>
+  <h2>The data says 80/20. The model says 60/40.</h2>
+  <div class="body">
+    <div class="row" style="justify-content:center;gap:120px;margin-top:20px">
+      <div class="col" style="align-items:center">
+        <p class="small cx" style="font-weight:650">$P$: the data</p>
+        <div class="vbars"><div style="--h:0.8;--c:var(--x)"><span>0.8</span></div><div style="--h:0.2;--c:var(--x)"><span>0.2</span></div></div>
+        <div class="vlabs"><span>a 1</span><span>a 7</span></div>
+      </div>
+      <div class="col" style="align-items:center" data-b="2">
+        <p class="small cdec" style="font-weight:650">$Q$: our model</p>
+        <div class="vbars"><div style="--h:0.6;--c:var(--dec)"><span>0.6</span></div><div style="--h:0.4;--c:var(--dec)"><span>0.4</span></div></div>
+        <div class="vlabs"><span>a 1</span><span>a 7</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">A dataset of 1s and 7s, 80% 1s. The model believes 60/40. How wrong is it, as one number?</p>
+  <aside class="notes"><p>Keep the story concrete: draw digits from the data, ask the model how probable each was. When a 1 shows up, the model said 0.6 when it should have said 0.8.</p></aside>
+</section>
+
+<section class="slide sec-kl" id="kl-surprise" data-section="KL divergence">
+  <p class="kicker">Ingredient: surprise</p>
+  <h2>Surprise $= -\log(\text{probability})$</h2>
+  <div class="body">
+    <table class="work" style="margin:10px auto 0;font-size:24px">
+      <tr><th>outcome</th><th>$P$</th><th>$Q$</th><th>surprise if you believe $P$</th><th>surprise if you believe $Q$</th></tr>
+      <tr><td>a 1</td><td>0.8</td><td>0.6</td><td>$-\log 0.8 = 0.223$</td><td data-b="2">$-\log 0.6 = 0.511$</td></tr>
+      <tr><td>a 7</td><td>0.2</td><td>0.4</td><td>$-\log 0.2 = 1.609$</td><td data-b="2">$-\log 0.4 = 0.916$</td></tr>
+    </table>
+    <div class="row" style="justify-content:center;gap:40px;margin-top:26px" data-b="3">
+      <div class="callout plain" style="width:470px">Certain events cost 0. Rare events cost a lot. Natural logs, so the unit is the <b>nat</b>.</div>
+      <div class="callout loss" style="width:470px">Believing $Q$, a 1 surprises us more than it should ($0.511$ vs $0.223$), a 7 less ($0.916$ vs $1.609$).</div>
+    </div>
+  </div>
+  <aside class="notes"><p>This is the same −log p that appeared in the name model and in cross-entropy. Nothing new, just a name for it.</p></aside>
+</section>
+
+<section class="slide sec-kl" id="kl-extra" data-section="KL divergence">
+  <p class="kicker">KL, step 1 of 3</p>
+  <h2>For each outcome: how much extra surprise does $Q$ cause?</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:28px">$$\underbrace{-\log Q_i}_{\text{surprise under } Q} \;-\; \underbrace{(-\log P_i)}_{\text{surprise under } P} \;=\; \log\frac{P_i}{Q_i}$$</div>
+    <table class="work" style="margin:14px auto 0;font-size:24px">
+      <tr><th>outcome</th><th>$-\log Q_i$</th><th>$-\log P_i$</th><th>extra surprise $\log(P_i/Q_i)$</th></tr>
+      <tr data-b="2"><td>a 1</td><td>0.511</td><td>0.223</td><td>$0.511 - 0.223 = 0.288$</td></tr>
+      <tr data-b="3"><td>a 7</td><td>0.916</td><td>1.609</td><td>$0.916 - 1.609 = -0.693$</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="3">Negative for the 7: $Q$ over-predicts 7s, so a 7 surprises it less than it should.</p>
+</section>
+
+<section class="slide sec-kl" id="kl-weight" data-section="KL divergence">
+  <p class="kicker">KL, step 2 of 3</p>
+  <h2>Weight each outcome by how often it really happens</h2>
+  <div class="body">
+    <table class="work" style="margin:10px auto 0;font-size:24px">
+      <tr><th>outcome</th><th>how often: $P_i$</th><th>extra surprise</th><th>weighted: $P_i\log(P_i/Q_i)$</th></tr>
+      <tr><td>a 1</td><td>0.8</td><td>0.288</td><td data-b="2">$0.8 \times 0.288 = 0.230$</td></tr>
+      <tr><td>a 7</td><td>0.2</td><td>$-0.693$</td><td data-b="3">$0.2 \times (-0.693) = -0.139$</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="3">Real data is 80% 1s, so the 1 row counts four times as much as the 7 row.</p>
+  <aside class="notes"><p>Why weight by P and not by Q? Because P is what actually happens. We ask: on the data we really see, how much extra surprise does the model cause per example?</p></aside>
+</section>
+
+<section class="slide sec-kl" id="kl-sum" data-section="KL divergence">
+  <p class="kicker">KL, step 3 of 3</p>
+  <h2>Add them up: that is the KL divergence</h2>
+  <div class="body">
+    <div class="mathblock big">$$\KL(P\,\|\,Q) \;=\; \sum_i P_i \log\frac{P_i}{Q_i}$$</div>
+    <div class="mathblock" style="font-size:28px" data-b="2">$$= 0.230 + (-0.139) = 0.092 \text{ nats}$$</div>
+    <div class="row" style="justify-content:center;gap:24px;margin-top:18px" data-b="3">
+      <div class="callout plain" style="width:470px">One row was negative, yet the total can never be: $\KL \ge 0$.</div>
+      <div class="callout plain" style="width:470px">$\KL = 0$ only when $Q = P$ exactly.</div>
+    </div>
+  </div>
+  <p class="q" data-b="3">KL is the average extra surprise you pay for believing $Q$ when the truth is $P$.</p>
+  <aside class="notes"><p>Why can't the total be negative? To over-predict 7s, Q had to under-predict 1s, and 1s carry more weight. Gibbs' inequality makes this precise.</p></aside>
+</section>
+
+<section class="slide sec-kl" id="expectation" data-section="KL divergence">
+  <p class="kicker">Notation we will use all lecture</p>
+  <h2>$\E$ means "average over"</h2>
+  <div class="body">
+    <div class="erows" style="margin:0 auto">
+      <div class="mathblock left" style="font-size:25px">$$\E_{x\sim P}\big[f(x)\big] = \sum_x P(x)\,f(x)$$</div><span class="lab">exact, for a sum over outcomes</span>
+      <div class="mathblock left" style="font-size:25px" data-b="2">$$\E_{z\sim q}\big[f(z)\big] = \int q(z)\,f(z)\,dz$$</div><span class="lab" data-b="2">exact, for a continuous variable</span>
+      <div class="mathblock left" style="font-size:25px" data-b="3">$$\E_{x\sim P}\big[f(x)\big] \approx \frac1S\sum_{s=1}^{S} f(x_s),\quad x_s\sim P$$</div><span class="lab" data-b="3">estimated from samples</span>
+    </div>
+    <div class="callout x" style="margin-top:14px" data-b="4">KL is an average: $\KL(P\|Q) = \E_{x\sim P}\big[\log\tfrac{P(x)}{Q(x)}\big]$. Five draws 1, 1, 7, 1, 1 give $\tfrac15(4\times 0.288 - 0.693) = 0.092$.</div>
+  </div>
+  <aside class="notes">
+    <p>The subscript says which distribution the average is taken under: x ∼ P means "x is drawn from P". This matters because KL changes when you swap it.</p>
+    <p>Those five draws happen to be exactly 80/20, so the estimate matches. With random draws it would fluctuate around 0.092.</p>
+  </aside>
+</section>
+
+<section class="slide sec-kl" id="kl-order" data-section="KL divergence">
+  <p class="kicker">Not a distance</p>
+  <h2>Swap the arguments, get a different number</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <div class="col" style="width:470px">
+        <div class="mathblock left" style="font-size:25px">$$\KL(Q\|P) = 0.6\log\frac{0.6}{0.8} + 0.4\log\frac{0.4}{0.2}$$</div>
+        <div class="mathblock left" style="font-size:25px">$$= -0.173 + 0.277 = 0.105$$</div>
+        <p class="small" data-b="2">$0.105 \neq 0.092$: KL is not symmetric. "How wrong is $Q$ about $P$" differs from "how wrong is $P$ about $Q$".</p>
+        <p class="small" data-b="3">Push $q \to 0$ and $\KL(P\|Q) \to \infty$. Never give zero probability to something that happens.</p>
+      </div>
+      <img class="fig" src="figures/data/kl-vs-q.svg" style="width:640px">
+    </div>
+    <div class="ctrl interactive" data-widget="kl" style="justify-content:center;margin-top:4px">
+      <span>model's $q$ =</span><input type="range" min="0.01" max="0.99" step="0.01" value="0.6"><span class="readout">0.60</span>
+      <span>$\KL(P\|Q)$ = <span class="readout kl-pq">0.092</span></span><span>$\KL(Q\|P)$ = <span class="readout kl-qp">0.105</span></span>
+    </div>
+  </div>
+  <aside class="notes"><p>Drag the slider live. Both curves are zero at q = 0.8. Near q = 0 the red curve explodes: the data has 1s but the model says they never happen.</p></aside>
+</section>
+
+<section class="slide sec-kl" id="kl-ce" data-section="KL divergence">
+  <p class="kicker">You have minimised a KL many times</p>
+  <h2>Cross-entropy = entropy + KL</h2>
+  <div class="body">
+    <div class="ladder" style="margin:0 auto;width:1080px;font-size:26px">
+      <span class="lhs">$H(P,Q)$</span><span>$=$</span><span>$\displaystyle -\sum_i P_i\log Q_i$</span>
+      <span></span><span></span><span class="why">cross-entropy: the loss you train classifiers with</span>
+      <span class="lhs" data-b="2"></span><span data-b="2">$=$</span><span data-b="2">$\displaystyle -\sum_i P_i\log P_i \;+\; \sum_i P_i\big(\log P_i - \log Q_i\big)$</span>
+      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">add and subtract $\sum_i P_i\log P_i$</span>
+      <span class="lhs" data-b="3"></span><span data-b="3">$=$</span><span data-b="3">$\displaystyle \underbrace{H(P)}_{\text{entropy: fixed by the data}} \;+\; \KL(P\,\|\,Q)$</span>
+    </div>
+    <div class="stackbar" style="margin:22px auto 0;width:980px" data-b="4">
+      <div style="flex:0.500;background:var(--x-t);border-color:var(--x)"><b>$H(P) = 0.500$</b><span>does not depend on the model</span></div>
+      <div style="flex:0.092;background:var(--loss-t);border-color:var(--loss)"><b>$0.092$</b><span>KL</span></div>
+    </div>
+  </div>
+  <p class="q" data-b="4">Lowering cross-entropy can only lower the KL part. So does maximum likelihood: it minimises $\KL(\text{data}\,\|\,\text{model})$.</p>
+  <aside class="notes"><p>Together: H(P, Q) = 0.592 nats. Remember the direction: data first. That direction will explain why VAEs blur.</p></aside>
+</section>
+
+<section class="slide sec-kl" id="kl-gauss" data-section="KL divergence">
+  <p class="kicker">The version the VAE needs</p>
+  <h2>KL between two bumps: an area</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/kl-gauss.svg" style="width:600px">
+      <div class="col grow">
+        <p class="small">For continuous variables the sum becomes an integral:</p>
+        <div class="mathblock left" style="font-size:26px">$$\KL(q\|p) = \int q(z)\,\log\frac{q(z)}{p(z)}\,dz$$</div>
+        <p class="small" data-b="2">Take $q = \N(1, 0.5^2)$, the encoder's cloud, and $p = \N(0,1)$, the prior.</p>
+        <p class="small" data-b="3">The shaded area, computed numerically, is <b>0.818</b> nats.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Can we get 0.818 without a computer? Yes: for two Gaussians the integral has a formula. Three steps.</p>
+  <aside class="notes"><p>Numerical integral of the lower curve: 0.8181. The grey part is where q is below p and contributes negatively, like the 7 row earlier.</p></aside>
+</section>
+
+<section class="slide sec-kl" id="kl-gauss-2" data-section="KL divergence">
+  <p class="kicker">Gaussian KL, step 1 of 2</p>
+  <h2>Write out the log of the ratio</h2>
+  <div class="body">
+    <div class="ladder" style="margin:0 auto;width:1060px;font-size:26px">
+      <span class="lhs">$\log q(z)$</span><span>$=$</span><span>$\displaystyle -\log\sigma - \tfrac12\log 2\pi - \frac{(z-\mu)^2}{2\sigma^2}$</span>
+      <span></span><span></span><span class="why">log of $\N(z;\mu,\sigma^2)$</span>
+      <span class="lhs" data-b="2">$\log p(z)$</span><span data-b="2">$=$</span><span data-b="2">$\displaystyle -\tfrac12\log 2\pi - \frac{z^2}{2}$</span>
+      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">log of $\N(z;0,1)$</span>
+      <span class="lhs" data-b="3">$\log\dfrac{q(z)}{p(z)}$</span><span data-b="3">$=$</span><span data-b="3">$\displaystyle -\log\sigma - \frac{(z-\mu)^2}{2\sigma^2} + \frac{z^2}{2}$</span>
+      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">subtract: the $\tfrac12\log 2\pi$ terms cancel</span>
+    </div>
+  </div>
+  <p class="q" data-b="3">Three terms. Next: average each one over $z \sim q$.</p>
+</section>
+
+<section class="slide sec-kl" id="kl-gauss-3" data-section="KL divergence">
+  <p class="kicker">Gaussian KL, step 2 of 2</p>
+  <h2>Average each term over the cloud $q$</h2>
+  <div class="body">
+    <div class="row" style="justify-content:center;gap:24px">
+      <div class="callout enc" style="width:500px">$\E_q\big[(z-\mu)^2\big] = \sigma^2$ <span class="muted">(that is the variance)</span></div>
+      <div class="callout enc" style="width:500px">$\E_q\big[z^2\big] = \mu^2 + \sigma^2$ <span class="muted">(mean squared + variance)</span></div>
+    </div>
+    <div class="mathblock" style="font-size:27px;margin-top:16px" data-b="2">$$\KL = -\log\sigma - \frac{\sigma^2}{2\sigma^2} + \frac{\mu^2+\sigma^2}{2} = \frac12\Big(\mu^2 + \sigma^2 - 1 - \log\sigma^2\Big)$$</div>
+    <div class="mathblock" style="font-size:25px" data-b="3">$$\mu = 1,\ \sigma = 0.5:\quad \tfrac12\big(1 + 0.25 - 1 + 1.386\big) = 0.818 \ \checkmark$$</div>
+  </div>
+  <p class="q" data-b="3">Moving the mean away costs $\mu^2$; shrinking $\sigma$ costs $-\log\sigma^2$. For a code with several coordinates, add one such term per coordinate.</p>
+  <aside class="notes"><p>The check matches the shaded area from two slides ago. This exact formula is what the VAE code computes.</p></aside>
+</section>
+
+<section class="slide sec-kl" id="kl-direction" data-section="KL divergence">
+  <p class="kicker">Back to our two bumps</p>
+  <h2>Fit one Gaussian: the KL direction decides what you get</h2>
+  <div class="body">
+    <div class="row" style="justify-content:center;gap:30px">
+      <div class="col" style="align-items:center"><img class="fig" src="figures/data/kl-fwd.svg" style="width:530px">
+        <p class="small" style="text-align:center">minimise $\KL(\text{data}\,\|\,q)$: cover everything.<br>This is the maximum-likelihood fit from before.</p></div>
+      <div class="col" style="align-items:center" data-b="2"><img class="fig" src="figures/data/kl-rev.svg" style="width:530px">
+        <p class="small" style="text-align:center">minimise $\KL(q\,\|\,\text{data})$: never put mass where<br>data is absent, so pick one bump.</p></div>
+    </div>
+  </div>
+  <p class="q" data-b="2">Mode-covering vs mode-seeking. Keep this picture: it explains blurry VAEs and mode-collapsing GANs.</p>
+  <aside class="notes">
+    <p>Both fits found by brute-force search over (μ, σ). Forward: 𝒩(0.0, 2.06²), the same as the moment-matched maximum-likelihood fit. Reverse: 𝒩(−2.0, 0.5²), sitting on one bump.</p>
+    <p>Why: KL(p‖q) is weighted by p, so q is punished wherever data exists and q is small. KL(q‖p) is weighted by q, so q is punished wherever it puts mass and the data is absent.</p>
+  </aside>
+</section>
+
+<!-- ===================================================================== 5 · ELBO -->
+
+<section class="slide sec-elbo opener" id="elbo-open" data-section="The ELBO">
+  <p class="kicker">Part 4 · tool 2</p>
+  <h2>The ELBO: a loss we can actually compute</h2>
+  <p>Goal: give our 3 high probability, as with the names. Problem: for a latent-variable model that probability is an integral nobody can evaluate. Watch it happen on our 3.</p>
+</section>
+
+<section class="slide sec-elbo" id="pgm" data-section="The ELBO">
+  <p class="kicker">The model, as a picture</p>
+  <h2>Two arrows: generate down, infer up</h2>
+  <div class="body center"><svg viewBox="0 0 1152 330" class="diagram" role="img" aria-label="pgm"><defs><marker id="pgm-ah-AA4E08" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#AA4E08"/></marker><marker id="pgm-ah-0F766E" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0F766E"/></marker><marker id="pgm-ah-8B2CDE" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8B2CDE"/></marker></defs><g data-b="1"><foreignObject x="-210.0" y="171.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#AA4E08;font-weight:400;text-align:center;height:33.6px;line-height:33.6px">$p(z) = \N(0, I)$</div></foreignObject><path d="M272,190 L330,190" fill="none" stroke="#AA4E08" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#pgm-ah-AA4E08)"/><circle cx="390" cy="190" r="56" fill="#fff" stroke="#AA4E08" stroke-width="3"/><foreignObject x="10.0" y="159.0" width="760" height="79.2" overflow="visible"><div class="fo" style="font-size:36px;color:#AA4E08;font-weight:400;text-align:center;height:57.6px;line-height:57.6px">$z$</div></foreignObject><text x="390" y="276" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="500" fill="#6B7280" text-anchor="middle">hidden code</text><circle cx="760" cy="190" r="56" fill="#E4ECFF" stroke="#245EDB" stroke-width="3"/><foreignObject x="380.0" y="159.0" width="760" height="79.2" overflow="visible"><div class="fo" style="font-size:36px;color:#245EDB;font-weight:400;text-align:center;height:57.6px;line-height:57.6px">$x$</div></foreignObject><text x="760" y="276" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="500" fill="#6B7280" text-anchor="middle">observed image (shaded)</text><path d="M448,190 L700,190" fill="none" stroke="#0F766E" stroke-width="3" stroke-linejoin="round" marker-end="url(#pgm-ah-0F766E)"/><foreignObject x="195.0" y="148.0" width="760" height="52.8" overflow="visible"><div class="fo" style="font-size:24px;color:#0F766E;font-weight:400;text-align:center;height:38.4px;line-height:38.4px">$p_\theta(x\mid z)$</div></foreignObject><text x="575" y="220" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="21" font-weight="650" fill="#0F766E" text-anchor="middle">decoder: generate</text></g><g data-b="2"><path d="M712,146 C640,70 510,70 436,142" fill="none" stroke="#8B2CDE" stroke-width="3" stroke-dasharray="9 6" marker-end="url(#pgm-ah-8B2CDE)"/><foreignObject x="195.0" y="21.5" width="760" height="57.2" overflow="visible"><div class="fo" style="font-size:26px;color:#8B2CDE;font-weight:400;text-align:center;height:41.6px;line-height:41.6px">$q_\varphi(z\mid x)$</div></foreignObject><foreignObject x="125.0" y="293.8" width="900" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#8B2CDE;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">encoder: infer $z$ from $x$ (dashed = an approximation we learn)</div></foreignObject></g></svg></div>
+  <div class="mathblock" style="font-size:27px">$$p_\theta(x, z) = \cz{p(z)}\;\cdec{p_\theta(x\mid z)}$$</div>
+  <aside class="notes">
+    <p>Solid arrow: the generative model we want, prior times decoder. Dashed arrow: an approximate inference network we add only to make training possible. θ are decoder weights, φ are encoder weights.</p>
+    <p>Same story as the coin and the bumps; z is now a 2-D code and p(x|z) is a neural network.</p>
+  </aside>
+</section>
+
+<section class="slide sec-elbo" id="evidence" data-section="The ELBO">
+  <p class="kicker">Maximum likelihood for our 3</p>
+  <h2>How probable is our 3 under the model?</h2>
+  <div class="body">
+    <div class="row" style="gap:28px">
+      <img class="fig" src="figures/data/evidence-map.svg" style="height:455px">
+      <div class="col grow">
+        <p class="small">With the coin we summed over two values:</p>
+        <div class="mathblock left" style="font-size:24px">$$p(x) = \sum_{z\in\{\mathrm A,\mathrm B\}} p(z)\,p(x\mid z)$$</div>
+        <p class="small" data-b="2">A code can be any point in the plane, so the sum becomes an integral:</p>
+        <div class="mathblock left" style="font-size:24px" data-b="2">$$p_\theta(x) = \int \cz{p(z)}\;\cdec{p_\theta(x\mid z)}\,dz$$</div>
+        <p class="small" data-b="3">2 numbers per code, so we can afford a 901 × 901 grid of decoder calls: $\log p_\theta(x) = −128.7$ nats. With 16 numbers it would be $901^{16}$ calls.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>The map shows log p(x | z) for our 3 at every code z: dark = codes that decode to something like our 3. Dashed circles: 1, 2, 3 prior standard deviations.</p>
+    <p>Real computation on the trained 2-D VAE decoder: 811,801 decoder calls, then log-sum-exp.</p>
+  </aside>
+</section>
+
+<section class="slide sec-elbo" id="mc-prior" data-section="The ELBO">
+  <p class="kicker">Idea: estimate the integral by sampling</p>
+  <h2>Random codes almost never hit the right patch</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:27px">$$p_\theta(x) = \E_{z\sim p(z)}\big[\,p_\theta(x\mid z)\,\big] \approx \frac1S\sum_{s=1}^{S} p_\theta(x\mid z_s)$$</div>
+    <div class="row" style="justify-content:center;gap:28px;margin-top:22px">
+      <div class="stat" data-b="2"><b>100,000</b><span>random codes $z_s\sim\N(0,I)$</span></div>
+      <div class="stat" data-b="3"><b>0.07%</b><span>land inside our 3's patch</span></div>
+      <div class="stat" data-b="4"><b>−363.9</b><span>typical $\log p(x\mid z)$ of a random code</span></div>
+      <div class="stat" data-b="4"><b>−121.0</b><span>the best code's $\log p(x\mid z)$</span></div>
+    </div>
+  </div>
+  <p class="q" data-b="4">A typical random code makes our 3 about $e^{243}$ times less probable than the best code. Blind sampling wastes almost every draw.</p>
+  <aside class="notes">
+    <p>The estimate is unbiased but its variance is enormous: the average is dominated by the rare draws that hit the patch, and with 16 or 100 dimensions you would essentially never hit it.</p>
+    <p>Better: ask someone where the patch is. That "someone" is the encoder.</p>
+  </aside>
+</section>
+
+<section class="slide sec-elbo" id="posterior" data-section="The ELBO">
+  <p class="kicker">Inference, like the coin and the bumps</p>
+  <h2>Ask the encoder where to look</h2>
+  <div class="body">
+    <div class="row" style="gap:28px">
+      <img class="fig" src="figures/data/posterior-vs-q.svg" style="height:430px">
+      <div class="col grow">
+        <p class="small">The patch, normalised, is the true posterior:</p>
+        <div class="mathblock left" style="font-size:25px">$$p_\theta(z\mid x) = \frac{p(z)\,p_\theta(x\mid z)}{p_\theta(x)}$$</div>
+        <p class="small" data-b="2">It needs $p_\theta(x)$, the impossible integral. So we train a network to guess it:</p>
+        <div class="mathblock left" style="font-size:25px" data-b="2">$$\cenc{q_\varphi(z\mid x)} = \N\big(\mu_\varphi(x),\, \sigma_\varphi(x)^2\big)$$</div>
+        <p class="small" data-b="3">For our 3: $\mu = (0.3,\ −1.93)$ and $\sigma = (0.047,\ 0.05)$. Close to the truth, not identical.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    <p>Zoomed view around our 3. Shaded: the true posterior from the grid. Purple ellipses: one and two standard deviations of the encoder's Gaussian. The true posterior is slightly tilted and offset; a diagonal Gaussian cannot tilt.</p>
+    <p>Notice the scale: σ ≈ 0.05 while the prior has σ = 1. The encoder is very confident about where our 3 lives.</p>
+  </aside>
+</section>
+
+<!-- ------------------------------------------------ the derivation, one move per slide -->
+
+<section class="slide sec-elbo" id="elbo-1" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · move 1 of 7</p>
+  <h2>Start from what we want</h2>
+  <div class="body">
+    <div class="mathblock big">$$\log p_\theta(x) = \log \int p_\theta(x,z)\,dz$$</div>
+    <div class="callout plain why" style="margin:16px auto 0;width:900px">Maximum likelihood wants this number large for our 3, and for every image in the data. The integral over all codes is the part we cannot compute.</div>
+  </div>
+  <p class="q">We will rewrite this line until it becomes something we can compute and differentiate.</p>
+  <aside class="notes"><p>Recall p(x, z) = p(z) p(x | z): prior times decoder. Each of the next six slides makes exactly one change. Ask the class to name the move before you click.</p></aside>
+</section>
+
+<section class="slide sec-elbo" id="elbo-2" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · move 2 of 7</p>
+  <h2>Multiply and divide by the encoder's cloud</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\log \int p_\theta(x,z)\,dz$$</div>
+    <div class="mathblock big">$$= \log \int \hl{q_\varphi(z\mid x)}\;\frac{p_\theta(x,z)}{\hl{q_\varphi(z\mid x)}}\,dz$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Multiplying and dividing by the same positive number changes nothing. We are free to choose any $q$; we choose the encoder's Gaussian, which is positive everywhere.</div>
+  </div>
+  <p class="q" data-b="2">Why bother? Because the next move turns this integral into an average under $q$, and $q$ knows where the patch is.</p>
+</section>
+
+<section class="slide sec-elbo" id="elbo-3" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · move 3 of 7</p>
+  <h2>Read the integral as an average under $q$</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\log \int q_\varphi(z\mid x)\,\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\,dz$$</div>
+    <div class="mathblock big">$$= \log\; \hl{\E_{z\sim q_\varphi(z\mid x)}}\!\left[\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right]$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">From the $\E$ slide: $\int q(z)\,f(z)\,dz = \E_{z\sim q}[f(z)]$. Here $f(z)$ is the ratio $p_\theta(x,z)/q_\varphi(z\mid x)$: one number for each code.</div>
+  </div>
+  <p class="q" data-b="2">Still exact. We now average over codes drawn from the encoder's cloud, right where the patch is.</p>
+</section>
+
+<section class="slide sec-elbo" id="jensen" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · a tool for move 4</p>
+  <h2>Jensen's inequality, in one picture</h2>
+  <div class="body">
+    <div class="row" style="gap:24px">
+      <img class="fig" src="figures/data/jensen.svg" style="width:580px">
+      <div class="col grow">
+        <p class="small">$\log$ curves downwards (it is concave), so every chord lies below the curve.</p>
+        <p class="small" data-b="2">Two values, $R=1$ and $R=4$:</p>
+        <div class="mathblock left" style="font-size:24px" data-b="2">$$\underbrace{\log 2.5}_{\log \text{ of the average}} = 0.916 \;\ge\; \underbrace{\tfrac12(0 + 1.386)}_{\text{average of the logs}} = 0.693$$</div>
+        <div class="mathblock left" style="font-size:26px" data-b="3">$$\log \E[R] \;\ge\; \E[\log R]$$</div>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>Read the picture: two orange points on the curve; their chord lies below the curve. The midpoint of the chord (average of logs) sits below the curve at the midpoint (log of the average).</p></aside>
+</section>
+
+<section class="slide sec-elbo" id="elbo-4" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · move 4 of 7</p>
+  <h2>Swap the log and the average: the only inequality</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\log p_\theta(x) = \log\,\E_{q}\!\left[\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right]$$</div>
+    <div class="mathblock big">$$\log p_\theta(x) \;\hl{\ge}\; \E_{q}\!\left[\log\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right] \;=:\; \ELBO$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Jensen with $R = p_\theta(x,z)/q_\varphi(z\mid x)$. The right side is the <b>E</b>vidence <b>L</b>ower <b>BO</b>und: it can never exceed $\log p_\theta(x)$.</div>
+  </div>
+  <p class="q" data-b="2">The log is now inside the average. That is what makes the next three moves possible.</p>
+</section>
+
+<section class="slide sec-elbo" id="elbo-5" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · move 5 of 7</p>
+  <h2>Split the log of a product</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\ELBO = \E_{q}\!\left[\log\frac{p_\theta(x\mid z)\,p(z)}{q_\varphi(z\mid x)}\right]$$</div>
+    <div class="mathblock big">$$= \E_{q}\Big[\hl{\log p_\theta(x\mid z) + \log p(z) - \log q_\varphi(z\mid x)}\Big]$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">First write $p_\theta(x,z) = p_\theta(x\mid z)\,p(z)$: decoder times prior. Then $\log\frac{ab}{c} = \log a + \log b - \log c$.</div>
+  </div>
+</section>
+
+<section class="slide sec-elbo" id="elbo-6" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · move 6 of 7</p>
+  <h2>The average of a sum is the sum of the averages</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\E_{q}\Big[\log p_\theta(x\mid z) + \log p(z) - \log q_\varphi(z\mid x)\Big]$$</div>
+    <div class="mathblock big">$$= \hl{\E_{q}\big[\log p_\theta(x\mid z)\big]} \;+\; \hl{\E_{q}\big[\log p(z) - \log q_\varphi(z\mid x)\big]}$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">$\E[a + b] = \E[a] + \E[b]$. Group the decoder term on its own, and the two terms that only involve $z$ together.</div>
+  </div>
+</section>
+
+<section class="slide sec-elbo" id="elbo-7" data-section="The ELBO">
+  <p class="kicker">Deriving the ELBO · move 7 of 7</p>
+  <h2>Recognise the second average: it is a KL</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\E_{q}\big[\log p(z) - \log q_\varphi(z\mid x)\big]$$</div>
+    <div class="mathblock big">$$= -\,\E_{q}\!\left[\log\frac{q_\varphi(z\mid x)}{p(z)}\right] = \hl{-\KL\big(q_\varphi(z\mid x)\,\|\,p(z)\big)}$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Flip the sign to flip the fraction. Then use the definition: $\KL(q\|p) = \E_{z\sim q}\big[\log\frac{q(z)}{p(z)}\big]$, the average extra surprise.</div>
+  </div>
+  <p class="q" data-b="2">And for Gaussians we already have its formula: $\tfrac12\sum_j(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2)$.</p>
+</section>
+
+<section class="slide sec-elbo" id="elbo-final" data-section="The ELBO">
+  <p class="kicker">Put the pieces together</p>
+  <h2>The ELBO, in symbols and in words</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:36px;margin-top:10px">$$\ELBO = \underbrace{\E_{z\sim\cenc q}\big[\cx{\log p_\theta(x\mid z)}\big]}_{\text{rebuild } x \text{ from codes in its cloud}} \;-\; \underbrace{\closs{\KL\big(q_\varphi(z\mid x)\,\|\,p(z)\big)}}_{\text{keep the cloud near } \N(0,I)}$$</div>
+    <div class="row" style="justify-content:center;gap:24px;margin-top:20px" data-b="2">
+      <div class="callout x" style="width:520px">First term: the autoencoder's reconstruction score, with the code drawn from the cloud.</div>
+      <div class="callout loss" style="width:520px">Second term: the Gaussian KL we just derived.</div>
+    </div>
+  </div>
+  <p class="q" data-b="2">The two wishes from the autoencoder slide, derived rather than invented. The loss we minimise is $-\ELBO$.</p>
+</section>
+
+<section class="slide sec-elbo" id="gap-derive" data-section="The ELBO">
+  <p class="kicker">What did the inequality cost?</p>
+  <h2>A second route: start from the true posterior</h2>
+  <div class="body">
+    <div class="ladder" style="margin:0 auto;width:1100px;font-size:25px">
+      <span class="lhs">$\KL\big(q\,\|\,p_\theta(z\mid x)\big)$</span><span>$=$</span><span>$\E_q\big[\log q_\varphi(z\mid x) - \log p_\theta(z\mid x)\big]$</span>
+      <span></span><span></span><span class="why">definition of KL, now against the <b>true posterior</b></span>
+      <span class="lhs" data-b="2"></span><span data-b="2">$=$</span><span data-b="2">$\E_q\big[\log q_\varphi(z\mid x) - \log p_\theta(x,z)\big] + \log p_\theta(x)$</span>
+      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">Bayes: $\log p_\theta(z\mid x) = \log p_\theta(x,z) - \log p_\theta(x)$, and $\log p_\theta(x)$ has no $z$ in it</span>
+      <span class="lhs" data-b="3"></span><span data-b="3">$=$</span><span data-b="3">$-\ELBO + \log p_\theta(x)$</span>
+      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">the average is exactly minus the ELBO from move 4</span>
+    </div>
+    <div class="mathblock" style="font-size:31px;margin-top:10px" data-b="4">$$\log p_\theta(x) = \ELBO + \KL\big(q_\varphi(z\mid x)\,\|\,p_\theta(z\mid x)\big)$$</div>
+  </div>
+  <p class="q" data-b="4">The gap is a KL, so it is never negative: a second proof that the ELBO is a lower bound.</p>
+</section>
+
+<section class="slide sec-elbo" id="gap" data-section="The ELBO">
+  <p class="kicker">The gap, measured on our 3</p>
+  <h2>Two different KLs, two different jobs</h2>
+  <div class="body">
+    <div class="numline" style="margin:24px auto 0">
+      <div class="nl-track"></div>
+      <div class="nl-mark" style="left:8%;--c:var(--dec)"><b>ELBO</b><span>−129.3</span></div>
+      <div class="nl-mark" style="left:92%;--c:var(--x)"><b>$\log p_\theta(x)$</b><span>−128.7</span></div>
+      <div class="nl-gap" style="left:8%;width:84%" data-b="2"><span>gap $= \KL(q\,\|\,\text{true posterior}) = 0.61$</span></div>
+    </div>
+    <div class="row" style="justify-content:center;gap:24px;margin-top:40px" data-b="3">
+      <div class="callout loss" style="width:540px"><b>In the loss:</b> $\KL(q\,\|\,\text{prior}) = 6.97$ nats. Computable by formula.</div>
+      <div class="callout enc" style="width:540px"><b>In the gap:</b> $\KL(q\,\|\,\text{true posterior}) = 0.61$ nats. Needs $p_\theta(x)$; we only got it from the grid.</div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Raising the ELBO raises $\log p_\theta(x)$ or shrinks the gap. Both are what we want.</p>
+  <aside class="notes">
+    <p>All numbers for our 3 from the trained 2-D VAE: ELBO estimated with 20,000 draws from q; log p(x) from the grid; the gap computed independently as E_q[log q − log p(z|x)] = 0.61, matching the difference.</p>
+    <p>Students routinely mix up these two KLs. Ask: which one can we compute during training?</p>
+  </aside>
+</section>
+
+<section class="slide sec-elbo" id="elbo-toy" data-section="The ELBO">
+  <p class="kicker">Check the identity with numbers you can do by hand</p>
+  <h2>Neat or messy writer? A two-value latent</h2>
+  <div class="body">
+    <div class="row top" style="gap:36px">
+      <div class="col" style="width:520px">
+        <p class="small">$z\in\{\text{neat},\text{messy}\}$, prior $\tfrac12, \tfrac12$. Observation $x$: a thick stroke.</p>
+        <p class="small">$p(x\mid\text{neat}) = 0.8,\quad p(x\mid\text{messy}) = 0.2$</p>
+        <p class="small" data-b="2">evidence $p(x) = 0.5$ · true posterior $(0.8,\ 0.2)$</p>
+        <p class="small" data-b="3">Our guess $q = (q_0,\ 1-q_0)$:</p>
+        <div class="ctrl interactive" data-widget="elbo" data-b="3"><span>$q_0$ =</span><input type="range" min="0.02" max="0.98" step="0.01" value="0.6"><span class="readout q0">0.60</span></div>
+      </div>
+      <table class="work elbo-table" style="font-size:22px" data-b="3">
+        <tr><th>quantity</th><th>value</th></tr>
+        <tr><td>$\E_q[\log p(x\mid z)]$</td><td class="v-ell">−0.778</td></tr>
+        <tr><td>$-\,\KL(q\,\|\,\text{prior})$</td><td class="v-klp">−0.020</td></tr>
+        <tr class="total"><td>$\ELBO$</td><td class="v-elbo">−0.798</td></tr>
+        <tr><td>$+\,\KL(q\,\|\,\text{posterior})$</td><td class="v-gap">0.105</td></tr>
+        <tr class="total"><td>$\log p(x)$</td><td class="v-lpx">−0.693</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="3">Move $q$: the ELBO and the gap change, their sum never does. At $q$ = posterior $(0.8)$ the gap is 0.</p>
+  <aside class="notes">
+    <p>At q = (0.6, 0.4) the gap is KL((0.6,0.4) ‖ (0.8,0.2)) = 0.105, the same "KL(Q‖P)" we computed with the 1s and 7s.</p>
+    <p>Drag the slider live. ELBO + gap = log 0.5 = −0.693 for every q0.</p>
+  </aside>
+</section>
+
+<section class="slide sec-elbo" id="vae-bernoulli" data-section="The ELBO">
+  <p class="kicker">The reconstruction term, zoomed in</p>
+  <h2>Each pixel is a coin flip with probability $\pi_i$</h2>
+  <div class="body">
+    <div class="row" style="gap:20px">
+      <div class="col" style="align-items:center;width:220px"><img class="fig" src="figures/data/digit3-patch.svg" style="width:210px"><p class="cap">our 3, one 5 × 5 patch</p></div>
+      <div class="grow"><svg viewBox="0 0 920 360" class="diagram" role="img" aria-label="pixels"><defs></defs><g data-b="1"><foreignObject x="-227.5" y="4.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#245EDB;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\text{observed } x_i$</div></foreignObject><rect x="10" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="37.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="67" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="94.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="124" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="151.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="181" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="208.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="238" y="50" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="265.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="10" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="37.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="67" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="94.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="124" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="151.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="181" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="208.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="238" y="107" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="10" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="37.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="67" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="94.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="124" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="151.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="181" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="208.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="238" y="164" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="10" y="221" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="37.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="67" y="221" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="94.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="124" y="221" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="151.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="181" y="221" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="208.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="238" y="221" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text><rect x="10" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="37.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="67" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="94.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="124" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="151.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="181" y="278" width="54" height="54" rx="4" fill="#FFFFFF" stroke="#D9DDE5"/><text x="208.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0</text><rect x="238" y="278" width="54" height="54" rx="4" fill="#14171F" stroke="#D9DDE5"/><text x="265.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1</text></g><g data-b="2"><foreignObject x="77.5" y="4.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#0F766E;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\text{decoder's } \pi_i$</div></foreignObject><rect x="315" y="50" width="54" height="54" rx="4" fill="rgb(175,175,175)" stroke="#D9DDE5"/><text x="342.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.38</text><rect x="372" y="50" width="54" height="54" rx="4" fill="rgb(196,196,196)" stroke="#D9DDE5"/><text x="399.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.28</text><rect x="429" y="50" width="54" height="54" rx="4" fill="rgb(227,227,227)" stroke="#D9DDE5"/><text x="456.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.13</text><rect x="486" y="50" width="54" height="54" rx="4" fill="rgb(244,244,244)" stroke="#D9DDE5"/><text x="513.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.05</text><rect x="543" y="50" width="54" height="54" rx="4" fill="rgb(250,250,250)" stroke="#D9DDE5"/><text x="570.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.02</text><rect x="315" y="107" width="54" height="54" rx="4" fill="rgb(68,68,68)" stroke="#D9DDE5"/><text x="342.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.89</text><rect x="372" y="107" width="54" height="54" rx="4" fill="rgb(82,82,82)" stroke="#D9DDE5"/><text x="399.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.82</text><rect x="429" y="107" width="54" height="54" rx="4" fill="rgb(118,118,118)" stroke="#D9DDE5"/><text x="456.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.65</text><rect x="486" y="107" width="54" height="54" rx="4" fill="rgb(168,168,168)" stroke="#D9DDE5"/><text x="513.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.41</text><rect x="543" y="107" width="54" height="54" rx="4" fill="rgb(217,217,217)" stroke="#D9DDE5"/><text x="570.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.18</text><rect x="315" y="164" width="54" height="54" rx="4" fill="rgb(93,93,93)" stroke="#D9DDE5"/><text x="342.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.77</text><rect x="372" y="164" width="54" height="54" rx="4" fill="rgb(89,89,89)" stroke="#D9DDE5"/><text x="399.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.79</text><rect x="429" y="164" width="54" height="54" rx="4" fill="rgb(95,95,95)" stroke="#D9DDE5"/><text x="456.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.76</text><rect x="486" y="164" width="54" height="54" rx="4" fill="rgb(114,114,114)" stroke="#D9DDE5"/><text x="513.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.67</text><rect x="543" y="164" width="54" height="54" rx="4" fill="rgb(171,171,171)" stroke="#D9DDE5"/><text x="570.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.40</text><rect x="315" y="221" width="54" height="54" rx="4" fill="rgb(168,168,168)" stroke="#D9DDE5"/><text x="342.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.41</text><rect x="372" y="221" width="54" height="54" rx="4" fill="rgb(145,145,145)" stroke="#D9DDE5"/><text x="399.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.52</text><rect x="429" y="221" width="54" height="54" rx="4" fill="rgb(114,114,114)" stroke="#D9DDE5"/><text x="456.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.67</text><rect x="486" y="221" width="54" height="54" rx="4" fill="rgb(116,116,116)" stroke="#D9DDE5"/><text x="513.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.66</text><rect x="543" y="221" width="54" height="54" rx="4" fill="rgb(147,147,147)" stroke="#D9DDE5"/><text x="570.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.51</text><rect x="315" y="278" width="54" height="54" rx="4" fill="rgb(208,208,208)" stroke="#D9DDE5"/><text x="342.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.22</text><rect x="372" y="278" width="54" height="54" rx="4" fill="rgb(181,181,181)" stroke="#D9DDE5"/><text x="399.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.35</text><rect x="429" y="278" width="54" height="54" rx="4" fill="rgb(139,139,139)" stroke="#D9DDE5"/><text x="456.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.55</text><rect x="486" y="278" width="54" height="54" rx="4" fill="rgb(129,129,129)" stroke="#D9DDE5"/><text x="513.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">0.60</text><rect x="543" y="278" width="54" height="54" rx="4" fill="rgb(154,154,154)" stroke="#D9DDE5"/><text x="570.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.48</text></g><g data-b="3"><foreignObject x="382.5" y="4.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$-\log p(x_i\mid z)$</div></foreignObject><rect x="620" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.28)" stroke="#D9DDE5"/><text x="647.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.48</text><rect x="677" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.22)" stroke="#D9DDE5"/><text x="704.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.33</text><rect x="734" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.14)" stroke="#D9DDE5"/><text x="761.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.14</text><rect x="791" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.10)" stroke="#D9DDE5"/><text x="818.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.05</text><rect x="848" y="50" width="54" height="54" rx="4" fill="rgba(190,18,60,0.09)" stroke="#D9DDE5"/><text x="875.0" y="83.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.02</text><rect x="620" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.13)" stroke="#D9DDE5"/><text x="647.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.11</text><rect x="677" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.16)" stroke="#D9DDE5"/><text x="704.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.19</text><rect x="734" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.26)" stroke="#D9DDE5"/><text x="761.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.43</text><rect x="791" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.45)" stroke="#D9DDE5"/><text x="818.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.89</text><rect x="848" y="107" width="54" height="54" rx="4" fill="rgba(190,18,60,0.79)" stroke="#D9DDE5"/><text x="875.0" y="140.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1.71</text><rect x="620" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.19)" stroke="#D9DDE5"/><text x="647.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.26</text><rect x="677" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.18)" stroke="#D9DDE5"/><text x="704.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.24</text><rect x="734" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.20)" stroke="#D9DDE5"/><text x="761.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.28</text><rect x="791" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.25)" stroke="#D9DDE5"/><text x="818.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.40</text><rect x="848" y="164" width="54" height="54" rx="4" fill="rgba(190,18,60,0.46)" stroke="#D9DDE5"/><text x="875.0" y="197.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.91</text><rect x="620" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.45)" stroke="#D9DDE5"/><text x="647.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.89</text><rect x="677" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.39)" stroke="#D9DDE5"/><text x="704.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.74</text><rect x="734" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.55)" stroke="#D9DDE5"/><text x="761.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1.12</text><rect x="791" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.53)" stroke="#D9DDE5"/><text x="818.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#fff" text-anchor="middle">1.09</text><rect x="848" y="221" width="54" height="54" rx="4" fill="rgba(190,18,60,0.36)" stroke="#D9DDE5"/><text x="875.0" y="254.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.67</text><rect x="620" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.18)" stroke="#D9DDE5"/><text x="647.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.25</text><rect x="677" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.26)" stroke="#D9DDE5"/><text x="704.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.44</text><rect x="734" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.41)" stroke="#D9DDE5"/><text x="761.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.79</text><rect x="791" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.47)" stroke="#D9DDE5"/><text x="818.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.93</text><rect x="848" y="278" width="54" height="54" rx="4" fill="rgba(190,18,60,0.39)" stroke="#D9DDE5"/><text x="875.0" y="311.0" font-family="SF Mono, Menlo, monospace" font-size="17" fill="#14171F" text-anchor="middle">0.74</text></g><g data-b="3"><text x="763" y="352" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#BE123C" text-anchor="middle">this 5 × 5 patch: 14.1 nats</text></g></svg></div>
+    </div>
+    <div class="mathblock" style="font-size:25px" data-b="3">$$-\log p_\theta(x\mid z) = -\sum_{i=1}^{784}\Big[x_i\log\pi_i + (1-x_i)\log(1-\pi_i)\Big] = 122.3\ \text{nats}$$</div>
+  </div>
+  <p class="q" data-b="3">Binary cross-entropy is not a design choice: it is the Bernoulli log-likelihood. Gaussian pixels would give squared error.</p>
+  <aside class="notes">
+    <p>The patch is on the top stroke of our 3. Where x = 1 the loss is −log π; where x = 0 it is −log(1 − π). Ink predicted at 0.89 costs 0.11; ink predicted at 0.18 costs 1.71.</p>
+    <p>In code we pass logits to binary_cross_entropy_with_logits for numerical stability; π = sigmoid(logits) is only for display.</p>
+  </aside>
+</section>
+
+<section class="slide sec-elbo" id="elbo-loss" data-section="The ELBO">
+  <p class="kicker">From theory to the training loss</p>
+  <h2>The VAE loss for our 3</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:27px">$$\mathcal L(x) = -\ELBO \approx \underbrace{\closs{-\log p_\theta(x\mid z)}}_{\text{BCE over 784 pixels}} \;+\; \underbrace{\closs{\tfrac12\sum_{j=1}^{2}\big(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2\big)}}_{\text{KL over 2 coordinates}},\qquad z\sim q_\varphi(z\mid x)$$</div>
+    <div class="row" style="justify-content:center;gap:24px;margin-top:26px">
+      <div class="stat" data-b="2"><b>122.3</b><span>reconstruction, one draw of $z$</span></div>
+      <div class="stat" data-b="2"><b>+ 6.97</b><span>KL, exact formula</span></div>
+      <div class="stat" data-b="3"><b>= 129.2</b><span>loss for our 3</span></div>
+    </div>
+  </div>
+  <p class="q" data-b="3">One problem left: $z$ is a random draw, and we need gradients through it.</p>
+  <aside class="notes"><p>Using a single z per image per step is standard. The reconstruction term is a one-sample estimate of the expectation; the KL term is computed exactly.</p></aside>
+</section>
+
+</main>
+<script>window.MATH_MACROS = {"\\cx": "\\textcolor{##245EDB}{#1}", "\\cenc": "\\textcolor{##8B2CDE}{#1}", "\\cdec": "\\textcolor{##0F766E}{#1}", "\\cz": "\\textcolor{##AA4E08}{#1}", "\\closs": "\\textcolor{##BE123C}{#1}", "\\cdisc": "\\textcolor{##334155}{#1}", "\\N": "\\mathcal{N}", "\\KL": "\\mathrm{KL}", "\\E": "\\mathbb{E}", "\\ELBO": "\\mathrm{ELBO}", "\\eps": "\\varepsilon", "\\hl": "\\colorbox{##FFF1B8}{$\\displaystyle #1$}"};</script>
+<script src="vendor/katex/katex.min.js"></script>
+<script src="vendor/katex/contrib/auto-render.min.js"></script>
+<script src="deck/widgets.js"></script>
+<script src="deck/deck.js"></script>
+<script src="deck/annotate.js"></script>
+</body>
+</html>

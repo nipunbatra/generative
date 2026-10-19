@@ -1,0 +1,209 @@
+<!-- ===================================================================== 1 · HOOK -->
+
+<section class="slide sec-hook cover" id="cover" data-section="Why generate?">
+  <p class="kicker">ES 667 · Deep Learning · Generative Modelling I</p>
+  <h2 style="font-size:60px;margin-top:40px">Learning to generate<span class="sub" style="font-size:30px">Autoencoders, VAEs and GANs, built from one handwritten 3</span></h2>
+  <div class="body">
+    <img class="fig pix" src="figures/data/interp-vae16.png" style="width:1150px;margin:0 auto">
+    <p class="cap">A 3 turns into a 7. Every frame is decoded from a point on a straight line through the code space of the VAE we train today.</p>
+  </div>
+  <p class="tiny" style="margin:0">Nipun Batra · IIT Gandhinagar</p>
+  <aside class="notes">
+    <p>Open with the strip. Every image here was generated, not drawn: we encoded a real 3 and a real 7, drew a straight line between their codes, and decoded 12 points on that line.</p>
+    <p>By the end of the lecture students should be able to explain every step of that sentence.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="faces" data-section="Why generate?">
+  <p class="kicker">Start with a question</p>
+  <h2>Who are these people?</h2>
+  <div class="body center">
+    <img class="fig" src="assets/gallery/stylegan-faces.jpg" style="height:420px;border-radius:10px">
+  </div>
+  <p class="q" data-b="=1">Look closely: skin, hair, glasses, lighting, background. Anything odd?</p>
+  <p class="q" data-b="2">No one. Each face is a random vector of 512 numbers pushed through a trained network.</p>
+  <p class="src">Karras, Laine &amp; Aila, <i>A Style-Based Generator Architecture for GANs</i> (StyleGAN), 2019 · CC BY-NC 4.0</p>
+  <aside class="notes">
+    <p>Let students look for 20 seconds. Common answers: "celebrities", "stock photos". Reveal: none of them exist.</p>
+    <p>Question to leave hanging: what would a network have to learn to produce a new, plausible face, and how would you even train it? There is no "correct answer" image for a face that has never existed.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="vote" data-section="Why generate?">
+  <p class="kicker">Your turn to be the judge</p>
+  <h2>Real or generated?</h2>
+  <div class="body">
+    <div class="tiles" style="grid-template-columns:repeat(6,150px);gap:18px 26px;justify-content:center;margin-top:8px">
+      <div><img src="figures/data/vote-01.png"><p class="tile-lab">1</p></div>
+      <div><img src="figures/data/vote-02.png"><p class="tile-lab">2</p></div>
+      <div><img src="figures/data/vote-03.png"><p class="tile-lab">3</p></div>
+      <div><img src="figures/data/vote-04.png"><p class="tile-lab">4</p></div>
+      <div><img src="figures/data/vote-05.png"><p class="tile-lab">5</p></div>
+      <div><img src="figures/data/vote-06.png"><p class="tile-lab">6</p></div>
+      <div><img src="figures/data/vote-07.png"><p class="tile-lab">7</p></div>
+      <div><img src="figures/data/vote-08.png"><p class="tile-lab">8</p></div>
+      <div><img src="figures/data/vote-09.png"><p class="tile-lab">9</p></div>
+      <div><img src="figures/data/vote-10.png"><p class="tile-lab">10</p></div>
+      <div><img src="figures/data/vote-11.png"><p class="tile-lab">11</p></div>
+      <div><img src="figures/data/vote-12.png"><p class="tile-lab">12</p></div>
+    </div>
+  </div>
+  <p class="q">Six are MNIST test digits, six come from a network. Write down which six are fake.</p>
+  <aside class="notes">
+    <p>Give one minute. Ask for a show of hands on two or three tiles. Do not reveal: we come back to this vote in the GAN section, where our own discriminator also votes.</p>
+    <p>The six generated digits come from the small GAN we train later in this lecture (about 9 minutes on a laptop GPU).</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="apps" data-section="Why generate?">
+  <p class="kicker">Generation is not only "make a random picture"</p>
+  <h2>Predict the output, then look</h2>
+  <div class="body">
+    <div class="appgrid">
+      <div class="app">
+        <p class="app-t">a sketch → a photo</p>
+        <div class="app-row"><img src="assets/gallery/shoe-input.jpg"><span class="arrow">→</span>
+          <div class="stack app-out"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/shoe-output.jpg" data-b="2"></div></div>
+      </div>
+      <div class="app">
+        <p class="app-t">a horse → a zebra</p>
+        <div class="app-row"><img src="assets/gallery/crops/horse.jpg"><span class="arrow">→</span>
+          <div class="stack app-out"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/crops/zebra.jpg" data-b="2"></div></div>
+      </div>
+      <div class="app">
+        <p class="app-t">fill a hole</p>
+        <div class="app-row"><img src="assets/gallery/crops/inpaint-in.jpg"><span class="arrow">→</span>
+          <div class="stack app-out"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/crops/inpaint-out.jpg" data-b="2"></div></div>
+      </div>
+      <div class="app">
+        <p class="app-t">a label map → a landscape</p>
+        <div class="app-row"><img src="assets/gallery/crops/spade-layout.jpg" style="width:150px"><span class="arrow">→</span>
+          <div class="stack app-out" style="width:150px"><div class="qbox" data-b="=1">?</div><img src="assets/gallery/crops/spade-out-0.jpg" data-b="2" style="width:150px"></div></div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="=1">What should come out on the right? Is there exactly one right answer?</p>
+  <p class="q" data-b="2">Each input allows many plausible outputs. A generator must pick one that looks real.</p>
+  <p class="src">pix2pix (Isola et al. 2017) · CycleGAN (Zhu et al. 2017) · Context Encoders (Pathak et al. 2016) · SPADE (Park et al. 2019). All published model outputs.</p>
+  <aside class="notes">
+    <p>For each pair ask: what does the input fix, and what does the model have to invent? The sketch fixes the outline but not the colour or leather. The hole could be filled many ways. The bird completion is visibly imperfect: point that out.</p>
+    <p>All four were trained with an adversarial (GAN) loss plus task-specific terms. We will see the core of that idea today.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="spade-many" data-section="Why generate?">
+  <p class="kicker">One input, many answers</p>
+  <h2>The same label map, three different photographs</h2>
+  <div class="body">
+    <div class="row" style="justify-content:center;gap:22px;margin-top:20px">
+      <div class="col" style="align-items:center"><img src="assets/gallery/crops/spade-layout.jpg" style="width:250px;border-radius:6px"><p class="cap">the condition</p></div>
+      <span class="arrow" style="font-size:44px">→</span>
+      <div class="col" style="align-items:center" data-b="2"><img src="assets/gallery/crops/spade-out-0.jpg" style="width:250px;border-radius:6px"><p class="cap">sample 1</p></div>
+      <div class="col" style="align-items:center" data-b="3"><img src="assets/gallery/crops/spade-out-1.jpg" style="width:250px;border-radius:6px"><p class="cap">sample 2</p></div>
+      <div class="col" style="align-items:center" data-b="3"><img src="assets/gallery/crops/spade-out-2.jpg" style="width:250px;border-radius:6px"><p class="cap">sample 3</p></div>
+    </div>
+  </div>
+  <p class="q" data-b="3">A generator does not learn one answer. It learns a distribution of answers and draws from it.</p>
+  <p class="src">SPADE / GauGAN, Park et al. 2019, teaser figure: here the variation comes from a style image given to the generator.</p>
+  <aside class="notes">
+    <p>This is the key shift from the classifiers and regressors students know: the target is not a single value. For one input there is a whole distribution of acceptable outputs.</p>
+    <p>Precision: in SPADE these three differ because the authors supplied different style images, not purely random codes. The point stands: one layout, several valid photographs.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="common" data-section="Why generate?">
+  <p class="kicker">What all of these share</p>
+  <h2>Randomness in, a learned network, a sample out</h2>
+  <div class="body center"><!--svg:common--></div>
+  <p class="q">Training means: adjust $\theta$ until the samples look like the data. But what is the loss?</p>
+  <aside class="notes">
+    <p>Build 1: the random input. Build 2: a sample. Build 3: an optional condition (a sketch, a class label, a sentence).</p>
+    <p>The difficulty: there is no target image for a random z. Today we see two answers: the VAE (an encoder tells us which z belongs to which image) and the GAN (a second network learns to judge).</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="names" data-section="Why generate?">
+  <p class="kicker">Part 1 of this course</p>
+  <h2>You have already built a generator</h2>
+  <div class="body">
+    <div class="row top" style="gap:60px;margin-top:6px">
+      <div class="col" style="width:520px">
+        <p class="small">Our name model reads three characters and gives a probability for every next character.</p>
+        <p class="small muted" style="margin-bottom:4px">after <span class="mono">a a b</span>, the trained model says:</p>
+        <div class="bars" style="--c:var(--x)">
+          <span class="lab">–</span><div><div class="bar" style="width:92%"></div></div><span class="val">0.46</span>
+          <span class="lab">i</span><div><div class="bar" style="width:24%"></div></div><span class="val">0.12</span>
+          <span class="lab">h</span><div><div class="bar" style="width:18%"></div></div><span class="val">0.09</span>
+          <span class="lab">r</span><div><div class="bar" style="width:16%"></div></div><span class="val">0.08</span>
+          <span class="lab">b</span><div><div class="bar" style="width:12%"></div></div><span class="val">0.06</span>
+          <span class="lab">s</span><div><div class="bar" style="width:8%"></div></div><span class="val">0.04</span>
+          <span class="lab">other 21</span><div><div class="bar" style="width:30%;background:#C7CCD4"></div></div><span class="val">0.15</span>
+        </div>
+      </div>
+      <div class="col grow" data-b="2">
+        <p class="small"><b>Generate:</b> sample a character, append it, repeat.</p>
+        <div class="row chain" style="gap:6px;flex-wrap:nowrap;margin-top:6px">
+          <span class="node x">a</span><span class="arrow">→</span><span class="node x">a</span><span class="arrow">→</span><span class="node x">b</span><span class="arrow">→</span><span class="node x">i</span><span class="arrow">→</span><span class="node x">d</span><span class="arrow">→</span><span class="node ghost">–</span>
+        </div>
+        <p class="small" style="margin-top:18px" data-b="3">A different random draw at any step gives a different name. That is a generative model: it gives probabilities, and we sample from them.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q">Same idea today: learn a distribution, then sample from it. Only now the samples are images.</p>
+  <aside class="notes">
+    <p>The bars are the actual probabilities from the trained Part 1 model bundled with that lecture ("–" is the end marker). Students have seen this exact chart.</p>
+    <p>Ask: if we always took the most likely character, would we ever get "aabid"? No: after aab we would stop. Sampling, not taking the argmax, is what makes generation varied.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="name-prob" data-section="Why generate?">
+  <p class="kicker">Part 1 of this course</p>
+  <h2>A whole name gets one probability</h2>
+  <div class="body">
+    <table class="work" style="margin:6px auto 0">
+      <tr><th>context</th><th>next</th><th>probability</th><th>−log p</th></tr>
+      <tr><td class="mono">– – –</td><td class="mono">a</td><td>0.08</td><td>2.53</td></tr>
+      <tr><td class="mono">– – a</td><td class="mono">a</td><td>0.08</td><td>2.53</td></tr>
+      <tr><td class="mono">– a a</td><td class="mono">b</td><td>0.02</td><td>3.91</td></tr>
+      <tr><td class="mono">a a b</td><td class="mono">i</td><td>0.12</td><td>2.12</td></tr>
+      <tr><td class="mono">a b i</td><td class="mono">d</td><td>0.09</td><td>2.41</td></tr>
+      <tr><td class="mono">b i d</td><td class="mono">–</td><td>0.23</td><td>1.47</td></tr>
+      <tr class="total" data-b="2"><td>aabid</td><td></td><td>3.2 × 10⁻⁷</td><td>14.96</td></tr>
+    </table>
+    <div class="mathblock" data-b="2" style="margin-top:6px;font-size:26px">$$p_\theta(\text{aabid}) = \prod_{t} p_\theta(x_t \mid x_{\lt t}) \qquad -\log p_\theta(\text{aabid}) = \sum_{t} -\log p_\theta(x_t \mid x_{\lt t})$$</div>
+  </div>
+  <p class="q" data-b="3">Training made this number large for every name in the data. That is maximum likelihood, and it is what we want for images too.</p>
+  <aside class="notes">
+    <p>Numbers are the bundled Part 1 model's target probabilities for "aabid". The product is tiny (3.2e-7) because there are many possible names; the log turns the product into a sum of per-step losses, the cross-entropy they already trained with.</p>
+    <p>Bridge: "Give the data high probability" is the goal for every model today. The difficulty for images will be computing that probability at all.</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="two-ways" data-section="Why generate?">
+  <p class="kicker">From names to digits</p>
+  <h2>Two ways to generate a 28 × 28 digit</h2>
+  <div class="body center"><!--svg:two-ways--></div>
+  <p class="q" data-b="2">Today: route B. Two questions: where does $z$ come from, and how do we train a decoder when no one tells us the right $z$?</p>
+  <aside class="notes">
+    <p>Route A is exactly the name model with pixels as tokens (PixelRNN/PixelCNN): it works but needs 784 sequential steps per image.</p>
+    <p>Route B makes the whole image in one pass from a short random vector. The rest of the lecture is about training that decoder. The code values shown, (0.33, −1.99), are the actual code of our running "3".</p>
+  </aside>
+</section>
+
+<section class="slide sec-hook" id="map" data-section="Why generate?">
+  <p class="kicker">The plan</p>
+  <h2>Today's route</h2>
+  <div class="body">
+    <ol class="route">
+      <li style="--c:var(--z)"><b>Distributions and hidden causes</b><span>on a 1-D toy dataset</span></li>
+      <li style="--c:var(--enc)"><b>Autoencoders</b><span>and why they cannot generate</span></li>
+      <li style="--c:var(--loss)"><b>KL divergence</b><span>how far apart are two distributions?</span></li>
+      <li style="--c:var(--dec)"><b>The ELBO</b><span>a loss for a model we cannot evaluate exactly</span></li>
+      <li style="--c:var(--z)"><b>Reparameterisation</b><span>backprop through a random draw</span></li>
+      <li style="--c:var(--enc)"><b>The VAE on MNIST</b><span>one digit, end to end, with real numbers</span></li>
+      <li style="--c:var(--disc)"><b>GANs</b><span>learn the judge instead of the likelihood</span></li>
+    </ol>
+  </div>
+  <p class="q take">One running image throughout: test digit #{{digit3_index}}, a handwritten 3.</p>
+  <aside class="notes"><p>About 120 minutes in full. If short on time, skip the 2-number vs 16-number comparison and the conditional GAN slide.</p></aside>
+</section>
