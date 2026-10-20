@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-20T10:35:08.423Z",
+  "created": "2026-10-20T10:36:51.271Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -519,8 +519,8 @@
     },
     {
       "path": "lecture4/README.md",
-      "bytes": 4590,
-      "sha256": "d43503cd85ce9753ef159c8553e71a86878991896ae1bbc0e311f6d5425bec11"
+      "bytes": 4826,
+      "sha256": "7d18f8fa16645fc9371c1a1f4727206d04e6666f4f574664761250b90213ec64"
     },
     {
       "path": "lecture4/content.js",

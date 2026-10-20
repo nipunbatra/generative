@@ -46,6 +46,8 @@ The stable and collapsed illustrative runs differ in generator width **and seed*
 
 ## Full training
 
+Optional full image-model training additionally needs `torchvision`, compatible with the installed PyTorch version (`python -m pip install torchvision`). It is not required for the default notebook demonstrations or checkpoint replay.
+
 The final notebook cell has `RUN_FULL=False`. To run it, set `MNIST_ROOT` to a local directory containing `MNIST/raw` and enable the cell. The script never downloads data. It uses the full training split, 30 epochs, batch size 128, Adam learning rate 0.0002, seed 1 and latent dimension 100. CPU works; optional `gan.DEVICE="mps"` uses an available Apple GPU. The new result goes to `models/full-retrain/`, preserving the supplied checkpoint.
 
 BatchNorm running statistics and dropout modes are distinct from parameter freezing. The explicit ownership checks use MLPs without mutable buffers. The image D has dropout but no BatchNorm; the supplied training implementation retains its documented training-mode behaviour.
