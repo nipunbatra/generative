@@ -1,7 +1,8 @@
 # Learning to generate · ES 667 Generative Modelling I (VAEs)
 
-A rebuilt lecture: distributions and fitting, autoencoders, the probabilistic view, KL divergence, variational inference
-and the ELBO, reparameterisation, and the VAE, taught slowly around **one running example** (MNIST test digit #90, a handwritten 3)
+A rebuilt lecture: distributions and fitting, autoencoders, the probabilistic view, then KL divergence, variational inference
+and the ELBO, and reparameterisation (taught on toys in the separate maths lecture `vi.html` below, and applied here), and the VAE,
+taught slowly around **one running example** (MNIST test digit #90, a handwritten 3)
 and one 1-D toy dataset (two bumps at ±2). Every figure and every number on the slides comes from models trained by the scripts below.
 GANs are a separate lecture (`deck/slides/10-gan.html` is kept here as its source; it is not in these decks).
 
@@ -10,8 +11,8 @@ Two 75-minute sessions, seven parts:
 | Deck | Slides | Content |
 |---|---|---|
 | `part1.html` · [exports/session1.pdf](exports/session1.pdf) | 95 | why generate · **1** distributions and fitting (PyTorch fitting, how many bumps, sampling, Bayes, why the gradient needs the posterior, and a second half on MNIST: PCA and inverse PCA, Gaussian mixtures over d PCA numbers with a live d × K explorer, held-out vs AIC vs BIC, a mixture of Bernoullis on raw pixels, and why the recipe does not scale) · **2** autoencoders (the bridge from PCA: a linear autoencoder rediscovers it; MLP, CNN and ViT encoders compared; denoising, sparse, contractive; why they cannot generate, and Part 1's bumps fitted to the codes) · **3** the probabilistic view (prior, decoder as likelihood, the intractable evidence and posterior, Laplace / MCMC / VI) |
-| `part2.html` · [exports/session2.pdf](exports/session2.pdf) | 79 | recap · **4** KL divergence, the slow way (a betting game, surprise, entropy, cross-entropy) · **5** variational inference and the ELBO (derived from KL(q ‖ posterior), VI by hand for our 3, importance sampling, amortisation = the VAE) · **6** reparameterisation · **7** the VAE on MNIST · wrap-up · appendix (the ELBO through Jensen) |
-| `index.html` · [exports/lecture.pdf](exports/lecture.pdf) | 174 | both sessions in one deck |
+| `part2.html` · [exports/session2.pdf](exports/session2.pdf) | 51 | recap, with the VI lecture's two lines · **4** KL divergence, recalled from `vi.html` Part 2 (5 slides: the facts VI needs, and the Gaussian KL against the prior N(0, 1), per coordinate) · **5** variational inference and the ELBO (12 slides: the identity recalled from `vi.html` Part 6 and written for one image, the bound with our 3's numbers, VI by hand for our 3, importance sampling, amortisation = the VAE, the two KLs) · **6** reparameterisation (5 slides: recalled from `vi.html` Part 5, the encoder's log σ² link with our 3's numbers, three lines of PyTorch) · **7** the VAE on MNIST · wrap-up · appendix (the ELBO through Jensen) |
+| `index.html` · [exports/lecture.pdf](exports/lecture.pdf) | 146 | both sessions in one deck |
 
 `*-builds.pdf` versions show every click.
 
@@ -22,7 +23,8 @@ apply it instead of introducing it. It follows the PML course's Lectures 23–24
 course's own examples: the Beta(5, 3) coin with 17 heads in 30, p = N(1, 4²), and two mixtures of Gaussians. The plan it was built
 from, with the source of every slide, is [plan/vi-lecture-plan.md](plan/vi-lecture-plan.md).
 70 slides (a cover, then 9 parts), 168 clicks: `vi.html` · [exports/vi.pdf](exports/vi.pdf) · [exports/vi-builds.pdf](exports/vi-builds.pdf).
-It does not touch the VAE decks above (their Parts 4–6 are to be trimmed only after this deck is reviewed).
+The VAE lecture's Parts 4–6 recall it instead of re-deriving it: each opens with one recap slide whose foot line links to the
+`vi.html` slides it relies on (Part 2 for KL, Part 6 for the ELBO, Part 5 for reparameterisation), then spends its time on our 3.
 
 | Part | Slides | Content |
 |---|---|---|
@@ -49,8 +51,8 @@ its own 9-part route (`<!--viroute:N-->`, `VI_PARTS` in `build_deck.py`).
 Live widgets (in `deck/widgets.js`, each with a print state): `betacoin` (prior × likelihood → posterior), `klgauss` (KL between two
 Gaussians as shaded areas, both directions), `fwdrev` (forward vs reverse KL on the mixture, by gradient descent on the notebook's grid),
 `chase` (q chasing a target: exact KL to N(1, 4²), or a Monte Carlo KL with reparameterised draws to the mixture), `coinelbo` (the
-coin's exact ELBO and KL for any Beta(α, β) on a number line, and a play button that fits it). The VAE decks' `kl`, `elbo`, `explorer`,
-`latent` and `gmmx` widgets are unchanged.
+coin's exact ELBO and KL for any Beta(α, β) on a number line, and a play button that fits it). The VAE decks' `explorer`, `latent` and `gmmx`
+widgets are unchanged; `kl` and `elbo` (the old Part 4 and Part 5 sliders) are no longer on any slide, but their code stays in `widgets.js`.
 
 ```sh
 PY=/Users/nipun/git/clip-lab/.venv/bin/python

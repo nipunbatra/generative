@@ -36,6 +36,7 @@ def fmt(v):
 def derived():
     d = {}
     d["kl_neglogvar"] = [f"{-v:.2f}" for v in NUM["our3"]["logvar"]]
+    d["rep_dzdv"] = f"{NUM['our3']['eps'][0] * NUM['our3']['sigma'][0] / 2:.3f}"   # dz1/dv1 = eps1 * sigma1 / 2, from the shown values
     bad = NUM["toygan"]["bad"]
     d["toygan_bad_left_pct"] = f"{100 * bad['left']:.0f}"
     d["toygan_bad_right_pct"] = f"{100 * bad['right']:.0f}"

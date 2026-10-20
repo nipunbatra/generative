@@ -53,7 +53,7 @@
 <section class="slide sec-end opener" id="appendix" data-section="Appendix">
   <p class="kicker">Appendix</p>
   <h2>A second route to the ELBO</h2>
-  <p>Part 5 reached the ELBO from $\KL(q\,\|\,\text{posterior})$. Many textbooks reach it from $\log p_\theta(x)$ with Jensen's inequality instead. Same bound, one more tool.</p>
+  <p>The VI lecture (its Part 6) reached the ELBO from $\KL(q\,\|\,\text{posterior})$. Many textbooks reach it from $\log p_\theta(x)$ with Jensen's inequality instead. Same bound, one more tool.</p>
 </section>
 
 <section class="slide sec-end" id="app-elbo-1" data-section="Appendix">
@@ -84,7 +84,7 @@
   <div class="body">
     <div class="deriv-prev mathblock">$$\log \int q_\varphi(z\mid x)\,\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\,dz$$</div>
     <div class="mathblock big">$$= \log\; \hl{\E_{z\sim q_\varphi(z\mid x)}}\!\left[\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">From the $\E$ slide: $\int q(z)\,f(z)\,dz = \E_{z\sim q}[f(z)]$. Here $f(z)$ is the ratio $p_\theta(x,z)/q_\varphi(z\mid x)$: one number for each code.</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">An integral against $q$ is an average under $q$: $\int q(z)\,f(z)\,dz = \E_{z\sim q}[f(z)]$. Here $f(z)$ is the ratio $p_\theta(x,z)/q_\varphi(z\mid x)$: one number for each code.</div>
   </div>
   <p class="q" data-b="2">Still exact. We now average over codes drawn from the encoder's cloud, right where the patch is.</p>
 </section>
@@ -114,7 +114,7 @@
     <div class="mathblock big">$$\log p_\theta(x) \;\hl{\ge}\; \E_{q}\!\left[\log\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right] \;=:\; \ELBO$$</div>
     <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Jensen with $R = p_\theta(x,z)/q_\varphi(z\mid x)$. The right side is the <b>E</b>vidence <b>L</b>ower <b>BO</b>und: it can never exceed $\log p_\theta(x)$.</div>
   </div>
-  <p class="q" data-b="2">The same ELBO as Part 5. This route shows it is a bound; Part 5's route also shows the gap is $\KL(q\,\|\,\text{posterior})$.</p>
+  <p class="q" data-b="2">The same ELBO as Part 5. This route shows it is a bound; the KL route (the VI lecture's Part 6) also shows the gap is $\KL(q\,\|\,\text{posterior})$.</p>
 </section>
 
 <section class="slide sec-end" id="reading" data-section="Appendix">
@@ -127,7 +127,7 @@
       <li>Kingma &amp; Welling, <i>Auto-Encoding Variational Bayes</i>, arXiv 1312.6114</li>
       <li>Blei, Kucukelbir &amp; McAuliffe, <i>Variational Inference: A Review for Statisticians</i>, arXiv 1601.00670</li>
       <li>Bishop, <i>Pattern Recognition and Machine Learning</i>, §10.1: the ELBO + KL picture of Part 5</li>
-      <li>Three YouTube videos on KL divergence that Part 4 draws on (video ids sjgZxuCm_8Q, KHVR587oW8I, tXE23653JrU)</li>
+      <li>The VI lecture (<span class="mono">vi.html</span>): KL, the ELBO and reparameterisation on toys; and three YouTube videos on KL divergence (video ids sjgZxuCm_8Q, KHVR587oW8I, tXE23653JrU)</li>
       <li>Stanford CS236 notes on VAEs (deepgenerativemodels.github.io)</li>
       <li>This lecture's code: <span class="mono">scripts/train_models.py</span> (all models), <span class="mono">scripts/make_figures.py</span> and <span class="mono">make_figures_extra.py</span> (every number on the slides)</li>
     </ul>

@@ -20,6 +20,16 @@
         "8774"
       ],
       "port": 8774
+    },
+    {
+      "name": "vae-trim-review",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "scripts/review_server.py",
+        "--port",
+        "8775"
+      ],
+      "port": 8775
     }
   ]
 }

@@ -11,6 +11,7 @@
 <body>
 <main id="deck">
 <!-- ===================================================================== PART 4 · KL DIVERGENCE (SESSION 2 STARTS) -->
+<!-- KL itself is taught in the VI lecture (vi.html, Part 2). This part recalls it and writes the one formula the VAE uses. -->
 
 <section class="slide sec-kl" id="session2" data-section="4 · KL divergence">
   <p class="kicker">Session 2 · where we stopped</p>
@@ -23,308 +24,69 @@
         <p class="small">Training it needs $p_\theta(x) = \int p(z)\,p_\theta(x\mid z)\,dz$: intractable.</p>
         <p class="small">So does the posterior $p_\theta(z\mid x)$, the shaded patch for our 3.</p>
         <p class="small"><b>Variational idea:</b> a simple Gaussian $q$ (purple), pulled close to it.</p>
+        <div class="callout plain" style="margin-top:6px" data-b="2"><b>The VI lecture's two lines:</b><br>$\log p(D) = \ELBO(q) + \KL\big(q\,\|\,p(\theta\mid D)\big)$ for every $q$<br>$z = \mu + \sigma\cdot\eps$: a random draw with a gradient</div>
       </div>
     </div>
   </div>
-  <p class="q">Today: how to measure "close" (KL), the loss that does the pulling (the ELBO), and the VAE.</p>
-  <aside class="notes"><p>Two minutes. Ask a student to say in words what the shaded patch is (which codes could have produced our 3) and why we cannot compute it (it needs p(x)).</p></aside>
+  <p class="q" data-b="2">Today: those two lines for our 3, then one network that applies them to every image: the VAE.</p>
+  <aside class="notes">
+    <p>Two minutes. Ask a student to say in words what the shaded patch is (which codes could have produced our 3) and why we cannot compute it (it needs p(x)).</p>
+    <p>The VI lecture (vi.html) built KL, the ELBO and reparameterisation on a coin, two Gaussians and two mixtures, and ended on these two lines. Today does not re-derive them: each part recalls one tool, points to the VI lecture's slides, and spends its time on our 3.</p>
+  </aside>
 </section>
 
 <section class="slide sec-kl opener break" id="kl-open" data-section="4 · KL divergence">
   <div class="break-grid">
     <div>
       <p class="kicker">Part 4 of 7</p>
-      <h2>KL divergence: how far apart are two distributions?</h2>
-      <p class="why">We want $q$ <b>close</b> to the posterior. Before two clouds in a plane, the simplest possible pair: two bar charts over the digits 1 and 7. Slowly, from a betting game.</p>
+      <h2>KL divergence, recalled for our 3's code</h2>
+      <p class="why">We want $q$ <b>close</b> to the posterior. The VI lecture built "close" from scratch (its Part 2). Here: the facts we need from it, and the one formula every VAE loss uses, a cloud against the prior $\N(0, I)$.</p>
     </div>
     <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and fitting</li><li class="done" style="--c:var(--enc)"><span class="dot">✓</span>Autoencoders</li><li class="done" style="--c:var(--x)"><span class="dot">✓</span>The probabilistic view</li><li class="now" style="--c:var(--loss)"><span class="dot">4</span>KL divergence</li><li class="todo" style="--c:var(--dec)"><span class="dot">5</span>Variational inference and the ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">6</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">7</span>The VAE on MNIST</li></ol>
   </div>
 </section>
 
-<section class="slide sec-kl" id="kl-bars" data-section="4 · KL divergence">
-  <p class="kicker">Two distributions over the same two outcomes</p>
-  <h2>The data says 80/20. The model says 60/40.</h2>
+<section class="slide sec-kl" id="kl-recall" data-section="4 · KL divergence">
+  <p class="kicker">From the VI lecture, Part 2</p>
+  <h2>KL is an average of log-ratios, under its first argument</h2>
   <div class="body">
-    <div class="row" style="justify-content:center;gap:120px;margin-top:20px">
-      <div class="col" style="align-items:center">
-        <p class="small cx" style="font-weight:650">$P$: the data</p>
-        <div class="vbars"><div style="--h:0.8;--c:var(--x)"><span>0.8</span></div><div style="--h:0.2;--c:var(--x)"><span>0.2</span></div></div>
-        <div class="vlabs"><span>a 1</span><span>a 7</span></div>
-      </div>
-      <div class="col" style="align-items:center" data-b="2">
-        <p class="small cdec" style="font-weight:650">$Q$: our model</p>
-        <div class="vbars"><div style="--h:0.6;--c:var(--dec)"><span>0.6</span></div><div style="--h:0.4;--c:var(--dec)"><span>0.4</span></div></div>
-        <div class="vlabs"><span>a 1</span><span>a 7</span></div>
-      </div>
+    <div class="mathblock big">$$\KL\big(q\,\|\,p\big) = \E_{z\sim q}\big[\log q(z) - \log p(z)\big]$$</div>
+    <div class="row top" style="gap:22px;margin-top:10px">
+      <div class="callout plain" style="flex:1" data-b="2"><h3>Never negative</h3>$\KL \ge 0$, and $= 0$ only when $q = p$: the log lies below its tangent.</div>
+      <div class="callout plain" style="flex:1" data-b="3"><h3>Not symmetric</h3>$\KL(q\|p) \ne \KL(p\|q)$. Which one we minimise changes the answer.</div>
+      <div class="callout enc" style="flex:1" data-b="4"><h3>VI uses $\KL(q\,\|\,\text{posterior})$</h3>An average under $q$, which we can draw from. The price: $q$ seeks one mode and comes out too narrow.</div>
     </div>
   </div>
-  <p class="q" data-b="2">A dataset of 1s and 7s, 80% 1s. The model believes 60/40. How wrong is it, as one number?</p>
-  <aside class="notes"><p>Keep the story concrete: draw digits from the data, ask the model how probable each was. When a 1 shows up, the model said 0.6 when it should have said 0.8.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-game" data-section="4 · KL divergence">
-  <p class="kicker">A betting game</p>
-  <h2>Which model makes the real data more likely?</h2>
-  <div class="body">
-    <p class="small" style="text-align:center">Ten digits from the data: eight 1s, two 7s. Each model gives each digit a probability; multiply them.</p>
-    <div class="game-row"><span class="who cx">$P$ (the truth)</span><div class="dgs"><span class="dg "><b>1</b><i>0.8</i></span><span class="dg "><b>1</b><i>0.8</i></span><span class="dg "><b>1</b><i>0.8</i></span><span class="dg seven"><b>7</b><i>0.2</i></span><span class="dg "><b>1</b><i>0.8</i></span><span class="dg "><b>1</b><i>0.8</i></span><span class="dg "><b>1</b><i>0.8</i></span><span class="dg "><b>1</b><i>0.8</i></span><span class="dg seven"><b>7</b><i>0.2</i></span><span class="dg "><b>1</b><i>0.8</i></span></div><span class="prod" data-b="2">$0.8^8 \times 0.2^2 = 0.0067$</span></div>
-    <div class="game-row" data-b="3"><span class="who cdec">$Q$ (our model)</span><div class="dgs"><span class="dg "><b>1</b><i>0.6</i></span><span class="dg "><b>1</b><i>0.6</i></span><span class="dg "><b>1</b><i>0.6</i></span><span class="dg seven"><b>7</b><i>0.4</i></span><span class="dg "><b>1</b><i>0.6</i></span><span class="dg "><b>1</b><i>0.6</i></span><span class="dg "><b>1</b><i>0.6</i></span><span class="dg "><b>1</b><i>0.6</i></span><span class="dg seven"><b>7</b><i>0.4</i></span><span class="dg "><b>1</b><i>0.6</i></span></div><span class="prod" data-b="4">$0.6^8 \times 0.4^2 = 0.0027$</span></div>
-  </div>
-  <p class="q" data-b="5">The truth wins, by a factor of $0.0067 / 0.0027 = 2.5$. KL will measure this gap, per digit.</p>
-  <aside class="notes"><p>From Luis Serrano's KL video: a model is good if it makes the data we actually see likely. A model that is wrong about the 1s and 7s pays for it on every digit. Keep the factor 2.5 in mind: KL turns out to be (1/10) log 2.5, the gap per digit.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-whylog" data-section="4 · KL divergence">
-  <p class="kicker">Products of many small numbers are awkward</p>
-  <h2>Surprise $= -\log p$, and why the log</h2>
-  <div class="body">
-    <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/surprise-curve.svg" style="width:600px">
-      <div class="col grow">
-        <p class="small">What should "surprise" do?</p>
-        <p class="small" data-b="2">1 · a certain event: no surprise. $-\log 1 = 0$.</p>
-        <p class="small" data-b="3">2 · rarer means more surprising. $-\log p$ grows as $p$ shrinks.</p>
-        <p class="small" data-b="4">3 · two independent digits: probabilities <b>multiply</b>, surprises should <b>add</b>. Only the log turns products into sums.</p>
-      </div>
-    </div>
-  </div>
-  <p class="q" data-b="4">So the betting-game product becomes a sum of surprises, one per digit. Natural log, so the unit is the <b>nat</b>.</p>
-  <aside class="notes"><p>Following Artem Kirsanov's argument: the additivity requirement forces the logarithm. The base only changes the unit (bits for log base 2).</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-surprise" data-section="4 · KL divergence">
-  <p class="kicker">Our two digits, scored both ways</p>
-  <h2>The surprise table</h2>
-  <div class="body">
-    <table class="work" style="margin:10px auto 0;font-size:24px">
-      <tr><th>outcome</th><th>$P$</th><th>$Q$</th><th>surprise if you believe $P$</th><th>surprise if you believe $Q$</th></tr>
-      <tr><td>a 1</td><td>0.8</td><td>0.6</td><td>$-\log 0.8 = 0.223$</td><td data-b="2">$-\log 0.6 = 0.511$</td></tr>
-      <tr><td>a 7</td><td>0.2</td><td>0.4</td><td>$-\log 0.2 = 1.609$</td><td data-b="2">$-\log 0.4 = 0.916$</td></tr>
-    </table>
-    <div class="row" style="justify-content:center;gap:40px;margin-top:26px" data-b="3">
-      <div class="callout plain" style="width:470px">Each row is one kind of digit. The next two slides average each column, weighted by how often the digit really appears.</div>
-      <div class="callout loss" style="width:470px">Believing $Q$, a 1 surprises us more than it should ($0.511$ vs $0.223$), a 7 less ($0.916$ vs $1.609$).</div>
-    </div>
-  </div>
-  <aside class="notes"><p>This is the same −log p that appeared in the name model and in cross-entropy. Nothing new, just a name for it.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-entropy" data-section="4 · KL divergence">
-  <p class="kicker">Average surprise, when you believe the truth</p>
-  <h2>Entropy: $H(P) = 0.500$ nats per digit</h2>
-  <div class="body">
-    <div class="mathblock" style="font-size:28px">$$H(P) = \sum_i P_i\,(-\log P_i) = \underbrace{0.8}_{\text{how often a 1}}\times 0.223 + \underbrace{0.2}_{\text{how often a 7}}\times 1.609 = 0.500$$</div>
-    <p class="small" style="text-align:center;margin-top:16px" data-b="2">The weights are how often each digit really appears: eight in ten, two in ten. The batch of ten digits from the game, averaged.</p>
-  </div>
-  <p class="q" data-b="2">Even the perfect model is surprised by 0.500 nats per digit on average: the data are random.</p>
-</section>
-
-<section class="slide sec-kl" id="kl-cross" data-section="4 · KL divergence">
-  <p class="kicker">Same data, a different scorer</p>
-  <h2>Cross-entropy: $H(P, Q) = 0.592$ nats per digit</h2>
-  <div class="body">
-    <div class="mathblock" style="font-size:28px">$$H(P, Q) = \sum_i \cx{P_i}\,(-\log \cdec{Q_i}) = 0.8 \times 0.511 + 0.2 \times 0.916 = 0.592$$</div>
-    <div class="steps2" style="margin-top:16px" data-b="2">
-      <div class="callout x"><h3>Still weighted by $P$</h3>the digits still come from the real data: eight 1s, two 7s.</div>
-      <div class="callout dec"><h3>Scored by $Q$</h3>each digit's surprise now uses the model's probability.</div>
-    </div>
-  </div>
-  <p class="q" data-b="2">Believing the wrong model costs more surprise on the same data: 0.592 instead of 0.500.</p>
-  <aside class="notes"><p>Kirsanov's rigged coin: you only get unusually surprised by ten heads in a row because you wrongly believe the coin is fair. The data did not change; your model did.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-extra" data-section="4 · KL divergence">
-  <p class="kicker">The extra surprise</p>
-  <h2>KL divergence = cross-entropy − entropy</h2>
-  <div class="body">
-    <div class="stackbar" style="margin:6px auto 0;width:980px">
-      <div style="flex:5.00;background:var(--x-t);border-color:var(--x)"><b>$H(P) = 0.500$</b><span>unavoidable: the data are random</span></div>
-      <div style="flex:0.92;background:var(--loss-t);border-color:var(--loss)" data-b="2"><b>$0.092$</b><span>KL</span></div>
-    </div>
-    <p class="cap">together: $H(P, Q) = 0.592$ (more precisely $0.5004 + 0.0915 = 0.5919$)</p>
-    <div class="mathblock" style="font-size:30px;margin-top:14px" data-b="3">$$\KL(P\,\|\,Q) = H(P, Q) - H(P) = \sum_i P_i \log\frac{P_i}{Q_i} = 0.092 \text{ nats}$$</div>
-  </div>
-  <p class="q" data-b="3">KL is the part of the surprise that comes only from using the wrong model.</p>
-</section>
-
-<section class="slide sec-kl" id="kl-ledger" data-section="4 · KL divergence">
-  <p class="kicker">Digit by digit, and back to the game</p>
-  <h2>Where the 0.092 comes from</h2>
-  <div class="body">
-    <table class="work" style="margin:0 auto;font-size:24px">
-      <tr><th>digit</th><th>how often $P_i$</th><th>extra surprise $\log(P_i/Q_i)$</th><th>contribution</th></tr>
-      <tr><td>a 1</td><td>0.8</td><td>$\log(0.8/0.6) = 0.2877$</td><td>$0.2301$</td></tr>
-      <tr data-b="2"><td>a 7</td><td>0.2</td><td>$\log(0.2/0.4) = -0.6931$</td><td>$-0.1386$</td></tr>
-      <tr class="total" data-b="3"><td>KL</td><td></td><td></td><td>$0.0915$</td></tr>
-    </table>
-    <div class="mathblock" style="font-size:26px;margin-top:20px" data-b="4">$$\text{the game:}\quad \tfrac{1}{10}\log\frac{0.0067}{0.0027} = \tfrac{1}{10}\log 2.497 = 0.0915$$</div>
-  </div>
-  <p class="q" data-b="4">One row is negative: $Q$ over-predicts 7s, so a 7 surprises it less. The total is still positive, and it is exactly the betting-game gap, per digit.</p>
-</section>
-
-<section class="slide sec-kl" id="expectation" data-section="4 · KL divergence">
-  <p class="kicker">Notation we will use all lecture</p>
-  <h2>$\E$ means "average over"</h2>
-  <div class="body">
-    <div class="erows" style="margin:0 auto">
-      <div class="mathblock left" style="font-size:25px">$$\E_{x\sim P}\big[f(x)\big] = \sum_x P(x)\,f(x)$$</div><span class="lab">exact, for a sum over outcomes</span>
-      <div class="mathblock left" style="font-size:25px" data-b="2">$$\E_{z\sim q}\big[f(z)\big] = \int q(z)\,f(z)\,dz$$</div><span class="lab" data-b="2">exact, for a continuous variable</span>
-      <div class="mathblock left" style="font-size:25px" data-b="3">$$\E_{x\sim P}\big[f(x)\big] \approx \frac1S\sum_{s=1}^{S} f(x_s),\quad x_s\sim P$$</div><span class="lab" data-b="3">estimated from samples</span>
-    </div>
-    <div class="callout x" style="margin-top:14px" data-b="4">KL is an average: $\KL(P\|Q) = \E_{x\sim P}\big[\log\tfrac{P(x)}{Q(x)}\big]$. Five draws 1, 1, 7, 1, 1 give $\tfrac15(4\times 0.288 - 0.693) = 0.092$.</div>
-  </div>
+  <p class="q" data-b="4">Our 3's posterior is a single small patch, so there is only one mode to seek. What a diagonal $q$ cannot do is tilt with it.</p>
+  <p class="src">VI lecture (vi.html), Part 2: <a href="vi.html#k-dens">KL for densities, never negative, not symmetric</a> · <a href="vi.html#k-g1-live">KL between two Gaussians, live</a> · <a href="vi.html#k-fwdrev">forward vs reverse on two bumps</a></p>
   <aside class="notes">
-    <p>The subscript says which distribution the average is taken under: x ∼ P means "x is drawn from P". This matters because KL changes when you swap it.</p>
-    <p>Those five draws happen to be exactly 80/20, so the estimate matches. With random draws it would fluctuate around 0.092.</p>
+    <p>Ask the class for each fact before clicking; they did all three in the VI lecture. If they hesitate on the third: KL(p‖q) would average under the posterior, which we cannot sample. That is why VI minimises KL(q‖posterior).</p>
+    <p>Mode-seeking on our 3: Part 3's grid showed a single, slightly tilted patch, so a diagonal Gaussian can sit on it closely but not exactly. Part 5 measures how closely: 0.08 nats.</p>
   </aside>
 </section>
 
-<section class="slide sec-kl" id="kl-nonneg" data-section="4 · KL divergence">
-  <p class="kicker">Why KL can never be negative</p>
-  <h2>One picture: $\log r$ lies under its tangent</h2>
+<section class="slide sec-kl" id="kl-prior" data-section="4 · KL divergence">
+  <p class="kicker">The KL in every VAE loss</p>
+  <h2>A Gaussian cloud against the prior $\N(0, 1)$</h2>
   <div class="body">
     <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/kl-tangent.svg" style="width:560px">
+      <img class="fig" src="figures/data/kl-gauss.svg" style="width:560px">
       <div class="col grow">
-        <p class="small">Let $r = Q_i / P_i$. The curve $\log r$ never rises above the line $r - 1$.</p>
-        <div class="mathblock left" style="font-size:24px" data-b="2">$$\KL = \sum_i P_i\,(-\log r_i) \;\ge\; \sum_i P_i\,(1 - r_i)$$</div>
-        <div class="mathblock left" style="font-size:24px" data-b="3">$$= \sum_i P_i - \sum_i Q_i = 1 - 1 = 0$$</div>
+        <p class="small">The VI lecture's formula for two Gaussians:</p>
+        <div class="mathblock left" style="font-size:21px">$$\KL(q\,\|\,p) = \frac12\left[\log\frac{\sigma_p^2}{\sigma_q^2} - 1 + \frac{\sigma_q^2 + (\mu_q-\mu_p)^2}{\sigma_p^2}\right]$$</div>
+        <p class="small" data-b="2">Put in the prior, $\mu_p = 0$ and $\sigma_p = 1$:</p>
+        <div class="mathblock left" style="font-size:26px" data-b="2">$$\KL\big(q\,\|\,\N(0,1)\big) = \hl{\tfrac12\big(\mu^2 + \sigma^2 - 1 - \log\sigma^2\big)}$$</div>
+        <p class="small" data-b="3">Check on the toy cloud $q = \N(1, 0.5^2)$, the shaded area:</p>
+        <div class="mathblock left" style="font-size:24px" data-b="3">$$\tfrac12\big(1 + 0.25 - 1 + 1.386\big) = 0.818\ \checkmark$$</div>
       </div>
     </div>
   </div>
-  <p class="q" data-b="3">Equality only when every $r_i = 1$: $Q = P$. No model beats the truth on the truth's own data.</p>
-  <aside class="notes"><p>The tangent picture is from Jia-Bin Huang's KL video. Red segments: our two digits, r = 0.75 for a 1 and r = 2 for a 7. The gaps between the line and the curve are what makes KL positive.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-evidence" data-section="4 · KL divergence">
-  <p class="kicker">What the number means</p>
-  <h2>KL is how fast evidence piles up</h2>
-  <div class="body">
-    <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/kl-evidence.svg" style="width:640px">
-      <div class="col grow">
-        <div class="mathblock left" style="font-size:24px">$$\frac{p(\text{data}\mid P)}{p(\text{data}\mid Q)} \approx e^{\,n\,\KL(P\|Q)}$$</div>
-        <p class="small">After 10 digits the truth is 2.5× more likely; after 50, 97×; after 100, 9,400×.</p>
-      </div>
-    </div>
-  </div>
-  <p class="q">A small KL means the two models are hard to tell apart from data; a large one means a few samples settle it.</p>
-</section>
-
-<section class="slide sec-kl" id="kl-order" data-section="4 · KL divergence">
-  <p class="kicker">Not a distance</p>
-  <h2>Swap the arguments, get a different number</h2>
-  <div class="body">
-    <div class="row" style="gap:30px">
-      <div class="col" style="width:470px">
-        <div class="mathblock left" style="font-size:25px">$$\KL(Q\|P) = 0.6\log\frac{0.6}{0.8} + 0.4\log\frac{0.4}{0.2}$$</div>
-        <div class="mathblock left" style="font-size:25px">$$= -0.1726 + 0.2773 = 0.1046$$</div>
-        <p class="small" data-b="2">$0.105 \neq 0.092$: KL is not symmetric. "How wrong is $Q$ about $P$" differs from "how wrong is $P$ about $Q$".</p>
-        <p class="small" data-b="3">Push $q \to 0$ and $\KL(P\|Q) \to \infty$. Never give zero probability to something that happens.</p>
-      </div>
-      <img class="fig" src="figures/data/kl-vs-q.svg" style="width:640px">
-    </div>
-    <div class="ctrl interactive" data-widget="kl" style="justify-content:center;margin-top:4px">
-      <span>model's probability of a 1, $q$ =</span><input type="range" min="0.01" max="0.99" step="0.01" value="0.6"><span class="readout">0.60</span>
-      <span>$\KL(P\|Q)$ = <span class="readout kl-pq">0.092</span></span><span>$\KL(Q\|P)$ = <span class="readout kl-qp">0.105</span></span>
-    </div>
-  </div>
-  <aside class="notes"><p>Drag the slider live. Both curves are zero at q = 0.8. Near q = 0 the red curve explodes: the data has 1s but the model says they never happen.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-asym" data-section="4 · KL divergence">
-  <p class="kicker">The order matters, sharply</p>
-  <h2>A model that "forgets" 7s</h2>
-  <div class="body">
-    <p class="small" style="text-align:center">Truth $P = (0.8, 0.2)$. A model $Q' = (0.99, 0.01)$ that almost never expects a 7.</p>
-    <div class="row" style="justify-content:center;gap:28px;margin-top:10px">
-      <div class="stat wide" data-b="2"><b>$\KL(P\|Q') = 0.43$</b><span>real 7s keep showing up, and each costs $\log(0.2/0.01) = 3.0$ nats</span></div>
-      <div class="stat wide" data-b="3"><b>$\KL(Q'\|P) = 0.18$</b><span>averaged under $Q'$, which almost never draws a 7, so the costly digit rarely counts</span></div>
-    </div>
-  </div>
-  <p class="q" data-b="3">$\KL(P\|Q)$ punishes a model for giving tiny probability to things that really happen.</p>
-</section>
-
-<section class="slide sec-kl" id="kl-ce" data-section="4 · KL divergence">
-  <p class="kicker">Why training code says "cross-entropy"</p>
-  <h2>Cross-entropy = entropy + KL</h2>
-  <div class="body">
-    <div class="ladder" style="margin:0 auto;width:1080px;font-size:26px">
-      <span class="lhs">$H(P,Q)$</span><span>$=$</span><span>$\displaystyle -\sum_i P_i\log Q_i$</span>
-      <span></span><span></span><span class="why">cross-entropy: the loss you train classifiers with</span>
-      <span class="lhs" data-b="2"></span><span data-b="2">$=$</span><span data-b="2">$\displaystyle -\sum_i P_i\log P_i \;+\; \sum_i P_i\big(\log P_i - \log Q_i\big)$</span>
-      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">add and subtract $\sum_i P_i\log P_i$</span>
-      <span class="lhs" data-b="3"></span><span data-b="3">$=$</span><span data-b="3">$\displaystyle \underbrace{H(P)}_{\text{entropy: fixed by the data}} \;+\; \KL(P\,\|\,Q)$</span>
-    </div>
-  </div>
-  <p class="q" data-b="3">Lowering cross-entropy can only lower the KL part. So does maximum likelihood: it minimises $\KL(\text{data}\,\|\,\text{model})$.</p>
-  <aside class="notes"><p>Together: H(P, Q) = 0.592 nats. Remember the direction: data first. That direction will explain why VAEs blur.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-gauss" data-section="4 · KL divergence">
-  <p class="kicker">The version the VAE needs</p>
-  <h2>KL between two bumps: an area</h2>
-  <div class="body">
-    <div class="row" style="gap:30px">
-      <img class="fig" src="figures/data/kl-gauss.svg" style="width:570px">
-      <div class="col grow">
-        <p class="small">For continuous variables the sum becomes an integral:</p>
-        <div class="mathblock left" style="font-size:26px">$$\KL(q\|p) = \int q(z)\,\log\frac{q(z)}{p(z)}\,dz$$</div>
-        <p class="small" data-b="2">Take a toy cloud $q = \N(1, 0.5^2)$ and $p = \N(0,1)$, the prior. (Our 3's real $q$ is far narrower: Part 7.)</p>
-        <p class="small" data-b="3">The shaded area, computed numerically, is <b>0.818</b> nats.</p>
-      </div>
-    </div>
-  </div>
-  <p class="q" data-b="3">Can we get 0.818 without a computer? Yes: for two Gaussians the integral has a formula. Two steps.</p>
-  <aside class="notes"><p>Numerical integral of the lower curve: 0.8181. The grey part is where q is below p and contributes negatively, like the 7 row earlier.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-gauss-2" data-section="4 · KL divergence">
-  <p class="kicker">Gaussian KL, step 1 of 2</p>
-  <h2>Write out the log of the ratio</h2>
-  <div class="body">
-    <div class="ladder" style="margin:0 auto;width:1060px;font-size:26px">
-      <span class="lhs">$\log q(z)$</span><span>$=$</span><span>$\displaystyle -\log\sigma - \tfrac12\log 2\pi - \frac{(z-\mu)^2}{2\sigma^2}$</span>
-      <span></span><span></span><span class="why">log of $\N(z;\mu,\sigma^2)$</span>
-      <span class="lhs" data-b="2">$\log p(z)$</span><span data-b="2">$=$</span><span data-b="2">$\displaystyle -\tfrac12\log 2\pi - \frac{z^2}{2}$</span>
-      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">log of $\N(z;0,1)$</span>
-      <span class="lhs" data-b="3">$\log\dfrac{q(z)}{p(z)}$</span><span data-b="3">$=$</span><span data-b="3">$\displaystyle -\log\sigma - \frac{(z-\mu)^2}{2\sigma^2} + \frac{z^2}{2}$</span>
-      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">subtract: the $\tfrac12\log 2\pi$ terms cancel</span>
-    </div>
-  </div>
-  <p class="q" data-b="3">Three terms. Next: average each one over $z \sim q$.</p>
-</section>
-
-<section class="slide sec-kl" id="kl-gauss-3" data-section="4 · KL divergence">
-  <p class="kicker">Gaussian KL, step 2 of 2</p>
-  <h2>Average each term over the cloud $q$</h2>
-  <div class="body">
-    <div class="row" style="justify-content:center;gap:24px">
-      <div class="callout enc" style="width:500px">$\E_q\big[(z-\mu)^2\big] = \sigma^2$ <span class="muted">(that is the variance)</span></div>
-      <div class="callout enc" style="width:500px">$\E_q\big[z^2\big] = \mu^2 + \sigma^2$ <span class="muted">(mean squared + variance)</span></div>
-    </div>
-    <div class="mathblock" style="font-size:27px;margin-top:16px" data-b="2">$$\KL = -\log\sigma - \frac{\sigma^2}{2\sigma^2} + \frac{\mu^2+\sigma^2}{2} = \frac12\Big(\mu^2 + \sigma^2 - 1 - \log\sigma^2\Big)$$</div>
-    <div class="mathblock" style="font-size:25px" data-b="3">$$\mu = 1,\ \sigma = 0.5:\quad \tfrac12\big(1 + 0.25 - 1 + 1.386\big) = 0.818 \ \checkmark$$</div>
-  </div>
-  <p class="q" data-b="3">Per coordinate: moving the mean costs $\tfrac12\mu^2$; a width other than 1 costs $\tfrac12(\sigma^2 - 1 - \log\sigma^2)$, zero only at $\sigma = 1$. Several coordinates: add one term each.</p>
-  <aside class="notes"><p>The check matches the shaded area from two slides ago. This exact formula is what the VAE code computes.</p></aside>
-</section>
-
-<section class="slide sec-kl" id="kl-direction" data-section="4 · KL divergence">
-  <p class="kicker">Back to our two bumps</p>
-  <h2>Fit one Gaussian: the KL direction decides what you get</h2>
-  <div class="body">
-    <div class="row" style="justify-content:center;gap:30px">
-      <div class="col" style="align-items:center"><img class="fig" src="figures/data/kl-fwd.svg" style="width:530px">
-        <p class="small" style="text-align:center">minimise $\KL(\text{data}\,\|\,q)$: cover everything.<br>Part 1's maximum-likelihood fit, with infinite data.</p></div>
-      <div class="col" style="align-items:center" data-b="2"><img class="fig" src="figures/data/kl-rev.svg" style="width:530px">
-        <p class="small" style="text-align:center">minimise $\KL(q\,\|\,\text{data})$: never put mass where<br>data is absent, so pick one bump.</p></div>
-    </div>
-  </div>
-  <p class="q" data-b="2">Mode-covering vs mode-seeking. Variational inference will minimise $\KL(q\,\|\,\text{posterior})$: the second kind.</p>
+  <p class="q" data-b="3">A code with several coordinates and a diagonal $q$: one such term per coordinate, added. Moving a centre costs $\tfrac12\mu^2$; a width other than 1 costs $\tfrac12(\sigma^2 - 1 - \log\sigma^2)$.</p>
+  <p class="src">VI lecture (vi.html), Part 2: <a href="vi.html#k-ex">derive the Gaussian KL</a> · <a href="vi.html#k-ans">the answer, and torch's _kl_normal_normal</a></p>
   <aside class="notes">
-    <p>Both fits found by brute-force search over (μ, σ). Forward: 𝒩(0.0, 2.06²), the same as the moment-matched maximum-likelihood fit. Reverse: 𝒩(−2.0, 0.5²), sitting on one bump.</p>
-    <p>Why: KL(p‖q) is weighted by p, so q is punished wherever data exists and q is small. KL(q‖p) is weighted by q, so q is punished wherever it puts mass and the data is absent.</p>
+    <p>The figure: the toy cloud N(1, 0.5²) against the prior. The lower curve is the integrand; its area, computed numerically, is 0.8181 nats. Grey: where q is below p and contributes negatively.</p>
+    <p>Our 3's real cloud is far narrower (σ about 0.05), so its width term dominates: 6.97 nats in all for the encoder's cloud. Part 7 works it out coordinate by coordinate.</p>
+    <p>"Diagonal" matters: with independent coordinates both q and the prior factorise, and the KL of a product is the sum of the KLs.</p>
   </aside>
 </section>
 
@@ -334,78 +96,58 @@
   <div class="body">
     <div class="recap">
       <div><h3>What we did</h3><ol>
-        <li>Surprise $= -\log p$; entropy = average surprise under the truth.</li>
-        <li>Cross-entropy = the same data scored by a model; KL = the extra.</li>
-        <li>$\KL \ge 0$, zero only when the two match, not symmetric.</li>
-        <li>For Gaussians: $\tfrac12(\mu^2+\sigma^2-1-\log\sigma^2)$ per coordinate.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next: make $q$ close to the posterior</h3><p class="small">Minimise $\KL(q\,\|\,p_\theta(z\mid x))$. It contains the intractable $p_\theta(x)$; Part 5 rearranges it into a loss that does not.</p></div>
+        <li>From the VI lecture: $\KL(q\|p)$ is an average under $q$, never negative, not symmetric.</li>
+        <li>VI minimises $\KL(q\,\|\,\text{posterior})$ because we can draw from $q$; $q$ seeks a mode.</li>
+        <li>Against the prior: $\tfrac12(\mu^2+\sigma^2-1-\log\sigma^2)$ per coordinate, added.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next: make $q$ close to the posterior</h3><p class="small">$\KL(q\,\|\,p_\theta(z\mid x))$ contains the intractable $p_\theta(x)$. The VI lecture's ELBO removes it; Part 5 runs it on our 3, then hands the job to an encoder.</p></div>
     </div>
   </div>
 </section>
 
 <!-- ===================================================================== PART 5 · VARIATIONAL INFERENCE AND THE ELBO -->
+<!-- The ELBO is derived in the VI lecture (vi.html, Part 6). This part recalls it for one image and runs it on our 3. -->
 
 <section class="slide sec-elbo opener break" id="elbo-open" data-section="5 · VI and the ELBO">
   <div class="break-grid">
     <div>
       <p class="kicker">Part 5 of 7</p>
-      <h2>Variational inference, and the ELBO</h2>
-      <p class="why">Part 3 wanted a simple $q$ close to the posterior of our 3. Part 4 gave a number for "close". Write the goal down: one rearrangement turns it into a loss we can compute, the ELBO. Then run it, and see why it leads to an encoder.</p>
+      <h2>Variational inference for our 3, then for every image</h2>
+      <p class="why">The VI lecture turned "make $q$ close to the posterior" into a loss we can compute, the ELBO, and fitted a coin with it (its Part 6). Here the unknown is our 3's code: run the same loss on it, read the numbers, and see why doing this image by image leads to an encoder.</p>
     </div>
     <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and fitting</li><li class="done" style="--c:var(--enc)"><span class="dot">✓</span>Autoencoders</li><li class="done" style="--c:var(--x)"><span class="dot">✓</span>The probabilistic view</li><li class="done" style="--c:var(--loss)"><span class="dot">✓</span>KL divergence</li><li class="now" style="--c:var(--dec)"><span class="dot">5</span>Variational inference and the ELBO</li><li class="todo" style="--c:var(--z)"><span class="dot">6</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">7</span>The VAE on MNIST</li></ol>
   </div>
 </section>
 
-<section class="slide sec-elbo" id="vi-goal" data-section="5 · VI and the ELBO">
-  <p class="kicker">The goal, written down</p>
-  <h2>Find the $q$ with the smallest KL to the posterior</h2>
+<section class="slide sec-elbo" id="elbo-recall" data-section="5 · VI and the ELBO">
+  <p class="kicker">From the VI lecture, Part 6, with an image in place of the coin</p>
+  <h2>The same identity, written for one image</h2>
   <div class="body">
-    <div class="mathblock" style="font-size:34px">$$q^{\star} = \arg\min_{q\,\in\,\mathcal Q}\; \KL\big(\,q(z)\,\|\,p_\theta(z\mid x)\,\big)$$</div>
-    <div class="row top" style="gap:26px;margin-top:14px">
-      <div class="callout enc" style="flex:1"><h3>$\mathcal Q$: the shapes we allow</h3>Diagonal Gaussians. For our 2-number code: 4 numbers, a centre $m$ and two widths $s$.</div>
-      <div class="callout x" style="flex:1" data-b="2"><h3>Why $q$ first?</h3>KL averages under its first argument. $q$ is ours, so we can draw from it. The other order would need draws from the posterior: the thing we cannot get.</div>
-      <div class="callout loss" style="flex:1" data-b="3"><h3>The catch</h3>$p_\theta(z\mid x) = p_\theta(x,z)\,/\,p_\theta(x)$, and $p_\theta(x)$ is the integral we cannot do. We cannot even evaluate this KL.</div>
+    <div class="mathblock" style="font-size:28px">$$\log p_\theta(x) = \underbrace{\E_{z\sim q}\big[\log p_\theta(x, z) - \log q(z)\big]}_{\ELBO(q)} + \underbrace{\KL\big(q\,\|\,p_\theta(z\mid x)\big)}_{\ge\, 0}$$</div>
+    <div class="row top" style="gap:34px;margin-top:6px" data-b="2">
+      <table class="work vocab3" style="width:470px">
+        <tr><th>VI lecture</th><th>here</th></tr>
+        <tr><td>$\theta$, the unknown</td><td>$z$, our 3's code</td></tr>
+        <tr><td>$D$, the data</td><td>$x$, our 3</td></tr>
+        <tr><td>prior $p(\theta)$</td><td>$p(z) = \N(0, I)$</td></tr>
+        <tr><td>likelihood $p(D\mid\theta)$</td><td>decoder $p_\theta(x\mid z)$</td></tr>
+      </table>
+      <div class="col grow">
+        <p class="small" data-b="3">The ELBO needs only the joint, $p_\theta(x, z) = p(z)\,p_\theta(x\mid z)$: prior times decoder. No $p_\theta(x)$, no posterior.</p>
+        <p class="small" data-b="4">$\log p_\theta(x)$ does not move when $q$ does, so whatever the ELBO gains, the KL to the posterior loses.</p>
+      </div>
     </div>
   </div>
-  <p class="q" data-b="3">Four short moves get $p_\theta(x)$ out of the way.</p>
-  <aside class="notes"><p>This is KL(q ‖ p), the "reverse" or mode-seeking direction from the end of Part 4. Here the choice is forced by practicality: we can only average under a distribution we can sample.</p></aside>
-</section>
-
-<section class="slide sec-elbo" id="vi-d1" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 1 of 4</p>
-  <h2>Write out the KL</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\KL\big(q(z)\,\|\,p_\theta(z\mid x)\big)$$</div>
-    <div class="mathblock big">$$= \E_{z\sim q}\big[\,\log q(z) - \hl{\log p_\theta(z\mid x)}\,\big]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">The definition from Part 4: the average, under the first argument, of the log of the ratio. The highlighted term is the one we cannot compute.</div>
-  </div>
-</section>
-
-<section class="slide sec-elbo" id="vi-d2" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 2 of 4</p>
-  <h2>Bayes: the posterior is the joint over the evidence</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\big[\log q(z) - \log p_\theta(z\mid x)\big]$$</div>
-    <div class="mathblock big">$$= \E_{q}\big[\log q(z) - \log p_\theta(x,z)\big] \;+\; \hl{\log p_\theta(x)}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">$\log p_\theta(z\mid x) = \log p_\theta(x,z) - \log p_\theta(x)$. The evidence has no $z$ in it: the same number for every draw, so it comes out of the average.</div>
-  </div>
-  <p class="q" data-b="2">The joint $p_\theta(x,z) = p(z)\,p_\theta(x\mid z)$ is easy: prior times decoder. All the difficulty is now in one number.</p>
-</section>
-
-<section class="slide sec-elbo" id="vi-d3" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 3 of 4</p>
-  <h2>Move the evidence to the other side</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\KL\big(q\,\|\,p_\theta(z\mid x)\big) = \E_{q}\big[\log q(z) - \log p_\theta(x,z)\big] + \log p_\theta(x)$$</div>
-    <div class="mathblock big">$$\log p_\theta(x) = \underbrace{\hl{\E_{q}\big[\log p_\theta(x,z) - \log q(z)\big]}}_{\ELBO(q)} \;+\; \KL\big(q\,\|\,p_\theta(z\mid x)\big)$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">Rearrange, and give the highlighted average a name: the <b>ELBO</b>. Every piece of it is computable: the joint is prior times decoder, and $q$ is ours.</div>
-  </div>
-  <p class="q" data-b="2">Why "Evidence Lower BOund"? The last move.</p>
+  <p class="q" data-b="4">Careful with one letter: there, $\theta$ was the unknown; here it names the decoder's weights, and the unknown is $z$.</p>
+  <p class="src">VI lecture (vi.html), Part 6: <a href="vi.html#e-catch">the catch</a> · <a href="vi.html#e-sub">substitute Bayes</a> · <a href="vi.html#e-out">the evidence comes out</a> · <a href="vi.html#e-bound">the lower bound</a> · <a href="vi.html#e-picture">ELBO + KL for the coin</a></p>
+  <aside class="notes">
+    <p>The VI lecture's three steps: write the KL to the posterior as an average under q, substitute Bayes' rule for the posterior, and take log p(x) out of the average because it does not depend on z. The identity holds for every q.</p>
+    <p>Ask: which of the two terms can we compute? The ELBO: draws from q, and the prior and decoder at those draws. The KL to the posterior needs p(x).</p>
+  </aside>
 </section>
 
 <section class="slide sec-elbo" id="vi-d4" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 4 of 4</p>
-  <h2>The KL is never negative, so the ELBO is a lower bound</h2>
+  <p class="kicker">The lower bound, measured on our 3</p>
+  <h2>The KL is never negative, so the ELBO sits below $\log p_\theta(x)$</h2>
   <div class="body">
     <div class="mathblock" style="font-size:32px">$$\log p_\theta(x) = \ELBO(q) + \underbrace{\KL\big(q\,\|\,p_\theta(z\mid x)\big)}_{\ge\, 0} \;\ge\; \ELBO(q)$$</div>
     <p class="small" style="text-align:center;margin:6px 0 0" data-b="2">Our 3, two choices of $q$. The right end, $\log p_\theta(x)$, is fixed by the model; it does not move when $q$ changes.</p>
@@ -426,83 +168,25 @@
   </div>
   <p class="q" data-b="3">The total cannot move, so raising the ELBO must shrink the KL: maximise the ELBO and $q$ approaches the posterior, without ever computing $p_\theta(x)$.</p>
   <aside class="notes">
-    <p>Pause here: this is the single idea of variational inference. It is the picture in Bishop, PRML, Figure 10.2, with real numbers. Axis not to scale: the second gap is about 3,000 times smaller than the first.</p>
+    <p>The VI lecture drew this picture for the coin (Part 6, three Beta q's); here it is with our 3's numbers. It is the picture in Bishop, PRML, Figure 10.2. Axis not to scale: the second gap is about 3,000 times smaller than the first.</p>
     <p>At q = prior the KL to the prior is 0, so the ELBO there is just the average log p(x | z) of random codes: the blind sampling of Part 3. The next slides find the second q.</p>
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-5" data-section="5 · VI and the ELBO">
-  <p class="kicker">Unpacking the ELBO · step 1 of 3</p>
-  <h2>The joint is prior times decoder</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\ELBO(q) = \E_{q}\big[\log p_\theta(x,z) - \log q(z)\big]$$</div>
-    <div class="mathblock big">$$= \E_{q}\Big[\hl{\log p_\theta(x\mid z) + \log p(z) - \log q(z)}\Big]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">$p_\theta(x,z) = p(z)\,p_\theta(x\mid z)$: the generative story from Part 3. The log of a product is a sum of logs.</div>
-  </div>
-  <p class="q" data-b="2">Why unpack? To see which parts are the decoder and which are the prior, and to get two terms with names.</p>
-</section>
-
-<section class="slide sec-elbo" id="elbo-6" data-section="5 · VI and the ELBO">
-  <p class="kicker">Unpacking the ELBO · step 2 of 3</p>
-  <h2>The average of a sum is the sum of the averages</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\Big[\log p_\theta(x\mid z) + \log p(z) - \log q(z)\Big]$$</div>
-    <div class="mathblock big">$$= \hl{\E_{q}\big[\log p_\theta(x\mid z)\big]} \;+\; \hl{\E_{q}\big[\log p(z) - \log q(z)\big]}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">$\E[a + b] = \E[a] + \E[b]$. Group the decoder term on its own, and the two terms that only involve $z$ together.</div>
-  </div>
-</section>
-
-<section class="slide sec-elbo" id="elbo-7" data-section="5 · VI and the ELBO">
-  <p class="kicker">Unpacking the ELBO · step 3 of 3</p>
-  <h2>Recognise the second average: a KL to the prior</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\big[\log p(z) - \log q(z)\big]$$</div>
-    <div class="mathblock big">$$= -\,\E_{q}\!\left[\log\frac{q(z)}{p(z)}\right] = \hl{-\KL\big(q(z)\,\|\,p(z)\big)}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Flip the sign to flip the fraction. Then use the definition: $\KL(q\|p) = \E_{z\sim q}\big[\log\frac{q(z)}{p(z)}\big]$, the average extra surprise.</div>
-  </div>
-  <p class="q" data-b="2">And for Gaussians we already have its formula: $\tfrac12\sum_j(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2)$.</p>
-</section>
-
 <section class="slide sec-elbo" id="elbo-final" data-section="5 · VI and the ELBO">
-  <p class="kicker">Put the pieces together</p>
+  <p class="kicker">The VI lecture's second form, for an image</p>
   <h2>The ELBO, in symbols and in words</h2>
   <div class="body">
-    <div class="mathblock" style="font-size:36px;margin-top:10px">$$\ELBO = \underbrace{\E_{z\sim\cenc q}\big[\cdec{\log p_\theta(x\mid z)}\big]}_{\text{rebuild } x \text{ from codes in its cloud}} \;-\; \underbrace{\closs{\KL\big(q(z)\,\|\,p(z)\big)}}_{\text{keep the cloud near } \N(0,I)}$$</div>
+    <div class="deriv-prev mathblock">$$\ELBO = \E_{q}\big[\log p_\theta(x\mid z) + \log p(z) - \log q(z)\big]$$</div>
+    <div class="mathblock" style="font-size:36px;margin-top:4px">$$\ELBO = \underbrace{\E_{z\sim\cenc q}\big[\cdec{\log p_\theta(x\mid z)}\big]}_{\text{rebuild } x \text{ from codes in its cloud}} \;-\; \underbrace{\closs{\KL\big(q(z)\,\|\,p(z)\big)}}_{\text{keep the cloud near } \N(0,I)}$$</div>
     <div class="row" style="justify-content:center;gap:24px;margin-top:20px" data-b="2">
       <div class="callout dec" style="width:520px">First term: the autoencoder's reconstruction score, with the code drawn from the cloud.</div>
-      <div class="callout loss" style="width:520px">Second term: the Gaussian KL from Part 4, in closed form.</div>
+      <div class="callout loss" style="width:520px">Second term: the Gaussian KL to the prior from Part 4, in closed form.</div>
     </div>
   </div>
   <p class="q" data-b="2">The two wishes from the end of Part 2, derived rather than invented: rebuild well, and keep codes where the prior can find them.</p>
-</section>
-
-<section class="slide sec-elbo" id="elbo-toy" data-section="5 · VI and the ELBO">
-  <p class="kicker">Check it with numbers you can do by hand</p>
-  <h2>Neat or messy writer? A two-value latent</h2>
-  <div class="body">
-    <div class="row top" style="gap:36px">
-      <div class="col" style="width:520px">
-        <p class="small">$z\in\{\text{neat},\text{messy}\}$, prior $\tfrac12, \tfrac12$. Observation $x$: a thick stroke.</p>
-        <p class="small">$p(x\mid\text{neat}) = 0.8,\quad p(x\mid\text{messy}) = 0.2$</p>
-        <p class="small" data-b="2">evidence $p(x) = 0.5$ · true posterior $(0.8,\ 0.2)$</p>
-        <p class="small" data-b="3">Our guess $q = (q_0,\ 1-q_0)$:</p>
-        <div class="ctrl interactive" data-widget="elbo" data-b="3"><span>$q_0$ =</span><input type="range" min="0.02" max="0.98" step="0.01" value="0.6"><span class="readout q0">0.60</span></div>
-      </div>
-      <table class="work elbo-table" style="font-size:22px" data-b="3">
-        <tr><th>quantity</th><th>value</th></tr>
-        <tr><td>$\E_q[\log p(x\mid z)]$</td><td class="v-ell">−0.778</td></tr>
-        <tr><td>$-\,\KL(q\,\|\,\text{prior})$</td><td class="v-klp">−0.020</td></tr>
-        <tr class="total"><td>$\ELBO$</td><td class="v-elbo">−0.798</td></tr>
-        <tr><td>$+\,\KL(q\,\|\,\text{posterior})$</td><td class="v-gap">0.105</td></tr>
-        <tr class="total"><td>$\log p(x)$</td><td class="v-lpx">−0.693</td></tr>
-      </table>
-    </div>
-  </div>
-  <p class="q" data-b="3">Move $q$: the ELBO and the gap change, their sum never does. At $q$ = posterior $(0.8)$ the gap is 0.</p>
-  <aside class="notes">
-    <p>At q = (0.6, 0.4) the gap is KL((0.6,0.4) ‖ (0.8,0.2)) = 0.105, the same "KL(Q‖P)" we computed with the 1s and 7s.</p>
-    <p>Drag the slider live. ELBO + gap = log 0.5 = −0.693 for every q0.</p>
-  </aside>
+  <p class="src">VI lecture (vi.html), Part 6: <a href="vi.html#e-forms">two ways to write the same ELBO</a></p>
+  <aside class="notes"><p>The faded line splits the joint into decoder times prior. Group log p(z) with −log q(z): their average is minus the KL from q to the prior. It is the prior here, not the posterior, so both terms are computable.</p></aside>
 </section>
 
 <section class="slide sec-elbo" id="vi-code" data-section="5 · VI and the ELBO">
@@ -523,7 +207,7 @@
 <span class="line" data-hl="=4">    opt.zero_grad(); loss.backward(); opt.step()</span></pre>
       <div class="notes-col">
         <p class="small" data-b="=1"><b>Only $q$ is learned.</b> The decoder is a trained one, kept fixed; $x$ is our 3. Start at $q = \N(0, I)$: $m = 0$, $s = 1$.</p>
-        <p class="small" data-b="=2"><b>Draw codes from $q$:</b> centre plus width times standard noise, exactly how Part 1 sampled from a bump. Part 6 explains why gradients flow through this line.</p>
+        <p class="small" data-b="=2"><b>Draw codes from $q$:</b> centre plus width times standard noise: the VI lecture's reparameterised draw (its Part 5), so gradients reach <code>m</code> and <code>log_s</code>.</p>
         <p class="small" data-b="=3"><b>The two terms:</b> reconstruction, averaged over the 64 draws; the KL to the prior by the Gaussian formula from Part 4.</p>
         <p class="small" data-b="4"><b>The same three-line loop</b> as fitting one Gaussian in Part 1. The ELBO rises from −386.0 to −128.8.</p>
       </div>
@@ -625,103 +309,61 @@
   <div class="body">
     <div class="recap">
       <div><h3>What we did</h3><ol>
-        <li>Goal: minimise $\KL(q\,\|\,\text{posterior})$. It contains $p_\theta(x)$.</li>
-        <li>Rearranged: $\log p_\theta(x) = \ELBO + \KL$. Maximising the ELBO minimises the KL.</li>
+        <li>Our 3: $\log p_\theta(x) = \ELBO + \KL(q\,\|\,\text{posterior})$, as in the VI lecture.</li>
         <li>ELBO = reconstruction $-\ \KL(q\,\|\,\text{prior})$: both computable.</li>
-        <li>VI by hand fits our 3's $q$ in 800 steps; an encoder predicts it in one pass. That is the VAE.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next: gradients through a random draw</h3><p class="small">The loss draws $z$ from the encoder's cloud. Part 6: why writing the draw as $\mu + \sigma\eps$ lets gradients reach the encoder.</p></div>
+        <li>VI by hand fits our 3's $q$ in 800 steps and leaves a gap of 0.08 nats.</li>
+        <li>An encoder predicts $q$ in one pass, with a gap of 0.55: that is the VAE.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next: gradients through a random draw</h3><p class="small">The loss draws $z$ from the encoder's cloud. Part 6: the VI lecture's reparameterisation, with $\mu$ and $\log\sigma^2$ coming out of a network.</p></div>
     </div>
   </div>
 </section>
 
 <!-- ===================================================================== 6 · REPARAMETERISATION -->
+<!-- The trick is taught in the VI lecture (vi.html, Part 5). This part recalls it and adds what the encoder changes. -->
 
 <section class="slide sec-rep opener break" id="rep-open" data-section="6 · Reparameterisation">
   <div class="break-grid">
     <div>
       <p class="kicker">Part 6 of 7</p>
-      <h2>Backpropagating through a random draw</h2>
-      <p class="why">VI by hand wrote each draw as $m + s\cdot\eps$ without comment. The VAE loss also uses a $z$ drawn from the encoder's cloud, and to train the encoder, gradients must get from the loss back to $\mu$ and $\sigma$ through that draw. Here is why the way we write the draw is the whole trick.</p>
+      <h2>Backpropagating through the encoder's random draw</h2>
+      <p class="why">VI by hand drew each code as $m + s\cdot\eps$ and backpropagated through it: the VI lecture's reparameterisation trick (its Part 5). The VAE does the same, except that $\mu$ and $\sigma$ come out of the encoder, as $\log\sigma^2$. One recalled picture, one more link in the chain, and three lines of PyTorch.</p>
     </div>
     <ol class="route-mini"><li class="done" style="--c:var(--z)"><span class="dot">✓</span>Distributions and fitting</li><li class="done" style="--c:var(--enc)"><span class="dot">✓</span>Autoencoders</li><li class="done" style="--c:var(--x)"><span class="dot">✓</span>The probabilistic view</li><li class="done" style="--c:var(--loss)"><span class="dot">✓</span>KL divergence</li><li class="done" style="--c:var(--dec)"><span class="dot">✓</span>Variational inference and the ELBO</li><li class="now" style="--c:var(--z)"><span class="dot">6</span>Reparameterisation</li><li class="todo" style="--c:var(--enc)"><span class="dot">7</span>The VAE on MNIST</li></ol>
   </div>
 </section>
 
-<section class="slide sec-rep" id="rep-problem" data-section="6 · Reparameterisation">
-  <p class="kicker">The problem</p>
-  <h2>A sampling step sits in the middle of the graph</h2>
-  <div class="body center"><svg viewBox="0 0 1152 380" class="diagram" role="img" aria-label="reparam-before"><defs><marker id="reparam-before-ah-6B7280" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker><marker id="reparam-before-ah-BE123C" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#BE123C"/></marker></defs><g data-b="1"><rect x="262" y="72" width="76" height="76" rx="8" fill="#F1E5FC" stroke="#8B2CDE" stroke-width="2.4"/><foreignObject x="-80.0" y="91.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#8B2CDE;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\mu$</div></foreignObject><rect x="262" y="232" width="76" height="76" rx="8" fill="#F1E5FC" stroke="#8B2CDE" stroke-width="2.4"/><foreignObject x="-80.0" y="251.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#8B2CDE;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\sigma$</div></foreignObject><circle cx="560" cy="190" r="52" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.4" stroke-dasharray="5 3"/><foreignObject x="180.0" y="171.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#AA4E08;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$z$</div></foreignObject><foreignObject x="180.0" y="247.2" width="760" height="50.6" overflow="visible"><div class="fo" style="font-size:23px;color:#6B7280;font-weight:400;text-align:center;height:36.8px;line-height:36.8px">$z \sim \N(\mu, \sigma^2)$</div></foreignObject><rect x="782" y="152" width="76" height="76" rx="8" fill="#FDE2E7" stroke="#BE123C" stroke-width="2.4"/><foreignObject x="440.0" y="171.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$f$</div></foreignObject><text x="820" y="258" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="20" font-weight="500" fill="#6B7280" text-anchor="middle">loss</text><path d="M340,120 L510,175" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-before-ah-6B7280)"/><path d="M340,260 L510,205" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-before-ah-6B7280)"/><path d="M614,190 L780,190" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-before-ah-6B7280)"/><text x="160" y="115" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="end">from the encoder</text><text x="160" y="275" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="end">from the encoder</text><circle cx="1000" cy="80" r="16" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2" stroke-dasharray="4 3"/><text x="1026" y="86" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="start">random</text><rect x="984" y="112" width="32" height="32" rx="6" fill="#F1E5FC" stroke="#8B2CDE" stroke-width="2"/><text x="1026" y="134" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="18" font-weight="500" fill="#6B7280" text-anchor="start">deterministic</text></g><g data-b="2"><path d="M780,214 L616,214" fill="none" stroke="#BE123C" stroke-width="2.8" stroke-linejoin="round" marker-end="url(#reparam-before-ah-BE123C)"/><path d="M508,222 L344,272" fill="none" stroke="#BE123C" stroke-width="2.8" stroke-linejoin="round" stroke-dasharray="5 4" marker-end="url(#reparam-before-ah-BE123C)"/><path d="M508,160 L344,106" fill="none" stroke="#BE123C" stroke-width="2.8" stroke-linejoin="round" stroke-dasharray="5 4" marker-end="url(#reparam-before-ah-BE123C)"/><path d="M412,120 L440,148 M440,120 L412,148" stroke="#BE123C" stroke-width="4" stroke-linecap="round"/><path d="M412,232 L440,260 M440,232 L412,260" stroke="#BE123C" stroke-width="4" stroke-linecap="round"/><foreignObject x="60.0" y="314.5" width="1000" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:650;text-align:center;height:35.2px;line-height:35.2px">the loss knows how $z$ should move, but $z$ is a fresh random draw:</div></foreignObject><foreignObject x="60.0" y="340.5" width="1000" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:650;text-align:center;height:35.2px;line-height:35.2px">how does it change when $\mu$ or $\sigma$ changes a little?</div></foreignObject></g></svg></div>
-  <aside class="notes">
-    <p>In PyTorch, Normal(mu, sigma).sample() returns a tensor with no gradient history: the graph is cut at z.</p>
-    <p>We want the gradient of the expected loss with respect to μ and σ: if the cloud moves a little, how does the average loss change? There are other estimators (score function / REINFORCE), but they are noisy. Here is a simple trick that works for Gaussians.</p>
-  </aside>
-</section>
-
-<section class="slide sec-rep" id="rep-dots" data-section="6 · Reparameterisation">
-  <p class="kicker">The trick</p>
-  <h2>Draw standard noise first, then stretch and shift it</h2>
-  <div class="body center col" style="gap:4px">
-    <img class="fig" src="figures/data/reparam-dots.svg" style="width:960px">
-    <div class="mathblock" style="font-size:28px">$$z = \mu + \sigma\,\eps,\quad \eps\sim\N(0,1) \qquad\Longrightarrow\qquad z \sim \N(\mu,\sigma^2)$$</div>
-  </div>
-  <p class="q">Same distribution as before (the $\mu = 1$, $\sigma = 0.5$ cloud of the Gaussian KL slide). But the randomness now enters as an input, $\eps$, that does not depend on any weights.</p>
-  <aside class="notes">
-    <p>Follow one dot (red): ε = −0.4, scaled by σ = 0.5 to −0.2, shifted by μ = 1 to 0.8. Each z is a deterministic function of (μ, σ, ε).</p>
-    <p>If μ increases a little, every dot moves right by the same amount. If σ increases, each dot moves away from the centre in proportion to its ε. That is exactly the derivative.</p>
-  </aside>
-</section>
-
 <section class="slide sec-rep" id="rep-fixed" data-section="6 · Reparameterisation">
-  <p class="kicker">The fix</p>
-  <h2>Now the path from the loss to $\mu$ and $\sigma$ is ordinary arithmetic</h2>
+  <p class="kicker">From the VI lecture, Part 5, with the encoder in front</p>
+  <h2>Draw $\eps$ first, and the path back to $\mu$ and $\sigma$ is arithmetic</h2>
   <div class="body center"><svg viewBox="0 0 1152 380" class="diagram" role="img" aria-label="reparam-after"><defs><marker id="reparam-after-ah-6B7280" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker><marker id="reparam-after-ah-BE123C" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#BE123C"/></marker></defs><g data-b="1"><rect x="262" y="42" width="76" height="76" rx="8" fill="#F1E5FC" stroke="#8B2CDE" stroke-width="2.4"/><foreignObject x="-80.0" y="61.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#8B2CDE;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\mu$</div></foreignObject><rect x="262" y="162" width="76" height="76" rx="8" fill="#F1E5FC" stroke="#8B2CDE" stroke-width="2.4"/><foreignObject x="-80.0" y="181.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#8B2CDE;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\sigma$</div></foreignObject><circle cx="300" cy="318" r="40" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.4" stroke-dasharray="5 3"/><foreignObject x="-80.0" y="299.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#AA4E08;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\varepsilon$</div></foreignObject><foreignObject x="-520.0" y="298.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#AA4E08;font-weight:400;text-align:right;height:35.2px;line-height:35.2px">$\varepsilon \sim \N(0, I)$</div></foreignObject><rect x="572" y="152" width="96" height="96" rx="8" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.4"/><foreignObject x="240.0" y="176.5" width="760" height="57.2" overflow="visible"><div class="fo" style="font-size:26px;color:#AA4E08;font-weight:400;text-align:center;height:41.6px;line-height:41.6px">$z$</div></foreignObject><foreignObject x="240.0" y="265.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#AA4E08;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$z = \mu + \sigma\odot\varepsilon$</div></foreignObject><rect x="862" y="162" width="76" height="76" rx="8" fill="#FDE2E7" stroke="#BE123C" stroke-width="2.4"/><foreignObject x="520.0" y="181.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$f$</div></foreignObject><path d="M340,88 L570,180" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-after-ah-6B7280)"/><path d="M340,200 L570,200" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-after-ah-6B7280)"/><path d="M342,318 L620,318 L620,252" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-after-ah-6B7280)"/><path d="M670,200 L860,200" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-after-ah-6B7280)"/></g><g data-b="2"><path d="M860,226 L672,226" fill="none" stroke="#BE123C" stroke-width="3" stroke-linejoin="round" marker-end="url(#reparam-after-ah-BE123C)"/><path d="M572,166 L344,74" fill="none" stroke="#BE123C" stroke-width="3" stroke-linejoin="round" marker-end="url(#reparam-after-ah-BE123C)"/><path d="M572,236 L344,236" fill="none" stroke="#BE123C" stroke-width="3" stroke-linejoin="round" marker-end="url(#reparam-after-ah-BE123C)"/><foreignObject x="100.0" y="41.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#BE123C;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$\partial z/\partial\mu = 1$</div></foreignObject><foreignObject x="80.0" y="249.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#BE123C;font-weight:400;text-align:center;height:32.0px;line-height:32.0px">$\partial z/\partial\sigma = \varepsilon$</div></foreignObject><foreignObject x="860.0" y="272.5" width="300" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:650;text-align:center;height:35.2px;line-height:35.2px">$\varepsilon$ is just an input,</div></foreignObject><text x="1010" y="326" font-family="'Avenir Next', 'Avenir', 'Segoe UI', sans-serif" font-size="22" font-weight="650" fill="#BE123C" text-anchor="middle">like a pixel value</text></g></svg></div>
-  <aside class="notes"><p>Formally: ∇ E_{z∼q}[f(z)] = E_{ε∼𝒩(0,1)}[∇ f(μ + σε)], under mild regularity conditions. We check this numerically a few slides from now.</p></aside>
-</section>
-
-<section class="slide sec-rep" id="rep-chain" data-section="6 · Reparameterisation">
-  <p class="kicker">Chain rule, symbol by symbol</p>
-  <h2>Take $f(z) = z^2$ as the loss</h2>
-  <div class="body">
-    <div class="mathblock" style="font-size:27px">$$z = \mu + \sigma\eps \qquad\Rightarrow\qquad \frac{\partial z}{\partial \mu} = 1, \qquad \frac{\partial z}{\partial \sigma} = \eps, \qquad \frac{\partial f}{\partial z} = 2z$$</div>
-    <div class="mathblock" style="font-size:29px;margin-top:10px" data-b="2">$$\frac{\partial f}{\partial \mu} = \frac{\partial f}{\partial z}\cdot\frac{\partial z}{\partial \mu} = 2z\cdot 1$$</div>
-    <div class="mathblock" style="font-size:29px" data-b="3">$$\frac{\partial f}{\partial \sigma} = \frac{\partial f}{\partial z}\cdot\frac{\partial z}{\partial \sigma} = 2z\cdot\eps$$</div>
-  </div>
-  <p class="q" data-b="3">The noise value $\eps$ appears in the $\sigma$-gradient: a draw far from the centre pushes $\sigma$ harder.</p>
-  <aside class="notes"><p>ε is treated exactly like an input pixel: a fixed number for this forward and backward pass. A new ε is drawn next step.</p></aside>
-</section>
-
-<section class="slide sec-rep" id="rep-numbers" data-section="6 · Reparameterisation">
-  <p class="kicker">Now plug in numbers</p>
-  <h2>$\mu = 1,\ \sigma = 0.5,\ \eps = -0.4$</h2>
-  <div class="body center"><svg viewBox="0 0 1152 380" class="diagram" role="img" aria-label="reparam-numbers"><defs><marker id="reparam-numbers-ah-6B7280" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker><marker id="reparam-numbers-ah-BE123C" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#BE123C"/></marker></defs><g data-b="1"><rect x="10" y="60" width="190" height="92" rx="12" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.2"/><foreignObject x="-275.0" y="80.0" width="760" height="70.4" overflow="visible"><div class="fo" style="font-size:32px;color:#AA4E08;font-weight:700;text-align:center;height:51.2px;line-height:51.2px">$-0.4$</div></foreignObject><foreignObject x="-275.0" y="18.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#AA4E08;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\varepsilon$</div></foreignObject><path d="M202,106 L316,106" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-numbers-ah-6B7280)"/><foreignObject x="160.0" y="67.8" width="200" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#4A5160;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">$\times\,\sigma$ (0.5)</div></foreignObject><rect x="320" y="60" width="190" height="92" rx="12" fill="#F1E5FC" stroke="#8B2CDE" stroke-width="2.2"/><foreignObject x="35.0" y="80.0" width="760" height="70.4" overflow="visible"><div class="fo" style="font-size:32px;color:#8B2CDE;font-weight:700;text-align:center;height:51.2px;line-height:51.2px">$-0.2$</div></foreignObject><foreignObject x="35.0" y="18.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#8B2CDE;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$\sigma\varepsilon$</div></foreignObject><path d="M512,106 L626,106" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-numbers-ah-6B7280)"/><foreignObject x="470.0" y="67.8" width="200" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#4A5160;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">$+\,\mu$ (1)</div></foreignObject><rect x="630" y="60" width="190" height="92" rx="12" fill="#FCEFD9" stroke="#AA4E08" stroke-width="2.2"/><foreignObject x="345.0" y="80.0" width="760" height="70.4" overflow="visible"><div class="fo" style="font-size:32px;color:#AA4E08;font-weight:700;text-align:center;height:51.2px;line-height:51.2px">$0.8$</div></foreignObject><foreignObject x="345.0" y="18.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#AA4E08;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$z = \mu + \sigma\varepsilon$</div></foreignObject><path d="M822,106 L936,106" fill="none" stroke="#6B7280" stroke-width="2.4" stroke-linejoin="round" marker-end="url(#reparam-numbers-ah-6B7280)"/><foreignObject x="780.0" y="67.8" width="200" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#4A5160;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">square</div></foreignObject><rect x="940" y="60" width="190" height="92" rx="12" fill="#FDE2E7" stroke="#BE123C" stroke-width="2.2"/><foreignObject x="655.0" y="80.0" width="760" height="70.4" overflow="visible"><div class="fo" style="font-size:32px;color:#BE123C;font-weight:700;text-align:center;height:51.2px;line-height:51.2px">$0.64$</div></foreignObject><foreignObject x="655.0" y="18.5" width="760" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#BE123C;font-weight:400;text-align:center;height:35.2px;line-height:35.2px">$f = z^2$</div></foreignObject><foreignObject x="76.0" y="166.5" width="1000" height="48.4" overflow="visible"><div class="fo" style="font-size:22px;color:#6B7280;font-weight:500;text-align:center;height:35.2px;line-height:35.2px">forward: one fixed draw $\varepsilon=-0.4$, with $\mu = 1$ and $\sigma = 0.5$</div></foreignObject></g><g data-b="2"><path d="M990,270 L842,270" fill="none" stroke="#BE123C" stroke-width="2.8" stroke-linejoin="round" marker-end="url(#reparam-numbers-ah-BE123C)"/><foreignObject x="1000.0" y="227.0" width="760" height="44.0" overflow="visible"><div class="fo" style="font-size:20px;color:#BE123C;font-weight:400;text-align:left;height:32.0px;line-height:32.0px">$\frac{\partial f}{\partial z} = 2z = 1.6$</div></foreignObject><rect x="560" y="238" width="280" height="64" rx="12" fill="#FDE2E7" stroke="#BE123C" stroke-width="2.2"/><foreignObject x="320.0" y="253.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#BE123C;font-weight:400;text-align:center;height:33.6px;line-height:33.6px">$\frac{\partial f}{\partial\mu} = 1.6\times 1 = 1.6$</div></foreignObject></g><g data-b="3"><rect x="200" y="238" width="340" height="64" rx="12" fill="#FDE2E7" stroke="#BE123C" stroke-width="2.2"/><foreignObject x="-10.0" y="253.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#BE123C;font-weight:400;text-align:center;height:33.6px;line-height:33.6px">$\frac{\partial f}{\partial\sigma} = 1.6\times\varepsilon = -0.64$</div></foreignObject><foreignObject x="-10.0" y="313.8" width="760" height="46.2" overflow="visible"><div class="fo" style="font-size:21px;color:#BE123C;font-weight:650;text-align:center;height:33.6px;line-height:33.6px">the noise value multiplies the $\sigma$-gradient</div></foreignObject></g></svg></div>
-  <aside class="notes"><p>Finite-difference check with ε held fixed: μ → 1.001 gives z = 0.801 and f = 0.641601, slope 1.601 ≈ 1.6. If you resample ε between the two evaluations, the check becomes noise.</p></aside>
+  <p class="q" data-b="2">As the VI lecture showed, <code>sample()</code> would cut the graph at $z$. Each draw gives a noisy gradient; on average it is exact.</p>
+  <p class="src">VI lecture (vi.html), Part 5: <a href="vi.html#g-graph1">the blocked graph</a> · <a href="vi.html#g-code">sample() fails</a> · <a href="vi.html#g-graph2">the reparameterised graph</a> · <a href="vi.html#g-ex">checked in code</a> · <a href="vi.html#g-rsample">rsample</a></p>
+  <aside class="notes">
+    <p>In the VI lecture, loc and scale were the two parameters of one q. Here μ and σ are outputs of the encoder, so the gradient continues past them into the encoder's weights. f stands for the loss: reconstruction plus KL.</p>
+    <p>Formally: ∇ E_{z∼q}[f(z)] = E_{ε∼𝒩(0,I)}[∇ f(μ + σε)]. A single ε gives a noisy but unbiased gradient, which is all stochastic gradient descent needs.</p>
+  </aside>
 </section>
 
 <section class="slide sec-rep" id="rep-logvar" data-section="6 · Reparameterisation">
-  <p class="kicker">One more link in the chain</p>
-  <h2>The network outputs $v = \log\sigma^2$, not $\sigma$</h2>
+  <p class="kicker">What the encoder adds: one more link in the chain</p>
+  <h2>The encoder outputs $v = \log\sigma^2$, not $\sigma$</h2>
   <div class="body">
     <div class="ladder" style="margin:0 auto;width:1000px;font-size:27px">
       <span class="lhs">$\sigma$</span><span>$=$</span><span>$e^{v/2}$</span>
       <span></span><span></span><span class="why">$v$ can be any real number; $\sigma$ is always positive</span>
-      <span class="lhs" data-b="2">$\dfrac{\partial\sigma}{\partial v}$</span><span data-b="2">$=$</span><span data-b="2">$\tfrac12 e^{v/2} = \dfrac{\sigma}{2} = 0.25$</span>
+      <span class="lhs" data-b="2">$\dfrac{\partial\sigma}{\partial v}$</span><span data-b="2">$=$</span><span data-b="2">$\tfrac12 e^{v/2} = \dfrac{\sigma}{2}$</span>
       <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">derivative of $e^{v/2}$</span>
-      <span class="lhs" data-b="3">$\dfrac{\partial f}{\partial v}$</span><span data-b="3">$=$</span><span data-b="3">$\dfrac{\partial f}{\partial \sigma}\cdot\dfrac{\partial\sigma}{\partial v} = -0.64 \times 0.25 = -0.16$</span>
-      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">one more chain-rule factor</span>
+      <span class="lhs" data-b="3">$\dfrac{\partial z}{\partial v}$</span><span data-b="3">$=$</span><span data-b="3">$\dfrac{\partial z}{\partial\sigma}\cdot\dfrac{\partial\sigma}{\partial v} = \eps\cdot\dfrac{\sigma}{2}$</span>
+      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">one more chain-rule factor after $\partial z/\partial\sigma = \eps$</span>
+      <span class="lhs" data-b="4">$\dfrac{\partial z_1}{\partial v_1}$</span><span data-b="4">$=$</span><span data-b="4">$0.62 \times \dfrac{ 0.047 }{2} = 0.015$</span>
+      <span data-b="4"></span><span data-b="4"></span><span class="why" data-b="4">our 3: $v_1 = −6.11$, so $\sigma_1 = 0.047$; this draw's $\eps_1 = 0.62$</span>
     </div>
   </div>
-  <p class="q" data-b="3">Autograd does exactly this. The point of doing it by hand once: no step is magic.</p>
-</section>
-
-<section class="slide sec-rep" id="rep-average" data-section="6 · Reparameterisation">
-  <p class="kicker">Is one draw enough?</p>
-  <h2>One draw is noisy; the average is exactly right</h2>
-  <div class="body">
-    <div class="mathblock" style="font-size:23px">$$\E_\eps\big[f\big] = \E\big[(\mu+\sigma\eps)^2\big] = \mu^2 + \sigma^2 \quad\Rightarrow\quad \frac{\partial}{\partial\mu}\E[f] = 2\mu = 2, \qquad \frac{\partial}{\partial\sigma}\E[f] = 2\sigma = 1$$</div>
-    <img class="fig" src="figures/data/reparam-grads.svg" style="height:300px;margin:4px auto 0" data-b="2">
-  </div>
-  <p class="q" data-b="2">Our single $\eps$ gave 1.6 and $-0.64$. Averaged over 10,000 draws: 2.01 and 1.02. SGD only needs the right answer on average.</p>
-  <aside class="notes"><p>Each histogram: the per-sample gradient for 10,000 values of ε. The red dashed line is our ε = −0.4. The solid line, the average, sits on the exact gradient of the expected loss. Noisy but unbiased: exactly what stochastic gradient descent needs.</p></aside>
+  <p class="q" data-b="4">Autograd adds this factor for us: in code it is the one line <code>std = torch.exp(0.5 * logvar)</code>.</p>
+  <aside class="notes">
+    <p>The numbers are our 3's first coordinate, with the same draw as Part 7's sampling step. The factor is small because σ is small: a cloud 0.05 wide hardly moves its draws when its log-variance changes a little.</p>
+    <p>The full gradient for v₁ multiplies this by ∂loss/∂z₁ from the decoder, and adds the KL term's own derivative, ½(σ₁² − 1).</p>
+  </aside>
 </section>
 
 <section class="slide sec-rep" id="rep-code" data-section="6 · Reparameterisation">
@@ -735,8 +377,8 @@
 <span class="line" data-hl="3">eps = torch.randn_like(std)       <span class="c"># standard normal, no grad</span></span>
 <span class="line" data-hl="4">z   = mu + std * eps              <span class="c"># differentiable in mu, std</span></span></pre>
       <div class="col grow">
-        <p class="small" data-b="2">Why output $\log\sigma^2$? It can be any real number; $\sigma$ must be positive.</p>
-        <p class="small" data-b="4"><code>Normal(mu, std).rsample()</code> does the same thing; <code>.sample()</code> drops the gradient.</p>
+        <p class="small" data-b="2"><code>std</code> is $\sigma = e^{v/2}$: the extra link from the last slide.</p>
+        <p class="small" data-b="4"><code>Normal(mu, std).rsample()</code> does the same thing, as in the VI lecture; <code>.sample()</code> drops the gradient.</p>
         <p class="small" data-b="4">For our 3: $\mu = (0.3,\, −1.93)$, $\eps = (0.62,\, −1.15)$ gives $z = (0.33,\, −1.99)$.</p>
       </div>
     </div>
@@ -749,7 +391,7 @@
   <h2>What we did, and what comes next</h2>
   <div class="body">
     <div class="recap">
-      <div><h3>What we did</h3><ol><li>Sampling $z$ directly cuts the gradient path to $\mu$ and $\sigma$.</li><li>Write $z = \mu + \sigma\eps$ with $\eps \sim \N(0, 1)$: same distribution, randomness as an input.</li><li>$\partial z/\partial\mu = 1$, $\partial z/\partial\sigma = \eps$; one draw is noisy, the average is exact.</li><li>In PyTorch: three lines, or <code>rsample()</code>.</li></ol></div>
+      <div><h3>What we did</h3><ol><li>From the VI lecture: sampling $z$ directly cuts the gradient path; $z = \mu + \sigma\eps$ with $\eps \sim \N(0, I)$ keeps it.</li><li>$\partial z/\partial\mu = 1$ and $\partial z/\partial\sigma = \eps$; one draw is noisy, the average is exact.</li><li>The encoder outputs $v = \log\sigma^2$: one more factor, $\partial\sigma/\partial v = \sigma/2$.</li><li>In PyTorch: three lines, or <code>rsample()</code>.</li></ol></div>
       <div class="next" data-b="2"><h3>Next: everything together</h3><p class="small">Encoder, cloud, reparameterised sample, decoder, ELBO: train it on MNIST and follow our 3 through every step.</p></div>
     </div>
   </div>
@@ -1050,7 +692,7 @@
 <section class="slide sec-end opener" id="appendix" data-section="Appendix">
   <p class="kicker">Appendix</p>
   <h2>A second route to the ELBO</h2>
-  <p>Part 5 reached the ELBO from $\KL(q\,\|\,\text{posterior})$. Many textbooks reach it from $\log p_\theta(x)$ with Jensen's inequality instead. Same bound, one more tool.</p>
+  <p>The VI lecture (its Part 6) reached the ELBO from $\KL(q\,\|\,\text{posterior})$. Many textbooks reach it from $\log p_\theta(x)$ with Jensen's inequality instead. Same bound, one more tool.</p>
 </section>
 
 <section class="slide sec-end" id="app-elbo-1" data-section="Appendix">
@@ -1081,7 +723,7 @@
   <div class="body">
     <div class="deriv-prev mathblock">$$\log \int q_\varphi(z\mid x)\,\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\,dz$$</div>
     <div class="mathblock big">$$= \log\; \hl{\E_{z\sim q_\varphi(z\mid x)}}\!\left[\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">From the $\E$ slide: $\int q(z)\,f(z)\,dz = \E_{z\sim q}[f(z)]$. Here $f(z)$ is the ratio $p_\theta(x,z)/q_\varphi(z\mid x)$: one number for each code.</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">An integral against $q$ is an average under $q$: $\int q(z)\,f(z)\,dz = \E_{z\sim q}[f(z)]$. Here $f(z)$ is the ratio $p_\theta(x,z)/q_\varphi(z\mid x)$: one number for each code.</div>
   </div>
   <p class="q" data-b="2">Still exact. We now average over codes drawn from the encoder's cloud, right where the patch is.</p>
 </section>
@@ -1111,7 +753,7 @@
     <div class="mathblock big">$$\log p_\theta(x) \;\hl{\ge}\; \E_{q}\!\left[\log\frac{p_\theta(x,z)}{q_\varphi(z\mid x)}\right] \;=:\; \ELBO$$</div>
     <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Jensen with $R = p_\theta(x,z)/q_\varphi(z\mid x)$. The right side is the <b>E</b>vidence <b>L</b>ower <b>BO</b>und: it can never exceed $\log p_\theta(x)$.</div>
   </div>
-  <p class="q" data-b="2">The same ELBO as Part 5. This route shows it is a bound; Part 5's route also shows the gap is $\KL(q\,\|\,\text{posterior})$.</p>
+  <p class="q" data-b="2">The same ELBO as Part 5. This route shows it is a bound; the KL route (the VI lecture's Part 6) also shows the gap is $\KL(q\,\|\,\text{posterior})$.</p>
 </section>
 
 <section class="slide sec-end" id="reading" data-section="Appendix">
@@ -1124,7 +766,7 @@
       <li>Kingma &amp; Welling, <i>Auto-Encoding Variational Bayes</i>, arXiv 1312.6114</li>
       <li>Blei, Kucukelbir &amp; McAuliffe, <i>Variational Inference: A Review for Statisticians</i>, arXiv 1601.00670</li>
       <li>Bishop, <i>Pattern Recognition and Machine Learning</i>, §10.1: the ELBO + KL picture of Part 5</li>
-      <li>Three YouTube videos on KL divergence that Part 4 draws on (video ids sjgZxuCm_8Q, KHVR587oW8I, tXE23653JrU)</li>
+      <li>The VI lecture (<span class="mono">vi.html</span>): KL, the ELBO and reparameterisation on toys; and three YouTube videos on KL divergence (video ids sjgZxuCm_8Q, KHVR587oW8I, tXE23653JrU)</li>
       <li>Stanford CS236 notes on VAEs (deepgenerativemodels.github.io)</li>
       <li>This lecture's code: <span class="mono">scripts/train_models.py</span> (all models), <span class="mono">scripts/make_figures.py</span> and <span class="mono">make_figures_extra.py</span> (every number on the slides)</li>
     </ul>

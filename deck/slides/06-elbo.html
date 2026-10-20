@@ -1,66 +1,47 @@
 <!-- ===================================================================== PART 5 · VARIATIONAL INFERENCE AND THE ELBO -->
+<!-- The ELBO is derived in the VI lecture (vi.html, Part 6). This part recalls it for one image and runs it on our 3. -->
 
 <section class="slide sec-elbo opener break" id="elbo-open" data-section="5 · VI and the ELBO">
   <div class="break-grid">
     <div>
       <p class="kicker">Part 5 of 7</p>
-      <h2>Variational inference, and the ELBO</h2>
-      <p class="why">Part 3 wanted a simple $q$ close to the posterior of our 3. Part 4 gave a number for "close". Write the goal down: one rearrangement turns it into a loss we can compute, the ELBO. Then run it, and see why it leads to an encoder.</p>
+      <h2>Variational inference for our 3, then for every image</h2>
+      <p class="why">The VI lecture turned "make $q$ close to the posterior" into a loss we can compute, the ELBO, and fitted a coin with it (its Part 6). Here the unknown is our 3's code: run the same loss on it, read the numbers, and see why doing this image by image leads to an encoder.</p>
     </div>
     <!--route:5-->
   </div>
 </section>
 
-<section class="slide sec-elbo" id="vi-goal" data-section="5 · VI and the ELBO">
-  <p class="kicker">The goal, written down</p>
-  <h2>Find the $q$ with the smallest KL to the posterior</h2>
+<section class="slide sec-elbo" id="elbo-recall" data-section="5 · VI and the ELBO">
+  <p class="kicker">From the VI lecture, Part 6, with an image in place of the coin</p>
+  <h2>The same identity, written for one image</h2>
   <div class="body">
-    <div class="mathblock" style="font-size:34px">$$q^{\star} = \arg\min_{q\,\in\,\mathcal Q}\; \KL\big(\,q(z)\,\|\,p_\theta(z\mid x)\,\big)$$</div>
-    <div class="row top" style="gap:26px;margin-top:14px">
-      <div class="callout enc" style="flex:1"><h3>$\mathcal Q$: the shapes we allow</h3>Diagonal Gaussians. For our 2-number code: 4 numbers, a centre $m$ and two widths $s$.</div>
-      <div class="callout x" style="flex:1" data-b="2"><h3>Why $q$ first?</h3>KL averages under its first argument. $q$ is ours, so we can draw from it. The other order would need draws from the posterior: the thing we cannot get.</div>
-      <div class="callout loss" style="flex:1" data-b="3"><h3>The catch</h3>$p_\theta(z\mid x) = p_\theta(x,z)\,/\,p_\theta(x)$, and $p_\theta(x)$ is the integral we cannot do. We cannot even evaluate this KL.</div>
+    <div class="mathblock" style="font-size:28px">$$\log p_\theta(x) = \underbrace{\E_{z\sim q}\big[\log p_\theta(x, z) - \log q(z)\big]}_{\ELBO(q)} + \underbrace{\KL\big(q\,\|\,p_\theta(z\mid x)\big)}_{\ge\, 0}$$</div>
+    <div class="row top" style="gap:34px;margin-top:6px" data-b="2">
+      <table class="work vocab3" style="width:470px">
+        <tr><th>VI lecture</th><th>here</th></tr>
+        <tr><td>$\theta$, the unknown</td><td>$z$, our 3's code</td></tr>
+        <tr><td>$D$, the data</td><td>$x$, our 3</td></tr>
+        <tr><td>prior $p(\theta)$</td><td>$p(z) = \N(0, I)$</td></tr>
+        <tr><td>likelihood $p(D\mid\theta)$</td><td>decoder $p_\theta(x\mid z)$</td></tr>
+      </table>
+      <div class="col grow">
+        <p class="small" data-b="3">The ELBO needs only the joint, $p_\theta(x, z) = p(z)\,p_\theta(x\mid z)$: prior times decoder. No $p_\theta(x)$, no posterior.</p>
+        <p class="small" data-b="4">$\log p_\theta(x)$ does not move when $q$ does, so whatever the ELBO gains, the KL to the posterior loses.</p>
+      </div>
     </div>
   </div>
-  <p class="q" data-b="3">Four short moves get $p_\theta(x)$ out of the way.</p>
-  <aside class="notes"><p>This is KL(q ‖ p), the "reverse" or mode-seeking direction from the end of Part 4. Here the choice is forced by practicality: we can only average under a distribution we can sample.</p></aside>
-</section>
-
-<section class="slide sec-elbo" id="vi-d1" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 1 of 4</p>
-  <h2>Write out the KL</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\KL\big(q(z)\,\|\,p_\theta(z\mid x)\big)$$</div>
-    <div class="mathblock big">$$= \E_{z\sim q}\big[\,\log q(z) - \hl{\log p_\theta(z\mid x)}\,\big]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">The definition from Part 4: the average, under the first argument, of the log of the ratio. The highlighted term is the one we cannot compute.</div>
-  </div>
-</section>
-
-<section class="slide sec-elbo" id="vi-d2" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 2 of 4</p>
-  <h2>Bayes: the posterior is the joint over the evidence</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\big[\log q(z) - \log p_\theta(z\mid x)\big]$$</div>
-    <div class="mathblock big">$$= \E_{q}\big[\log q(z) - \log p_\theta(x,z)\big] \;+\; \hl{\log p_\theta(x)}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">$\log p_\theta(z\mid x) = \log p_\theta(x,z) - \log p_\theta(x)$. The evidence has no $z$ in it: the same number for every draw, so it comes out of the average.</div>
-  </div>
-  <p class="q" data-b="2">The joint $p_\theta(x,z) = p(z)\,p_\theta(x\mid z)$ is easy: prior times decoder. All the difficulty is now in one number.</p>
-</section>
-
-<section class="slide sec-elbo" id="vi-d3" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 3 of 4</p>
-  <h2>Move the evidence to the other side</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\KL\big(q\,\|\,p_\theta(z\mid x)\big) = \E_{q}\big[\log q(z) - \log p_\theta(x,z)\big] + \log p_\theta(x)$$</div>
-    <div class="mathblock big">$$\log p_\theta(x) = \underbrace{\hl{\E_{q}\big[\log p_\theta(x,z) - \log q(z)\big]}}_{\ELBO(q)} \;+\; \KL\big(q\,\|\,p_\theta(z\mid x)\big)$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">Rearrange, and give the highlighted average a name: the <b>ELBO</b>. Every piece of it is computable: the joint is prior times decoder, and $q$ is ours.</div>
-  </div>
-  <p class="q" data-b="2">Why "Evidence Lower BOund"? The last move.</p>
+  <p class="q" data-b="4">Careful with one letter: there, $\theta$ was the unknown; here it names the decoder's weights, and the unknown is $z$.</p>
+  <p class="src">VI lecture (vi.html), Part 6: <a href="vi.html#e-catch">the catch</a> · <a href="vi.html#e-sub">substitute Bayes</a> · <a href="vi.html#e-out">the evidence comes out</a> · <a href="vi.html#e-bound">the lower bound</a> · <a href="vi.html#e-picture">ELBO + KL for the coin</a></p>
+  <aside class="notes">
+    <p>The VI lecture's three steps: write the KL to the posterior as an average under q, substitute Bayes' rule for the posterior, and take log p(x) out of the average because it does not depend on z. The identity holds for every q.</p>
+    <p>Ask: which of the two terms can we compute? The ELBO: draws from q, and the prior and decoder at those draws. The KL to the posterior needs p(x).</p>
+  </aside>
 </section>
 
 <section class="slide sec-elbo" id="vi-d4" data-section="5 · VI and the ELBO">
-  <p class="kicker">From the KL to the ELBO · move 4 of 4</p>
-  <h2>The KL is never negative, so the ELBO is a lower bound</h2>
+  <p class="kicker">The lower bound, measured on our 3</p>
+  <h2>The KL is never negative, so the ELBO sits below $\log p_\theta(x)$</h2>
   <div class="body">
     <div class="mathblock" style="font-size:32px">$$\log p_\theta(x) = \ELBO(q) + \underbrace{\KL\big(q\,\|\,p_\theta(z\mid x)\big)}_{\ge\, 0} \;\ge\; \ELBO(q)$$</div>
     <p class="small" style="text-align:center;margin:6px 0 0" data-b="2">Our 3, two choices of $q$. The right end, $\log p_\theta(x)$, is fixed by the model; it does not move when $q$ changes.</p>
@@ -81,83 +62,25 @@
   </div>
   <p class="q" data-b="3">The total cannot move, so raising the ELBO must shrink the KL: maximise the ELBO and $q$ approaches the posterior, without ever computing $p_\theta(x)$.</p>
   <aside class="notes">
-    <p>Pause here: this is the single idea of variational inference. It is the picture in Bishop, PRML, Figure 10.2, with real numbers. Axis not to scale: the second gap is about 3,000 times smaller than the first.</p>
+    <p>The VI lecture drew this picture for the coin (Part 6, three Beta q's); here it is with our 3's numbers. It is the picture in Bishop, PRML, Figure 10.2. Axis not to scale: the second gap is about 3,000 times smaller than the first.</p>
     <p>At q = prior the KL to the prior is 0, so the ELBO there is just the average log p(x | z) of random codes: the blind sampling of Part 3. The next slides find the second q.</p>
   </aside>
 </section>
 
-<section class="slide sec-elbo" id="elbo-5" data-section="5 · VI and the ELBO">
-  <p class="kicker">Unpacking the ELBO · step 1 of 3</p>
-  <h2>The joint is prior times decoder</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\ELBO(q) = \E_{q}\big[\log p_\theta(x,z) - \log q(z)\big]$$</div>
-    <div class="mathblock big">$$= \E_{q}\Big[\hl{\log p_\theta(x\mid z) + \log p(z) - \log q(z)}\Big]$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">$p_\theta(x,z) = p(z)\,p_\theta(x\mid z)$: the generative story from Part 3. The log of a product is a sum of logs.</div>
-  </div>
-  <p class="q" data-b="2">Why unpack? To see which parts are the decoder and which are the prior, and to get two terms with names.</p>
-</section>
-
-<section class="slide sec-elbo" id="elbo-6" data-section="5 · VI and the ELBO">
-  <p class="kicker">Unpacking the ELBO · step 2 of 3</p>
-  <h2>The average of a sum is the sum of the averages</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\Big[\log p_\theta(x\mid z) + \log p(z) - \log q(z)\Big]$$</div>
-    <div class="mathblock big">$$= \hl{\E_{q}\big[\log p_\theta(x\mid z)\big]} \;+\; \hl{\E_{q}\big[\log p(z) - \log q(z)\big]}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">$\E[a + b] = \E[a] + \E[b]$. Group the decoder term on its own, and the two terms that only involve $z$ together.</div>
-  </div>
-</section>
-
-<section class="slide sec-elbo" id="elbo-7" data-section="5 · VI and the ELBO">
-  <p class="kicker">Unpacking the ELBO · step 3 of 3</p>
-  <h2>Recognise the second average: a KL to the prior</h2>
-  <div class="body">
-    <div class="deriv-prev mathblock">$$\E_{q}\big[\log p(z) - \log q(z)\big]$$</div>
-    <div class="mathblock big">$$= -\,\E_{q}\!\left[\log\frac{q(z)}{p(z)}\right] = \hl{-\KL\big(q(z)\,\|\,p(z)\big)}$$</div>
-    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Flip the sign to flip the fraction. Then use the definition: $\KL(q\|p) = \E_{z\sim q}\big[\log\frac{q(z)}{p(z)}\big]$, the average extra surprise.</div>
-  </div>
-  <p class="q" data-b="2">And for Gaussians we already have its formula: $\tfrac12\sum_j(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2)$.</p>
-</section>
-
 <section class="slide sec-elbo" id="elbo-final" data-section="5 · VI and the ELBO">
-  <p class="kicker">Put the pieces together</p>
+  <p class="kicker">The VI lecture's second form, for an image</p>
   <h2>The ELBO, in symbols and in words</h2>
   <div class="body">
-    <div class="mathblock" style="font-size:36px;margin-top:10px">$$\ELBO = \underbrace{\E_{z\sim\cenc q}\big[\cdec{\log p_\theta(x\mid z)}\big]}_{\text{rebuild } x \text{ from codes in its cloud}} \;-\; \underbrace{\closs{\KL\big(q(z)\,\|\,p(z)\big)}}_{\text{keep the cloud near } \N(0,I)}$$</div>
+    <div class="deriv-prev mathblock">$$\ELBO = \E_{q}\big[\log p_\theta(x\mid z) + \log p(z) - \log q(z)\big]$$</div>
+    <div class="mathblock" style="font-size:36px;margin-top:4px">$$\ELBO = \underbrace{\E_{z\sim\cenc q}\big[\cdec{\log p_\theta(x\mid z)}\big]}_{\text{rebuild } x \text{ from codes in its cloud}} \;-\; \underbrace{\closs{\KL\big(q(z)\,\|\,p(z)\big)}}_{\text{keep the cloud near } \N(0,I)}$$</div>
     <div class="row" style="justify-content:center;gap:24px;margin-top:20px" data-b="2">
       <div class="callout dec" style="width:520px">First term: the autoencoder's reconstruction score, with the code drawn from the cloud.</div>
-      <div class="callout loss" style="width:520px">Second term: the Gaussian KL from Part 4, in closed form.</div>
+      <div class="callout loss" style="width:520px">Second term: the Gaussian KL to the prior from Part 4, in closed form.</div>
     </div>
   </div>
   <p class="q" data-b="2">The two wishes from the end of Part 2, derived rather than invented: rebuild well, and keep codes where the prior can find them.</p>
-</section>
-
-<section class="slide sec-elbo" id="elbo-toy" data-section="5 · VI and the ELBO">
-  <p class="kicker">Check it with numbers you can do by hand</p>
-  <h2>Neat or messy writer? A two-value latent</h2>
-  <div class="body">
-    <div class="row top" style="gap:36px">
-      <div class="col" style="width:520px">
-        <p class="small">$z\in\{\text{neat},\text{messy}\}$, prior $\tfrac12, \tfrac12$. Observation $x$: a thick stroke.</p>
-        <p class="small">$p(x\mid\text{neat}) = 0.8,\quad p(x\mid\text{messy}) = 0.2$</p>
-        <p class="small" data-b="2">evidence $p(x) = 0.5$ · true posterior $(0.8,\ 0.2)$</p>
-        <p class="small" data-b="3">Our guess $q = (q_0,\ 1-q_0)$:</p>
-        <div class="ctrl interactive" data-widget="elbo" data-b="3"><span>$q_0$ =</span><input type="range" min="0.02" max="0.98" step="0.01" value="0.6"><span class="readout q0">0.60</span></div>
-      </div>
-      <table class="work elbo-table" style="font-size:22px" data-b="3">
-        <tr><th>quantity</th><th>value</th></tr>
-        <tr><td>$\E_q[\log p(x\mid z)]$</td><td class="v-ell">−0.778</td></tr>
-        <tr><td>$-\,\KL(q\,\|\,\text{prior})$</td><td class="v-klp">−0.020</td></tr>
-        <tr class="total"><td>$\ELBO$</td><td class="v-elbo">−0.798</td></tr>
-        <tr><td>$+\,\KL(q\,\|\,\text{posterior})$</td><td class="v-gap">0.105</td></tr>
-        <tr class="total"><td>$\log p(x)$</td><td class="v-lpx">−0.693</td></tr>
-      </table>
-    </div>
-  </div>
-  <p class="q" data-b="3">Move $q$: the ELBO and the gap change, their sum never does. At $q$ = posterior $(0.8)$ the gap is 0.</p>
-  <aside class="notes">
-    <p>At q = (0.6, 0.4) the gap is KL((0.6,0.4) ‖ (0.8,0.2)) = 0.105, the same "KL(Q‖P)" we computed with the 1s and 7s.</p>
-    <p>Drag the slider live. ELBO + gap = log 0.5 = −0.693 for every q0.</p>
-  </aside>
+  <p class="src">VI lecture (vi.html), Part 6: <a href="vi.html#e-forms">two ways to write the same ELBO</a></p>
+  <aside class="notes"><p>The faded line splits the joint into decoder times prior. Group log p(z) with −log q(z): their average is minus the KL from q to the prior. It is the prior here, not the posterior, so both terms are computable.</p></aside>
 </section>
 
 <section class="slide sec-elbo" id="vi-code" data-section="5 · VI and the ELBO">
@@ -178,7 +101,7 @@
 <span class="line" data-hl="=4">    opt.zero_grad(); loss.backward(); opt.step()</span></pre>
       <div class="notes-col">
         <p class="small" data-b="=1"><b>Only $q$ is learned.</b> The decoder is a trained one, kept fixed; $x$ is our 3. Start at $q = \N(0, I)$: $m = 0$, $s = 1$.</p>
-        <p class="small" data-b="=2"><b>Draw codes from $q$:</b> centre plus width times standard noise, exactly how Part 1 sampled from a bump. Part 6 explains why gradients flow through this line.</p>
+        <p class="small" data-b="=2"><b>Draw codes from $q$:</b> centre plus width times standard noise: the VI lecture's reparameterised draw (its Part 5), so gradients reach <code>m</code> and <code>log_s</code>.</p>
         <p class="small" data-b="=3"><b>The two terms:</b> reconstruction, averaged over the 64 draws; the KL to the prior by the Gaussian formula from Part 4.</p>
         <p class="small" data-b="4"><b>The same three-line loop</b> as fitting one Gaussian in Part 1. The ELBO rises from {{vi.start_elbo}} to {{vi.elbo}}.</p>
       </div>
@@ -280,11 +203,11 @@
   <div class="body">
     <div class="recap">
       <div><h3>What we did</h3><ol>
-        <li>Goal: minimise $\KL(q\,\|\,\text{posterior})$. It contains $p_\theta(x)$.</li>
-        <li>Rearranged: $\log p_\theta(x) = \ELBO + \KL$. Maximising the ELBO minimises the KL.</li>
+        <li>Our 3: $\log p_\theta(x) = \ELBO + \KL(q\,\|\,\text{posterior})$, as in the VI lecture.</li>
         <li>ELBO = reconstruction $-\ \KL(q\,\|\,\text{prior})$: both computable.</li>
-        <li>VI by hand fits our 3's $q$ in 800 steps; an encoder predicts it in one pass. That is the VAE.</li></ol></div>
-      <div class="next" data-b="2"><h3>Next: gradients through a random draw</h3><p class="small">The loss draws $z$ from the encoder's cloud. Part 6: why writing the draw as $\mu + \sigma\eps$ lets gradients reach the encoder.</p></div>
+        <li>VI by hand fits our 3's $q$ in 800 steps and leaves a gap of {{vi.gap}} nats.</li>
+        <li>An encoder predicts $q$ in one pass, with a gap of {{vi.gap_enc}}: that is the VAE.</li></ol></div>
+      <div class="next" data-b="2"><h3>Next: gradients through a random draw</h3><p class="small">The loss draws $z$ from the encoder's cloud. Part 6: the VI lecture's reparameterisation, with $\mu$ and $\log\sigma^2$ coming out of a network.</p></div>
     </div>
   </div>
 </section>
