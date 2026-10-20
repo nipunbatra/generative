@@ -43,6 +43,11 @@ ELBO + gap, or the two terms), `gradvar` (score-function vs reparameterised grad
 `vi2d` (diagonal or full-covariance q on three 2-D targets). The existing `kl` and `elbo` widgets are reused unchanged. The browser widgets
 use the same grids and formulas as the script; the play-button runs draw their own random numbers, and the PDF shows the recorded run.
 
+**Rebuild in progress (plan v2, awaiting review):** [plan/vi-lecture-plan.md](plan/vi-lecture-plan.md) restructures this deck
+to follow the PML course's Lectures 23–24 frame by frame. Its companion notebook is built and run:
+`vi-lab/vi_lecture.ipynb` (helpers in `vi-lab/vi_utils.py`; torch, numpy and matplotlib only, no ASTRA), regenerated with
+`$PY scripts/make_vi_notebook.py`.
+
 Borrowed from the PML course (nipunbatra/pml-teaching): the coin-toss VI with a Beta q, `kl_via_sampling`, `neg_elbo`, the
 `sample` / reparameterise-by-hand / `rsample` sequence (variational-inference notebook); darts for π (mc_sampling_intro); the surprise
 question and code lengths (information-theory slides); the Gaussian-KL exercise (VI slides).
