@@ -4,11 +4,70 @@
   <div class="break-grid">
     <div>
       <p class="kicker">Part 2 of 7</p>
-      <h2>First attempt: an autoencoder</h2>
-      <p class="why">Part 1 modelled single numbers; an image has 784. Before any probability, a simpler idea: squeeze each image into a few numbers with an <b>encoder</b>, rebuild it with a <b>decoder</b>, and see how far that gets us towards generating.</p>
+      <h2>From PCA to the autoencoder</h2>
+      <p class="why">Part 1 ended with PCA: squeeze an image to a few numbers along straight lines, then rebuild it. An <b>autoencoder</b> learns the squeeze with a network instead, so it can bend. First, the bridge: PCA is already one.</p>
     </div>
     <!--route:2-->
   </div>
+</section>
+
+<section class="slide sec-ae" id="pca-as-ae" data-section="2 · Autoencoders">
+  <p class="kicker">The bridge from Part 1</p>
+  <h2>PCA was an autoencoder all along</h2>
+  <div class="body center"><!--svg:pca-ae--></div>
+  <aside class="notes"><p>Encoder: the linear map from 784 pixels to d numbers. Decoder: the linear map back. PCA picks the d directions that make the squared rebuild error as small as possible for any straight-line squeeze, in closed form (one SVD). The autoencoder replaces both linear maps with networks and finds its answer by gradient descent. Both reconstructions shown are of our 3 with d = 16.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="linear-ae" data-section="2 · Autoencoders">
+  <p class="kicker">Train the straight-line version by gradient descent</p>
+  <h2>A linear autoencoder rediscovers PCA</h2>
+  <div class="body">
+    <div class="row top" style="gap:34px">
+      <pre class="code" style="font-size:18px;width:520px"><span class="line">enc = nn.Linear(<span class="n">784</span>, d)       <span class="c"># no activation</span></span>
+<span class="line">dec = nn.Linear(d, <span class="n">784</span>)</span>
+<span class="line"></span>
+<span class="line">x_hat = dec(enc(x))</span>
+<span class="line">loss = ((x_hat - x)**<span class="n">2</span>).sum(<span class="n">1</span>).mean()</span></pre>
+      <div class="col grow">
+        <table class="work" style="font-size:22px" data-b="2">
+          <tr><th>$d$</th><th>PCA, one SVD</th><th>linear AE, Adam</th><th>same directions?</th></tr>
+          <tr><td>2</td><td>{{bridge.pca2}}</td><td>{{bridge.linear2.err}}</td><td>{{bridge.overlap2}}</td></tr>
+          <tr><td>16</td><td>{{bridge.pca16}}</td><td>{{bridge.linear16.err}}</td><td>{{bridge.overlap16}}</td></tr>
+        </table>
+        <p class="cap" data-b="2">error: squared error per test image, summed over 784 grey pixels · last column: 1 means the decoder spans exactly PCA's directions</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">Gradient descent finds exactly PCA's error and PCA's directions. Only the individual vectors may differ: any rotation of the same directions rebuilds just as well.</p>
+  <aside class="notes"><p>The overlap is ‖Vᵀ Q‖²_F / d, with V PCA's top d directions and Q an orthonormal basis of the learned decoder's columns. This is the classic result of Baldi and Hornik (1989): a linear autoencoder trained on squared error has no better solution than the PCA subspace. Training: 150 epochs of Adam on the 60,000 training images; with 30 epochs the 2-number version was still turning towards PCA's directions (overlap 0.64), because the loss is very flat along those rotations.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-bends" data-section="2 · Autoencoders">
+  <p class="kicker">Now let it bend</p>
+  <h2>Same 2 numbers, add layers and ReLUs</h2>
+  <div class="body">
+    <div class="row top" style="gap:30px">
+      <div class="col" style="align-items:center;gap:4px">
+        <img class="fig pix" src="figures/data/bridge-recon-d2.png" style="width:640px">
+        <p class="cap">rows: test digits · PCA · linear autoencoder · MLP autoencoder, each squeezing to <b>2</b> numbers</p>
+      </div>
+      <table class="work" style="font-size:21px" data-b="2">
+        <tr><th>error</th><th>$d = 2$</th><th>$d = 16$</th></tr>
+        <tr><td>PCA</td><td>{{bridge.pca2}}</td><td>{{bridge.pca16}}</td></tr>
+        <tr><td>linear AE</td><td>{{bridge.linear2.err}}</td><td>{{bridge.linear16.err}}</td></tr>
+        <tr class="total"><td>MLP AE</td><td>{{bridge.mlp2.err}}</td><td>{{bridge.mlp16.err}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="2">With only 2 numbers, the straight-line squeeze keeps a blurry average; the bendy one keeps which digit it was. Same idea, more flexible maps.</p>
+  <aside class="notes"><p>The MLP is 784-512-256-d and back, ReLU in between, a sigmoid at the end; 20 epochs of Adam. These bridge slides use grey pixels and squared error so that PCA is directly comparable. From the next slide on, Part 2 uses black-and-white pixels and binary cross-entropy: the loss of one coin flip per pixel.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-codes2d" data-section="2 · Autoencoders">
+  <p class="kicker">What the 2 numbers look like</p>
+  <h2>Straight-line codes overlap; learned codes pull digits apart</h2>
+  <div class="body center"><img class="fig" src="figures/data/bridge-scatter.svg" style="height:440px"></div>
+  <p class="q">5,000 test digits, coloured by label (neither model saw labels). The autoencoder's squeeze bends to keep different digits apart.</p>
 </section>
 
 <section class="slide sec-ae" id="ae-arch" data-section="2 · Autoencoders">
@@ -88,6 +147,61 @@
   </div>
   <p class="q" data-b="2">Each pair of rows: test digits on top, reconstructions below. Two numbers keep the digit's identity; sixteen also keep its slant and stroke.</p>
   <aside class="notes"><p>Same architecture apart from the width of the middle layer. The 2-number version matters later because we can draw its code space on a slide.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-archs" data-section="2 · Autoencoders">
+  <p class="kicker">The encoder and decoder can be any network</p>
+  <h2>MLP, CNN or ViT: three ways to squeeze</h2>
+  <div class="body center"><!--svg:ae-archs--></div>
+  <p class="q" data-b="4">An autoencoder is a recipe, not an architecture: anything that maps 784 numbers to 16 and back, and can be trained.</p>
+  <aside class="notes"><p>CNN: two strided 4 × 4 convolutions (28 → 14 → 7), then one linear layer to the code; the decoder uses transposed convolutions. ViT: 7 × 7 patches, a 64-number token each, 3 transformer layers, the tokens averaged into the code; the decoder turns the code back into 16 tokens, 3 more transformer layers, and one 7 × 7 patch per token.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-archs-code" data-section="2 · Autoencoders">
+  <p class="kicker">In PyTorch</p>
+  <h2>Only the encoder changes; the training loop does not</h2>
+  <div class="body">
+    <div class="row top" style="gap:16px">
+      <div class="col" style="flex:1;gap:4px"><p class="small" style="margin:0"><b>MLP</b></p><pre class="code" style="font-size:14px">enc = nn.Sequential(
+  nn.Flatten(),
+  nn.Linear(<span class="n">784</span>, <span class="n">512</span>), nn.ReLU(),
+  nn.Linear(<span class="n">512</span>, <span class="n">256</span>), nn.ReLU(),
+  nn.Linear(<span class="n">256</span>, <span class="n">16</span>))</pre></div>
+      <div class="col" style="flex:1;gap:4px" data-b="2"><p class="small" style="margin:0"><b>CNN</b></p><pre class="code" style="font-size:14px">enc = nn.Sequential(
+  nn.Conv2d(<span class="n">1</span>, <span class="n">32</span>, <span class="n">4</span>, <span class="n">2</span>, <span class="n">1</span>), nn.ReLU(),  <span class="c"># 14x14</span>
+  nn.Conv2d(<span class="n">32</span>, <span class="n">64</span>, <span class="n">4</span>, <span class="n">2</span>, <span class="n">1</span>), nn.ReLU(), <span class="c"># 7x7</span>
+  nn.Flatten(),
+  nn.Linear(<span class="n">64</span>*<span class="n">7</span>*<span class="n">7</span>, <span class="n">16</span>))</pre></div>
+      <div class="col" style="flex:1;gap:4px" data-b="3"><p class="small" style="margin:0"><b>ViT</b></p><pre class="code" style="font-size:14px">t = embed(patches(x)) + pos  <span class="c"># [B,16,64]</span>
+t = transformer(t)          <span class="c"># 3 layers</span>
+z = to_code(t.mean(<span class="n">1</span>))       <span class="c"># [B,16]</span></pre></div>
+    </div>
+    <pre class="code" style="font-size:16px;width:760px;margin:16px auto 0" data-b="4"><span class="line">x_hat = dec(enc(x))                       <span class="c"># the same for all three</span></span>
+<span class="line">loss = ((x_hat - x)**<span class="n">2</span>).sum(<span class="n">1</span>).mean()</span></pre>
+  </div>
+  <aside class="notes"><p>Full definitions: scripts/make_figures_bridge.py (classes MLPAE, CNNAE, ViTAE). Each decoder mirrors its encoder.</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-archs-results" data-section="2 · Autoencoders">
+  <p class="kicker">Same data, same loss, same 16 numbers</p>
+  <h2>How the three compare on MNIST</h2>
+  <div class="body">
+    <div class="row top" style="gap:30px">
+      <div class="col" style="align-items:center;gap:4px">
+        <img class="fig pix" src="figures/data/arch-recon.png" style="width:640px">
+        <p class="cap">rows: test digits · MLP · CNN · ViT, each through 16 numbers</p>
+      </div>
+      <table class="work" style="font-size:20px" data-b="2">
+        <tr><th></th><th>parameters</th><th>test error</th><th>training</th></tr>
+        <tr><td>MLP</td><td>{{bridge.mlp16.params}}</td><td>{{bridge.mlp16.err}}</td><td>{{bridge.mlp16.secs}} s</td></tr>
+        <tr><td>CNN</td><td>{{bridge.cnn16.params}}</td><td>{{bridge.cnn16.err}}</td><td>{{bridge.cnn16.secs}} s</td></tr>
+        <tr><td>ViT</td><td>{{bridge.vit16.params}}</td><td>{{bridge.vit16.err}}</td><td>{{bridge.vit16.secs}} s</td></tr>
+        <tr><td>PCA</td><td>{{bridge.pca16_params}}</td><td>{{bridge.pca16}}</td><td>one SVD</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="2">Lowest error: the CNN (7.3), with 6× fewer parameters than the MLP. Networks built for images use the pixel layout; the MLP has to learn it.</p>
+  <aside class="notes"><p>20 epochs each with Adam on a laptop GPU (Apple M-series). Error: squared error per test image, summed over 784 grey pixels. On MNIST all three are good; on large photos, convolutions and attention matter far more, and the same choice reappears in diffusion models (U-Nets) and in today's image transformers.</p></aside>
 </section>
 
 <section class="slide sec-ae" id="ae-kinds" data-section="2 · Autoencoders">
@@ -275,6 +389,21 @@
   </div>
   <p class="q">A real digit's code decodes well. A random code usually gives a smudge: the decoder only learned the dotted regions.</p>
   <aside class="notes"><p>Three ways to choose a code: drag the sliders, click anywhere on the map, or press a button. Hover over any dot to see the test digit it came from.</p><p>Live demo: press "random code" five times, then "encode a real test digit" five times, then click into a gap between clusters. The decoder runs in the browser with the trained weights (2 → 256 → 512 → 784).</p></aside>
+</section>
+
+<section class="slide sec-ae" id="ae-codes-gmm" data-section="2 · Autoencoders">
+  <p class="kicker">Part 1's tool, on the autoencoder's codes</p>
+  <h2>Fit bumps to where the codes actually are</h2>
+  <div class="body center col" style="gap:4px">
+    <p class="cap" style="margin:0">random codes from $\N(0, I)$, decoded by a 16-number autoencoder</p>
+    <img class="fig pix" src="figures/data/aecodes-random.png" style="width:620px">
+    <p class="cap" style="margin:6px 0 0" data-b="2">{{bridge.k_codes}} Gaussian bumps fitted to PCA's 16 numbers, sampled, inverse PCA</p>
+    <img class="fig pix" src="figures/data/aecodes-pca-gmm.png" style="width:620px" data-b="2">
+    <p class="cap" style="margin:6px 0 0" data-b="3">{{bridge.k_codes}} Gaussian bumps fitted to the autoencoder's 16 numbers, sampled, decoded</p>
+    <img class="fig pix" src="figures/data/aecodes-ae-gmm.png" style="width:620px" data-b="3">
+  </div>
+  <p class="q" data-b="3">Bolting a density onto the codes works, and a better squeeze gives better samples. The VAE goes one step further: it shapes the codes during training, so that $\N(0, I)$ itself is the right density.</p>
+  <aside class="notes"><p>The 16-number MLP autoencoder from the bridge slides (grey pixels, squared error); its codes spread from {{bridge.code_sd_min}} to {{bridge.code_sd_max}} per coordinate, nothing like N(0, I). The bumps are fitted exactly as in Part 1 (k-means start, the same gradient-descent loop). Fitting a density to a trained autoencoder's codes after the fact is a real technique ("ex-post density estimation", Ghosh et al., 2020).</p></aside>
 </section>
 
 <section class="slide sec-ae" id="ae-wishes" data-section="2 · Autoencoders">

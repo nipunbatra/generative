@@ -1,0 +1,42 @@
+{
+ "pca2": 43.6,
+ "pca16": 21.1,
+ "pca16_params": 13328,
+ "overlap2": 1.0,
+ "overlap16": 1.0,
+ "linear2": {
+  "err": 43.6,
+  "params": 3922,
+  "secs": 36.0
+ },
+ "mlp2": {
+  "err": 29.3,
+  "params": 1068306,
+  "secs": 9.0
+ },
+ "linear16": {
+  "err": 21.1,
+  "params": 25888,
+  "secs": 37.0
+ },
+ "mlp16": {
+  "err": 7.6,
+  "params": 1075488,
+  "secs": 9.0
+ },
+ "cnn16": {
+  "err": 7.3,
+  "params": 170193,
+  "secs": 23.0
+ },
+ "vit16": {
+  "err": 8.6,
+  "params": 227713,
+  "secs": 65.0
+ },
+ "k_codes": 50,
+ "code_sd_min": 3.0,
+ "code_sd_max": 4.3,
+ "gmm_test_ae": -33.7,
+ "gmm_test_pca": -18.2
+}

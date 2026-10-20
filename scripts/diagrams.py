@@ -1101,10 +1101,120 @@ def gmm_pipeline():
     d.end()
     d.save()
 
+def _bridge_num():
+    f = ROOT / "figures" / "data" / "numbers-bridge.json"
+    return json.loads(f.read_text()) if f.exists() else {}
+
+
+def pca_ae():
+    """PCA is an autoencoder with straight-line encoder and decoder; an autoencoder lets them bend."""
+    d = SVG("pca-ae", 1152, 380)
+    b = _bridge_num()
+    rows = [(1, 92, "PCA", "grey", r"$z = V^{\top}(x - \bar x)$", r"$\hat x = \bar x + V z$", "bridge-3-pca16.png",
+             "one SVD, exact", f"error {b.get('pca16', '?')}"),
+            (2, 262, "autoencoder", "enc", "layers + ReLU", "layers + ReLU", "bridge-3-mlp16.png",
+             "gradient descent", f"error {b.get('mlp16', {}).get('err', '?')}")]
+    for build, cy, name, role, enc_sub, dec_sub, out_img, how, err in rows:
+        d.begin(build)
+        d.text(70, cy - 52, name, 20, INK if role == "grey" else C["enc"], 700)
+        d.image(20, cy - 40, 80, 80, "digit3.png", "x", sw=2)
+        d.line([(104, cy), (134, cy)], C["x"])
+        d.trapezoid(138, cy, 190, 96, 52, role, "encoder")
+        if "$" in enc_sub:
+            d.label(233, cy + 70, enc_sub, 17, INK2, width=260)
+        else:
+            d.text(233, cy + 62, enc_sub, 15, INK3)
+        d.line([(332, cy), (362, cy)], INK3)
+        d.vec(366, cy - 40, ["0.3", "-1.2", "...", "0.8"], "z", cw=46, ch=20, size=11)
+        d.label(389, cy + 62, r"$d = 16$ numbers", 15, C["z"], 650, width=160)
+        d.line([(416, cy), (446, cy)], C["z"])
+        d.trapezoid(450, cy, 190, 52, 96, "grey" if role == "grey" else "dec", "decoder")
+        if "$" in dec_sub:
+            d.label(545, cy + 70, dec_sub, 17, INK2, width=240)
+        else:
+            d.text(545, cy + 62, dec_sub, 15, INK3)
+        d.line([(644, cy), (674, cy)], INK3)
+        d.image(678, cy - 40, 80, 80, out_img, "dec", sw=2)
+        d.text(870, cy - 6, how, 17, INK2, 650)
+        d.text(870, cy + 18, err, 16, C["loss"], 650)
+        d.end()
+    d.begin(3)
+    d.label(576, 358, r"Both learn by making $\|x - \hat x\|^2$ small, summed over the 784 pixels. PCA is the best straight-line answer.",
+            17, INK2, width=1000)
+    d.end()
+    d.save()
+
+
+def ae_archs():
+    """Three encoders for the same job: MLP, CNN, ViT. Each decoder mirrors its encoder."""
+    d = SVG("ae-archs", 1152, 330)
+    b = _bridge_num()
+
+    def params(key):
+        v = b.get(key, {}).get("params")
+        return "" if v is None else (f"{v / 1e6:.2f} million parameters" if v >= 1e6 else f"{v / 1e3:.0f} thousand parameters")
+
+    cy = 140
+    for i, (title, key) in enumerate((("MLP", "mlp16"), ("CNN", "cnn16"), ("ViT", "vit16"))):
+        X = i * 384
+        d.begin(i + 1)
+        d.text(X + 192, 30, title, 22, C["enc"], 700)
+        d.image(X + 18, cy - 32, 64, 64, "digit3.png", "x", sw=2)
+        d.line([(X + 86, cy), (X + 106, cy)], C["x"], 2)
+        if title == "MLP":
+            bars = [(X + 116, 150, "784"), (X + 170, 112, "512"), (X + 224, 80, "256"), (X + 300, 34, "16")]
+            for (bx, h, lab), nxt in zip(bars, bars[1:] + [None]):
+                c = C["z"] if lab == "16" else C["enc"]
+                d.rect(bx, cy - h / 2, 22, h, c, ROLE["z" if lab == "16" else "enc"][1], r=5, sw=2)
+                d.text(bx + 11, cy + 96, lab, 14, INK3)
+                if nxt:
+                    for a_ in (-0.35, 0, 0.35):
+                        for b_ in (-0.35, 0.35):
+                            d.add(f'<line x1="{bx + 22}" y1="{cy + a_ * h}" x2="{nxt[0]}" y2="{cy + b_ * nxt[1]}" stroke="{LINE}" stroke-width="1.2"/>')
+            caption = "every pixel feeds every unit"
+        elif title == "CNN":
+            d.add(f'<rect x="{X + 30}" y="{cy - 22}" width="14" height="14" fill="none" stroke="{C["loss"]}" stroke-width="2"/>')
+            for k in range(4):
+                d.rect(X + 112 + 6 * k, cy - 40 + 6 * k, 46, 46, C["enc"], ROLE["enc"][1], r=3, sw=1.6)
+            d.text(X + 144, cy - 50, "32 maps of 14 × 14", 12, INK3)
+            d.line([(X + 186, cy), (X + 200, cy)], INK3, 2)
+            for k in range(4):
+                d.rect(X + 206 + 5 * k, cy - 26 + 5 * k, 30, 30, C["enc"], ROLE["enc"][1], r=3, sw=1.6)
+            d.text(X + 236, cy - 34, "64 of 7 × 7", 12, INK3)
+            d.line([(X + 262, cy), (X + 296, cy)], INK3, 2)
+            d.rect(X + 300, cy - 17, 22, 34, C["z"], ROLE["z"][1], r=5, sw=2)
+            d.text(X + 311, cy + 96, "16", 14, INK3)
+            caption = "small filters slide over the image"
+        else:
+            for k in (1, 2, 3):
+                d.add(f'<line x1="{X + 18 + 16 * k}" y1="{cy - 32}" x2="{X + 18 + 16 * k}" y2="{cy + 32}" stroke="{C["loss"]}" stroke-width="1.2"/>')
+                d.add(f'<line x1="{X + 18}" y1="{cy - 32 + 16 * k}" x2="{X + 82}" y2="{cy - 32 + 16 * k}" stroke="{C["loss"]}" stroke-width="1.2"/>')
+            for k in range(16):
+                rr, cc = divmod(k, 4)
+                d.rect(X + 112 + cc * 15, cy - 30 + rr * 15, 12, 12, C["enc"], ROLE["enc"][1], r=2, sw=1.2)
+            d.text(X + 141, cy + 54, "16 tokens", 13, INK3)
+            d.line([(X + 174, cy), (X + 188, cy)], INK3, 2)
+            d.rect(X + 190, cy - 32, 86, 64, C["enc"], ROLE["enc"][1], r=8, sw=2)
+            d.text(X + 233, cy - 4, "attention", 13, C["enc"], 650)
+            d.text(X + 233, cy + 14, "× 3 layers", 12, C["enc"], 650)
+            d.text(X + 288, cy + 34, "average", 12, INK3)
+            d.line([(X + 278, cy), (X + 296, cy)], INK3, 2)
+            d.rect(X + 300, cy - 17, 22, 34, C["z"], ROLE["z"][1], r=5, sw=2)
+            d.text(X + 311, cy + 96, "16", 14, INK3)
+            caption = "patches become tokens that attend to each other"
+        d.text(X + 192, cy + 126, caption, 14, INK2, 650)
+        d.text(X + 192, cy + 148, params(key), 14, INK3)
+        d.end()
+    d.begin(4)
+    d.text(576, 318, "Same 16-number code, same squared-error loss. Each decoder mirrors its encoder back to 28 × 28.", 16, INK2)
+    d.end()
+    d.save()
+
+
 def main():
     for f in (common, two_ways, mixture_story, latent_story, ae, ae_generate, cloud_vs_point, vae_encode, vae_sample,
               vae_decode, vae, vae_generate, pgm, vae_shapes, pixels, task, route_a, story_decode, reparam_before, reparam_after, reparam_numbers,
-              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes, amortise, gmm_pipeline):
+              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes, amortise, gmm_pipeline, pca_ae, ae_archs):
         f()
     print("wrote", len(list(OUT.glob("*.svg"))), "diagrams")
 

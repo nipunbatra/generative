@@ -18,6 +18,9 @@ if _extra.exists():
 _gmm = ROOT / "figures" / "data" / "numbers-gmm.json"       # from scripts/make_figures_gmm.py, as {{gmm.*}}
 if _gmm.exists():
     NUM["gmm"] = json.loads(_gmm.read_text())
+_bridge = ROOT / "figures" / "data" / "numbers-bridge.json"   # from scripts/make_figures_bridge.py, as {{bridge.*}}
+if _bridge.exists():
+    NUM["bridge"] = json.loads(_bridge.read_text())
 
 
 def fmt(v):
