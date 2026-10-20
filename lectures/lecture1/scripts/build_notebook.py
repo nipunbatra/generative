@@ -21,7 +21,7 @@ md(r"""
 
 **Lecture 1 · KL divergence, variational inference and the ELBO**
 
-This notebook follows the PML 2023 Gaussian → mixture → differentiable sampling → coin sequence. The lecture uses three short demonstrations, marked **Live demo**; the saved outputs let class continue without waiting for training.
+This notebook follows the lecture: a posterior with no formula (Section 0), what KL measures and why VI uses it (1–2), fitting q (3), Monte Carlo (4), gradients through draws (5), the ELBO (6), a check with an answer key (7), and VI on the posterior with no formula (8). It adapts the PML 2023 Gaussian → mixture → differentiable sampling → coin sequence. The lecture uses three short demonstrations, marked **Live demo**; the saved outputs let class continue without waiting for training.
 
 All distributions use natural logarithms. `Normal(loc=μ, scale=σ)` takes a **standard deviation**. Mathematical notation is $\mathcal N(\mu,\sigma^2)$. We use $u$ for a generic unknown, $r$ for a coin's probability of heads, $\mathcal D$ for observed data and $\psi$ for free variational parameters.
 
@@ -71,7 +71,173 @@ def normal_kl(q, p):
 print("CPU; float64; PyTorch", torch.__version__, "· fixed seeds recorded per experiment")
 """)
 md(r"""
-## 1. Which approximation is closer?
+## 0. The wall: a posterior with no formula
+
+Thirty tosses: 17 heads and 13 tails. With a Beta(5, 3) prior on the chance of heads $r$, Bayes' rule gives everything in closed form, including the evidence $p(\mathcal D)=B(22,16)/B(5,3)$. That is luck: the prior and the likelihood are conjugate.
+
+Put a Normal prior on the coin's **logit** instead: $w\sim\mathcal N(0,1)$ and $r=\mathrm{sigmoid}(w)$. The data are unchanged, but
+
+$$p(\mathcal D)=\int \mathcal N(w;0,1)\,r(w)^{17}\big(1-r(w)\big)^{13}\,dw$$
+
+has no closed form. In one dimension a grid still works. With many unknowns it cannot, which is why we need approximations.
+""")
+code(r"""
+heads_w, tails_w = 17, 13
+def lgB(a, b):
+    return math.lgamma(a) + math.lgamma(b) - math.lgamma(a + b)
+conj_log_evidence = lgB(22, 16) - lgB(5, 3)
+w_prior = dist.Normal(torch.tensor(0.), torch.tensor(1.))
+def logit_log_joint(w):
+    F = torch.nn.functional
+    return w_prior.log_prob(w) + heads_w * F.logsigmoid(w) + tails_w * F.logsigmoid(-w)
+w_grid = torch.linspace(-10, 10, 200_001)
+dw = number(w_grid[1] - w_grid[0])
+logit_log_evidence = number(torch.logsumexp(logit_log_joint(w_grid), 0)) + math.log(dw)
+torch.manual_seed(31)
+w_draws = w_prior.sample((100_000,))
+F = torch.nn.functional
+w_loglik = heads_w * F.logsigmoid(w_draws) + tails_w * F.logsigmoid(-w_draws)
+logit_log_evidence_mc = number(torch.logsumexp(w_loglik, 0)) - math.log(len(w_draws))
+w_plot = torch.linspace(-3, 3.5, 261)
+joint_plot = logit_log_joint(w_plot).exp()
+posterior_w_plot = (logit_log_joint(w_plot) - logit_log_evidence).exp()
+fig, ax = plt.subplots(figsize=(8.8, 4.0))
+ax.fill_between(w_plot, 0, joint_plot * 1e10, color="#E5E7EB")
+ax.plot(w_plot, joint_plot * 1e10, color=C["p"])
+ax.set(xlabel="w, the coin's logit (r = sigmoid(w))", ylabel="p(D, w) × 1e10")
+ax.set_title("The shaded area is p(D). No formula gives it.", loc="left")
+savefig("wall-logit-joint")
+fixtures["story"] = {"wall": dict(
+    heads=heads_w, tails=tails_w, conj_log_evidence=conj_log_evidence,
+    logit_prior=[0., 1.], logit_log_evidence_grid=logit_log_evidence,
+    logit_log_evidence_mc=logit_log_evidence_mc, mc_draws=100_000, mc_seed=31, grid_points=200_001,
+    plot=dict(w=w_plot.tolist(), joint_e10=(joint_plot * 1e10).tolist(), posterior=posterior_w_plot.tolist()))}
+print(f"Beta(5, 3) prior: log p(D) = {conj_log_evidence:.4f}, from the formula B(22,16)/B(5,3)")
+print(f"Normal prior on the logit: log p(D) = {logit_log_evidence:.4f} on a 200,001-point grid; "
+      f"{logit_log_evidence_mc:.4f} from 100,000 prior draws")
+""")
+md(r"""
+### Three ways around an intractable posterior
+
+On a two-bump target, $0.7\,\mathcal N(-2,1)+0.3\,\mathcal N(2,1)$:
+
+- **Laplace**: find the highest peak and fit a Gaussian to its curvature.
+- **MCMC**: a random walk whose visits follow the target (random-walk Metropolis).
+- **Variational inference**: the Gaussian $q$ closest to the target in $\mathrm{KL}(q\,\|\,p)$, found by gradient descent.
+""")
+code(r"""
+three_target = dist.MixtureSameFamily(dist.Categorical(probs=torch.tensor([.7, .3])),
+    dist.Normal(torch.tensor([-2., 2.]), torch.tensor([1., 1.])))
+def grid_kl(a, b, grid):
+    # KL(a || b) by the trapezoid rule on a fixed grid
+    la, lb = a.log_prob(grid), b.log_prob(grid)
+    return torch.trapezoid(la.exp() * (la - lb), grid)
+# Laplace: the highest peak, then the curvature there
+peak = torch.tensor(-1.0, requires_grad=True)
+peak_opt = torch.optim.Adam([peak], lr=.05)
+for _ in range(2000):
+    loss = -three_target.log_prob(peak)
+    peak_opt.zero_grad(); loss.backward(); peak_opt.step()
+mode = peak.detach()
+curvature = torch.autograd.functional.hessian(lambda t: three_target.log_prob(t), mode)
+laplace = dist.Normal(mode, (-curvature).rsqrt())
+# MCMC: random-walk Metropolis
+torch.manual_seed(7)
+state = torch.tensor(0.); state_lp = three_target.log_prob(state); chain = []; accepted = 0
+for _ in range(20_000):
+    proposal = state + 2.0 * torch.randn(())
+    proposal_lp = three_target.log_prob(proposal)
+    if torch.log(torch.rand(())) < proposal_lp - state_lp:
+        state, state_lp, accepted = proposal, proposal_lp, accepted + 1
+    chain.append(number(state))
+chain = np.array(chain)
+# VI: minimise KL(q || p) on a grid
+grid3 = torch.linspace(-8, 8, 2001)
+m3 = torch.nn.Parameter(torch.tensor(-.5)); rho3 = torch.nn.Parameter(torch.tensor(0.))
+opt3 = torch.optim.Adam([m3, rho3], lr=.05)
+for _ in range(600):
+    loss = grid_kl(dist.Normal(m3, rho3.exp()), three_target, grid3)
+    opt3.zero_grad(); loss.backward(); opt3.step()
+vi3 = dist.Normal(m3.detach(), rho3.detach().exp())
+x3 = torch.linspace(-6, 6, 241)
+hist, edges = np.histogram(chain, bins=np.linspace(-6, 6, 49), density=True)
+fig, axes = plt.subplots(1, 3, figsize=(13, 3.6), sharey=True)
+for ax, title in zip(axes, ["Laplace", "MCMC", "VI"]):
+    ax.fill_between(x3, 0, three_target.log_prob(x3).exp(), color="#D9F2EF")
+    ax.set_title(title, loc="left")
+axes[0].plot(x3, laplace.log_prob(x3).exp(), color=C["noise"])
+axes[1].hist(chain, bins=edges, density=True, color=C["noise"], alpha=.5)
+axes[2].plot(x3, vi3.log_prob(x3).exp(), color=C["q"])
+savefig("three-ways")
+fixtures["story"]["three"] = dict(weights=[.7, .3], means=[-2., 2.], scales=[1., 1.],
+    laplace=[number(laplace.loc), number(laplace.scale)],
+    mcmc=dict(steps=20_000, step_size=2.0, seed=7, acceptance=accepted / 20_000,
+              mean=float(chain.mean()), hist=hist.tolist(), edges=edges.tolist()),
+    vi=[number(vi3.loc), number(vi3.scale)], true_mean=.7 * -2 + .3 * 2,
+    plot=dict(x=x3.tolist(), p=three_target.log_prob(x3).exp().tolist(),
+              laplace=laplace.log_prob(x3).exp().tolist(), vi=vi3.log_prob(x3).exp().tolist()))
+print("Laplace:", fixtures["story"]["three"]["laplace"], "· MCMC mean", round(float(chain.mean()), 3),
+      "acceptance", accepted / 20_000, "· VI:", fixtures["story"]["three"]["vi"])
+""")
+md(r"""
+## 1. What does “close” mean? Build the KL divergence
+
+**A favourite-fruit survey.** Year 1 is the reference $q$: 50% apple, 40% banana, 10% clementine. Year 2 is $p$: 50%, 10%, 40%. One number for how much year 2 differs, relative to year 1:
+
+1. Compare by **ratios**, $p/q$: $1, \tfrac14, 4$.
+2. Take the **log**, so that a fourfold rise and a fourfold fall cancel: $0, -1.386, 1.386$.
+3. **Weight** each fruit by how common it is in $p$, and add: $\mathrm{KL}(p\|q)=\sum_x p(x)\log\frac{p(x)}{q(x)}$.
+
+The same number has a coding meaning: the extra average message length (in bits, with $\log_2$) of using a code built for the wrong distribution. And it is the rate at which data separate two hypotheses.
+""")
+code(r"""
+fruit_names = ["apple", "banana", "clementine"]
+fruit_q = np.array([.5, .4, .1])
+fruit_p = np.array([.5, .1, .4])
+fruit_ratio = fruit_p / fruit_q
+fruit_terms = fruit_p * np.log(fruit_ratio)
+fruit_kl = float(fruit_terms.sum())
+library = number(dist.kl_divergence(dist.Categorical(probs=torch.tensor(fruit_p)),
+                                    dist.Categorical(probs=torch.tensor(fruit_q))))
+assert abs(fruit_kl - library) < 1e-12
+weather_p = np.array([.5, .25, .25])
+weather_q = np.array([.25, .5, .25])
+entropy_bits = float(-(weather_p * np.log2(weather_p)).sum())
+cross_entropy_bits = float(-(weather_p * np.log2(weather_q)).sum())
+assert abs((cross_entropy_bits - entropy_bits) - float((weather_p * np.log2(weather_p / weather_q)).sum())) < 1e-12
+coin_08, coin_05 = dist.Bernoulli(torch.tensor(.8)), dist.Bernoulli(torch.tensor(.5))
+kl_coin = number(dist.kl_divergence(coin_08, coin_05))
+kl_coin_reverse = number(dist.kl_divergence(coin_05, coin_08))
+torch.manual_seed(5)
+toss_sim = (torch.rand(20_000, 30) < .8).double()
+llr = (toss_sim * math.log(.8 / .5) + (1 - toss_sim) * math.log(.2 / .5)).cumsum(1)
+fig, axes = plt.subplots(1, 2, figsize=(12, 3.8))
+xs = np.arange(3)
+axes[0].bar(xs - .2, fruit_q, .4, color=C["p"], label="year 1, q")
+axes[0].bar(xs + .2, fruit_p, .4, color=C["q"], label="year 2, p")
+axes[0].set_xticks(xs, fruit_names); axes[0].legend(frameon=False)
+n = np.arange(31)
+axes[1].semilogy(n, np.exp(n * kl_coin), color=C["loss"])
+axes[1].set(xlabel="tosses of the 0.8 coin", ylabel="p(D | 0.8) / p(D | 0.5)")
+savefig("kl-intuition")
+fixtures["story"]["fruit"] = dict(names=fruit_names, q=fruit_q.tolist(), p=fruit_p.tolist(),
+    ratio=fruit_ratio.tolist(), log_ratio=np.log(fruit_ratio).tolist(), terms=fruit_terms.tolist(),
+    kl=fruit_kl, ratio_mean=float(fruit_ratio.mean()))
+fixtures["story"]["bits"] = dict(p=weather_p.tolist(), q=weather_q.tolist(), entropy=entropy_bits,
+    cross_entropy=cross_entropy_bits, kl=cross_entropy_bits - entropy_bits,
+    names=["sunny", "cloudy", "rainy"], right_code=["0", "10", "11"], wrong_code=["10", "0", "11"])
+fixtures["story"]["coinkl"] = dict(kl=kl_coin, reverse=kl_coin_reverse,
+    x10=math.exp(10 * kl_coin), x30=math.exp(30 * kl_coin),
+    simulated_mean_llr_30=float(llr[:, -1].mean()), simulated_sequences=20_000, simulation_seed=5)
+print(f"Fruit: KL(p||q) = {fruit_kl:.4f} nats (library {library:.4f})")
+print(f"Weather: H(p) = {entropy_bits:.2f} bits, H(p, q) = {cross_entropy_bits:.2f} bits, "
+      f"KL = {cross_entropy_bits - entropy_bits:.2f} bits")
+print(f"Coins: KL(0.8 || 0.5) = {kl_coin:.4f}, reverse {kl_coin_reverse:.4f}; "
+      f"e^(10 KL) = {math.exp(10 * kl_coin):.1f}, e^(30 KL) = {math.exp(30 * kl_coin):.0f}; "
+      f"simulated mean log ratio after 30 = {float(llr[:, -1].mean()):.3f} (30 KL = {30 * kl_coin:.3f})")
+""")
+md(r"""
+## 2. Which Gaussian is closer?
 
 Fix $p=\mathcal N(1,4^2)$. Compare $q_1=\mathcal N(0,2^2)$ and $q_2=\mathcal N(1,3^2)$.
 
@@ -126,7 +292,50 @@ print("Matched distributions: KL(p||p) =", number(dist.kl_divergence(p,p)))
 fixtures["normal"] = {"target": {"mu":1., "sigma":4.}, "candidates":normal_values}
 """)
 md(r"""
-## 2. Turn the score into an optimisation problem
+### Which direction? Fit one Gaussian to two bumps
+
+Target $p=0.7\,\mathcal N(-2,w^2)+0.3\,\mathcal N(2,w^2)$. Fit a Gaussian $q$ by gradient descent on each direction of the KL, computed on a grid. $\mathrm{KL}(p\|q)$ averages under $p$, so $q$ must cover both bumps. $\mathrm{KL}(q\|p)$ averages under $q$, so mass in the gap is expensive and $q$ settles on one bump; which one depends on where it starts.
+""")
+code(r"""
+def bump_mixture(width):
+    return dist.MixtureSameFamily(dist.Categorical(probs=torch.tensor([.7, .3])),
+        dist.Normal(torch.tensor([-2., 2.]), torch.tensor([width, width])))
+grid_fr = torch.linspace(-8, 8, 2001)
+x_fr = torch.linspace(-6, 6, 241)
+def fit_direction(target, direction, start, steps=300, lr=.05, every=2):
+    m = torch.nn.Parameter(torch.tensor(start[0]))
+    rho = torch.nn.Parameter(torch.tensor(math.log(start[1])))
+    opt = torch.optim.Adam([m, rho], lr=lr); frames = []
+    for step in range(steps + 1):
+        q = dist.Normal(m, rho.exp())
+        loss = grid_kl(q, target, grid_fr) if direction == "reverse" else grid_kl(target, q, grid_fr)
+        if step % every == 0:
+            frames.append([step, number(m), number(rho.exp()), number(loss)])
+        if step == steps:
+            break
+        opt.zero_grad(); loss.backward(); opt.step()
+    return frames
+fwdrev = {"x": x_fr.tolist(), "start": {"fwd": [.5, .6], "revl": [-.5, .6], "revr": [.5, .6]}, "steps": 300, "lr": .05}
+for width in [1.0, 0.5]:
+    target = bump_mixture(width)
+    runs = {"fwd": fit_direction(target, "forward", (.5, .6)),
+            "revl": fit_direction(target, "reverse", (-.5, .6)),
+            "revr": fit_direction(target, "reverse", (.5, .6))}
+    fwdrev[str(width)] = dict(p=target.log_prob(x_fr).exp().tolist(), **runs)
+    print(f"bump width {width}: " + "; ".join(
+        f"{k}: N({v[-1][1]:.2f}, {v[-1][2]:.2f}^2), KL {v[-1][3]:.3f}" for k, v in runs.items()))
+fixtures["story"]["fwdrev"] = fwdrev
+fig, axes = plt.subplots(1, 3, figsize=(13, 3.4), sharey=True)
+narrow = bump_mixture(.5)
+for ax, key, title in zip(axes, ["fwd", "revl", "revr"], ["KL(p||q)", "KL(q||p), start left", "KL(q||p), start right"]):
+    _, m_, s_, k_ = fwdrev["0.5"][key][-1]
+    ax.fill_between(x_fr, 0, narrow.log_prob(x_fr).exp(), color="#D9F2EF")
+    ax.plot(x_fr, dist.Normal(m_, s_).log_prob(x_fr).exp(), color=C["q"])
+    ax.set_title(f"{title} = {k_:.3f}", loc="left")
+savefig("forward-reverse")
+""")
+md(r"""
+## 3. Make q move
 
 **Live demo 1 · about 3 minutes.** Hold $\sigma=2$ fixed and start at $\mu=0$.
 
@@ -192,7 +401,57 @@ savefig("gaussian-fit")
 print("Final measured parameters:", normal_trace[-1])
 """)
 md(r"""
-## 3. What if the library has no KL formula?
+### Watch the optimiser: from $\mathcal N(4,0.5^2)$ to $p$
+
+The same loop, started far away, recorded at every step for the slide animation. The centre moves first; the width catches up.
+""")
+code(r"""
+m_o = torch.nn.Parameter(torch.tensor(4.)); rho_o = torch.nn.Parameter(torch.tensor(math.log(.5)))
+opt_o = torch.optim.Adam([m_o, rho_o], lr=.05); olive = []
+for step in range(201):
+    loss = dist.kl_divergence(dist.Normal(m_o, rho_o.exp()), p)
+    olive.append([step, number(m_o), number(rho_o.exp()), number(loss)])
+    if step == 200:
+        break
+    opt_o.zero_grad(); loss.backward(); opt_o.step()
+fixtures["story"]["olive"] = dict(start=[4., .5], lr=.05, steps=200, frames=olive)
+print("start", olive[0], "· step 100", olive[100], "· end", olive[-1])
+""")
+md(r"""
+### Two dimensions: a diagonal $q$ cannot tilt
+
+Target: unit variances and correlation $\rho=0.9$. A $q$ with independent coordinates (diagonal covariance) must fit inside the tilted ellipse. Under $\mathrm{KL}(q\|p)$ its best widths are the target's **conditional** widths $\sqrt{1-\rho^2}$, not the marginal widths 1. A full covariance, $\Sigma=LL^\top$ with lower-triangular $L$, matches exactly.
+""")
+code(r"""
+rho_2d = .9
+p2d = dist.MultivariateNormal(torch.zeros(2), torch.tensor([[1., rho_2d], [rho_2d, 1.]]))
+def fit_2d(full, steps=1500):
+    mean = torch.nn.Parameter(torch.tensor([.5, -.5]))
+    raw = torch.nn.Parameter(torch.zeros(3 if full else 2))
+    opt = torch.optim.Adam([mean, raw], lr=.05)
+    for _ in range(steps):
+        if full:
+            L = torch.stack([torch.stack([raw[0].exp(), torch.tensor(0.)]),
+                             torch.stack([raw[1], raw[2].exp()])])
+        else:
+            L = torch.diag(raw.exp())
+        q = dist.MultivariateNormal(mean, scale_tril=L)
+        loss = dist.kl_divergence(q, p2d)
+        opt.zero_grad(); loss.backward(); opt.step()
+    return q, number(loss)
+q_diag, kl_diag = fit_2d(False)
+q_full, kl_full = fit_2d(True)
+analytic_sd = math.sqrt(1 - rho_2d ** 2)
+analytic_kl = .5 * (math.log(1 - rho_2d ** 2) - 2 * math.log(1 - rho_2d ** 2))
+diag_sd = q_diag.covariance_matrix.diagonal().sqrt().tolist()
+assert max(abs(v - analytic_sd) for v in diag_sd) < 2e-3 and abs(kl_diag - analytic_kl) < 1e-4 and kl_full < 1e-4
+fixtures["story"]["twod"] = dict(rho=rho_2d, diag_sd=diag_sd, diag_kl=kl_diag, full_kl=kl_full,
+    analytic_sd=analytic_sd, analytic_kl=analytic_kl)
+print(f"diagonal q: widths {diag_sd[0]:.4f}, {diag_sd[1]:.4f} (analytic {analytic_sd:.4f}), KL {kl_diag:.4f} "
+      f"(analytic {analytic_kl:.4f}); full q: KL {kl_full:.2e}")
+""")
+md(r"""
+## 4. No formula: estimate the KL by sampling
 
 Use the original PML mixture:
 
@@ -291,7 +550,7 @@ for x,lq,lp,t in zip(draws,q2.log_prob(draws),p.log_prob(draws),terms):
 print("Five-draw estimate:",number(terms.mean()),"· exact KL:",number(dist.kl_divergence(q2,p)))
 """)
 md(r"""
-## 4. Can we optimise through random draws?
+## 5. Gradients through random draws
 
 First inspect the sample itself. `Normal.sample()` returns a draw without the pathwise gradient connection to the Normal's parameters. Asking that scalar draw for a gradient fails.
 
@@ -379,7 +638,49 @@ fixtures["gradients"]["finite_difference"]=dict(seed=88,samples=2048,h=h,
 print(fixtures["gradients"]["finite_difference"])
 """)
 md(r"""
-## 5. The target is now an unknown posterior
+### Optimise the Monte Carlo KL: `sample()` versus `rsample()`
+
+Fit a Gaussian to the PML mixture starting from $\mathcal N(6,0.1^2)$, with 5,000 draws per step and plain gradient descent. With `sample()` the code runs, but the draws carry no path back to $\mu$ and $\sigma$: the surviving gradient averages to zero and $q$ barely moves. (Adam rescales its steps, so with Adam the stuck run wanders aimlessly instead; it still never fits.) With `rsample()` the same loop fits the mixture.
+""")
+code(r"""
+def mixture_kl_quadrature(q):
+    g = torch.linspace(-10, 12, 20_001)
+    lq = q.log_prob(g)
+    return number(torch.trapezoid(lq.exp() * (lq - mixture.log_prob(g)), g))
+def fit_mixture(use_rsample, steps=400, draws=5000, seed=4004, dense=120, every=5):
+    torch.manual_seed(seed)
+    m = torch.nn.Parameter(torch.tensor(6.)); rho = torch.nn.Parameter(torch.tensor(math.log(.1)))
+    opt = torch.optim.SGD([m, rho], lr=.05); frames = []
+    for step in range(steps + 1):
+        q = dist.Normal(m, rho.exp())
+        u_s = q.rsample((draws,)) if use_rsample else q.sample((draws,))
+        loss = (q.log_prob(u_s) - mixture.log_prob(u_s)).mean()
+        if step <= dense or step % every == 0:  # dense frames while q moves, for the slide animation
+            frames.append([step, number(m), number(rho.exp()), number(loss),
+                           mixture_kl_quadrature(dist.Normal(m.detach(), rho.detach().exp()))])
+        if step == steps:
+            break
+        opt.zero_grad(); loss.backward(); opt.step()
+    return frames
+mix_rsample = fit_mixture(True)
+mix_sample = fit_mixture(False)
+x_mix = torch.linspace(-4, 8, 241)
+fixtures["story"]["mixfit"] = dict(start=[6., .1], optimiser="SGD", lr=.05, steps=400, draws=5000, seed=4004,
+    rsample=mix_rsample, sample=mix_sample, x=x_mix.tolist(), p=mixture.log_prob(x_mix).exp().tolist())
+for name, frames in [("sample()", mix_sample), ("rsample()", mix_rsample)]:
+    _, m_, s_, est, exact = frames[-1]
+    print(f"{name}: final N({m_:.3f}, {s_:.3f}^2), MC KL {est:.3f}, quadrature KL {exact:.3f}")
+fig, ax = plt.subplots(figsize=(9, 3.8))
+ax.fill_between(x_mix, 0, mixture.log_prob(x_mix).exp(), color="#D9F2EF")
+for frames, style, label in [(mix_sample, "--", "sample(): stuck"), (mix_rsample, "-", "rsample(): fitted")]:
+    _, m_, s_, _, _ = frames[-1]
+    ax.plot(x_mix, dist.Normal(m_, s_).log_prob(x_mix).exp(), color=C["q"], ls=style, label=label)
+ax.set(ylim=(0, 1.2), xlabel="u")
+ax.legend(frameon=False)
+savefig("mixture-fit")
+""")
+md(r"""
+## 6. The real target: a posterior we cannot write down
 
 For a fixed model and observed dataset:
 
@@ -401,7 +702,7 @@ $$\log p(\mathcal D)=
 Maximise the ELBO, or minimise its negative. We can evaluate the **joint** without the evidence normaliser. Estimating the expectation can still require Monte Carlo. A finite-sample ELBO estimate need not lie below the evidence on every draw; the exact expectation is the lower bound.
 """)
 md(r"""
-## 6. Fit the coin, then check a reference answer
+## 7. A check with an answer key: the Beta coin
 
 Use a Beta(5,3) prior and **one ordered sequence** with 17 heads and 13 tails. Any order with these counts has the same sequence likelihood:
 
@@ -522,7 +823,55 @@ fixtures["coin"]["sampled_estimates_above_evidence"]=int(np.sum(sampled>number(l
 print("MC estimates above the exact evidence:",fixtures["coin"]["sampled_estimates_above_evidence"])
 """)
 md(r"""
-## 7. Retrieve the method
+## 8. Back to the wall: VI on the coin with no formula
+
+Return to the Normal prior on the logit. Let $q(w)=\mathcal N(m,s^2)$, start at the prior $\mathcal N(0,1)$, and maximise a Monte Carlo ELBO with `rsample` (256 draws per step). The optimiser uses only the joint $p(\mathcal D,w)$. The grid evidence from Section 0 is used **only to check** the result: the exact ELBO, by quadrature, must sit just below it.
+""")
+code(r"""
+torch.manual_seed(3301)
+m_w = torch.nn.Parameter(torch.tensor(0.)); rho_w = torch.nn.Parameter(torch.tensor(0.))
+opt_w = torch.optim.Adam([m_w, rho_w], lr=.05)
+w_quad = torch.linspace(-8, 8, 16_001)
+def logit_exact_elbo(m, s):
+    q = dist.Normal(torch.tensor(m), torch.tensor(s)); lq = q.log_prob(w_quad)
+    return number(torch.trapezoid(lq.exp() * (logit_log_joint(w_quad) - lq), w_quad))
+logit_frames = []
+for step in range(601):
+    q = dist.Normal(m_w, rho_w.exp())
+    w_s = q.rsample((256,))
+    elbo_estimate = (logit_log_joint(w_s) - q.log_prob(w_s)).mean()
+    if step <= 60 or step % 10 == 0:  # dense frames while q moves, for the slide animation
+        logit_frames.append([step, number(m_w), number(rho_w.exp()), number(elbo_estimate),
+                             logit_exact_elbo(number(m_w), number(rho_w.exp()))])
+    if step == 600:
+        break
+    opt_w.zero_grad(); (-elbo_estimate).backward(); opt_w.step()
+_, m_end, s_end, _, elbo_end = logit_frames[-1]
+logit_gap = logit_log_evidence - elbo_end
+assert logit_gap > -1e-6
+theta = torch.linspace(.2, .9, 281)
+w_of_theta = torch.log(theta) - torch.log1p(-theta)
+jacobian = 1 / (theta * (1 - theta))
+q_theta = dist.Normal(m_end, s_end).log_prob(w_of_theta).exp() * jacobian
+posterior_theta = (logit_log_joint(w_of_theta) - logit_log_evidence).exp() * jacobian
+fixtures["story"]["logitvi"] = dict(start=[0., 1.], lr=.05, steps=600, draws=256, seed=3301,
+    frames=logit_frames, final=dict(m=m_end, s=s_end, exact_elbo=elbo_end,
+    log_evidence_grid=logit_log_evidence, gap=logit_gap),
+    theta=dict(x=theta.tolist(), q=q_theta.tolist(), posterior=posterior_theta.tolist()))
+print(f"q(w) = N({m_end:.3f}, {s_end:.3f}^2); exact ELBO {elbo_end:.4f}; grid log p(D) {logit_log_evidence:.4f}; "
+      f"gap = KL(q || posterior) = {logit_gap:.4f}")
+fig, axes = plt.subplots(1, 2, figsize=(12, 3.8))
+axes[0].fill_between(w_plot, 0, posterior_w_plot, color="#D9F2EF")
+axes[0].plot(w_plot, dist.Normal(0., 1.).log_prob(w_plot).exp(), color=C["q"], ls=":", label="q at the start (the prior)")
+axes[0].plot(w_plot, dist.Normal(m_end, s_end).log_prob(w_plot).exp(), color=C["q"], label="q after 600 steps")
+axes[0].set(xlabel="w"); axes[0].legend(frameon=False)
+axes[1].fill_between(theta, 0, posterior_theta, color="#D9F2EF")
+axes[1].plot(theta, q_theta, color=C["q"])
+axes[1].set(xlabel="r = sigmoid(w)")
+savefig("logit-vi")
+""")
+md(r"""
+## 9. Retrieve the method
 
 Before revealing the answers, answer these in your own words:
 

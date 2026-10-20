@@ -2,49 +2,49 @@
   "id": "lecture1",
   "number": 1,
   "title": "KL and variational inference",
-  "subtitle": "Fit an approximation to an unknown posterior",
+  "subtitle": "Push a simple distribution onto a posterior nobody can write down",
   "minutes": 70,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
-      "id": "question",
-      "title": "An inference question",
-      "minutes": 4
+      "id": "wall",
+      "title": "Act 0 · The wall",
+      "minutes": 8
     },
     {
-      "id": "compare",
-      "title": "Which distribution is closer?",
-      "minutes": 9
+      "id": "close",
+      "title": "Act 1 · Closer how?",
+      "minutes": 15
     },
     {
-      "id": "optimise",
-      "title": "Turn comparison into optimisation",
+      "id": "move",
+      "title": "Act 2 · Make q move",
+      "minutes": 7
+    },
+    {
+      "id": "nofo",
+      "title": "Act 3 · No formula",
+      "minutes": 7
+    },
+    {
+      "id": "grad",
+      "title": "Act 4 · Gradients through a draw",
       "minutes": 10
     },
     {
-      "id": "monte-carlo",
-      "title": "Estimate an unavailable formula",
-      "minutes": 7
-    },
-    {
-      "id": "gradients",
-      "title": "Differentiate through a draw",
-      "minutes": 7
-    },
-    {
       "id": "elbo",
-      "title": "An objective without the posterior",
-      "minutes": 13
+      "title": "Act 5 · The real target",
+      "minutes": 10
     },
     {
-      "id": "coin",
-      "title": "Fit and check the coin",
-      "minutes": 13
+      "id": "back",
+      "title": "Act 6 · Back to the wall",
+      "minutes": 10
     },
     {
-      "id": "retrieve",
-      "title": "Retrieve and transfer",
-      "minutes": 7
+      "id": "exit",
+      "title": "Exit",
+      "minutes": 3
     },
     {
       "id": "optional",
@@ -52,488 +52,355 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 66,
-  "optionalSlides": 6,
+  "coreSlides": 39,
+  "optionalSlides": 14,
   "slides": [
     {
       "id": "coin-question",
-      "title": "What would you like to know about this coin?",
-      "section": "question",
+      "title": "Is this coin fair?",
+      "section": "wall",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "data-and-unknown",
-      "title": "The data are fixed; the unknown is not a data point",
-      "section": "question",
+      "id": "conjugate-luck",
+      "title": "With a Beta prior, Bayes’ rule has a formula",
+      "section": "wall",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "prior-before-data",
-      "title": "A prior is a distribution over the unknown",
-      "section": "question",
+      "id": "no-formula",
+      "title": "Change the prior, and the formula disappears",
+      "section": "wall",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "bayes-recall",
-      "title": "What normalises the posterior?",
-      "section": "question",
+      "id": "grid-explodes",
+      "title": "A grid works for one unknown, not for a million",
+      "section": "wall",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "three-ways",
+      "title": "Three ways around an integral nobody can do",
+      "section": "wall",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "plan",
+      "title": "The plan: push a simple q towards the posterior",
+      "section": "wall",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "fruit",
+      "title": "Two surveys: how different are they?",
+      "section": "close",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ratios-logs",
+      "title": "Ratios say “how many times”; logs make up and down cancel",
+      "section": "close",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "weight",
+      "title": "Weight by how common each fruit is now: that is KL",
+      "section": "close",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "bits",
+      "title": "KL is the extra message length of using the wrong code",
+      "section": "close",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "used-before",
+      "title": "You have minimised KL before: in every cross-entropy loss",
+      "section": "close",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "coin-evidence",
+      "title": "A KL value is how fast evidence piles up",
+      "section": "close",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "densities",
+      "title": "For densities, sums become integrals, and KL ≥ 0",
+      "section": "close",
       "builds": 2,
       "optional": false
     },
     {
       "id": "compare",
-      "title": "Which Gaussian is closer to the target?",
-      "section": "compare",
+      "title": "Which Gaussian is closer to p?",
+      "section": "close",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "one-location",
-      "title": "One density comparison is not the whole story",
-      "section": "compare",
+      "id": "kl-area",
+      "title": "KL is an area you can watch",
+      "section": "close",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "why-reverse",
+      "title": "VI uses KL(q‖p) because it needs only what we have",
+      "section": "close",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "kl-average",
-      "title": "Average the log ratio under q",
-      "section": "compare",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "kl-direction",
-      "title": "Reversing KL changes the question",
-      "section": "compare",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "local-versus-average",
-      "title": "Nonnegative KL does not make every term positive",
-      "section": "compare",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "gaussian-formula",
-      "title": "For two Gaussians, evaluate the expectation exactly",
-      "section": "compare",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "gaussian-substitution",
-      "title": "Substitute first; then compare the score",
-      "section": "compare",
+      "id": "fwdrev",
+      "title": "The price: reverse KL picks one bump",
+      "section": "close",
       "builds": 2,
       "optional": false
     },
     {
       "id": "score-to-search",
-      "title": "A comparison can become a search",
-      "section": "compare",
+      "title": "A score picks a winner. Can it improve a loser?",
+      "section": "move",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "gaussian-moment",
-      "title": "A moment identity explains the squared shift",
-      "section": "optimise",
+      "id": "olive",
+      "title": "Press play: q slides onto p",
+      "section": "move",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "isolate-mean",
-      "title": "Move the centre while keeping the width fixed",
-      "section": "optimise",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "gradient",
-      "title": "A negative derivative produces a rightward descent step",
-      "section": "optimise",
+      "id": "two-d",
+      "title": "In 2-D, a q that cannot tilt shrinks instead",
+      "section": "move",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "one-update",
-      "title": "One literal update",
-      "section": "optimise",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "recompute-loss",
-      "title": "The new curve earns a new loss evaluation",
-      "section": "optimise",
+      "id": "mixture-no-formula",
+      "title": "PyTorch has no formula for this KL. The definition still works.",
+      "section": "nofo",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "family-restriction",
-      "title": "Perfect mean fitting still leaves a gap",
-      "section": "optimise",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "positive-scale",
-      "title": "A standard deviation must remain positive",
-      "section": "optimise",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "optimisation-loop",
-      "title": "Rebuild, score, differentiate, update",
-      "section": "optimise",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "measured-gaussian-fit",
-      "title": "Letting both parameters move removes the restriction",
-      "section": "optimise",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "analytic-loss-trace",
-      "title": "A loss trace answers a specific question",
-      "section": "optimise",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mixture-target",
-      "title": "Replace the target; keep the definition",
-      "section": "monte-carlo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mixture-candidates",
-      "title": "Which candidate wastes more mass far from the mixture?",
-      "section": "monte-carlo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "unsupported-kl",
-      "title": "A missing library formula is not an undefined quantity",
-      "section": "monte-carlo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "sample-average",
-      "title": "Draw from q, score both densities, average",
-      "section": "monte-carlo",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "mc-code-check",
-      "title": "Validate the estimator before using the unfamiliar target",
-      "section": "monte-carlo",
+      "id": "mc-estimate",
+      "title": "Draw from q, average the log ratio",
+      "section": "nofo",
       "builds": 2,
       "optional": false
     },
     {
       "id": "mc-variability",
-      "title": "More draws reduce variability, not every individual error",
-      "section": "monte-carlo",
+      "title": "More samples, tighter estimates",
+      "section": "nofo",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "now-optimise",
+      "title": "Now optimise it: the code runs, and q does not move",
+      "section": "grad",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "negative-estimate",
-      "title": "Five draws can give a negative KL estimate",
-      "section": "monte-carlo",
+      "id": "missing-path",
+      "title": "The gradient that would move q never reaches it",
+      "section": "grad",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "mixture-results",
-      "title": "The estimated score separates these candidates clearly",
-      "section": "monte-carlo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "sample-path",
-      "title": "A random draw is not automatically a differentiable path",
-      "section": "gradients",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "sample-backward",
-      "title": "Ask the sample itself for a gradient",
-      "section": "gradients",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "a-gradient-is-not-enough",
-      "title": "A backward call can run and still miss the intended path",
-      "section": "gradients",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "gradient-comparison",
-      "title": "Check the derivative, not just the existence of a tensor",
-      "section": "gradients",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "reparameterise",
-      "title": "Keep the noise separate from the parameters",
-      "section": "gradients",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "scalar-derivatives",
-      "title": "What happens to this same draw when a parameter changes?",
-      "section": "gradients",
+      "id": "reparam",
+      "title": "Move the randomness outside: u = μ + σε",
+      "section": "grad",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "chain-rule",
-      "title": "The loss gradient follows the same draw",
-      "section": "gradients",
+      "id": "rsample-fit",
+      "title": "Change one word: rsample() fits the mixture",
+      "section": "grad",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "rsample-check",
-      "title": "A fixed-noise finite difference checks the path",
-      "section": "gradients",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "posterior",
-      "title": "Now the target is an unknown posterior",
+      "id": "posterior-target",
+      "title": "The real target is a posterior we cannot evaluate",
       "section": "elbo",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "tractable-q",
-      "title": "Choose a family we can draw from and evaluate",
-      "section": "elbo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "posterior-obstacle",
-      "title": "The direct score asks for the density we do not have",
-      "section": "elbo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "bayes-joint",
-      "title": "Replace the posterior with joint divided by evidence",
-      "section": "elbo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "log-quotient",
-      "title": "The log quotient becomes a difference",
-      "section": "elbo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "substitute",
-      "title": "Keep the KL; change only the posterior term",
-      "section": "elbo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "constant",
-      "title": "Constant with respect to what?",
+      "id": "bayes-sub",
+      "title": "Substitute Bayes’ rule and see what survives",
       "section": "elbo",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "rearrange",
-      "title": "Swap sides and reverse the bracket’s signs",
+      "id": "no-evidence-needed",
+      "title": "Maximise the ELBO; the evidence never appears",
       "section": "elbo",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "name-elbo",
-      "title": "A trainable objective emerges from the rearrangement",
+      "id": "elbo-meaning",
+      "title": "Two forces: sit where the joint is high, stay spread out",
       "section": "elbo",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "bound",
-      "title": "One fixed total, two parts",
+      "id": "identity",
+      "title": "One fixed total: raising the ELBO lowers the KL",
       "section": "elbo",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "logit-vi",
+      "title": "Back to the coin with no formula",
+      "section": "back",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "coin-fair",
+      "title": "So, is the coin fair?",
+      "section": "back",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "answer-key",
+      "title": "A check with an answer key: the Beta coin",
+      "section": "back",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "what-we-avoid",
-      "title": "Optimise the ELBO without computing the evidence",
-      "section": "elbo",
-      "builds": 2,
+      "id": "elbo-slider",
+      "title": "Move q yourself: ELBO + KL never changes",
+      "section": "back",
+      "builds": 1,
       "optional": false
     },
     {
-      "id": "coin-return",
-      "title": "Return to the same coin and the same data",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-reference",
-      "title": "The conjugate posterior is a reference answer",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-prior",
-      "title": "Keep the prior’s normalising constant",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-likelihood",
-      "title": "Each observed toss contributes one log probability",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-joint",
-      "title": "The joint is available at any proposed r",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-family",
-      "title": "Fit positive Beta shapes through unconstrained parameters",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-estimator",
-      "title": "One mean over draws; the data are already summed",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-first-step",
-      "title": "Inspect one actual update",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-fit",
-      "title": "A measured fit using only the joint",
-      "section": "coin",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "coin-check",
-      "title": "Check the fixed total with three selected candidates",
-      "section": "coin",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "noisy-elbo",
-      "title": "An estimate is not itself guaranteed to be a lower bound",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "certificate",
-      "title": "A higher or stable ELBO does not prove a zero gap",
-      "section": "coin",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "retrieve-samples",
-      "title": "For KL(q‖p), where do the samples come from?",
-      "section": "retrieve",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "retrieve-update",
-      "title": "What changes during fixed-model variational inference?",
-      "section": "retrieve",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "retrieve-evidence",
-      "title": "Why can we omit the evidence from ψ’s optimisation?",
-      "section": "retrieve",
-      "builds": 2,
+      "id": "five-tools",
+      "title": "Five obstacles, five tools",
+      "section": "exit",
+      "builds": 1,
       "optional": false
     },
     {
       "id": "exit-transfer",
       "title": "A sensor has an unknown constant bias",
-      "section": "retrieve",
+      "section": "exit",
       "builds": 3,
       "optional": false
     },
     {
       "id": "next-lecture",
-      "title": "Generative models will create this inference problem again",
-      "section": "retrieve",
+      "title": "Generative models create this inference problem again",
+      "section": "exit",
       "builds": 2,
       "optional": false
     },
     {
+      "id": "optional-one-step",
+      "title": "One literal update of the mean",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
       "id": "optional-normal-algebra",
-      "title": "Where does the complete Gaussian KL formula come from?",
+      "title": "Where does the Gaussian KL formula come from?",
       "section": "optional",
       "builds": 3,
       "optional": true
     },
     {
       "id": "optional-nonnegative",
-      "title": "Why is exact KL nonnegative?",
+      "title": "KL ≥ 0 by Jensen’s inequality",
       "section": "optional",
       "builds": 3,
       "optional": true
     },
     {
+      "id": "optional-negative-estimate",
+      "title": "Five draws can give a negative KL estimate",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "optional-mixture-candidates",
+      "title": "The two PML candidates, scored by Monte Carlo",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "optional-rsample-check",
+      "title": "A fixed-noise finite difference checks the path",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
       "id": "optional-score-function",
-      "title": "Pathwise gradients are one route, not the only route",
+      "title": "Pathwise gradients are one route, not the only one",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "optional-noisy-elbo",
+      "title": "A noisy ELBO estimate can cross the evidence",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "optional-certificate",
+      "title": "A higher ELBO does not prove a zero gap",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "optional-coin-check",
+      "title": "Check the fixed total with three Beta candidates",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "optional-mean-field-nets",
+      "title": "One Gaussian per weight: Bayesian neural networks",
       "section": "optional",
       "builds": 2,
       "optional": true
@@ -560,5 +427,5 @@
       "optional": true
     }
   ],
-  "totalStates": 157
+  "totalStates": 114
 }

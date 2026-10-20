@@ -1,8 +1,8 @@
 {
   "status": "passed",
-  "assertions": 2780,
-  "numericalComparisons": 2005,
-  "maximumAbsoluteError": 6.0012550484600524e-12,
+  "assertions": 3215,
+  "numericalComparisons": 2232,
+  "maximumAbsoluteError": 0.00014682216466876952,
   "source": "Independent JavaScript formulae versus executed float64 PyTorch notebook; no new training in this check.",
   "tolerances": {
     "normal": 2e-12,
@@ -21929,6 +21929,3089 @@
     },
     {
       "name": "Invalid Beta shapes rejected",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Conjugate evidence on the wall slide",
+      "kind": "numerical",
+      "actual": -21.397241822312104,
+      "expected": -21.397241822312104,
+      "error": 0,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Logit-prior coin evidence (independent quadrature)",
+      "kind": "numerical",
+      "actual": -21.616018414210913,
+      "expected": -21.616018414208586,
+      "error": 2.327027459614328e-12,
+      "tolerance": 0.000001,
+      "passed": true
+    },
+    {
+      "name": "Logit-prior MC evidence close to the grid",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Fruit KL",
+      "kind": "numerical",
+      "actual": 0.4158883083359671,
+      "expected": 0.4158883083359671,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Fruit ratio0",
+      "kind": "numerical",
+      "actual": 1,
+      "expected": 1,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Fruit ratio1",
+      "kind": "numerical",
+      "actual": 0.25,
+      "expected": 0.25,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Fruit ratio2",
+      "kind": "numerical",
+      "actual": 4,
+      "expected": 4,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Weather entropy (bits)",
+      "kind": "numerical",
+      "actual": 1.5,
+      "expected": 1.5,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Weather cross-entropy (bits)",
+      "kind": "numerical",
+      "actual": 1.75,
+      "expected": 1.75,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Right code average length",
+      "kind": "numerical",
+      "actual": 1.5,
+      "expected": 1.5,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Wrong code average length",
+      "kind": "numerical",
+      "actual": 1.75,
+      "expected": 1.75,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Coin KL(0.8||0.5)",
+      "kind": "numerical",
+      "actual": 0.19274475702175747,
+      "expected": 0.19274475702175745,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Coin KL(0.5||0.8)",
+      "kind": "numerical",
+      "actual": 0.22314355131420982,
+      "expected": 0.22314355131420982,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Evidence ratio after 10 tosses",
+      "kind": "numerical",
+      "actual": 6.871947673600004,
+      "expected": 6.871947673600001,
+      "error": 2.6645352591003757e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Evidence ratio after 30 tosses",
+      "kind": "numerical",
+      "actual": 324.5185536584271,
+      "expected": 324.5185536584268,
+      "error": 2.8421709430404007e-13,
+      "tolerance": 1e-7,
+      "passed": true
+    },
+    {
+      "name": "Simulated log ratio grows at the KL rate",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step0 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step0 analytic KL",
+      "kind": "numerical",
+      "actual": 1.8685040416798357,
+      "expected": 1.8685040416798357,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step1 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step1 analytic KL",
+      "kind": "numerical",
+      "actual": 1.8100288154681339,
+      "expected": 1.8100288154681339,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step2 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step2 analytic KL",
+      "kind": "numerical",
+      "actual": 1.7518026956910457,
+      "expected": 1.7518026956910457,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step3 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step3 analytic KL",
+      "kind": "numerical",
+      "actual": 1.6938391766397607,
+      "expected": 1.693839176639761,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step4 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step4 analytic KL",
+      "kind": "numerical",
+      "actual": 1.6361528144081885,
+      "expected": 1.6361528144081885,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step5 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step5 analytic KL",
+      "kind": "numerical",
+      "actual": 1.5787593434996001,
+      "expected": 1.5787593434996001,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step6 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step6 analytic KL",
+      "kind": "numerical",
+      "actual": 1.5216758063105162,
+      "expected": 1.5216758063105165,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step7 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step7 analytic KL",
+      "kind": "numerical",
+      "actual": 1.464920696479311,
+      "expected": 1.464920696479311,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step8 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step8 analytic KL",
+      "kind": "numerical",
+      "actual": 1.4085141170703857,
+      "expected": 1.4085141170703857,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step9 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step9 analytic KL",
+      "kind": "numerical",
+      "actual": 1.352477954519732,
+      "expected": 1.352477954519732,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step10 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step10 analytic KL",
+      "kind": "numerical",
+      "actual": 1.2968360691849834,
+      "expected": 1.2968360691849834,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step11 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step11 analytic KL",
+      "kind": "numerical",
+      "actual": 1.2416145032113075,
+      "expected": 1.2416145032113075,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step12 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step12 analytic KL",
+      "kind": "numerical",
+      "actual": 1.1868417062292012,
+      "expected": 1.1868417062292007,
+      "error": 4.440892098500626e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step13 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step13 analytic KL",
+      "kind": "numerical",
+      "actual": 1.1325487791234907,
+      "expected": 1.1325487791234907,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step14 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step14 analytic KL",
+      "kind": "numerical",
+      "actual": 1.0787697357324428,
+      "expected": 1.0787697357324428,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step15 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step15 analytic KL",
+      "kind": "numerical",
+      "actual": 1.0255417818245567,
+      "expected": 1.0255417818245567,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step16 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step16 analytic KL",
+      "kind": "numerical",
+      "actual": 0.9729056100252649,
+      "expected": 0.9729056100252649,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step17 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step17 analytic KL",
+      "kind": "numerical",
+      "actual": 0.9209057084864134,
+      "expected": 0.9209057084864135,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step18 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step18 analytic KL",
+      "kind": "numerical",
+      "actual": 0.8695906799605604,
+      "expected": 0.8695906799605604,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step19 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step19 analytic KL",
+      "kind": "numerical",
+      "actual": 0.8190135665039298,
+      "expected": 0.8190135665039298,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step20 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step20 analytic KL",
+      "kind": "numerical",
+      "actual": 0.7692321732219867,
+      "expected": 0.7692321732219866,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step21 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step21 analytic KL",
+      "kind": "numerical",
+      "actual": 0.7203093822174451,
+      "expected": 0.7203093822174452,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step22 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step22 analytic KL",
+      "kind": "numerical",
+      "actual": 0.6723134451229746,
+      "expected": 0.6723134451229745,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step23 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step23 analytic KL",
+      "kind": "numerical",
+      "actual": 0.6253182392174086,
+      "expected": 0.6253182392174088,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step24 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step24 analytic KL",
+      "kind": "numerical",
+      "actual": 0.57940346805528,
+      "expected": 0.5794034680552799,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step25 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step25 analytic KL",
+      "kind": "numerical",
+      "actual": 0.5346547827182362,
+      "expected": 0.534654782718236,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step26 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step26 analytic KL",
+      "kind": "numerical",
+      "actual": 0.4911637941856374,
+      "expected": 0.49116379418563727,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step27 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step27 analytic KL",
+      "kind": "numerical",
+      "actual": 0.4490279409355922,
+      "expected": 0.44902794093559223,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step28 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step28 analytic KL",
+      "kind": "numerical",
+      "actual": 0.4083501688301113,
+      "expected": 0.4083501688301113,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step29 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step29 analytic KL",
+      "kind": "numerical",
+      "actual": 0.36923837284889993,
+      "expected": 0.3692383728488998,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step30 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step30 analytic KL",
+      "kind": "numerical",
+      "actual": 0.331804542758244,
+      "expected": 0.331804542758244,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step31 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step31 analytic KL",
+      "kind": "numerical",
+      "actual": 0.2961635480643253,
+      "expected": 0.2961635480643253,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step32 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step32 analytic KL",
+      "kind": "numerical",
+      "actual": 0.26243149272377864,
+      "expected": 0.26243149272377864,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step33 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step33 analytic KL",
+      "kind": "numerical",
+      "actual": 0.23072356869112975,
+      "expected": 0.2307235686911297,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step34 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step34 analytic KL",
+      "kind": "numerical",
+      "actual": 0.2011513417056361,
+      "expected": 0.2011513417056361,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step35 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step35 analytic KL",
+      "kind": "numerical",
+      "actual": 0.17381941566713555,
+      "expected": 0.1738194156671356,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step36 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step36 analytic KL",
+      "kind": "numerical",
+      "actual": 0.14882144706998357,
+      "expected": 0.14882144706998346,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step37 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step37 analytic KL",
+      "kind": "numerical",
+      "actual": 0.12623552221660006,
+      "expected": 0.1262355222166,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step38 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step38 analytic KL",
+      "kind": "numerical",
+      "actual": 0.10611897114649138,
+      "expected": 0.10611897114649138,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step39 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step39 analytic KL",
+      "kind": "numerical",
+      "actual": 0.08850277608825385,
+      "expected": 0.08850277608825385,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step40 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step40 analytic KL",
+      "kind": "numerical",
+      "actual": 0.07338583875916571,
+      "expected": 0.07338583875916563,
+      "error": 8.326672684688674e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step41 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step41 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0607294951399141,
+      "expected": 0.06072949513991413,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step42 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step42 analytic KL",
+      "kind": "numerical",
+      "actual": 0.05045279629498789,
+      "expected": 0.05045279629498803,
+      "error": 1.3877787807814457e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step43 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step43 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0424291879264056,
+      "expected": 0.04242918792640564,
+      "error": 4.163336342344337e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step44 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step44 analytic KL",
+      "kind": "numerical",
+      "actual": 0.036485288470569754,
+      "expected": 0.03648528847056985,
+      "error": 9.71445146547012e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step45 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step45 analytic KL",
+      "kind": "numerical",
+      "actual": 0.03240244773311485,
+      "expected": 0.03240244773311492,
+      "error": 6.938893903907228e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step46 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step46 analytic KL",
+      "kind": "numerical",
+      "actual": 0.029921628343995255,
+      "expected": 0.029921628343995164,
+      "error": 9.020562075079397e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step47 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step47 analytic KL",
+      "kind": "numerical",
+      "actual": 0.02875186754875325,
+      "expected": 0.028751867548753324,
+      "error": 7.28583859910259e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step48 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step48 analytic KL",
+      "kind": "numerical",
+      "actual": 0.02858215319413182,
+      "expected": 0.02858215319413182,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step49 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step49 analytic KL",
+      "kind": "numerical",
+      "actual": 0.029096033178626524,
+      "expected": 0.02909603317862658,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step50 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step50 analytic KL",
+      "kind": "numerical",
+      "actual": 0.029987763434547787,
+      "expected": 0.029987763434547857,
+      "error": 6.938893903907228e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step51 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step51 analytic KL",
+      "kind": "numerical",
+      "actual": 0.030978404631394008,
+      "expected": 0.03097840463139398,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step52 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step52 analytic KL",
+      "kind": "numerical",
+      "actual": 0.031830116093297334,
+      "expected": 0.03183011609329742,
+      "error": 8.326672684688674e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step53 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step53 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0323570358448767,
+      "expected": 0.032357035844876716,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step54 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step54 analytic KL",
+      "kind": "numerical",
+      "actual": 0.032431572244994156,
+      "expected": 0.032431572244994114,
+      "error": 4.163336342344337e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step55 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step55 analytic KL",
+      "kind": "numerical",
+      "actual": 0.03198557960676007,
+      "expected": 0.03198557960676009,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step56 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step56 analytic KL",
+      "kind": "numerical",
+      "actual": 0.03100660692124657,
+      "expected": 0.031006606921246585,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step57 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step57 analytic KL",
+      "kind": "numerical",
+      "actual": 0.02953004419008709,
+      "expected": 0.029530044190087076,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step58 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step58 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0276284280592366,
+      "expected": 0.027628428059236584,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step59 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step59 analytic KL",
+      "kind": "numerical",
+      "actual": 0.02539935242933511,
+      "expected": 0.02539935242933511,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step60 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step60 analytic KL",
+      "kind": "numerical",
+      "actual": 0.022953370618949087,
+      "expected": 0.022953370618949018,
+      "error": 6.938893903907228e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step61 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step61 analytic KL",
+      "kind": "numerical",
+      "actual": 0.020403031935059546,
+      "expected": 0.020403031935059518,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step62 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step62 analytic KL",
+      "kind": "numerical",
+      "actual": 0.017853848039407927,
+      "expected": 0.017853848039407996,
+      "error": 6.938893903907228e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step63 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step63 analytic KL",
+      "kind": "numerical",
+      "actual": 0.01539761237954318,
+      "expected": 0.01539761237954318,
+      "error": 0,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step64 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step64 analytic KL",
+      "kind": "numerical",
+      "actual": 0.013108160469010421,
+      "expected": 0.013108160469010435,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step65 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step65 analytic KL",
+      "kind": "numerical",
+      "actual": 0.01103939703477741,
+      "expected": 0.011039397034777368,
+      "error": 4.163336342344337e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step66 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step66 analytic KL",
+      "kind": "numerical",
+      "actual": 0.009225242044090365,
+      "expected": 0.0092252420440904,
+      "error": 3.469446951953614e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step67 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step67 analytic KL",
+      "kind": "numerical",
+      "actual": 0.007681057830274951,
+      "expected": 0.00768105783027493,
+      "error": 2.0816681711721685e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step68 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step68 analytic KL",
+      "kind": "numerical",
+      "actual": 0.006406099588898595,
+      "expected": 0.006406099588898574,
+      "error": 2.0816681711721685e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step69 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step69 analytic KL",
+      "kind": "numerical",
+      "actual": 0.005386562345373935,
+      "expected": 0.0053865623453739145,
+      "error": 2.0816681711721685e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step70 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step70 analytic KL",
+      "kind": "numerical",
+      "actual": 0.004598859884411222,
+      "expected": 0.004598859884411301,
+      "error": 7.979727989493313e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step71 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step71 analytic KL",
+      "kind": "numerical",
+      "actual": 0.004012848504732491,
+      "expected": 0.004012848504732475,
+      "error": 1.6479873021779667e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step72 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step72 analytic KL",
+      "kind": "numerical",
+      "actual": 0.003594788173448271,
+      "expected": 0.0035947881734481823,
+      "error": 8.890457814381136e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step73 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step73 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0033099071879325592,
+      "expected": 0.0033099071879326347,
+      "error": 7.546047120499111e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step74 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step74 analytic KL",
+      "kind": "numerical",
+      "actual": 0.003124498957404853,
+      "expected": 0.0031244989574049833,
+      "error": 1.3010426069826053e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step75 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step75 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0030075290206511562,
+      "expected": 0.0030075290206510417,
+      "error": 1.1449174941446927e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step76 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step76 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0029317669751610653,
+      "expected": 0.0029317669751611035,
+      "error": 3.8163916471489756e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step77 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step77 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0028744829122853144,
+      "expected": 0.002874482912285335,
+      "error": 2.0816681711721685e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step78 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step78 analytic KL",
+      "kind": "numerical",
+      "actual": 0.002817763167765608,
+      "expected": 0.0028177631677656287,
+      "error": 2.0816681711721685e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step79 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step79 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0027485078210740532,
+      "expected": 0.002748507821073963,
+      "error": 9.020562075079397e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step80 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step80 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0026581744114072547,
+      "expected": 0.002658174411407234,
+      "error": 2.0816681711721685e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step81 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step81 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0025423305081381242,
+      "expected": 0.0025423305081380063,
+      "error": 1.1796119636642288e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step82 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step82 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0024000734605961194,
+      "expected": 0.0024000734605960847,
+      "error": 3.469446951953614e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step83 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step83 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0022333698904641874,
+      "expected": 0.0022333698904640556,
+      "error": 1.3183898417423734e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step84 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step84 analytic KL",
+      "kind": "numerical",
+      "actual": 0.002046361001634245,
+      "expected": 0.0020463610016342934,
+      "error": 4.85722573273506e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step85 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step85 analytic KL",
+      "kind": "numerical",
+      "actual": 0.001844673031386579,
+      "expected": 0.0018446730313866275,
+      "error": 4.85722573273506e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step86 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step86 analytic KL",
+      "kind": "numerical",
+      "actual": 0.001634765422041995,
+      "expected": 0.0016347654220419741,
+      "error": 2.0816681711721685e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step87 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step87 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0014233426882016564,
+      "expected": 0.001423342688201764,
+      "error": 1.0755285551056204e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step88 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step88 analytic KL",
+      "kind": "numerical",
+      "actual": 0.001216849546352261,
+      "expected": 0.0012168495463522715,
+      "error": 1.0408340855860843e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step89 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step89 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0010210626830738923,
+      "expected": 0.0010210626830739061,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step90 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step90 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0008407865904377365,
+      "expected": 0.0008407865904377712,
+      "error": 3.469446951953614e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step91 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step91 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0006796552449820359,
+      "expected": 0.00067965524498214,
+      "error": 1.0408340855860843e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step92 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step92 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0005400361426116662,
+      "expected": 0.0005400361426115743,
+      "error": 9.194034422677078e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step93 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step93 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0004230284592491307,
+      "expected": 0.00042302845924910813,
+      "error": 2.2551405187698492e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step94 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step94 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00032854304986595917,
+      "expected": 0.00032854304986603376,
+      "error": 7.45931094670027e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step95 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step95 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00025544880126449065,
+      "expected": 0.000255448801264639,
+      "error": 1.48318857196017e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step96 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step96 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00020176767670831985,
+      "expected": 0.00020176767670844822,
+      "error": 1.2836953722228372e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step97 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step97 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00016489975106381838,
+      "expected": 0.0001648997510639434,
+      "error": 1.2500851048757866e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step98 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step98 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0001418596843911768,
+      "expected": 0.00014185968439118005,
+      "error": 3.2526065174565133e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step99 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step99 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00012950738604089462,
+      "expected": 0.00012950738604088335,
+      "error": 1.1275702593849246e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step100 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step100 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00012475795465682893,
+      "expected": 0.00012475795465684454,
+      "error": 1.5612511283791264e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step101 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step101 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00012475913028753283,
+      "expected": 0.0001247591302874513,
+      "error": 8.153200337090993e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step102 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step102 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00012702818325305287,
+      "expected": 0.00012702818325307716,
+      "error": 2.42861286636753e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step103 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step103 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0001295440705886275,
+      "expected": 0.00012954407058865872,
+      "error": 3.122502256758253e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step104 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step104 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0001307944888252477,
+      "expected": 0.0001307944888251436,
+      "error": 1.0408340855860843e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step105 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step105 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0001297808440413606,
+      "expected": 0.0001297808440413207,
+      "error": 3.9898639947466563e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step106 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step106 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00012598690760257103,
+      "expected": 0.00012598690760246695,
+      "error": 1.0408340855860843e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step107 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step107 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00011931886984584139,
+      "expected": 0.00011931886984577027,
+      "error": 7.112366251504909e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step108 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step108 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00011002557542072466,
+      "expected": 0.00011002557542070211,
+      "error": 2.2551405187698492e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step109 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step109 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00009860794287885888,
+      "expected": 0.00009860794287886408,
+      "error": 5.204170427930421e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step110 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step110 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00008572603392842382,
+      "expected": 0.00008572603392850014,
+      "error": 7.632783294297951e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step111 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step111 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00007211109812887972,
+      "expected": 0.00007211109812897513,
+      "error": 9.540979117872439e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step112 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step112 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00005848836392396972,
+      "expected": 0.00005848836392395758,
+      "error": 1.214306433183765e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step113 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step113 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00004551457368340284,
+      "expected": 0.00004551457368345141,
+      "error": 4.85722573273506e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step114 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step114 analytic KL",
+      "kind": "numerical",
+      "actual": 0.00003373245424109772,
+      "expected": 0.00003373245424112461,
+      "error": 2.688821387764051e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step115 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step115 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000023542632840767297,
+      "expected": 0.000023542632840796787,
+      "error": 2.949029909160572e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step116 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step116 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000015192070771163912,
+      "expected": 0.000015192070771160443,
+      "error": 3.469446951953614e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step117 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step117 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000008776969993684602,
+      "expected": 0.000008776969993588325,
+      "error": 9.627715291671279e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step118 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step118 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000004257346740588197,
+      "expected": 0.000004257346740514038,
+      "error": 7.41594285980085e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step119 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step119 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000014800585050878112,
+      "expected": 0.000001480058505093449,
+      "error": 5.637851296924623e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step120 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step120 analytic KL",
+      "kind": "numerical",
+      "actual": 2.0698584479728055e-7,
+      "expected": 2.0698584472523531e-7,
+      "error": 7.204523436166177e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step121 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step121 analytic KL",
+      "kind": "numerical",
+      "actual": 1.4525607727744472e-7,
+      "expected": 1.4525607720670053e-7,
+      "error": 7.074419175467916e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step122 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step122 analytic KL",
+      "kind": "numerical",
+      "actual": 9.767883533129407e-7,
+      "expected": 9.76788353384498e-7,
+      "error": 7.155734338404329e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step123 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step123 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000023849706347611743,
+      "expected": 0.0000023849706348221065,
+      "error": 6.093216209368535e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step124 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step124 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000004076882914816338,
+      "expected": 0.0000040768829147703675,
+      "error": 4.597017211338539e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step125 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step125 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000005800098670016851,
+      "expected": 0.000005800098670046775,
+      "error": 2.992397996059992e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step126 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step126 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000007353679190802431,
+      "expected": 0.000007353679190729139,
+      "error": 7.32920668600201e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step127 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step127 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000008593485959385028,
+      "expected": 0.000008593485959401941,
+      "error": 1.691355389077387e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step128 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step128 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000009432349589721944,
+      "expected": 0.00000943234958975317,
+      "error": 3.122502256758253e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step129 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step129 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000009835936424562597,
+      "expected": 0.000009835936424674053,
+      "error": 1.1145598333150986e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step130 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step130 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000009815342469465804,
+      "expected": 0.000009815342469490524,
+      "error": 2.47198095326695e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step131 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step131 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000009417524232779861,
+      "expected": 0.00000941752423289869,
+      "error": 1.1882855810441129e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step132 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step132 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000008714659347486275,
+      "expected": 0.000008714659347389131,
+      "error": 9.71445146547012e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step133 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step133 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000007793433423386453,
+      "expected": 0.000007793433423492705,
+      "error": 1.0625181290357943e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step134 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step134 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000006745093248383682,
+      "expected": 0.000006745093248241001,
+      "error": 1.4268100589909238e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step135 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step135 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000005656911107543294,
+      "expected": 0.0000056569111075905655,
+      "error": 4.7271214720367993e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step136 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step136 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000004605491243814264,
+      "expected": 0.000004605491243715818,
+      "error": 9.84455572616838e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step137 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step137 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000036521360702312933,
+      "expected": 0.000003652136070279432,
+      "error": 4.8138576458356397e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step138 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step138 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000028402928261561655,
+      "expected": 0.000002840292826165056,
+      "error": 8.890457814381136e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step139 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step139 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000021949334154669486,
+      "expected": 0.0000021949334154854885,
+      "error": 1.8539857149502126e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step140 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step140 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000017235898862599797,
+      "expected": 0.000001723589886328718,
+      "error": 6.873841773558098e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step141 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step141 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000014186799194293442,
+      "expected": 0.0000014186799194020766,
+      "error": 2.7267684638010437e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step142 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step142 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000001260711532835579,
+      "expected": 0.0000012607115327850686,
+      "error": 5.051026871066844e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step143 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step143 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000012219512115496656,
+      "expected": 0.0000012219512116076026,
+      "error": 5.793705359219414e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step144 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step144 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000012701692991834435,
+      "expected": 0.0000012701692991762335,
+      "error": 7.209944447028604e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step145 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step145 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000013721331866278774,
+      "expected": 0.0000013721331866026155,
+      "error": 2.5261910618912253e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step146 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step146 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000014965939122424388,
+      "expected": 0.0000014965939122562081,
+      "error": 1.3769367590565906e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step147 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step147 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000001616596245535007,
+      "expected": 0.0000016165962454992282,
+      "error": 3.5778671692021646e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step148 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step148 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000001711027698081402,
+      "expected": 0.000001711027698085522,
+      "error": 4.119968255444917e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step149 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step149 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000017654008382939068,
+      "expected": 0.000001765400838217579,
+      "error": 7.632783294297951e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step150 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step150 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000017719300562379914,
+      "expected": 0.000001771930056183456,
+      "error": 5.453536927602087e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step151 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step151 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000017290147166226788,
+      "expected": 0.000001729014716661927,
+      "error": 3.924811864397526e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step152 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step152 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000001640273547098836,
+      "expected": 0.000001640273547225254,
+      "error": 1.2641797331180982e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step153 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step153 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000015132901185488379,
+      "expected": 0.0000015132901185771356,
+      "error": 2.8297676701871666e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step154 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step154 analytic KL",
+      "kind": "numerical",
+      "actual": 0.000001358227903369702,
+      "expected": 0.000001358227903309854,
+      "error": 5.984795992119984e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step155 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step155 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000011864583903120618,
+      "expected": 0.0000011864583902793189,
+      "error": 3.2742905609062234e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step156 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step156 analytic KL",
+      "kind": "numerical",
+      "actual": 0.0000010093205952133033,
+      "expected": 0.000001009320595351756,
+      "error": 1.3845261742639892e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step157 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step157 analytic KL",
+      "kind": "numerical",
+      "actual": 8.370988971995175e-7,
+      "expected": 8.370988972612086e-7,
+      "error": 6.16911036144252e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step158 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step158 analytic KL",
+      "kind": "numerical",
+      "actual": 6.782722424825138e-7,
+      "expected": 6.782722424590951e-7,
+      "error": 2.3418766925686896e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step159 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step159 analytic KL",
+      "kind": "numerical",
+      "actual": 5.39054801351746e-7,
+      "expected": 5.390548013864947e-7,
+      "error": 3.474867962816042e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step160 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step160 analytic KL",
+      "kind": "numerical",
+      "actual": 4.232189112496343e-7,
+      "expected": 4.2321891127635987e-7,
+      "error": 2.6725583551767684e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step161 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step161 analytic KL",
+      "kind": "numerical",
+      "actual": 3.3216757955312204e-7,
+      "expected": 3.3216757951677416e-7,
+      "error": 3.6347877832576536e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step162 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step162 analytic KL",
+      "kind": "numerical",
+      "actual": 2.6520712204103347e-7,
+      "expected": 2.6520712200663716e-7,
+      "error": 3.439631392210263e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step163 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step163 analytic KL",
+      "kind": "numerical",
+      "actual": 2.1996101629007114e-7,
+      "expected": 2.199610162945096e-7,
+      "error": 4.438452643612534e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step164 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step164 analytic KL",
+      "kind": "numerical",
+      "actual": 1.9286341546020935e-7,
+      "expected": 1.928634154069818e-7,
+      "error": 5.3227550405460233e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step165 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step165 analytic KL",
+      "kind": "numerical",
+      "actual": 1.7967409526864486e-7,
+      "expected": 1.7967409535840325e-7,
+      "error": 8.97583873546437e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step166 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step166 analytic KL",
+      "kind": "numerical",
+      "actual": 1.7596459922497587e-7,
+      "expected": 1.7596459912067562e-7,
+      "error": 1.0430024899310553e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step167 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step167 analytic KL",
+      "kind": "numerical",
+      "actual": 1.7753651060381515e-7,
+      "expected": 1.7753651066715966e-7,
+      "error": 6.33445119274656e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step168 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step168 analytic KL",
+      "kind": "numerical",
+      "actual": 1.8074560215186608e-7,
+      "expected": 1.8074560217832061e-7,
+      "error": 2.6454533008646308e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step169 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step169 analytic KL",
+      "kind": "numerical",
+      "actual": 1.8271862833874053e-7,
+      "expected": 1.8271862825585327e-7,
+      "error": 8.288725608651681e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step170 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step170 analytic KL",
+      "kind": "numerical",
+      "actual": 1.8146157509946192e-7,
+      "expected": 1.8146157504172816e-7,
+      "error": 5.773376568485311e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step171 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step171 analytic KL",
+      "kind": "numerical",
+      "actual": 1.7586829148541483e-7,
+      "expected": 1.7586829135623214e-7,
+      "error": 1.2918268885164785e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step172 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step172 analytic KL",
+      "kind": "numerical",
+      "actual": 1.6564603178004234e-7,
+      "expected": 1.65646031694553e-7,
+      "error": 8.548934130048202e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step173 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step173 analytic KL",
+      "kind": "numerical",
+      "actual": 1.5117925478147498e-7,
+      "expected": 1.5117925485644756e-7,
+      "error": 7.497258022737263e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step174 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step174 analytic KL",
+      "kind": "numerical",
+      "actual": 1.333550710969078e-7,
+      "expected": 1.3335507108655368e-7,
+      "error": 1.0354130747236567e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step175 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step175 analytic KL",
+      "kind": "numerical",
+      "actual": 1.1337327932015029e-7,
+      "expected": 1.1337327938818397e-7,
+      "error": 6.80336863234654e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step176 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step176 analytic KL",
+      "kind": "numerical",
+      "actual": 9.256144894997931e-8,
+      "expected": 9.25614490475033e-8,
+      "error": 9.752398541507112e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step177 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step177 analytic KL",
+      "kind": "numerical",
+      "actual": 7.221152853453816e-8,
+      "expected": 7.221152860040344e-8,
+      "error": 6.58652819784944e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step178 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step178 analytic KL",
+      "kind": "numerical",
+      "actual": 5.344963194264807e-8,
+      "expected": 5.3449631949397227e-8,
+      "error": 6.749158523722265e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step179 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step179 analytic KL",
+      "kind": "numerical",
+      "actual": 3.71455403103127e-8,
+      "expected": 3.7145540406183274e-8,
+      "error": 9.587057710203073e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step180 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step180 analytic KL",
+      "kind": "numerical",
+      "actual": 2.386359243544689e-8,
+      "expected": 2.3863592470602145e-8,
+      "error": 3.515525544284248e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step181 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step181 analytic KL",
+      "kind": "numerical",
+      "actual": 1.3852426650196037e-8,
+      "expected": 1.3852426690582568e-8,
+      "error": 4.038653092508504e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step182 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step182 analytic KL",
+      "kind": "numerical",
+      "actual": 7.067781138125895e-9,
+      "expected": 7.067781193914873e-9,
+      "error": 5.578897803795724e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step183 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step183 analytic KL",
+      "kind": "numerical",
+      "actual": 3.220387734259589e-9,
+      "expected": 3.220387743773463e-9,
+      "error": 9.513874063560301e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step184 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step184 analytic KL",
+      "kind": "numerical",
+      "actual": 1.839956076388205e-9,
+      "expected": 1.839956134335423e-9,
+      "error": 5.79472179875612e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step185 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step185 analytic KL",
+      "kind": "numerical",
+      "actual": 2.3462340958957384e-9,
+      "expected": 2.346233979140717e-9,
+      "error": 1.1675502144953276e-16,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step186 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step186 analytic KL",
+      "kind": "numerical",
+      "actual": 4.1189861521573334e-9,
+      "expected": 4.118986177337929e-9,
+      "error": 2.518059545597584e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step187 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step187 analytic KL",
+      "kind": "numerical",
+      "actual": 6.5602366872141715e-9,
+      "expected": 6.560236605180725e-9,
+      "error": 8.203344687568448e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step188 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step188 analytic KL",
+      "kind": "numerical",
+      "actual": 9.14400155593853e-9,
+      "expected": 9.144001501416713e-9,
+      "error": 5.4521816748864804e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step189 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step189 analytic KL",
+      "kind": "numerical",
+      "actual": 1.1450781767230467e-8,
+      "expected": 1.1450781728754842e-8,
+      "error": 3.847562459607934e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step190 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step190 analytic KL",
+      "kind": "numerical",
+      "actual": 1.3186034153456205e-8,
+      "expected": 1.3186034107757084e-8,
+      "error": 4.569912157026401e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step191 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step191 analytic KL",
+      "kind": "numerical",
+      "actual": 1.4183547003554509e-8,
+      "expected": 1.4183547040024359e-8,
+      "error": 3.6469850576981155e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step192 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step192 analytic KL",
+      "kind": "numerical",
+      "actual": 1.4395972192104978e-8,
+      "expected": 1.4395972155445392e-8,
+      "error": 3.665958595716612e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step193 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step193 analytic KL",
+      "kind": "numerical",
+      "actual": 1.3875642301819369e-8,
+      "expected": 1.3875642262991378e-8,
+      "error": 3.882799030213713e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step194 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step194 analytic KL",
+      "kind": "numerical",
+      "actual": 1.274923100424985e-8,
+      "expected": 1.2749231022247606e-8,
+      "error": 1.7997756063259374e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step195 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step195 analytic KL",
+      "kind": "numerical",
+      "actual": 1.1189809967504516e-8,
+      "expected": 1.1189809938176847e-8,
+      "error": 2.9327668765732895e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step196 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step196 analytic KL",
+      "kind": "numerical",
+      "actual": 9.389508504042965e-9,
+      "expected": 9.389508488620189e-9,
+      "error": 1.54227759036063e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step197 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step197 analytic KL",
+      "kind": "numerical",
+      "actual": 7.535370438738198e-9,
+      "expected": 7.535370483298907e-9,
+      "error": 4.456070928915423e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step198 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step198 analytic KL",
+      "kind": "numerical",
+      "actual": 5.790239621106252e-9,
+      "expected": 5.790239591575296e-9,
+      "error": 2.953095667307393e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step199 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step199 analytic KL",
+      "kind": "numerical",
+      "actual": 4.279684828745189e-9,
+      "expected": 4.279684874661151e-9,
+      "error": 4.591596200476111e-17,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "Olive step200 positive scale",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Olive step200 analytic KL",
+      "kind": "numerical",
+      "actual": 3.0852009835768968e-9,
+      "expected": 3.0852009885032404e-9,
+      "error": 4.926343621231011e-18,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "2-D diagonal width",
+      "kind": "numerical",
+      "actual": 0.4358898943540673,
+      "expected": 0.4358898943540673,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "2-D diagonal KL",
+      "kind": "numerical",
+      "actual": 0.8303656034108255,
+      "expected": 0.8303656034108255,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "2-D fitted width0",
+      "kind": "numerical",
+      "actual": 0.43588989435406733,
+      "expected": 0.4358898943540673,
+      "error": 5.551115123125783e-17,
+      "tolerance": 0.002,
+      "passed": true
+    },
+    {
+      "name": "2-D fitted width1",
+      "kind": "numerical",
+      "actual": 0.4358898943540673,
+      "expected": 0.4358898943540673,
+      "error": 0,
+      "tolerance": 0.002,
+      "passed": true
+    },
+    {
+      "name": "Reverse KL from the left settles on the 0.7 bump",
+      "kind": "numerical",
+      "actual": 0.3566149685186749,
+      "expected": 0.35667494393873245,
+      "error": 0.0000599754200575342,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Reverse KL from the right settles on the 0.3 bump",
+      "kind": "numerical",
+      "actual": 1.2038259821612673,
+      "expected": 1.2039728043259361,
+      "error": 0.00014682216466876952,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Forward KL matches the mixture mean",
+      "kind": "numerical",
+      "actual": -0.8000039019330439,
+      "expected": -0.8,
+      "error": 0.000003901933043892747,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Forward KL matches the mixture spread",
+      "kind": "numerical",
+      "actual": 1.8999996779799169,
+      "expected": 1.9,
+      "error": 3.220200830433839e-7,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Mixture fit (rsample) final quadrature KL",
+      "kind": "numerical",
+      "actual": 0.0561973608163382,
+      "expected": 0.05619736081633808,
+      "error": 1.1796119636642288e-16,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "Mixture fit (sample) final quadrature KL",
+      "kind": "numerical",
+      "actual": 53.37963200902993,
+      "expected": 53.37963200902976,
+      "error": 1.7053025658242404e-13,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "rsample fit reaches the best Gaussian (KL 0.0562)",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "sample() run stays far from the mixture",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Logit VI exact ELBO (independent quadrature)",
+      "kind": "numerical",
+      "actual": -21.61657006126025,
+      "expected": -21.61657006126026,
+      "error": 7.105427357601002e-15,
+      "tolerance": 0.000001,
+      "passed": true
+    },
+    {
+      "name": "Logit VI ELBO sits below the evidence",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Three-ways target mean",
+      "kind": "numerical",
+      "actual": -0.7999999999999999,
+      "expected": -0.8,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Three-ways MCMC mean near the target mean",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Three-ways Laplace sits on the big bump",
       "kind": "assertion",
       "passed": true
     }

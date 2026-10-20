@@ -6,1096 +6,530 @@ Planned main route: 70 minutes. Timing includes student responses and the specif
 
 | Episode | Minutes |
 |---|---:|
-| An inference question | 4 |
-| Which distribution is closer? | 9 |
-| Turn comparison into optimisation | 10 |
-| Estimate an unavailable formula | 7 |
-| Differentiate through a draw | 7 |
-| An objective without the posterior | 13 |
-| Fit and check the coin | 13 |
-| Retrieve and transfer | 7 |
+| Act 0 · The wall | 8 |
+| Act 1 · Closer how? | 15 |
+| Act 2 · Make q move | 7 |
+| Act 3 · No formula | 7 |
+| Act 4 · Gradients through a draw | 10 |
+| Act 5 · The real target | 10 |
+| Act 6 · Back to the wall | 10 |
+| Exit | 3 |
 
-## coin-question: What would you like to know about this coin?
+## coin-question: Is this coin fair?
 
-**Build 1, ask:** Thirty observed tosses. What is still unknown?
+**Build 1, ask:** Vote: is this coin fair? How sure are you?
 
-**Expected:** The coin’s probability of heads. The observations themselves are known.
+**Expected:** Most students hedge: 17 of 30 is a little high, but fair seems plausible. The hedge is the point.
 
-**Build 2, ask:** Do we want one guess, or uncertainty about the guess?
+**Build 2, ask:** What would a complete answer look like?
 
-**Expected:** A distribution over plausible values of r describes both a centre and uncertainty.
+**Expected:** A posterior distribution over r: a centre and a spread, not one number.
 
-**Point here:** Point to individual observed H/T values before introducing r.
+**Point here:** PAUSE 1 · the hook. Take the vote by hands and keep it on the board: Act 6 answers it.
 
-**Transition:** The observed sequence is fixed. We will ask how it changes our belief about r.
+**Transition:** For one convenient prior, Bayes’ rule answers this exactly.
 
-**Source / evidence:** One chosen ordered sequence · 17 H and 13 T · recorded in science.json
+## conjugate-luck: With a Beta prior, Bayes’ rule has a formula
 
-## data-and-unknown: The data are fixed; the unknown is not a data point
+**Build 1, ask:** Where does the posterior sit, and how wide is it?
 
-**Build 1, ask:** Which object is observed? Which object will have a posterior?
+**Expected:** Near 22/38 ≈ 0.58, and much narrower than the prior.
 
-**Expected:** The ordered sequence 𝒟 is observed. The unknown r has the posterior.
+**Build 2, ask:** Why can we write p(𝒟) down here?
 
-**Build 2, ask:** Does inferring r change any of the thirty tosses?
+**Expected:** Prior and likelihood share the form r^a(1−r)^b, so the integral is a Beta function. Change either and the luck runs out.
 
-**Expected:** No. We update our description of r while holding the data fixed.
+**Point here:** The evidence p(𝒟) is the integral of prior × likelihood over r. Keep it blue throughout the lecture.
 
-**Point here:** Keep the blue observed data separate from the amber unknown.
+**Transition:** Keep the data. Change only the prior.
 
-**Transition:** We already know Bayes’ rule. Use it to name what we want.
+## no-formula: Change the prior, and the formula disappears
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 1, ask:** What changed, and what stayed the same?
 
-## prior-before-data: A prior is a distribution over the unknown
+**Expected:** Only the prior. Data, likelihood and question are unchanged.
 
-**Build 1, ask:** What does the Beta prior describe?
+**Build 2, ask:** Can you integrate this in closed form?
 
-**Expected:** Uncertainty about the single unknown probability r. It is not a distribution of toss outcomes.
+**Expected:** No. A dense grid gives log p(𝒟) ≈ −21.62, but only because w is a single number.
 
-**Build 2, ask:** What two ingredients turn it into a posterior shape?
+**Point here:** Log-odds priors are what logistic regression and neural networks use, so this is the normal case, not a contrived one.
 
-**Expected:** The likelihood of the observed sequence and the prior density.
+**Transition:** Why not always use a grid?
 
-**Point here:** The prior’s argument is r. The likelihood treats the already observed sequence as fixed.
+## grid-explodes: A grid works for one unknown, not for a million
 
-**Transition:** The proportionality hides a normalising constant.
+**Build 1, ask:** How many points for 3 unknowns? For 10?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** 10⁶ and 10²⁰.
 
-## bayes-recall: What normalises the posterior?
+**Build 2, ask:** Could faster computers rescue the grid?
 
-**Build 1, ask:** What is the denominator doing?
+**Expected:** No. The count grows exponentially with the number of unknowns.
 
-**Expected:** It makes the posterior integrate to one. It is the evidence.
+**Transition:** Three families of methods get around the integral.
 
-**Build 2, ask:** Why practise an approximate method on a solvable problem?
+## three-ways: Three ways around an integral nobody can do
 
-**Expected:** A known answer lets us check the implementation and understand the approximation.
+**Build 1, ask:** What does Laplace miss here?
 
-**Point here:** Do not launch an extended Bayes recap; these students know the rule.
+**Expected:** The second bump: it only looks at the peak.
 
-**Transition:** First learn how to compare and improve a distribution when the target is available.
+**Build 2, ask:** What does MCMC cost?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** Many steps, each evaluating the model on the data; hard to scale to large models and datasets.
 
-## compare: Which Gaussian is closer to the target?
+**Build 3, ask:** What does VI trade away?
 
-**Build 1, ask:** Describe the centre and width of q₁.
+**Expected:** Exactness. The answer is limited to the family, here one Gaussian. In return it is fast and uses the same gradient tools as deep learning.
 
-**Expected:** q₁ is left of p and narrower.
+**Point here:** Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 0.
 
-**Build 2, ask:** Vote for q₁ or q₂ before calculating.
+**Transition:** The plan for VI, and what stands in its way.
 
-**Expected:** q₂ shares p’s centre and has a more similar width. We need a score to make “closer” precise.
+## plan: The plan: push a simple q towards the posterior
 
-**Point here:** Curves use identical axes and labelled solid/dashed strokes.
+**Build 1, ask:** What must we define before we can minimise anything?
 
-**Transition:** A score should compare the whole distribution, not only the means.
+**Expected:** A number for the “distance” between two distributions.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 2, ask:** Which obstacle looks hardest?
 
-## one-location: One density comparison is not the whole story
+**Expected:** Usually the last: the posterior we are approaching is the thing we cannot evaluate.
 
-**Build 1, ask:** At u=0, which density is larger?
+**Point here:** u is the generic unknown from now on. For the coin, u is the log-odds w.
 
-**Expected:** q₁ is more concentrated and has the larger density here.
+**Transition:** Obstacle 1: what does “closer” mean for distributions?
 
-**Build 2, ask:** Could this one location settle which whole distribution is closer?
+## fruit: Two surveys: how different are they?
 
-**Expected:** No. The relationship changes across the support. We need an average.
+**Build 1, ask:** How would you score the difference between these two surveys?
 
-**Point here:** Point at the centres on the same axes. A density is not a point probability.
+**Expected:** Students propose differences of percentages. Note that apples, 50% both years, should contribute nothing.
 
-**Transition:** Choose the distribution that supplies the weights for our average.
+**Build 2, ask:** Bananas ÷4, clementines ×4: same size of change?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** By ratio, yes: both are a factor of 4. That suggests comparing ratios.
 
-## kl-average: Average the log ratio under q
+**Point here:** p is the survey we weight by (this year); q is the reference (last year).
 
-**Build 1, ask:** Where does this expectation get its values of u?
+**Transition:** Compare by ratios.
 
-**Expected:** From q. Equivalently, q weights the integral across u.
+## ratios-logs: Ratios say “how many times”; logs make up and down cancel
 
-**Build 2, ask:** What does the order q, then p tell us?
+**Build 1, ask:** On the ratio scale, which change looks bigger?
 
-**Expected:** The average is under q. Reversing the arguments changes that weighting.
+**Expected:** The rise: +3 against −0.75, though both are fourfold.
 
-**Point here:** Connect the purple q outside the bracket to the purple density inside it.
+**Build 2, ask:** After taking logs?
 
-**Transition:** Check that swapping the arguments really can change the number.
+**Expected:** Equal and opposite, ±1.39. Logs turn “times” into “plus”.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Transition:** Now combine the three log ratios into one number.
 
-## kl-direction: Reversing KL changes the question
+## weight: Weight by how common each fruit is now: that is KL
 
-**Build 1, ask:** Are these two averages weighted in the same way?
+**Build 1, ask:** Why weight by p rather than q?
 
-**Expected:** No. One averages under q₁, the other under p.
+**Expected:** That choice defines KL(p‖q): the first argument does the weighting. Swapping gives a different number.
 
-**Build 2, ask:** What does the numerical difference rule out?
+**Build 2, ask:** What is the KL if the surveys agree?
 
-**Expected:** KL is not a symmetric distance. Always state the direction.
+**Expected:** Zero: every ratio is 1, every log is 0.
 
-**Point here:** Both values use the same two Normal distributions. Only their order changed.
+**Point here:** Natural log gives nats. Base 2 gives bits, which the next slide uses.
 
-**Transition:** Keep the direction fixed as we fit q to p.
+**Transition:** The same number has a second meaning, in bits.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+## bits: KL is the extra message length of using the wrong code
 
-## local-versus-average: Nonnegative KL does not make every term positive
+**Build 1, ask:** Why does sunny get the shortest code?
 
-**Build 1, ask:** Can p(u) exceed q(u) at a particular u?
+**Expected:** Sunny is the most common, so a short code for it saves the most bits on average.
 
-**Expected:** Yes. Then that local log ratio is negative.
+**Build 2, ask:** Where do the extra 0.25 bits come from?
 
-**Build 2, ask:** Which nonnegative statement applies to the whole average?
+**Expected:** Sunny is half of all days, and the wrong code spends 2 bits on it. KL measures that waste.
 
-**Expected:** Exact KL is nonnegative. A matched distribution has zero KL.
+**Transition:** Cross-entropy is this “wrong code” length, and you have minimised it many times.
 
-**Point here:** Separate a pointwise term from its expectation. This distinction returns when sampling.
+## used-before: You have minimised KL before: in every cross-entropy loss
 
-**Common misconception:** A probability density may exceed one; a log-density ratio may be negative.
+**Build 1, ask:** Which term of the split depends on q?
 
-**Transition:** For two Gaussians, the entire expectation has a closed form.
+**Expected:** Only the KL. H(p) is fixed by p.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 2, ask:** What does your classifier’s loss minimise?
 
-## gaussian-formula: For two Gaussians, evaluate the expectation exactly
+**Expected:** KL(labels ‖ predictions), plus a constant.
 
-**Build 1, ask:** Which parameters belong to q, and which stay fixed in p?
+**Build 3, ask:** So what is new in VI?
 
-**Expected:** μ and σ belong to q; m and s belong to the target.
+**Expected:** The direction. VI puts the approximation first, KL(q‖p). Act 1 ends with why.
 
-**Build 2, ask:** Where do width and centre mismatch enter?
+**Transition:** What does a KL of 0.19 actually feel like?
 
-**Expected:** The log scale ratio and σ² measure width effects; the squared shift measures centre mismatch.
+## coin-evidence: A KL value is how fast evidence piles up
 
-**Point here:** Every scale symbol is a standard deviation; every squared scale is a variance.
+**Build 1, ask:** Predict: after 30 tosses, how many times more likely are the data under 0.8 than under 0.5?
 
-**Transition:** Substitute our two candidates before revealing the scores.
+**Expected:** Most guess far too low. It is about 325×.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 2, ask:** Why does a small KL eventually matter so much?
 
-## gaussian-substitution: Substitute first; then compare the score
+**Expected:** Log evidence adds up toss by toss, so the ratio grows exponentially with n.
 
-**Build 1, ask:** Which candidate has no squared centre-shift term?
+**Point here:** PAUSE 2. A simulation of 20,000 sequences gives a mean log ratio after 30 tosses of 5.780, against 30 × KL = 5.782.
 
-**Expected:** q₂, because its mean is 1, the target mean.
+**Transition:** Sums become integrals for continuous unknowns.
 
-**Build 2, ask:** Does the score support the earlier prediction?
+## densities: For densities, sums become integrals, and KL ≥ 0
 
-**Expected:** Yes. q₂ has the smaller KL, approximately 0.0689 versus 0.3494 nats.
+**Build 1, ask:** Which distribution supplies the weights in KL(q‖p)?
 
-**Point here:** The denominator is 2s²=2×16, not twice the standard deviation.
+**Expected:** q, the first argument.
 
-**Transition:** The score tells us which candidate wins. Can it tell us how to improve one?
+**Build 2, ask:** Why can’t KL be negative?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** log t ≤ t − 1 for every ratio t = p/q, and the average of p/q under q is ∫p = 1.
 
-## score-to-search: A comparison can become a search
+**Point here:** Individual log ratios can be negative; only the weighted average is guaranteed nonnegative. That returns with sampling in Act 3.
 
-**Build 1, ask:** What should the optimiser change?
+**Transition:** Back to the PML vote, now with a score.
 
-**Expected:** The parameters of q, while the target p stays fixed.
+## compare: Which Gaussian is closer to p?
 
-**Build 2, ask:** What does this argmin select?
+**Build 1, ask:** Vote: q₁ or q₂?
 
-**Expected:** The best member of the chosen family under this directional KL objective.
+**Expected:** Most pick q₂: same centre and a more similar width.
 
-**Point here:** ψ is a parameter collection, not a sampled value u.
+**Build 2, ask:** Does the score agree with your eye?
 
-**Transition:** Before differentiating, expose the Gaussian moment that makes the formula work.
+**Expected:** Yes: 0.07 < 0.35. The two-Gaussian formula is derived in the optional slides.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Point here:** PAUSE 3 (PML L23 08:30). Normal(loc, scale) takes a standard deviation; N(μ, σ²) writes a variance.
 
-## gaussian-moment: A moment identity explains the squared shift
+**Transition:** Where does each number come from? Watch it as an area.
 
-**Build 1, ask:** When expanding the square, which cross-term should vanish?
+## kl-area: KL is an area you can watch
 
-**Expected:** The cross-term contains E_q[u−μ], which is zero.
+**Build 1, ask:** Make q narrow and centred on p. What happens in each direction?
 
-**Build 2, ask:** Why does the remaining random term become σ²?
+**Expected:** KL(q‖p) stays moderate: q only visits places where p is reasonable. KL(p‖q) explodes: p’s tails land where q is nearly zero.
 
-**Expected:** By definition, the variance of q is E_q[(u−μ)²]=σ².
+**Point here:** Click q₁, then q₂, then flip to KL(p‖q). Then shrink σ in each direction.
 
-**Point here:** The mean of q is μ, even though the target has mean m.
+**Transition:** So which direction should VI use?
 
-**Transition:** Insert the variance into the KL and isolate one movable parameter.
+## why-reverse: VI uses KL(q‖p) because it needs only what we have
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 1, ask:** Which of these could we compute for a posterior?
 
-## isolate-mean: Move the centre while keeping the width fixed
+**Expected:** Only KL(q‖p).
 
-**Build 1, ask:** If the width cannot change, which way should μ move?
+**Build 2, ask:** What might that price look like for a posterior with two bumps?
 
-**Expected:** Right, towards the target mean 1.
+**Expected:** q may sit on one bump and ignore the other.
 
-**Build 2, ask:** Which term changes when μ changes?
+**Transition:** Watch that price on two bumps.
 
-**Expected:** Only the squared-shift term. Everything in the bracket is constant for this experiment.
+## fwdrev: The price: reverse KL picks one bump
 
-**Point here:** The experiment deliberately restricts q. Do not imply that σ is being learned yet.
+**Build 1, ask:** Predict each final q.
 
-**Transition:** Differentiate only the term that depends on μ.
+**Expected:** Forward: wide, centred between the bumps. Reverse: one bump, depending on the start.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 2, ask:** Which fit would make you overconfident?
 
-## gradient: A negative derivative produces a rightward descent step
+**Expected:** The reverse fits: each reports one bump with a narrow spread.
 
-**Build 1, ask:** Differentiate the squared shift.
+**Point here:** PAUSE 4. Narrow bumps: forward KL 0.72; reverse 0.36 (= −log 0.7) from the left and 1.20 (= −log 0.3) from the right. Then switch to wide bumps: overlapping bumps give one broad reverse-KL fit.
 
-**Expected:** 2(μ−1)/32.
+**Transition:** Act 2: a score picks a winner. Can it improve a loser?
 
-**Build 2, ask:** What simplifies in the derivative?
+## score-to-search: A score picks a winner. Can it improve a loser?
 
-**Expected:** The factor of two reduces the denominator to 16.
+**Build 1, ask:** What stays fixed, and what does the optimiser change?
 
-**Build 3, ask:** Does a negative derivative mean move left under gradient descent?
+**Expected:** p stays fixed; μ and ρ change.
 
-**Expected:** No. Gradient descent subtracts the derivative, so a negative derivative moves μ right.
+**Build 2, ask:** Why not update σ directly?
 
-**Point here:** Distinguish the derivative’s sign from the update’s direction.
+**Expected:** A step could make σ zero or negative, which is not a valid Normal.
 
-**Transition:** Use one explicit learning rate and perform the arithmetic.
+**Point here:** The literal one-step mean update, μ⁺ = 0.25, is in the optional slides.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Transition:** Press play.
 
-## one-update: One literal update
+## olive: Press play: q slides onto p
 
-**Build 1, ask:** What does gradient descent subtract?
+**Build 1, ask:** Predict: does the centre or the width arrive first?
 
-**Expected:** The learning rate times the derivative.
+**Expected:** Students split. The width reaches 4 around step 45, overshoots to 4.52, then settles; μ arrives by step 100.
 
-**Build 2, ask:** Predict the new mean.
+**Build 2, ask:** Why can both move at once?
 
-**Expected:** The new mean is 0.25.
+**Expected:** Each parameter has its own gradient. Adam steps both by roughly the learning rate each step.
 
-**Build 3, ask:** Which parameter has not changed?
+**Point here:** PAUSE 5 (PML L23 12:13). Adam, learning rate 0.05, analytic KL. Notebook section 3.
 
-**Expected:** The standard deviation remains 2, and p remains fixed.
+**Transition:** One dimension is easy. What happens with two correlated unknowns?
 
-**Point here:** η=4 is a chosen input for this inspectable step, not a general recommended learning rate.
+## two-d: In 2-D, a q that cannot tilt shrinks instead
 
-**Transition:** Recompute the score; a moving curve alone is not evidence of improvement.
+**Build 1, ask:** Predict the diagonal q’s widths: 1, more or less?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** Less: about 0.44, which is √(1 − 0.9²).
 
-## recompute-loss: The new curve earns a new loss evaluation
+**Build 2, ask:** Why shrink rather than spread?
 
-**Build 1, ask:** What changed in the curve?
+**Expected:** KL(q‖p) heavily penalises q mass where p is tiny, which is off the diagonal ridge.
 
-**Expected:** Its position changed. Its width did not.
+**Build 3, ask:** What does the full covariance cost?
 
-**Build 2, ask:** Did the computed objective improve?
+**Expected:** More parameters: d(d + 1)/2 for L instead of d. For a million weights that is far too many.
 
-**Expected:** Yes. The KL falls from approximately 0.3494 to 0.3357.
+**Point here:** PAUSE 6. Measured fit: both widths 0.4359, KL 0.8304, matching √(1 − ρ²) and −½ log(1 − ρ²).
 
-**Point here:** Read the before/after values only after students inspect the shift.
+**Transition:** Act 3: the library had a formula for every KL so far. What if it doesn’t?
 
-**Notebook demonstration:** Notebook section 2, first code cell: run the literal update and inspect μ.grad, μ_after and both KL values.
+## mixture-no-formula: PyTorch has no formula for this KL. The definition still works.
 
-**Transition:** Ask what the restricted optimisation can achieve if repeated.
+**Build 1, ask:** What would kl_divergence need for this pair?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** A closed-form expression for a Gaussian against a mixture. There isn’t one.
 
-## family-restriction: Perfect mean fitting still leaves a gap
+**Build 2, ask:** Is the KL undefined, then?
 
-**Build 1, ask:** What is the best mean if σ must stay 2?
+**Expected:** No. It is a perfectly good integral; we just cannot write it in closed form.
 
-**Expected:** μ=1.
+**Point here:** Mixture: ½·N(−0.2, 0.4²) + ½·N(1, 0.5²), from the PML notebook. The full error text is saved in science.json (PyTorch 2.13.0).
 
-**Build 2, ask:** Why is the minimum KL still positive?
+**Transition:** Estimate the average by sampling.
 
-**Expected:** The target standard deviation is 4. Mean-only fitting cannot repair the width mismatch.
+## mc-estimate: Draw from q, average the log ratio
 
-**Point here:** This is a family restriction, not an optimiser failure.
+**Build 1, ask:** Which distribution do the draws come from?
 
-**Transition:** To fit both parameters, the optimiser needs a valid representation of scale.
+**Expected:** q, the first argument: it does the weighting.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 2, ask:** Should the estimate match exactly?
 
-## positive-scale: A standard deviation must remain positive
+**Expected:** No. It is random: close, and closer with more draws.
 
-**Build 1, ask:** Why not update an unconstrained σ directly?
+**Point here:** Validated on q₂ = N(1, 3²) against p = N(1, 4²), seed 1000. Individual terms can be negative; see the optional slide.
 
-**Expected:** An arbitrary update could make σ nonpositive, which is invalid.
+**Transition:** How much does the estimate wobble?
 
-**Build 2, ask:** What does ρ represent here?
+## mc-variability: More samples, tighter estimates
 
-**Expected:** Log standard deviation. It is not log variance.
+**Build 1, ask:** How many more draws halve the spread?
 
-**Point here:** The optimiser stores μ and ρ. The distribution receives μ and exp(ρ).
+**Expected:** Four times as many: the spread scales as 1/√S.
 
-**Transition:** The optimisation loop must rebuild q and clear old gradients.
+**Point here:** Same p and q at every size; 40 seeds each.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Transition:** Act 4: we can estimate the loss. Now optimise it.
 
-## optimisation-loop: Rebuild, score, differentiate, update
+## now-optimise: Now optimise it: the code runs, and q does not move
 
-**Build 1, ask:** Why build q again on the next iteration?
+**Build 1, ask:** Predict: where is q after 400 steps?
 
-**Expected:** Its parameters have changed, so the density and computation graph must use the current values.
+**Expected:** Most expect it to slide onto the mixture. It does not move.
 
-**Build 2, ask:** Why clear gradients before backward?
+**Build 2, ask:** The code runs. What could be wrong?
 
-**Expected:** PyTorch accumulates gradients unless they are cleared.
+**Expected:** The gradient: it must be missing a piece.
 
-**Point here:** This is the executable five-line core of the notebook loop.
+**Point here:** PAUSE 7 (PML L23 34:49). Plain gradient descent, learning rate 0.05, 5,000 draws per step. With Adam the stuck run wanders aimlessly instead; it still never fits.
 
-**Notebook demonstration:** Notebook section 2, second code cell: replay saved snapshots, then inspect one update. Adam optimises analytic KL with lr=0.08.
+**Transition:** Look at the gradient on a case we can solve.
 
-**Transition:** Inspect a real saved trajectory instead of waiting for training in class.
+## missing-path: The gradient that would move q never reaches it
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 1, ask:** Which arrow can the gradient not travel along?
 
-## measured-gaussian-fit: Letting both parameters move removes the restriction
+**Expected:** The sample arrow from q to u.
 
-**Build 1, ask:** What can this larger family now match?
+**Build 2, ask:** Why isn’t the surviving gradient exactly zero?
 
-**Expected:** Both the target centre and width.
+**Expected:** log q(u) still contains μ and σ explicitly. That part averages to zero over draws; what remains is noise.
 
-**Build 2, ask:** At step 30, what is still visibly different?
+**Point here:** Gaussian pair q = N(0, 2²), p = N(1, 4²), 50,000 shared draws. A score-function estimator is another valid fix (optional slide).
 
-**Expected:** Inspect the measured curve rather than assuming monotone visual improvement.
+**Transition:** Give the gradient a path.
 
-**Build 3, ask:** How close is the final measured fit?
+## reparam: Move the randomness outside: u = μ + σε
 
-**Expected:** At step 150, μ≈0.9996, σ≈4.0000 and KL≈4.36×10⁻⁹; numerical agreement is excellent.
+**Build 1, ask:** Is u still distributed as N(μ, σ²)?
 
-**Point here:** The three states are saved steps 0, 30 and 150 from actual analytic-KL optimisation.
+**Expected:** Yes: shifting and scaling a standard Normal gives N(μ, σ²).
 
-**Transition:** A useful score may exist even when the library has no analytic formula for it.
+**Build 2, ask:** Compute u and both derivatives.
 
-**Source / evidence:** Measured deterministic optimisation · Adam lr=0.08 · 150 steps · float64
+**Expected:** u = 0 + 2(−0.75) = −1.5; ∂u/∂μ = 1; ∂u/∂σ = ε = −0.75.
 
-## analytic-loss-trace: A loss trace answers a specific question
+**Build 3, ask:** Can ∂u/∂σ be negative?
 
-**Build 1, ask:** What is being measured on the vertical axis?
+**Expected:** Yes, whenever ε < 0: widening q pushes this draw further left.
 
-**Expected:** Analytic directional KL at the current q parameters.
+**Point here:** PAUSE 8 (PML L24 11:20). Let students compute before build 3. The fixed-noise finite-difference check is an optional slide.
 
-**Build 2, ask:** Would the same smooth trace be guaranteed for a sampled objective?
+**Transition:** Change one word in the loop.
 
-**Expected:** No. Monte Carlo estimates introduce sampling variation.
+## rsample-fit: Change one word: rsample() fits the mixture
 
-**Point here:** Keep the evidence label tied to the actual experiment: one toy, analytic loss, recorded steps.
+**Build 1, ask:** Predict where q settles.
 
-**Transition:** Now replace the target with the PML mixture and retain the definition of KL.
+**Expected:** Over the mixture’s mass, between and around the two bumps.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Build 2, ask:** Why doesn’t the KL reach 0?
 
-## mixture-target: Replace the target; keep the definition
+**Expected:** No Gaussian equals a two-bump mixture. 0.056 is the best the family can do; the notebook confirms it with a direct optimisation.
 
-**Build 1, ask:** What makes this a normalised density?
+**Point here:** Same seed, learning rate and draws as the stuck run. Monte Carlo plus reparameterisation: the payoff of Acts 3 and 4.
 
-**Expected:** Each component integrates to one and the nonnegative weights sum to one.
+**Transition:** Act 5: every loss so far evaluated log p. For a posterior, we cannot.
 
-**Build 2, ask:** Does evaluating p(u) require a closed-form KL?
+## posterior-target: The real target is a posterior we cannot evaluate
 
-**Expected:** No. The mixture density can be evaluated directly.
+**Build 1, ask:** Which pieces of this KL can we evaluate?
 
-**Point here:** These are the original PML mixture parameters, not a newly invented target.
+**Expected:** Draws from q, and log q at those draws.
 
-**Transition:** Compare the same two Gaussian candidates used in the historical notebook.
+**Build 2, ask:** Which piece is missing?
 
-**Source / evidence:** PML2023 notebook cells25–30 · original mixture and candidate parameters
+**Expected:** log p(u | 𝒟): it needs the evidence p(𝒟).
 
-## mixture-candidates: Which candidate wastes more mass far from the mixture?
+**Transition:** Substitute Bayes’ rule and see what survives.
 
-**Build 1, ask:** Where does p assign most of its density?
+## bayes-sub: Substitute Bayes’ rule and see what survives
 
-**Expected:** Near the two mixture components, centred at −0.2 and 1.
+**Build 1, ask:** Substitute and simplify.
 
-**Build 2, ask:** Which candidate draws more often from far-away regions?
+**Expected:** −log p(u | 𝒟) = −log p(𝒟, u) + log p(𝒟).
 
-**Expected:** The very broad q₂ draws more often from far away. Predict a larger KL(q₂‖p), then check.
+**Build 2, ask:** Why can log p(𝒟) leave the expectation?
 
-**Point here:** The common wide x-axis keeps the broad candidate visible. Do not zoom each curve independently.
+**Expected:** It is a constant: it depends on neither u nor q.
 
-**Transition:** Ask the library for the analytic KL and inspect the actual result.
+**Build 3, ask:** Which term can we compute?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** The ELBO: draws from q, log q and the log joint.
 
-## unsupported-kl: A missing library formula is not an undefined quantity
+**Point here:** PAUSE 9 (PML L23 47:15). Students do the substitution on paper before build 2.
 
-**Build 1, ask:** What would this call need to know?
+**Transition:** What does that buy us in code?
 
-**Expected:** An implemented formula or algorithm for this specific distribution pair.
+## no-evidence-needed: Maximise the ELBO; the evidence never appears
 
-**Build 2, ask:** What does this error establish, and what does it not establish?
+**Build 1, ask:** Where is the evidence in this code?
 
-**Expected:** It establishes that this runtime does not implement the pair. It does not show that the KL is undefined.
+**Expected:** Nowhere.
 
-**Point here:** The exact exception is saved in science.json; the slide uses a shortened readable message.
+**Build 2, ask:** What does raising the ELBO by 1 do to the KL?
 
-**Transition:** Return to the expectation definition instead of abandoning the score.
+**Expected:** Lowers it by exactly 1, since their sum is fixed.
 
-**Source / evidence:** Observed PyTorch 2.13.0 runtime behaviour · full error saved in science.json
+**Transition:** What does the ELBO reward?
 
-## sample-average: Draw from q, score both densities, average
+## elbo-meaning: Two forces: sit where the joint is high, stay spread out
 
-**Build 1, ask:** Which distribution supplies the draws?
+**Build 1, ask:** What would maximising only the first term do?
 
-**Expected:** q, the first argument of KL(q‖p).
+**Expected:** Collapse q onto the peak of the joint: a point estimate, the MAP.
 
-**Build 2, ask:** What can we compute at each draw?
+**Build 2, ask:** Which q wins, and by how much?
 
-**Expected:** The log density of q minus the log density of p at the same draw.
+**Expected:** The balanced one: ELBO −21.62 against −22.89 and −25.26.
 
-**Build 3, ask:** Which dimension is averaged?
+**Point here:** Logit coin from Act 0; q centred at the VI solution, widths 0.06, the VI width and 1.2. Expectations by quadrature.
 
-**Expected:** The S independent Monte Carlo draws.
+**Transition:** Put the two pieces of the identity in one picture.
 
-**Point here:** The hat denotes an estimate. The log ratio compares the same u_i in both densities.
+## identity: One fixed total: raising the ELBO lowers the KL
 
-**Transition:** Write the estimator in three lines and validate it on a known case.
+**Build 1, ask:** What happens to the KL when the ELBO rises by 1?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** It falls by 1.
 
-## mc-code-check: Validate the estimator before using the unfamiliar target
+**Build 2, ask:** Can the ELBO pass log p(𝒟)?
 
-**Build 1, ask:** What result can we check without Monte Carlo?
+**Expected:** No: that would need a negative KL.
 
-**Expected:** The analytic Normal KL, approximately 0.0689.
+**Point here:** These three rows are q at steps 0, 10 and 600 of the next slide’s fit.
 
-**Build 2, ask:** Should a finite estimate equal the exact answer digit for digit?
+**Transition:** Act 6: back to the coin with no formula.
 
-**Expected:** No. The estimate varies with the sampled draws.
+## logit-vi: Back to the coin with no formula
 
-**Point here:** The notebook’s evaluation-only helper uses sample(); this differentiable training form uses rsample(), explained next.
+**Build 1, ask:** Predict: will the ELBO reach the dashed line? Cross it?
 
-**Notebook demonstration:** Notebook section3: run the known-Gaussian repeated-seed experiment. Do not change q or p.
+**Expected:** It approaches from below and stops just short. It can never cross.
 
-**Transition:** Repeat the estimator while holding both distributions fixed.
+**Build 2, ask:** The grid was used only to check. What did the optimiser use?
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Expected:** Only draws from q, log q and the log joint.
 
-## mc-variability: More draws reduce variability, not every individual error
+**Point here:** PAUSE 10. 256 rsample draws per step, Adam 0.05, 600 steps; exact ELBO by quadrature, for the plot only. Notebook section 8.
 
-**Build 1, ask:** What changed between these four groups?
+**Transition:** Answer the opening vote.
 
-**Expected:** Only the number of Monte Carlo draws. Each group also repeats 40 specified seeds.
+## coin-fair: So, is the coin fair?
 
-**Build 2, ask:** Must every larger-S estimate be closer than every smaller-S estimate?
+**Build 1, ask:** Is the coin fair?
 
-**Expected:** No. Sampling variance shrinks, but individual errors need not decrease monotonically.
+**Expected:** We cannot rule it out: about a 1 in 4 chance that r < 0.5, under this model and prior.
 
-**Point here:** Point to the spread across seeds and the unchanging exact reference line.
+**Build 2, ask:** How did VI get this without p(𝒟)?
 
-**Transition:** Examine one small sample whose estimate is negative.
+**Expected:** By maximising the ELBO, which needs only the joint.
 
-**Source / evidence:** Measured estimates · seeds1000–1039 · S=10,100,1000,10000 · float64
+**Point here:** q in r-space includes the Jacobian 1/(r(1 − r)). The exact tail probability comes from the grid posterior.
 
-## negative-estimate: Five draws can give a negative KL estimate
+**Transition:** Check the method on a problem with an answer key.
 
-**Build 1, ask:** Some rows are negative. Could their average be negative?
+## answer-key: A check with an answer key: the Beta coin
 
-**Expected:** Yes; this particular five-draw average is approximately −0.0933.
+**Build 1, ask:** Where does Beta(10, 10) put its mass?
 
-**Build 2, ask:** Does this contradict nonnegative exact KL?
+**Expected:** Centred at 0.5, and too broad.
 
-**Expected:** No. The finite-sample estimate is not the exact expectation.
+**Build 2, ask:** What changed by step 100?
 
-**Point here:** Seed0 was deliberately selected as the first negative example in a seed search, not as a performance result.
+**Expected:** It shifted towards the heads proportion and narrowed.
 
-**Transition:** Use many draws for the mixture comparison, and label the result as an estimate.
+**Build 3, ask:** Is the final q exactly Beta(22, 16)?
 
-**Source / evidence:** Intentional counterexample · first negative seed in0–999 is0 · five q draws
+**Expected:** No, but very close: KL ≈ 0.0002. The answer key was never used by the optimiser.
 
-## mixture-results: The estimated score separates these candidates clearly
+**Point here:** Beta.rsample is differentiable through implicit reparameterisation, not μ + σε. Adam 0.025, 512 draws, seed 2401.
 
-**Build 1, ask:** How large is the difference relative to the sampling uncertainty?
+**Transition:** Move q yourself and watch the total.
 
-**Expected:** The candidate difference is far larger than the reported standard errors.
+## elbo-slider: Move q yourself: ELBO + KL never changes
 
-**Build 2, ask:** What role does the numerical integral play?
+**Build 1, ask:** Find the q with the highest ELBO. What is its KL?
 
-**Expected:** It is an independent numerical check in this one-dimensional toy, not an available high-dimensional solution in general.
+**Expected:** Beta(22, 16): ELBO = log p(𝒟) and KL = 0.
 
-**Point here:** Both columns are numerical evaluations; neither should be labelled exact analytical mixture KL.
+**Point here:** ELBO from analytic Beta moments; KL from its own formula; their sum is checked against the evidence in check-science.mjs.
 
-**Transition:** An estimator is useful for scoring. Can it also provide the derivative we need?
+**Transition:** Collect the five tools.
 
-**Source / evidence:** 100,000 q draws · seeds402/403 · separate wide-domain numerical integration
+## five-tools: Five obstacles, five tools
 
-## sample-path: A random draw is not automatically a differentiable path
+**Build 1, ask:** Cover the middle column. Which tool removed which obstacle?
 
-**Build 1, ask:** Which connection would the derivative need to follow?
+**Expected:** Students reconstruct it row by row.
 
-**Expected:** From the scalar loss through u back to the distribution parameters.
-
-**Build 2, ask:** Does this sample retain that path in PyTorch?
-
-**Expected:** No. Normal.sample() returns a draw without that pathwise autograd connection.
-
-**Point here:** This is a computation view. The word sample identifies the random operation.
-
-**Transition:** Check the actual runtime behaviour before proposing a remedy.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## sample-backward: Ask the sample itself for a gradient
-
-**Build 1, ask:** What do you predict before running backward?
-
-**Expected:** Backward on this sampled scalar will fail because it has no autograd path.
-
-**Build 2, ask:** What has this failure shown?
-
-**Expected:** It identifies the absent path from this sample to μ and σ; it does not prove all stochastic gradient methods are impossible.
-
-**Point here:** The notebook catches this expected error so Run All still completes.
-
-**Notebook demonstration:** Notebook section4: inspect sample.requires_grad and the caught sample.backward() exception.
-
-**Transition:** A more subtle failure occurs when the loss has another explicit parameter dependence.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## a-gradient-is-not-enough: A backward call can run and still miss the intended path
-
-**Build 1, ask:** Can log q(u) depend on μ and σ even if u is detached?
-
-**Expected:** Yes. The density formula itself contains μ and σ.
-
-**Build 2, ask:** Would a nonempty gradient tensor prove this is the desired KL derivative?
-
-**Expected:** No. The derivative also needs the effect of changing the sampling distribution, which this naive construction omits.
-
-**Point here:** Do not claim that backward must fail for every loss containing sample().
-
-**Transition:** Compare the resulting derivatives with the analytic reference using identical draws.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## gradient-comparison: Check the derivative, not just the existence of a tensor
-
-**Build 1, ask:** Which row agrees with the derivative of the actual KL?
-
-**Expected:** The pathwise row closely agrees; the naive detached row misses the sampling-distribution effect.
-
-**Build 2, ask:** Is Monte Carlo agreement expected to be exact?
-
-**Expected:** No. This is a finite Monte Carlo derivative, so it has sampling error.
-
-**Point here:** A properly constructed score-function estimator is another valid approach; this comparison concerns the naive detached construction.
-
-**Transition:** Separate the randomness from the deterministic transformation.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## reparameterise: Keep the noise separate from the parameters
-
-**Build 1, ask:** Which random distribution is independent of μ and σ?
-
-**Expected:** The standard Normal that supplies ε.
-
-**Build 2, ask:** For a fixed ε, which part is now deterministic?
-
-**Expected:** The mapping from μ and σ to u=μ+σε.
-
-**Point here:** The noise source is separate. Do not draw ε as an output of μ or σ.
-
-**Transition:** Use one chosen ε to calculate the local derivatives by hand.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## scalar-derivatives: What happens to this same draw when a parameter changes?
-
-**Build 1, ask:** Hold ε fixed. What is u?
-
-**Expected:** u=0+2×(−0.75)=−1.5.
-
-**Build 2, ask:** If μ increases by a small amount, how does u change?
-
-**Expected:** It changes by the same amount, so the derivative is 1.
-
-**Build 3, ask:** Why can increasing σ move this particular u left?
-
-**Expected:** Because this fixed noise draw is negative; the derivative with respect to σ equals ε.
-
-**Point here:** The −0.75 is a chosen inspectable input. Other noise draws can have the opposite sign.
-
-**Transition:** Connect those local derivatives to a scalar loss.
-
-**Source / evidence:** Chosen scalar input ε=−0.75 · arithmetic and autograd checked
-
-## chain-rule: The loss gradient follows the same draw
-
-**Build 1, ask:** At u=−1.5, what derivative reaches the sampled value?
-
-**Expected:** The loss derivative is −5.
-
-**Build 2, ask:** How does that derivative reach μ and σ?
-
-**Expected:** Multiply by ∂u/∂μ=1 and ∂u/∂σ=−0.75, respectively.
-
-**Point here:** This scalar loss is chosen to expose the chain rule. It is not being labelled the KL objective.
-
-**Transition:** Use rsample for the Normal, then verify the path numerically.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## rsample-check: A fixed-noise finite difference checks the path
-
-**Build 1, ask:** What is different about rsample?
-
-**Expected:** It returns a draw with the pathwise gradient connection.
-
-**Build 2, ask:** What must stay fixed on both sides of the finite difference?
-
-**Expected:** The same noise array. Fresh noise would confound the derivative check with sampling variation.
-
-**Point here:** The notebook checks exact rsample=μ+σε equality under the same seed, then checks both derivatives.
-
-**Notebook demonstration:** Notebook section4, final cell: compare autograd with fixed-noise finite differences. Training normally uses fresh draws.
-
-**Transition:** We now know how to estimate and differentiate an objective. The remaining obstacle is the posterior itself.
-
-**Source / evidence:** Measured check · seed88 · S=2048 · finite-difference h=10⁻⁵
-
-## posterior: Now the target is an unknown posterior
-
-**Build 1, ask:** The model generates data from u. What is the backwards question?
-
-**Expected:** Which values of u explain the observed data?
-
-**Build 2, ask:** Which object is our new target distribution?
-
-**Expected:** The posterior p(u|𝒟). The observed data and model are fixed.
-
-**Point here:** Name this a probabilistic model: this arrow expresses a conditional dependency, not an optimiser update.
-
-**Transition:** Keep the idea of fitting q, and state what operations q must support.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## tractable-q: Choose a family we can draw from and evaluate
-
-**Build 1, ask:** What is ψ? What is u?
-
-**Expected:** ψ contains the free variational parameters; u is a possible value of the unknown.
-
-**Build 2, ask:** What operations do we need from this chosen family?
-
-**Expected:** Draw samples and evaluate the log density at those samples.
-
-**Point here:** A Normal example used ψ=(μ,ρ); other problems can use another family.
-
-**Transition:** Try the same directional KL that worked for the available target.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## posterior-obstacle: The direct score asks for the density we do not have
-
-**Build 1, ask:** Which pieces can we already compute?
-
-**Expected:** Samples from q and log q at those samples.
-
-**Build 2, ask:** Which piece blocks direct evaluation of this score?
-
-**Expected:** The normalised posterior log density, which is exactly what we are trying to approximate.
-
-**Point here:** The obstacle is not a missing Gaussian formula. It is the unavailable posterior normaliser.
-
-**Transition:** Use Bayes’ rule to expose the joint and the evidence.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## bayes-joint: Replace the posterior with joint divided by evidence
-
-**Build 1, ask:** Which factor can be built from prior and likelihood?
-
-**Expected:** The joint p(𝒟,u).
-
-**Build 2, ask:** Which denominator may still be difficult?
-
-**Expected:** The evidence p(𝒟), an integral over the unknown.
-
-**Point here:** Keep the data argument in both the joint and evidence. Do not replace the joint with the prior alone.
-
-**Transition:** Take a logarithm before substituting into the KL.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## log-quotient: The log quotient becomes a difference
-
-**Build 1, ask:** What is the log of joint divided by evidence?
-
-**Expected:** Log joint minus log evidence.
-
-**Build 2, ask:** Why does evidence become positive when the posterior term is subtracted?
-
-**Expected:** Subtracting that difference reverses both signs.
-
-**Point here:** This is the sign-sensitive step. Give students time to predict the second line.
-
-**Transition:** Place exactly this replacement inside the expectation.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## substitute: Keep the KL; change only the posterior term
-
-**Build 1, ask:** Which expression stays the same on the left?
-
-**Expected:** The same posterior KL. This is an exact equality.
-
-**Build 2, ask:** Which three terms now appear inside the average?
-
-**Expected:** Log q minus log joint plus log evidence.
-
-**Point here:** Point to the unchanged q term and the expanded posterior term.
-
-**Transition:** Ask what the expectation averages over, and whether the evidence varies with it.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## constant: Constant with respect to what?
-
-**Build 1, ask:** What varies inside this expectation?
-
-**Expected:** u is drawn from q.
-
-**Build 2, ask:** Does log evidence vary with the sampled u or the fitted ψ?
-
-**Expected:** Neither, for this fixed model and dataset.
-
-**Build 3, ask:** What justifies moving it outside?
-
-**Expected:** Linearity of expectation: the average of a constant is that same constant.
-
-**Point here:** Evidence can depend on generative model parameters θ; those are not being fitted in this argument.
-
-**Transition:** Rearrange the equality to put log evidence on the left.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## rearrange: Swap sides and reverse the bracket’s signs
-
-**Build 1, ask:** After rearranging, what is the sign of the joint term?
-
-**Expected:** Positive inside the expectation.
-
-**Build 2, ask:** Which term remains as a nonnegative gap?
-
-**Expected:** The KL from q to the posterior.
-
-**Point here:** Retain both lines so the sign change can be checked visually.
-
-**Transition:** Name the expectation we can estimate using the joint and q.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## name-elbo: A trainable objective emerges from the rearrangement
-
-**Build 1, ask:** Which density has disappeared from the computable expression?
-
-**Expected:** The normalised posterior.
-
-**Build 2, ask:** What do we still need to estimate in a general problem?
-
-**Expected:** The expectation under q; its integrand is available, but the integral may require Monte Carlo.
-
-**Point here:** Say estimate rather than promising every ELBO has a closed form.
-
-**Transition:** Use the nonnegative remaining KL to explain the name “lower bound”.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## bound: One fixed total, two parts
-
-**Build 1, ask:** Why can the ELBO not exceed the log evidence?
-
-**Expected:** The remaining posterior KL is nonnegative.
-
-**Build 2, ask:** When would equality hold?
-
-**Expected:** When q equals the posterior almost everywhere, under the stated support and finiteness assumptions.
-
-**Build 3, ask:** Which optimisation direction improves q?
-
-**Expected:** Maximise ELBO, equivalently minimise negative ELBO.
-
-**Point here:** This gap is KL to the posterior. It is not the KL to the prior that appears in the later VAE decomposition.
-
-**Transition:** Translate this into a practical objective without asking for the unknown evidence.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## what-we-avoid: Optimise the ELBO without computing the evidence
-
-**Build 1, ask:** Is the unknown evidence being set to zero?
-
-**Expected:** No. It remains an unknown fixed constant.
-
-**Build 2, ask:** What exactly makes it safe to omit from ψ’s optimisation?
-
-**Expected:** It does not change when ψ changes, for this fixed model and data.
-
-**Point here:** The optimisation equivalence concerns ψ only. Learning θ later changes the situation.
-
-**Transition:** Return to the coin and implement these available pieces.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-return: Return to the same coin and the same data
-
-**Build 1, ask:** What are we holding fixed from the opening problem?
-
-**Expected:** The same sequence, prior and coin probability r.
-
-**Build 2, ask:** Why retain a known answer if the optimiser does not use it?
-
-**Expected:** To independently check whether the approximation and objective behave as expected.
-
-**Point here:** The sequence has not changed to make an optimisation look better.
-
-**Transition:** First write the exact posterior reference from the sufficient statistics.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-reference: The conjugate posterior is a reference answer
-
-**Build 1, ask:** Which prior parameter receives the heads count?
-
-**Expected:** The first; the tails count is added to the second.
-
-**Build 2, ask:** Does the optimiser need to call this posterior density?
-
-**Expected:** No. The posterior is used only for checking this solvable example.
-
-**Point here:** Use an explicit reference label. Do not silently swap posterior.log_prob into the training objective.
-
-**Transition:** Construct the joint from the prior and the observed-data likelihood.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-prior: Keep the prior’s normalising constant
-
-**Build 1, ask:** Why are the exponents 4 and 2 rather than 5 and 3?
-
-**Expected:** A Beta(a,b) density has exponents a−1 and b−1.
-
-**Build 2, ask:** Can we drop this constant when checking absolute ELBO values?
-
-**Expected:** No. It matters for the numerical value of the joint, ELBO and evidence, even if independent of ψ.
-
-**Point here:** Distinguish a constant irrelevant to an optimiser from a constant required for a correct absolute score.
-
-**Transition:** Add the contributions of all thirty observations.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-likelihood: Each observed toss contributes one log probability
-
-**Build 1, ask:** What contributes log r? What contributes log(1−r)?
-
-**Expected:** Each head contributes log r; each tail contributes log(1−r).
-
-**Build 2, ask:** Why is there no factor counting different orders?
-
-**Expected:** The observed object is one ordered sequence, not the event containing all sequences with that head count.
-
-**Point here:** Counts are sufficient to evaluate this sequence likelihood, but the evidence convention remains sequence-based.
-
-**Transition:** Add prior and likelihood to obtain log joint.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-joint: The joint is available at any proposed r
-
-**Build 1, ask:** Which two available functions appear here?
-
-**Expected:** The likelihood and prior density.
-
-**Build 2, ask:** Where is the unknown evidence in this code?
-
-**Expected:** It does not appear. The joint is evaluated without the posterior normaliser.
-
-**Point here:** log1p(−r) evaluates log(1−r) stably. Our Beta draws lie inside the valid support.
-
-**Transition:** Choose a flexible positive-parameter q and specify what the optimiser stores.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-family: Fit positive Beta shapes through unconstrained parameters
-
-**Build 1, ask:** What family contains our exact posterior in this toy?
-
-**Expected:** The Beta family.
-
-**Build 2, ask:** Which quantities does the optimiser store and update?
-
-**Expected:** The unconstrained log-shape parameters ψ_a and ψ_b; exponentiation produces positive a and b.
-
-**Point here:** r is the unknown probability. a and b are shape parameters. ψ parameterises those shapes.
-
-**Transition:** Draw from q, evaluate the joint-minus-q terms, then average.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-estimator: One mean over draws; the data are already summed
-
-**Build 1, ask:** Where are the thirty observation contributions combined?
-
-**Expected:** Inside log_joint, through 17 log r+13 log(1−r).
-
-**Build 2, ask:** Why is there no additional sum over the 512 draws before mean?
-
-**Expected:** Each term is one sample’s joint-minus-q contribution. We average that sample axis exactly once.
-
-**Point here:** Beta.rsample is differentiable through an implicit reparameterisation method; it is not μ+σε.
-
-**Notebook demonstration:** Notebook section6, training cell: inspect first_step and trace[1]. The posterior reference is absent from the loss.
-
-**Transition:** Inspect one measured step, including the actual gradients and transformed parameters.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## coin-first-step: Inspect one actual update
-
-**Build 1, ask:** Which shape parameter should initially increase for more heads?
-
-**Expected:** a should move up relative to b, shifting q’s centre towards the observed heads proportion.
-
-**Build 2, ask:** Are the printed gradients with respect to a,b or ψ?
-
-**Expected:** They are with respect to ψ, the stored log-shape parameters. Adam then performs its own update.
-
-**Point here:** Do not use a plain SGD formula to explain these Adam parameter changes. The values are directly recorded.
-
-**Transition:** Replay the saved fit rather than waiting for all six hundred steps.
-
-**Source / evidence:** Measured first update · seed2401 · Adam lr=0.025 · 512 Beta draws
-
-## coin-fit: A measured fit using only the joint
-
-**Build 1, ask:** Where does the initial q put its mass?
-
-**Expected:** The initial Beta(10,10) is centred at 0.5 and is too broad.
-
-**Build 2, ask:** What changed by step100?
-
-**Expected:** The measured q has shifted and concentrated towards the reference.
-
-**Build 3, ask:** Is the final q exactly the known posterior?
-
-**Expected:** No. The measured final shapes are about22.394 and16.189, with posterior KL about0.000222. It is close, not exact.
-
-**Point here:** The teal reference was used for diagnostics only. The loss uses log joint and log q.
-
-**Transition:** Use selected candidates to check the identity independently of the training trajectory.
-
-**Source / evidence:** Actual CPU training · 600 Adam steps · seed2401 · saved checkpoints0/100/600
-
-## coin-check: Check the fixed total with three selected candidates
-
-**Build 1, ask:** Add the ELBO and the gap. What is fixed?
-
-**Expected:** The sum is the same log evidence, approximately−21.397.
-
-**Build 2, ask:** Does the better candidate raise the ELBO by the amount its KL falls?
-
-**Expected:** Yes. The identity holds independently for each selected candidate.
-
-**Build 3, ask:** What happens at the exact posterior?
-
-**Expected:** The posterior KL is zero, so ELBO equals log evidence.
-
-**Point here:** These three candidates are checking points, not asserted optimisation checkpoints. ELBO was computed directly from expected joint minus expected log q.
-
-**Transition:** A noisy ELBO estimate behaves differently from this exact expectation.
-
-**Source / evidence:** Direct analytic Beta ELBO and independent posterior KL · selected candidates, not a training trace
-
-## noisy-elbo: An estimate is not itself guaranteed to be a lower bound
-
-**Build 1, ask:** Can a finite-sample ELBO estimate cross the reference line?
-
-**Expected:** Yes. The noisy estimate can lie above the evidence on some draws.
-
-**Build 2, ask:** Which object remains a mathematical lower bound?
-
-**Expected:** The exact expected ELBO, not every finite-sample realisation of its estimator.
-
-**Point here:** This is observed behaviour from the saved run, not a universal crossing frequency.
-
-**Transition:** Separate an improving objective from a certificate of exact inference.
-
-**Source / evidence:** Measured seed2401 training trace · sampled objective versus direct analytic diagnostic
-
-## certificate: A higher or stable ELBO does not prove a zero gap
-
-**Build 1, ask:** What does a true increase in the exact ELBO establish?
-
-**Expected:** For this fixed model and data, posterior KL decreased.
-
-**Build 2, ask:** Does a stable loss establish q=p(u|𝒟)?
-
-**Expected:** No. The family or optimisation can leave a positive gap.
-
-**Point here:** Recall the mean-only Gaussian: even its perfect optimum left a width mismatch.
-
-**Common misconception:** Improvement, convergence of a trace and exact posterior recovery are different claims.
-
-**Transition:** Retrieve the method without looking at the derivation.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## retrieve-samples: For KL(q‖p), where do the samples come from?
-
-**Build 1, ask:** Answer without looking at the earlier definition.
-
-**Expected:** From q, the first argument.
-
-**Build 2, ask:** Why does sampling from p change the question?
-
-**Expected:** It changes the weighting distribution and does not estimate the same directional KL.
-
-**Point here:** Ask several students for the sampling distribution before revealing it.
-
-**Transition:** Now separate the parameters being updated from the random values being drawn.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## retrieve-update: What changes during fixed-model variational inference?
-
-**Build 1, ask:** Which objects change, and in what sense?
-
-**Expected:** ψ is updated; random draws vary; data, model and exact posterior remain fixed.
-
-**Build 2, ask:** Is a new draw an optimiser parameter update?
-
-**Expected:** No. A draw is a sampled value, not a stored parameter being fitted.
-
-**Point here:** Distinguish randomness in evaluating an objective from changes in the objective’s parameters.
-
-**Transition:** Explain the omitted evidence using the variable it is constant with respect to.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## retrieve-evidence: Why can we omit the evidence from ψ’s optimisation?
-
-**Build 1, ask:** Is the reason that evidence is zero, easy, or constant?
-
-**Expected:** It is constant, not zero and not necessarily easy to evaluate.
-
-**Build 2, ask:** Constant with respect to which parameters?
-
-**Expected:** ψ, for the fixed model and observed data used in this inference problem.
-
-**Point here:** Ask students to state both the changing parameter and what is held fixed.
-
-**Transition:** Apply the procedure to a new inference problem.
-
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
+**Transition:** Try the method on a new problem.
 
 ## exit-transfer: A sensor has an unknown constant bias
 
-**Build 1, ask:** Identify the unknown, observations and one possible q family.
+**Build 1, ask:** Identify the unknown, the observations and one possible q family.
 
-**Expected:** u is the bias; 𝒟 contains observed sensor values; a Normal q is one sensible choice.
+**Expected:** u is the bias; 𝒟 contains the readings; a Normal q is a sensible choice.
 
 **Build 2, ask:** Which available functions form the joint?
 
@@ -1105,29 +539,39 @@ Planned main route: 70 minutes. Timing includes student responses and the specif
 
 **Expected:** The expectation of log joint minus log q, maximised over ψ.
 
-**Point here:** This is an implementation-identification exercise, not another numerical derivation or a claim that approximation is required for this conjugate toy.
+**Point here:** This conjugate toy has an exact answer too; the exercise is identifying the pieces, not needing approximation.
 
-**Transition:** Connect this posterior-fitting problem to the models we will build next.
+**Transition:** Where these unknowns appear next.
 
-**Source / evidence:** Computed teaching example · natural logarithms · KL in nats
-
-## next-lecture: Generative models will create this inference problem again
+## next-lecture: Generative models create this inference problem again
 
 **Build 1, ask:** Where might a new unknown appear in an image model?
 
 **Expected:** A latent description z can explain an observed image x.
 
-**Build 2, ask:** What question should we ask about a good reconstruction?
+**Build 2, ask:** What should we ask of a good reconstruction?
 
 **Expected:** Whether reconstructing observations also gives a useful way to generate new ones.
 
-**Point here:** Lecture2 introduces generative modelling and ordinary autoencoders. Lecture3 returns to variational inference with an encoder and decoder.
+**Transition:** Close the main route. Optional depth follows.
 
-**Transition:** Close the main route here. Optional derivations follow for reading or extra time.
+## optional-one-step: One literal update of the mean (optional)
 
-**Source / evidence:** Main70-minute route ends here · optional depth follows
+**Build 1, ask:** Which term of the Gaussian KL depends on μ?
 
-## optional-normal-algebra: Where does the complete Gaussian KL formula come from? (optional)
+**Expected:** Only the squared shift, (μ − 1)²/(2·4²).
+
+**Build 2, ask:** Differentiate it at μ = 0.
+
+**Expected:** (μ − 1)/16 = −0.0625: a negative derivative, so descent moves μ right.
+
+**Build 3, ask:** Take one step with η = 4. What is the best KL with σ stuck at 2?
+
+**Expected:** μ⁺ = 0.25. Even at μ = 1 the KL is 0.318: the width mismatch needs σ to move too.
+
+**Point here:** η = 4 is chosen to make the arithmetic visible, not a recommended learning rate.
+
+## optional-normal-algebra: Where does the Gaussian KL formula come from? (optional)
 
 **Build 1, ask:** Which log-normalising constants cancel?
 
@@ -1141,13 +585,9 @@ Planned main route: 70 minutes. Timing includes student responses and the specif
 
 **Expected:** The expectation of (u−μ)²/(2σ²) equals one half.
 
-**Point here:** This is an optional completion of the Gaussian algebra. The core route exposed only its decisive moment.
+**Point here:** q = N(μ, σ²), p = N(m, s²). Every scale symbol is a standard deviation.
 
-**Transition:** Nonnegativity belongs to the expectation, not every local ratio.
-
-**Source / evidence:** Analytic derivation for positive Normal scales
-
-## optional-nonnegative: Why is exact KL nonnegative? (optional)
+## optional-nonnegative: KL ≥ 0 by Jensen’s inequality (optional)
 
 **Build 1, ask:** Which function makes Jensen’s inequality useful?
 
@@ -1159,61 +599,131 @@ Planned main route: 70 minutes. Timing includes student responses and the specif
 
 **Build 3, ask:** What makes the final expectation one?
 
-**Expected:** For positive densities on the same support, integrating q·p/q gives the normalisation integral of p.
+**Expected:** Integrating q · p/q gives the integral of p, which is 1 on a common support.
 
-**Point here:** State the common-support assumption for this simple proof. More general support cases require the standard extension, including infinite KL when needed.
+**Point here:** The tangent-line argument in the main route is the same fact without naming Jensen.
 
-**Transition:** A valid alternative estimator can handle sampling derivatives without a pathwise transform.
+## optional-negative-estimate: Five draws can give a negative KL estimate (optional)
 
-**Source / evidence:** Jensen proof · positive densities on the same support and finite terms
+**Build 1, ask:** Some rows are negative. Could their average be negative?
 
-## optional-score-function: Pathwise gradients are one route, not the only route (optional)
+**Expected:** Yes: this five-draw average is about −0.093.
 
-**Build 1, ask:** Which term was missing from naive detached-sample differentiation?
+**Build 2, ask:** Does this contradict KL ≥ 0?
+
+**Expected:** No. A finite-sample estimate is not the exact expectation.
+
+**Point here:** Seed 0 was chosen deliberately as the first negative example in a seed search.
+
+## optional-mixture-candidates: The two PML candidates, scored by Monte Carlo (optional)
+
+**Build 1, ask:** How large is the difference relative to the sampling uncertainty?
+
+**Expected:** Far larger than the standard errors.
+
+**Build 2, ask:** What role does the numerical integral play?
+
+**Expected:** An independent check, possible only because this toy is one-dimensional.
+
+**Point here:** 100,000 draws each, seeds 402 and 403.
+
+## optional-rsample-check: A fixed-noise finite difference checks the path (optional)
+
+**Build 1, ask:** What is different about rsample?
+
+**Expected:** It returns a draw with the pathwise gradient connection.
+
+**Build 2, ask:** What must stay fixed on both sides of the finite difference?
+
+**Expected:** The same noise array. Fresh noise would confound the check with sampling variation.
+
+**Point here:** Seed 88, S = 2048, h = 10⁻⁵.
+
+## optional-score-function: Pathwise gradients are one route, not the only one (optional)
+
+**Build 1, ask:** Which term was missing from the naive sample() gradient?
 
 **Expected:** The term accounting for the change in the probability of drawing u.
 
-**Build 2, ask:** Does this identity require u=μ+σε?
+**Build 2, ask:** Does this identity require u = μ + σε?
 
-**Expected:** No. It is a different route, under conditions permitting differentiation under the integral.
+**Expected:** No. It works for discrete q too, usually with higher variance.
 
-**Point here:** The displayed identity includes explicit parameter dependence of f. Do not silently discard that term for a general integrand.
+**Point here:** Regularity conditions allow differentiating under the integral.
 
-**Transition:** The event and sample dimensions still need correct reductions, whichever estimator is used.
+## optional-noisy-elbo: A noisy ELBO estimate can cross the evidence (optional)
 
-**Source / evidence:** Differentiation-under-the-integral identity · regularity assumptions apply
+**Build 1, ask:** Can a finite-sample ELBO estimate cross the reference line?
+
+**Expected:** Yes, on some draws.
+
+**Build 2, ask:** Which object remains a lower bound?
+
+**Expected:** The exact expected ELBO, not each sampled estimate.
+
+**Point here:** Beta coin, seed 2401.
+
+## optional-certificate: A higher ELBO does not prove a zero gap (optional)
+
+**Build 1, ask:** What does a true increase in the exact ELBO establish?
+
+**Expected:** For this fixed model and data, the posterior KL decreased.
+
+**Build 2, ask:** Does a stable loss establish q = p(u | 𝒟)?
+
+**Expected:** No. The family or optimisation can leave a positive gap.
+
+**Point here:** Recall the diagonal q in 2-D: its best possible KL was 0.83.
+
+## optional-coin-check: Check the fixed total with three Beta candidates (optional)
+
+**Build 1, ask:** Add the ELBO and the gap. What is fixed?
+
+**Expected:** The sum is the same log evidence, about −21.397.
+
+**Build 2, ask:** Does the better candidate raise the ELBO by the amount its KL falls?
+
+**Expected:** Yes. The identity holds for each candidate.
+
+**Build 3, ask:** What happens at the exact posterior?
+
+**Expected:** The KL is zero, so the ELBO equals the log evidence.
+
+**Point here:** ELBO computed directly from expected log joint minus expected log q; KL computed separately.
+
+## optional-mean-field-nets: One Gaussian per weight: Bayesian neural networks (optional)
+
+**Build 1, ask:** How many parameters does q have for a network with d weights?
+
+**Expected:** 2d: a mean and a width per weight. A full covariance would need about d²/2.
+
+**Build 2, ask:** How would you train it?
+
+**Expected:** Exactly as today: rsample the weights, estimate the ELBO, backpropagate.
+
+**Point here:** Mean-field: the diagonal q from Act 2, so expect underestimated uncertainty.
 
 ## optional-reductions: A mean must say which dimension it averages (optional)
 
 **Build 1, ask:** Does every log_prob output still have an event dimension?
 
-**Expected:** No. A multivariate distribution’s log_prob typically already reduces its event dimensions.
+**Expected:** No. A multivariate distribution’s log_prob already reduces its event dimensions.
 
-**Build 2, ask:** What goes wrong if you sum S before subtracting log q from the joint?
+**Build 2, ask:** What goes wrong if you sum over S before averaging?
 
-**Expected:** It changes the relative weighting, often multiplying an entropy contribution by the number of samples.
-
-**Point here:** This corrects a concrete reduction pitfall in the historical multivariate regression extension.
-
-**Transition:** Even harmless-looking likelihood constants affect absolute evidence checks.
-
-**Source / evidence:** Shape contract · scalar coin and multivariate event distinction
+**Expected:** It rescales the objective, often multiplying an entropy contribution by the number of samples.
 
 ## optional-count-data: An ordered sequence and a count have different evidence (optional)
 
 **Build 1, ask:** Which event contains more possible sequences?
 
-**Expected:** The count-only event includes every ordering with17 heads.
+**Expected:** The count-only event includes every ordering with 17 heads.
 
 **Build 2, ask:** Does this constant change the posterior or its KL gap?
 
-**Expected:** No. It adds the same log binomial coefficient to joint, ELBO and evidence; the posterior and gap remain unchanged.
+**Expected:** No. It adds the same constant to the joint, the ELBO and the evidence.
 
-**Point here:** The entire main lecture consistently uses the ordered-sequence convention.
-
-**Transition:** The Beta family also provides analytic expectations that independently check the sampled objective.
-
-**Source / evidence:** Exact convention comparison · log binomial coefficient computed with log-gamma
+**Point here:** The whole lecture uses the ordered-sequence convention.
 
 ## optional-beta-elbo: Check the sampled objective with analytic Beta moments (optional)
 
@@ -1221,16 +731,10 @@ Planned main route: 70 minutes. Timing includes student responses and the specif
 
 **Expected:** Expected log r and expected log(1−r).
 
-**Build 2, ask:** Why write digamma as a name rather than ψ here?
+**Build 2, ask:** Why write digamma rather than ψ here?
 
-**Expected:** ψ already denotes free variational parameters.
+**Expected:** ψ already denotes the variational parameters.
 
 **Build 3, ask:** How was the identity checked non-circularly?
 
-**Expected:** The notebook computes ELBO directly from these expectations, then independently adds the library posterior KL and checks the evidence.
-
-**Point here:** The direct calculation is not evidence minus KL disguised as an independent check. Numerical integration supplies another check.
-
-**Transition:** The notebook contains the complete formulas and reproducible outputs.
-
-**Source / evidence:** Analytic Beta moments · direct ELBO, independent KL and quadrature checks
+**Expected:** The ELBO is computed directly from these moments, then the separately computed KL is added and compared with the evidence.

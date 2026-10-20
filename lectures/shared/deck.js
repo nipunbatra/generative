@@ -24,6 +24,8 @@ for(const parent of stage.querySelectorAll('.content, .content div, .prompt')){
  const alternates=[...parent.children].filter(el=>el.hasAttribute('data-only'));
  if(alternates.length>1){const slot=document.createElement('div');slot.className='state-slot';parent.insertBefore(slot,alternates[0]);alternates.forEach(el=>slot.append(el));}
 }
+// Optional live figures: a lecture may export mount(stage,{reading,printing,builds}) to bind widgets after rendering.
+if(typeof content.mount==='function'){try{await content.mount(stage,{reading,printing,builds:printing&&params.get('print')==='builds'});}catch(error){console.error(error);mathsErrors.push({tex:'mount',error:String(error)});}}
 const elements=[...stage.querySelectorAll('.scene')];
 function matches(spec,b){return String(spec).split(',').some(part=>{const [lo,hi]=part.split('-').map(Number);return hi===undefined?b===lo:b>=lo&&b<=hi;});}
 function apply(el,b){el.dataset.build=b;el.querySelectorAll('[data-at]').forEach(x=>x.classList.toggle('reveal-hidden',b<Number(x.dataset.at)));el.querySelectorAll('[data-only]').forEach(x=>x.classList.toggle('reveal-hidden',!matches(x.dataset.only,b)));}
@@ -50,7 +52,7 @@ addEventListener('hashchange',fromHash);addEventListener('resize',fit);fit();
 if(reading||printing){
  document.body.classList.add(reading?'reading':'print');elements.forEach((el,i)=>apply(el,slides[i].builds));
  if(printing&&params.get('print')==='builds'){
-  elements.forEach((el,i)=>{for(let b=1;b<slides[i].builds;b++){const clone=el.cloneNode(true);clone.id=`${slides[i].id}-build-${b}`;const prefix=`${slides[i].id}-${b}-`;for(const n of clone.querySelectorAll('[id]')){const old=n.id;n.id=prefix+old;for(const a of clone.querySelectorAll('[marker-end],[marker-start]'))for(const k of ['marker-end','marker-start'])if(a.getAttribute(k)===`url(#${old})`)a.setAttribute(k,`url(#${prefix+old})`);}apply(clone,b);clone.querySelector('.page-number').textContent+=` · ${b}/${slides[i].builds}`;el.before(clone);}el.querySelector('.page-number').textContent+=` · ${slides[i].builds}/${slides[i].builds}`;});
+  elements.forEach((el,i)=>{for(let b=1;b<slides[i].builds;b++){const clone=el.cloneNode(true);clone.id=`${slides[i].id}-build-${b}`;const prefix=`${slides[i].id}-${b}-`;for(const n of clone.querySelectorAll('[id]')){const old=n.id;n.id=prefix+old;for(const a of clone.querySelectorAll('[marker-end],[marker-start],[clip-path]'))for(const k of ['marker-end','marker-start','clip-path'])if(a.getAttribute(k)===`url(#${old})`)a.setAttribute(k,`url(#${prefix+old})`);}apply(clone,b);clone.querySelector('.page-number').textContent+=` · ${b}/${slides[i].builds}`;el.before(clone);}el.querySelector('.page-number').textContent+=` · ${slides[i].builds}/${slides[i].builds}`;});
  }
  document.querySelector('#read-link').href='./';document.querySelector('#read-link').textContent='Present';
 }else fromHash();

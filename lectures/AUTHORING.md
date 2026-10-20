@@ -53,6 +53,18 @@ If fixtures are needed: `const data=await fetch(new URL('./data/fixtures.json',i
 
 Useful authored classes: `.lead` (28 px), `.small` (25 px), `.muted`, `.equation-stack`, `.centre`, `.diagram-scroll`, `.formula-scroll`, `.image-pair`, `.result` (large number), `.caption` (22 px), `.callout` (28 px). Titles are 40 px; principal maths 32 px; code 25 px. A slide's content area is about 1152 × 440 px. Split dense content across slides rather than shrinking it.
 
+## Live figures
+
+A lecture may also export `mount(stage, {reading, printing, builds})` from `content.js`. The engine calls it once, after KaTeX has rendered and before the deck is ready, so the layout checks and PDF export see the mounted figures. Lecture 1's `widgets.js` is the reference:
+
+- Put a placeholder in a slide body, such as `<div class="widget" data-widget="olive">`, and let `mount` fill it.
+- Presentation mode: an animation shows its first frame until the build that plays it. Advancing to that build plays it; arriving there directly, for example from a deep link, shows the last frame. Going back resets it.
+- Reading mode keeps the controls and starts on the last frame. Print mode renders static states and no controls: wrap them in a `.state-slot` of `data-only` children so `?print=builds` shows the right frame for each build.
+- Generic control styles are in `shared/deck.css` (`.widget`, `.w-controls`). Range inputs blur on release, so arrow keys go back to the deck.
+- `.act-strip` with an `.act-body` sibling pins the act map to the top of an act's first slide and centres the rest.
+
+`scripts/verify.mjs` also fails when a formula, diagram or table is wider than its box. Earlier checks measured only the box, so maths that ran past a column went unnoticed.
+
 ## Package files
 
 - `content.js`, `README.md`, `lectureN.ipynb`, `data/`, `figures/`, reproducibility scripts and local data/checkpoints where needed.

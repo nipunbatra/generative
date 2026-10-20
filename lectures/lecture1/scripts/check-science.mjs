@@ -94,6 +94,58 @@ check('Invalid Normal scales rejected',rejects===4);
 rejects=0;
 for(const alpha of [0,-1,Infinity,NaN]){try{betaPdf(.5,{alpha,beta:2});}catch{rejects++;}}
 check('Invalid Beta shapes rejected',rejects===4);
+// Story fixtures added for the rebuilt lecture: every value checked independently.
+const st=d.story;
+near('Conjugate evidence on the wall slide',st.wall.conj_log_evidence,coinLogEvidence(prior,data),5e-11);
+const trap=(xs,f)=>{let a=0;for(let i=1;i<xs.length;i++)a+=(xs[i]-xs[i-1])*(f(xs[i])+f(xs[i-1]))/2;return a;};
+const grid=(a,b,n)=>Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));
+const logSig=w=>w>=0?-Math.log1p(Math.exp(-w)):w-Math.log1p(Math.exp(w));
+const logitJoint=w=>Math.log(normalPdf(w,{mu:0,sigma:1}))+17*logSig(w)+13*logSig(-w);
+const wGrid=grid(-10,10,40001),wMax=Math.max(...wGrid.map(logitJoint));
+const logitEvidence=wMax+Math.log(trap(wGrid,w=>Math.exp(logitJoint(w)-wMax)));
+near('Logit-prior coin evidence (independent quadrature)',st.wall.logit_log_evidence_grid,logitEvidence,1e-6);
+check('Logit-prior MC evidence close to the grid',Math.abs(st.wall.logit_log_evidence_mc-logitEvidence)<.02);
+const fr=st.fruit;
+near('Fruit KL',fr.kl,fr.p.reduce((a,p,i)=>a+p*Math.log(p/fr.q[i]),0),1e-12);
+fr.ratio.forEach((r,i)=>near(`Fruit ratio${i}`,r,fr.p[i]/fr.q[i],1e-12));
+const bits=st.bits;
+near('Weather entropy (bits)',bits.entropy,-bits.p.reduce((a,p)=>a+p*Math.log2(p),0),1e-12);
+near('Weather cross-entropy (bits)',bits.cross_entropy,-bits.p.reduce((a,p,i)=>a+p*Math.log2(bits.q[i]),0),1e-12);
+near('Right code average length',bits.p.reduce((a,p,i)=>a+p*bits.right_code[i].length,0),bits.entropy,1e-12);
+near('Wrong code average length',bits.p.reduce((a,p,i)=>a+p*bits.wrong_code[i].length,0),bits.cross_entropy,1e-12);
+const ck=st.coinkl,bern=(a,b)=>a*Math.log(a/b)+(1-a)*Math.log((1-a)/(1-b));
+near('Coin KL(0.8||0.5)',ck.kl,bern(.8,.5),1e-12);
+near('Coin KL(0.5||0.8)',ck.reverse,bern(.5,.8),1e-12);
+near('Evidence ratio after 10 tosses',ck.x10,Math.exp(10*bern(.8,.5)),1e-9);
+near('Evidence ratio after 30 tosses',ck.x30,Math.exp(30*bern(.8,.5)),1e-7);
+check('Simulated log ratio grows at the KL rate',Math.abs(ck.simulated_mean_llr_30-30*ck.kl)<.05);
+for(const [step,mu,sigma,kl] of st.olive.frames){
+ check(`Olive step${step} positive scale`,sigma>0);
+ near(`Olive step${step} analytic KL`,normalKL({mu,sigma},target),kl,1e-10);
+}
+near('2-D diagonal width',st.twod.analytic_sd,Math.sqrt(1-st.twod.rho**2),1e-12);
+near('2-D diagonal KL',st.twod.analytic_kl,-.5*Math.log(1-st.twod.rho**2),1e-12);
+st.twod.diag_sd.forEach((v,i)=>near(`2-D fitted width${i}`,v,st.twod.analytic_sd,2e-3));
+const narrow=st.fwdrev['0.5'];
+near('Reverse KL from the left settles on the 0.7 bump',narrow.revl.at(-1)[3],-Math.log(.7),1e-3);
+near('Reverse KL from the right settles on the 0.3 bump',narrow.revr.at(-1)[3],-Math.log(.3),1e-3);
+near('Forward KL matches the mixture mean',narrow.fwd.at(-1)[1],-.8,1e-3);
+near('Forward KL matches the mixture spread',narrow.fwd.at(-1)[2],Math.sqrt(.25+4-.64),1e-3);
+const mixPdf=u=>.5*normalPdf(u,{mu:-.2,sigma:.4})+.5*normalPdf(u,{mu:1,sigma:.5});
+const mixKL=(mu,sigma)=>{const g=grid(mu-12*sigma,mu+12*sigma,20001);return trap(g,u=>{const q=normalPdf(u,{mu,sigma});return q>0?q*(Math.log(q)-Math.log(mixPdf(u))):0;});};
+for(const run of ['rsample','sample']){
+ const last=st.mixfit[run].at(-1);
+ near(`Mixture fit (${run}) final quadrature KL`,last[4],mixKL(last[1],last[2]),1e-4);
+}
+check('rsample fit reaches the best Gaussian (KL 0.0562)',Math.abs(st.mixfit.rsample.at(-1)[4]-.0562)<.002);
+check('sample() run stays far from the mixture',st.mixfit.sample.at(-1)[4]>40);
+const lv=st.logitvi.final,qLogit={mu:lv.m,sigma:lv.s};
+const elboLogit=trap(grid(lv.m-12*lv.s,lv.m+12*lv.s,20001),w=>{const q=normalPdf(w,qLogit);return q*(logitJoint(w)-Math.log(q));});
+near('Logit VI exact ELBO (independent quadrature)',lv.exact_elbo,elboLogit,1e-6);
+check('Logit VI ELBO sits below the evidence',lv.gap>0&&lv.gap<.01);
+near('Three-ways target mean',st.three.true_mean,-.8,1e-12);
+check('Three-ways MCMC mean near the target mean',Math.abs(st.three.mcmc.mean+.8)<.1);
+check('Three-ways Laplace sits on the big bump',Math.abs(st.three.laplace[0]+2)<.01&&Math.abs(st.three.laplace[1]-1)<.01);
 const numeric=records.filter(r=>r.kind==='numerical');
 const report={
  status:'passed',assertions:records.length,numericalComparisons:numeric.length,

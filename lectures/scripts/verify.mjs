@@ -26,6 +26,7 @@ try{
       if(z.left<r.left+60*scale-1||z.right>r.right-60*scale+1||z.top<r.top||z.bottom>r.bottom)f.push('outside margins: '+x.textContent.trim().slice(0,95));
      }
      if(c.scrollHeight>c.clientHeight+4)f.push('content height overflow');
+     for(const box of el.querySelectorAll('.formula-scroll,.diagram-scroll,.table-scroll'))if(getComputedStyle(box).visibility!=='hidden'&&box.scrollWidth>box.clientWidth+2)f.push('content wider than its box: '+box.textContent.trim().slice(0,70));
      for(const img of el.querySelectorAll('img'))if(!img.complete||!img.naturalWidth)f.push('missing image '+img.getAttribute('src'));
      for(const pre of el.querySelectorAll('pre'))if(getComputedStyle(pre).visibility!=='hidden'&&pre.scrollWidth>pre.clientWidth+2)f.push('code width overflow');
      for(const svg of el.querySelectorAll('svg[viewBox]'))for(const t of svg.querySelectorAll('text')){

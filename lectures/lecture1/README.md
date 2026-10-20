@@ -1,18 +1,19 @@
 # Lecture 1: KL and variational inference
 
-A 70-minute core route with 66 logical scenes, plus six optional derivations. Slides lead; three short notebook demonstrations cover Gaussian optimisation, Monte Carlo/gradient inspection and joint-only coin fitting. Pacing is planned, not classroom-rehearsed.
+A 70-minute main route of 39 slides in seven acts plus an exit, with 14 optional slides after it. The lecture follows `plan/2026-10-20-review/STORY-REVIEW.md`: each act opens with an obstacle the previous act exposed and ends on a picture. The bottom bar carries the story line; questions and answers live in the speaker notes, apart from ten marked pauses (PML moments where students predict before the reveal).
 
-The lecture builds from available target densities to an unknown posterior:
+| Act | Opens with | Ends with |
+|---|---|---|
+| 0 · The wall | Is this coin fair? With a Beta prior Bayes has a formula; with a Normal prior on the log-odds it does not. A grid needs 100^d points. | Laplace, MCMC and VI on one two-bump target; the plan and its five obstacles |
+| 1 · Closer how? | Two fruit surveys: ratios, then logs, then weighting give KL (0.42 nats) | KL as message length, as cross-entropy minus entropy, as the rate evidence piles up (325× after 30 tosses), as an area (live), and why VI uses KL(q‖p): the reverse fit picks one bump (animation) |
+| 2 · Make q move | A score picks a winner. Can it improve a loser? | q sliding onto p (animation); a diagonal q shrinking to widths 0.44 inside a correlated target |
+| 3 · No formula | `kl_divergence(q, mixture)` raises NotImplementedError | Monte Carlo, checked on a solvable pair and tightening as S grows |
+| 4 · Gradients through a draw | The `sample()` loop runs and q does not move (animation) | Reparameterisation with a pause for ∂u/∂μ and ∂u/∂σ, then `rsample()` fitting the mixture (animation) |
+| 5 · The real target | KL to a posterior needs the evidence | Students substitute Bayes' rule; the ELBO's two forces; log p(𝒟) = ELBO + KL as one fixed total |
+| 6 · Back to the wall | VI on the coin with no formula (animation), from the prior to within 0.0006 nats of the grid evidence | Is the coin fair? P(r > 0.5) ≈ 0.75; the Beta coin as an answer key; a live ELBO + KL slider |
+| Exit | Five obstacles, five tools, and where each reappears in the VAE | A transfer question and the bridge to Lecture 2 |
 
-1. Compare two Gaussian approximations using directional KL.
-2. Inspect one literal gradient step and a measured full fit.
-3. Replace an unavailable library formula with a Monte Carlo estimate.
-4. Diagnose missing sampling gradients and derive reparameterisation.
-5. Rearrange Bayes' rule into the ELBO identity.
-6. Fit a Beta coin approximation using only its joint density.
-7. Retrieve the method and transfer it to another inference problem.
-
-The selected Beta candidates used to verify the identity are distinct from the measured optimisation trajectory. Negative Monte Carlo estimates, imperfect final fitting, fixed seeds and loss reductions are explicitly labelled.
+Six slides carry live figures (`widgets.js`): KL as a net area, forward vs reverse fits, q sliding onto p, the `sample()` and `rsample()` mixture fits, VI on the logit coin, and the Beta ELBO slider. Each animation replays a recorded optimisation from `data/science.json`: frame 0 until you advance, then it plays. Print and PDF show the start and end frames as separate builds.
 
 ## Use
 
@@ -31,7 +32,8 @@ The builder uses the invoking Python interpreter for the notebook kernel. Regene
 
 ## Files and evidence
 
-- `content.js`: all slide content, builds, questions, answers, misconception cues and transitions.
+- `content.js`: all slide content, builds, story lines, notes (questions, answers, misconception cues, transitions) and static figures.
+- `widgets.js`: the live figures and the small SVG chart kit the static figures share.
 - `lecture1-variational-inference.ipynb`: executed self-contained notebook.
 - `data/science.json`: full-precision measurements, trajectories, plotted curves, seeds and configurations.
 - `math.mjs`: independent JavaScript analytic formulas, adapted unchanged from the checked prototype.
