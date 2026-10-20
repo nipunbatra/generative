@@ -1,0 +1,278 @@
+
+<!-- ===================================================================== VI LECTURE · PART 2 · KL DIVERGENCE (G1) -->
+
+<section class="slide sec-v2 opener break" id="k-open" data-section="2 · KL divergence">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 2 of 9 · goal G1</p>
+      <h2>KL divergence: how far is one distribution from another?</h2>
+      <p class="why">We will build it from a small problem, one step at a time, until the formula is the only sensible answer. Then we use it on Gaussians and on a mixture.</p>
+    </div>
+    <!--viroute:2-->
+  </div>
+</section>
+
+<section class="slide sec-v2" id="k-fruit" data-section="2 · KL divergence">
+  <p class="kicker">Start from a problem</p>
+  <h2>A class's favourite fruit, two years running</h2>
+  <div class="body">
+    <div class="row" style="gap:34px">
+      <img class="fig" src="figures/data/vik-fruit.svg" style="width:580px">
+      <div class="col grow">
+        <p class="small">Year 1 is our reference, $q$: 50% apple, 40% banana, 10% clementine. Year 2, $p$: 50%, 10%, 40%.</p>
+        <p class="small" data-b="2">We want <b>one number</b> for how much year 2 differs, <b>relative to year 1</b>.</p>
+        <p class="small" data-b="3">"Relative to" matters. Clementine rose from 10% to 40%: a big surprise if you expected year 1. Banana fell from 40% to 10%. The two changes need not count the same.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">So the number need not be symmetric. Where would you start?</p>
+  <aside class="notes">
+    <p>The construction follows ritvikmath, "The KL Divergence: Data Science Basics" (2:20–7:02), with our own numbers; Jia-Bin Huang's video makes the same point with two brothers (4:39).</p>
+    <p>Let students propose: differences p − q? They sum to zero. Squared differences? Symmetric, and they ignore that 10% → 40% is a fourfold change. Steer towards ratios.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-ratio" data-section="2 · KL divergence">
+  <p class="kicker">Step 1: compare by ratios. Step 2: take the log</p>
+  <h2>Ratios say "how many times more"; logs make up and down cancel</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <table class="work" style="font-size:21px">
+        <tr><th></th><th>apple</th><th>banana</th><th>clementine</th></tr>
+        <tr><td>$p/q$</td><td>1</td><td>$\tfrac14$</td><td>4</td></tr>
+        <tr data-b="3"><td>$\log(p/q)$</td><td>0</td><td>$-{{vik.fruit.log4}}$</td><td>${{vik.fruit.log4}}$</td></tr>
+      </table>
+      <img class="fig" src="figures/data/vik-logfn.svg" style="width:440px" data-b="2">
+    </div>
+    <p class="small" style="margin-top:10px">The plain average of the ratios is {{vik.fruit.avg}}: pulled up by the 4, while the $\tfrac14$ barely registers.</p>
+    <p class="small" data-b="2">We want $f(1) = 0$ (no change), and $f(4) = -f(\tfrac14)$ (four times up undoes four times down). The function that does this is the <b>log</b>.</p>
+  </div>
+  <p class="q" data-b="3">After the log, a fourfold rise and a fourfold fall are $\pm{{vik.fruit.log4}}$: equal and opposite.</p>
+  <aside class="notes">
+    <p>ritvikmath 7:02–10:57. The log is the function with f(ab) = f(a) + f(b); in particular f(1) = 0 and f(1/r) = −f(r).</p>
+    <p>We use the natural log, so the unit is the nat. With log₂ the unit is the bit (two slides on).</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-weight" data-section="2 · KL divergence">
+  <p class="kicker">Step 3: weight by what is common <span class="nbref">▶ N2</span></p>
+  <h2>Average the log-ratio, weighting each fruit by how common it is in $p$</h2>
+  <div class="body">
+    <table class="work" style="font-size:22px;margin:0 auto">
+      <tr><th></th><th>apple</th><th>banana</th><th>clementine</th><th>sum</th></tr>
+      <tr><td>$p$</td><td>0.5</td><td>0.1</td><td>0.4</td><td></td></tr>
+      <tr><td>$\log(p/q)$</td><td>0</td><td>$-{{vik.fruit.log4}}$</td><td>${{vik.fruit.log4}}$</td><td></td></tr>
+      <tr class="total" data-b="2"><td>$p\,\log(p/q)$</td><td>0</td><td>${{vik.fruit.tb}}$</td><td>${{vik.fruit.tc}}$</td><td><b>{{vik.fruit.kl}}</b></td></tr>
+    </table>
+    <div class="mathblock" data-b="3">$$\KL(p\,\|\,q) = \sum_{x} p(x)\,\log\frac{p(x)}{q(x)} = {{vik.fruit.kl}}\ \text{nats}$$</div>
+  </div>
+  <p class="q" data-b="3">That is the Kullback–Leibler divergence. It is an average of log-ratios, taken under its first argument.</p>
+  <aside class="notes">
+    <p>ritvikmath 11:44–14:52. Why weight by p: a large ratio on a fruit nobody eats should matter little. The banana's log-ratio is large but only 10% of year 2 eats bananas.</p>
+    <p>The row entries are 0.1 × (−1.386) and 0.4 × 1.386. Notebook N2 computes all of it in three lines.</p>
+    <p>Read KL(p‖q) as "the KL of p from q": q is the reference, p is what we compare to it.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-bits" data-section="2 · KL divergence">
+  <p class="kicker">The same number, in bits <span class="nbref">▶ N2</span></p>
+  <h2>KL is the extra message length you pay for using the wrong code</h2>
+  <div class="body">
+    <div class="row top" style="gap:30px">
+      <div class="col" style="width:470px">
+        <p class="small"><b>Surprise</b> of an outcome: $\log_2 \frac{1}{p(x)}$ bits. Snow in Kashmir: little surprise. Snow in Gandhinagar: a lot.</p>
+        <p class="small" data-b="2"><b>Entropy</b> $H(p) = \sum_x p(x)\log_2\frac1{p(x)}$: the average surprise, and the shortest possible average code length.</p>
+        <p class="small" data-b="4"><b>Cross-entropy</b> $H(p, q)$: the average length when the code was built for $q$. And $H(p, q) - H(p) = \KL(p\,\|\,q)$.</p>
+      </div>
+      <table class="work" style="font-size:20px" data-b="3">
+        <tr><th>weather $p$</th><th>sunny</th><th>cloudy</th><th>rainy</th><th>average bits</th></tr>
+        <tr><td>chance</td><td>50%</td><td>25%</td><td>25%</td><td></td></tr>
+        <tr><td>right code</td><td>0</td><td>10</td><td>11</td><td>{{vik.bits.H}}</td></tr>
+        <tr data-b="4"><td>code built for 25%, 50%, 25%</td><td>10</td><td>0</td><td>11</td><td>{{vik.bits.CE}}</td></tr>
+        <tr class="total" data-b="4"><td>extra bits $= \KL(p\,\|\,q)$</td><td></td><td></td><td></td><td>{{vik.bits.KL}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="4">Zero only if the code fits the weather. Never negative: no code beats the right one.</p>
+  <p class="src">Jia-Bin Huang, "Fantastic KL divergence and how to (actually) compute them", 0:46–4:39 · PML Information Theory lecture</p>
+  <aside class="notes">
+    <p>Right code: 0.5 × 1 + 0.25 × 2 + 0.25 × 2 = 1.5 bits. Wrong code (built for a forecast that expected cloud): 0.5 × 2 + 0.25 × 1 + 0.25 × 2 = 1.75 bits. The difference, 0.25 bits, is KL(p‖q) with log₂.</p>
+    <p>This also explains the name "cross-entropy loss" in classification: minimising H(p, q) over q is the same as minimising KL(p‖q), since H(p) does not depend on q.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-dens" data-section="2 · KL divergence">
+  <p class="kicker">For densities, and the two facts we need</p>
+  <h2>The sum becomes an integral; KL is never negative, and not symmetric</h2>
+  <div class="body">
+    <div class="mathblock">$$\KL(q\,\|\,p) = \int q(\theta)\,\log\frac{q(\theta)}{p(\theta)}\,d\theta = \E_{\theta\sim q}\big[\log q(\theta) - \log p(\theta)\big]$$</div>
+    <div class="row" style="gap:28px;margin-top:4px">
+      <img class="fig" src="figures/data/vik-tangent.svg" style="width:360px" data-b="2">
+      <div class="col grow">
+        <p class="small" data-b="2"><b>1. $\KL \ge 0$, and $= 0$ only when $q = p$.</b> The log lies below its tangent, $\log r \le r - 1$. With $r = p/q$:</p>
+        <div class="mathblock left" style="font-size:22px" data-b="2">$$-\KL(q\,\|\,p) = \E_q\Big[\log\tfrac{p}{q}\Big] \le \E_q\Big[\tfrac{p}{q} - 1\Big] = \int p - \int q = 0$$</div>
+        <p class="small" data-b="3"><b>2. $\KL(q\,\|\,p) \ne \KL(p\,\|\,q)$</b> in general. It is a divergence, not a distance.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">From here on we write it as an expectation under the first argument. That form is what we will compute.</p>
+  <p class="src">PML Lecture 23, "KL Divergence" frame, 5:27–6:16</p>
+  <aside class="notes">
+    <p>Equality in log r ≤ r − 1 holds only at r = 1, so KL = 0 only if p = q (almost everywhere).</p>
+    <p>The expectation form is the important one: E under q means "draw θ from q and average". Part 4 does exactly that when there is no formula.</p>
+    <p>Swap the letters from the fruit slide: there we averaged under p; here q comes first because in VI the first argument will be our approximation q.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-coin" data-section="2 · KL divergence">
+  <p class="kicker">A coin, both ways <span class="nbref">▶ N2</span></p>
+  <h2>How fast do tosses tell a 0.8 coin from a fair one?</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-coin-kl.svg" style="width:480px">
+      <div class="col grow">
+        <div class="mathblock left" style="font-size:22px">$$\KL\big(\mathrm{Bern}(0.8)\,\|\,\mathrm{Bern}(0.5)\big) = 0.8\log\tfrac{0.8}{0.5} + 0.2\log\tfrac{0.2}{0.5} = {{vik.coinkl.bf}}$$</div>
+        <div class="mathblock left" style="font-size:22px" data-b="2">$$\KL\big(\mathrm{Bern}(0.5)\,\|\,\mathrm{Bern}(0.8)\big) = {{vik.coinkl.fb}}$$</div>
+        <p class="small" data-b="3">If the coin really is 0.8, each toss adds on average {{vik.coinkl.bf}} nats of evidence for it. After $n$ tosses it is about $e^{n\,\KL}$ times likelier than the fair coin: {{vik.coinkl.x10}}× after 10, {{vik.coinkl.x30}}× after 30.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Not symmetric, and not abstract: KL is the rate at which data separate two hypotheses.</p>
+  <aside class="notes">
+    <p>The expected log-likelihood ratio per toss, when the data come from the 0.8 coin, is exactly KL(0.8 coin‖fair). Summed over n tosses: n × KL. The plot is e^(n × 0.193) on a log axis.</p>
+    <p>Notebook N2 calls dist.kl_divergence on two Bernoulli objects; torch has the formula for this pair.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-g1" data-section="2 · KL divergence">
+  <p class="kicker">Goal G1, the PML notebook's first example <span class="nbref">▶ N2</span></p>
+  <h2>Which $q$ is closer to $p = \N(1, 4^2)$?</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-g1.svg" style="width:560px">
+      <div class="col grow">
+        <p class="small">$q_1 = \N(0, 2^2)$: wrong centre, too narrow. $q_2 = \N(1, 3^2)$: right centre, a bit narrow. <b>Vote.</b></p>
+        <pre class="code" style="font-size:16px" data-b="2"><span class="line">p = dist.Normal(<span class="n">1.</span>, <span class="n">4.</span>)          <span class="c"># loc, scale (sd)</span></span>
+<span class="line">q1, q2 = dist.Normal(<span class="n">0.</span>, <span class="n">2.</span>), dist.Normal(<span class="n">1.</span>, <span class="n">3.</span>)</span>
+<span class="line">dist.kl_divergence(q1, p)     <span class="c"># {{vik.g1.kl1}}</span></span>
+<span class="line">dist.kl_divergence(q2, p)     <span class="c"># {{vik.g1.kl2}}</span></span></pre>
+        <p class="small" data-b="2">$\KL(q_1\,\|\,p) = {{vik.g1.kl1}}$, $\KL(q_2\,\|\,p) = {{vik.g1.kl2}}$: $q_2$ is five times closer.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">One number per candidate. Next: drag $q$ yourself and watch the number.</p>
+  <p class="src">PML notebook variational-inference.ipynb, cells 5–13 · PML Lecture 23 at 7:30–9:52</p>
+  <aside class="notes">
+    <p>torch's Normal takes the standard deviation (scale), not the variance; the PML notebook writes Normal(1, 4), which is N(1, 4²) in maths notation. Say this once, clearly.</p>
+    <p>Exact values: {{vik.g1.kl1x}} and {{vik.g1.kl2x}}. The exercise in two slides derives the formula torch is using.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-g1-live" data-section="2 · KL divergence">
+  <p class="kicker">Try it</p>
+  <h2>KL between two Gaussians is an area, and the two directions differ</h2>
+  <div class="body">
+    <div class="vw w2 interactive" data-widget="klgauss" data-pmu="1" data-psd="4" data-xlo="-11" data-xhi="13">
+      <canvas width="600" height="400"></canvas>
+      <div class="vw-side">
+        <p class="vw-read">$p = \N(1, 4^2)$ fixed (blue). Move $q = \N(\mu, \sigma^2)$ (purple):</p>
+        <label class="sl">$\mu$<input type="range" min="-5" max="7" step="0.05" value="0"><b class="kg-mu">0.00</b></label>
+        <label class="sl">$\sigma$<input type="range" min="0.5" max="8" step="0.05" value="2"><b class="kg-sd">2.00</b></label>
+        <div class="vw-btns"><span class="lab">shade the integrand of</span><button data-dir="qp">$\KL(q\|p)$</button><button data-dir="pq">$\KL(p\|q)$</button></div>
+        <p class="vw-read">shaded area, numerically: <b class="kg-area">0.349</b></p>
+        <p class="vw-read">formula: $\KL(q\|p) = $ <b class="kg-qp">0.349</b></p>
+        <p class="vw-read">the other way: $\KL(p\|q) = $ <b class="kg-pq">0.932</b></p>
+      </div>
+    </div>
+  </div>
+  <p class="q">Start: $q_1 = \N(0, 2^2)$, {{vik.g1.kl1}} one way. A narrow $q$ is cheap for $\KL(q\|p)$ and expensive for $\KL(p\|q)$.</p>
+  <aside class="notes">
+    <p>Top: the two densities. Bottom: the integrand, pink where it is positive and grey where it is negative. Its area is the KL.</p>
+    <p>Try: set μ = 1 and σ = 3 (q₂, 0.07). Then σ = 4: everything vanishes. Then a very narrow q, σ = 0.6, at μ = 1: KL(q‖p) is about 1.5, KL(p‖q) is over 20, because p has mass where q has almost none.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-ex" data-section="2 · KL divergence">
+  <p class="kicker">Exercise, in your notebook <span class="exref">✎ 5 minutes</span></p>
+  <h2>Derive the KL between two Gaussians</h2>
+  <div class="body">
+    <div class="mathblock" style="margin:0">$$q = \N(\mu_q, \sigma_q^2),\qquad p = \N(\mu_p, \sigma_p^2)$$</div>
+    <div class="mathblock" style="margin:0 0 6px">$$\KL(q\,\|\,p) = \E_{\theta\sim q}\big[\log q(\theta) - \log p(\theta)\big] = \ ?$$</div>
+    <div class="callout plain" style="width:960px;margin:6px auto 0" data-b="2">1. Write $\log \N(\theta\mid\mu, \sigma^2) = -\tfrac12\log(2\pi\sigma^2) - \dfrac{(\theta-\mu)^2}{2\sigma^2}$ for both.</div>
+    <div class="callout plain" style="width:960px;margin:10px auto 0" data-b="3">2. The $\log 2\pi$ terms cancel. Take the expectation of what is left, term by term.</div>
+    <div class="callout plain" style="width:960px;margin:10px auto 0" data-b="4">3. You need two averages under $q$: $\E_q\big[(\theta-\mu_q)^2\big] = \sigma_q^2$ and $\E_q\big[(\theta-\mu_p)^2\big] = \sigma_q^2 + (\mu_q-\mu_p)^2$.</div>
+  </div>
+  <p class="q" data-b="4">Check your answer on G1: it must give {{vik.g1.kl1x}} for $q_1$ and {{vik.g1.kl2x}} for $q_2$.</p>
+  <p class="src">PML Lecture 23, "Exercise" frames 1–3, 15:19–22:59</p>
+  <aside class="notes">
+    <p>Give students five minutes before clicking the hints. The third hint is the key step: (θ − μ_p)² = (θ − μ_q + μ_q − μ_p)², and the cross term has mean zero under q.</p>
+    <p>Notebook N2 has a kl_normal function to fill in, with the G1 numbers to check against.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-ans" data-section="2 · KL divergence">
+  <p class="kicker">The answer, and the same lines inside torch <span class="nbref">▶ N2</span></p>
+  <h2>Three terms: a width ratio, a shift, and a constant</h2>
+  <div class="body">
+    <div class="mathblock">$$\KL(q\,\|\,p) = \frac12\left[\log\frac{\sigma_p^2}{\sigma_q^2} - 1 + \frac{\sigma_q^2 + (\mu_q-\mu_p)^2}{\sigma_p^2}\right]$$</div>
+    <div class="codewalk" style="grid-template-columns:1.25fr 1fr;margin-top:6px" data-b="2">
+      <pre class="code" style="font-size:16px"><span class="line"><span class="c"># torch/distributions/kl.py: here p is the FIRST argument (our q)</span></span>
+<span class="line">@register_kl(Normal, Normal)</span>
+<span class="line"><span class="k">def</span> <span class="f">_kl_normal_normal</span>(p, q):</span>
+<span class="line" data-hl="3">    var_ratio = (p.scale / q.scale).pow(<span class="n">2</span>)</span>
+<span class="line" data-hl="3">    t1 = ((p.loc - q.loc) / q.scale).pow(<span class="n">2</span>)</span>
+<span class="line" data-hl="3">    <span class="k">return</span> <span class="n">0.5</span> * (var_ratio + t1 - <span class="n">1</span> - var_ratio.log())</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="3">Same formula, rearranged: <code>var_ratio</code> is $\sigma_q^2/\sigma_p^2$ and <code>t1</code> is the squared shift in units of $\sigma_p$.</p>
+        <p class="small" data-b="4">With $p = \N(0, 1)$ it becomes $\tfrac12\big(\sigma^2 + \mu^2 - 1 - \log\sigma^2\big)$: the KL term of every VAE.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="4">When both distributions are Gaussian, the KL is a formula, and torch has it. What if they are not?</p>
+  <p class="src">PML Lecture 23, "Exercise" frame 4, 22:59–28:48</p>
+  <aside class="notes">
+    <p>Notebook N2 prints this function's source with inspect.getsource, so students can see it is not magic.</p>
+    <p>Sanity checks: equal Gaussians give ½[0 − 1 + 1] = 0. A wider p with the same centre: the log term grows slowly, the ratio term shrinks.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-fwdrev" data-section="2 · KL divergence">
+  <p class="kicker">Which direction? Back to the two-bump posterior <span class="nbref">▶ N2</span></p>
+  <h2>$\KL(p\|q)$ covers both bumps; $\KL(q\|p)$ picks one</h2>
+  <div class="body">
+    <div class="row" style="gap:24px">
+      <img class="fig" src="figures/data/vik-fwdrev.svg" style="width:720px">
+      <div class="col grow">
+        <p class="small"><b>Top</b>, bumps of width 1 (Part 1's mixture): they overlap, and every fit is broad.</p>
+        <p class="small" data-b="2"><b>Bottom</b>, bumps of width 0.5. $\KL(p\|q)$ averages under $p$: $q$ must cover <b>both</b> ({{vik.fwdrev.narrow_fwd.kl}}).</p>
+        <p class="small" data-b="3">$\KL(q\|p)$ averages under $q$: mass in the gap costs a lot, so $q$ sits on <b>one</b> bump. Start left: {{vik.fwdrev.narrow_revl.kl}}. Start right: {{vik.fwdrev.narrow_revr.kl}}, a local optimum.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">VI minimises $\KL(q\|p)$, because we can draw from $q$, not from the posterior. Expect $q$ to be too narrow.</p>
+  <p class="src">Jia-Bin Huang, 4:39–5:25 · mixture from the PML Laplace notebook</p>
+  <aside class="notes">
+    <p>Mixture: 0.7 N(−2, w²) + 0.3 N(2, w²) with w = 1 (top) and w = 0.5 (bottom). Each panel is a Gaussian q fitted by gradient descent (800 Adam steps) on the KL computed on a grid.</p>
+    <p>On one bump, KL(q‖p) ≈ −log(weight of that bump): −log 0.7 = 0.357 and −log 0.3 = 1.204. Forward KL is moment matching: mean {{vik.fwdrev.narrow_fwd.m}}, sd {{vik.fwdrev.narrow_fwd.s}}, exactly the mixture's mean and sd.</p>
+    <p>Names in the literature: forward KL is "mass-covering" (or mean-seeking); reverse KL is "mode-seeking".</p>
+  </aside>
+</section>
+
+<section class="slide sec-v2" id="k-fwdrev-live" data-section="2 · KL divergence">
+  <p class="kicker">Try it</p>
+  <h2>Press play: the same $q$, fitted with the KL each way</h2>
+  <div class="body">
+    <div class="vw stack-v interactive" data-widget="fwdrev" data-width="0.5">
+      <div class="fr-pair">
+        <figure><canvas width="540" height="270"></canvas><figcaption>$\KL(p\,\|\,q)$ = <b class="fr-fwd-kl">—</b> · mean <b class="fr-fwd-m">—</b>, sd <b class="fr-fwd-s">—</b></figcaption></figure>
+        <figure><canvas width="540" height="270"></canvas><figcaption>$\KL(q\,\|\,p)$ = <b class="fr-rev-kl">—</b> · mean <b class="fr-rev-m">—</b>, sd <b class="fr-rev-s">—</b></figcaption></figure>
+      </div>
+      <div class="vw-btns"><button data-a="play">play</button><button data-a="reset">reset</button><span class="lab" style="margin-left:14px">bumps</span><button data-width="1">width 1</button><button data-width="0.5">width 0.5</button><span class="lab" style="margin-left:14px">$\KL(q\|p)$ starts</span><button data-start="-0.5">left</button><button data-start="0.5">right</button><span class="lab" style="margin-left:14px">step <b class="fr-step">0</b></span></div>
+    </div>
+  </div>
+  <p class="q">Same start, same optimiser; only the direction of the KL differs. Then restart the right panel from the right.</p>
+  <aside class="notes">
+    <p>Both panels start from N(±0.5, 0.6²) and run Adam (learning rate 0.05) on the grid KL, as in notebook N2. Print and PDF show the state after 800 steps with bumps of width 0.5, reverse KL started on the left.</p>
+    <p>The widget computes the KL on the notebook's grid (−8 to 8) and reproduces its numbers: with width 1, every fit is broad (reverse: mean {{vik.fwdrev.wide_revl.m}}, sd {{vik.fwdrev.wide_revl.s}}); with width 0.5, the three numbers on the previous slide.</p>
+  </aside>
+</section>

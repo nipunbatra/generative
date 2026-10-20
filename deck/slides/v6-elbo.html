@@ -1,0 +1,146 @@
+
+<!-- ===================================================================== VI LECTURE · PART 6 · THE ELBO -->
+
+<section class="slide sec-v6 opener break" id="e-open" data-section="6 · The ELBO">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 6 of 9</p>
+      <h2>The ELBO: a loss we can compute without the posterior</h2>
+      <p class="why">Parts 2–5 fitted $q$ to targets we could evaluate. The posterior is not one of them: we cannot evaluate $p(\theta\mid D)$, only $p(D\mid\theta)\,p(\theta)$. Three short algebra steps fix this.</p>
+    </div>
+    <!--viroute:6-->
+  </div>
+</section>
+
+<section class="slide sec-v6" id="e-catch" data-section="6 · The ELBO">
+  <p class="kicker">The catch</p>
+  <h2>The KL we want to minimise contains the posterior itself</h2>
+  <div class="body">
+    <div class="mathblock big">$$\KL\big(q(\theta)\,\|\,p(\theta\mid D)\big) = \E_{\theta\sim q}\big[\log q(\theta) - \hl{\log p(\theta\mid D)}\big]$$</div>
+    <div class="row" style="justify-content:center;gap:22px;margin-top:10px" data-b="2">
+      <div class="callout plain" style="width:470px">We can draw $\theta$ from $q$ and evaluate $\log q(\theta)$: we chose $q$.</div>
+      <div class="callout loss" style="width:470px">$\log p(\theta\mid D)$ needs the evidence $p(D)$: the very integral from Part 1.</div>
+    </div>
+  </div>
+  <p class="q" data-b="2">"If we could evaluate the posterior, we would not need $q$." So rewrite the KL using what we can evaluate.</p>
+  <p class="src">PML Lecture 23 at 47:15–48:55 · Lecture 24 at 23:44</p>
+  <aside class="notes">
+    <p>Everything so far used a target whose log-density we could compute at any point: a Gaussian, a mixture. The posterior's log-density is log p(D | θ) + log p(θ) − log p(D), and the last term is the problem.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="e-sub" data-section="6 · The ELBO">
+  <p class="kicker">Step 1 of 3 <span class="exref">✎ try it first</span></p>
+  <h2>Substitute Bayes' rule for the posterior</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\KL\big(q(\theta)\,\|\,p(\theta\mid D)\big) = \E_q\big[\log q(\theta) - \log p(\theta\mid D)\big]$$</div>
+    <div class="mathblock" data-b="2">$$p(\theta\mid D) = \frac{p(D, \theta)}{p(D)} \quad\Longrightarrow\quad \log p(\theta\mid D) = \log p(D, \theta) - \log p(D)$$</div>
+    <div class="mathblock big" data-b="3">$$\KL = \E_q\big[\log q(\theta) - \log p(D, \theta) + \log p(D)\big]$$</div>
+  </div>
+  <p class="q" data-b="3">$p(D, \theta) = p(D\mid\theta)\,p(\theta)$ is the joint: prior times likelihood, which we <b>can</b> evaluate.</p>
+  <p class="src">PML Variational-Inference slides, "Evidence Lower Bound" 1–2 · PML Lecture 23 at 48:55–50:44</p>
+  <aside class="notes">
+    <p>Give students a minute to do the substitution in their notebooks before clicking. Log of a quotient is a difference of logs.</p>
+    <p>For the coin, log p(D, θ) = log Beta(θ; 5, 3) + 17 log θ + 13 log(1 − θ): Part 7's log_joint.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="e-out" data-section="6 · The ELBO">
+  <p class="kicker">Step 2 of 3</p>
+  <h2>The evidence does not depend on $\theta$, so it comes out of the average</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\KL = \E_q\big[\log q(\theta) - \log p(D, \theta) + \log p(D)\big]$$</div>
+    <div class="mathblock big" data-b="2">$$\KL = \E_q\big[\log q(\theta) - \log p(D, \theta)\big] + \log p(D)$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">The average of a constant is that constant: $\E_q[\log p(D)] = \log p(D)$.</div>
+    <div class="mathblock" style="font-size:30px" data-b="3">$$\log p(D) = \underbrace{\E_q\big[\log p(D, \theta) - \log q(\theta)\big]}_{\text{call this }\ELBO(q)} + \KL\big(q(\theta)\,\|\,p(\theta\mid D)\big)$$</div>
+  </div>
+  <p class="q" data-b="3">Rearranged: the evidence splits into a part we can compute and the KL we want to shrink.</p>
+  <p class="src">PML Variational-Inference slides, "Evidence Lower Bound" 2 · PML Lecture 23 at 50:44–52:18</p>
+  <aside class="notes">
+    <p>The last line is an identity: it holds for every q, good or bad. Moving log p(D) to the left and flipping signs gives it.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="e-bound" data-section="6 · The ELBO">
+  <p class="kicker">Step 3 of 3</p>
+  <h2>KL $\ge 0$, so the ELBO is a lower bound on the log evidence</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\log p(D) = \ELBO(q) + \KL\big(q(\theta)\,\|\,p(\theta\mid D)\big)$$</div>
+    <div class="mathblock big" data-b="2">$$\log p(D) \;\ge\; \ELBO(q) = \E_{\theta\sim q}\big[\log p(D, \theta) - \log q(\theta)\big]$$</div>
+    <div class="row" style="justify-content:center;gap:22px;margin-top:10px" data-b="3">
+      <div class="callout plain" style="width:460px">$\log p(D)$ is a fixed number: it does not depend on $q$.</div>
+      <div class="callout enc" style="width:460px">So <b>raising the ELBO lowers the KL</b>, by exactly the same amount.</div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Maximise the ELBO, which needs only draws from $q$ and the joint. No evidence, no posterior.</p>
+  <p class="src">PML Variational-Inference slides, "Evidence Lower Bound" 3 · PML Lecture 23 at 52:18–53:55</p>
+  <aside class="notes">
+    <p>ELBO = Evidence Lower BOund. Equality holds exactly when the KL is zero, that is when q is the posterior.</p>
+    <p>It is an expectation under q, so Part 4's Monte Carlo estimates it, and Part 5's rsample gives its gradient. Every tool is now in place.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="e-picture" data-section="6 · The ELBO">
+  <p class="kicker">The picture, with the coin's numbers <span class="nbref">▶ N6</span></p>
+  <h2>For every $q$: ELBO + KL $= \log p(D) = {{vik.coin.log_ev}}$</h2>
+  <div class="body">
+    <div class="row" style="gap:28px">
+      <img class="fig" src="figures/data/vik-elbo-qs.svg" style="width:500px">
+      <table class="work" style="font-size:20px">
+        <tr><th>$q$</th><th>ELBO</th><th>KL</th><th>ELBO + KL</th></tr>
+        <tr><td>$\mathrm{Beta}(10, 10)$</td><td>{{vik.elbo.0.elbo}}</td><td>{{vik.elbo.0.kl}}</td><td>{{vik.elbo.0.sum}}</td></tr>
+        <tr data-b="2"><td>$\mathrm{Beta}(30, 20)$</td><td>{{vik.elbo.1.elbo}}</td><td>{{vik.elbo.1.kl}}</td><td>{{vik.elbo.1.sum}}</td></tr>
+        <tr data-b="3"><td>$\mathrm{Beta}(22, 16)$, the posterior</td><td>{{vik.elbo.2.elbo}}</td><td>{{vik.elbo.2.kl}}</td><td>{{vik.elbo.2.sum}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="3">The bracket's total never moves. A better $q$ moves the line between ELBO and KL to the right.</p>
+  <p class="src">PML Variational-Inference slides, "Evidence Lower Bound" 3 (kl-elbo.png) · PML Lecture 23 at 53:55–56:27</p>
+  <aside class="notes">
+    <p>Notebook N6: the ELBO by Monte Carlo (200,000 draws from each q), the KL by torch's Beta–Beta formula, the evidence by Part 1's formula. The sums agree to three decimals.</p>
+    <p>Beta(30, 20) has nearly the right mean but is a little narrow, so its KL is small but not zero. Only the posterior itself reaches the bound.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="e-live" data-section="6 · The ELBO">
+  <p class="kicker">Try it</p>
+  <h2>Move $q = \mathrm{Beta}(\alpha, \beta)$: the ELBO and KL trade, the total stays put</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="coinelbo" data-heads="17" data-tails="13" data-pa="5" data-pb="3">
+      <canvas width="560" height="330"></canvas>
+      <div class="vw-side">
+        <label class="sl">$\alpha$<input type="range" min="1" max="60" step="0.1" value="10"><b class="ce-a">10.0</b></label>
+        <label class="sl">$\beta$<input type="range" min="1" max="60" step="0.1" value="10"><b class="ce-b">10.0</b></label>
+        <p class="vw-read">$\ELBO(q) = $ <b class="ce-elbo">—</b> · $\KL = $ <b class="ce-kl">—</b></p>
+        <div class="numline vf-line ce-line">
+          <div class="nl-track"></div>
+          <div class="nl-mark ce-mark-elbo" style="left:40%;--c:var(--dec)"><b>ELBO</b><span class="ce-elbo">—</span></div>
+          <div class="nl-mark ce-mark-lpx" style="left:80%;--c:var(--x)"><b>$\log p(D)$</b><span class="ce-lpx">—</span></div>
+          <div class="nl-gap" style="left:40%;width:40%"><span>KL <span class="ce-kl">—</span></span></div>
+        </div>
+        <div class="vf-ends"><span class="ce-lo">—</span><span class="ce-hi">—</span></div>
+        <div class="lg"><span><i class="fill" style="--c:var(--x);--f:var(--x-t)"></i>posterior $\mathrm{Beta}(22, 16)$</span><span><i style="--c:var(--enc)"></i>$q$</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q">Find the $q$ that closes the gap. The ELBO can tell you when you are there, without ever knowing the posterior.</p>
+  <aside class="notes">
+    <p>The widget computes the ELBO exactly, on a 2,000-point grid over θ, from the joint p(D, θ) only. The KL readout is log p(D) − ELBO, with log p(D) from the formula; the posterior curve is drawn for reference only.</p>
+    <p>Things to try: α = β = 1 (uniform q): the KL is about 10 and the ELBO marker runs off the left end. Then α = 22, β = 16: the gap closes. Print and PDF show q = Beta(10, 10), as in the first row of the previous table.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="e-forms" data-section="6 · The ELBO">
+  <p class="kicker">Two ways to write the same ELBO</p>
+  <h2>What the code computes, and what the VAE lecture will use</h2>
+  <div class="body">
+    <div class="mathblock big">$$\ELBO(q) = \E_q\big[\log p(D, \theta) - \log q(\theta)\big]$$</div>
+    <div class="mathblock" data-b="2">$$= \E_q\big[\log p(D\mid\theta) + \log p(\theta) - \log q(\theta)\big]$$</div>
+    <div class="mathblock big" data-b="3">$$= \underbrace{\E_q\big[\log p(D\mid\theta)\big]}_{\text{fit the data}} \;-\; \underbrace{\KL\big(q(\theta)\,\|\,p(\theta)\big)}_{\text{stay close to the prior}}$$</div>
+  </div>
+  <p class="q" data-b="3">The first form is what we will code for the coin. The second is the VAE's loss, with the prior $\N(0, I)$ and Part 2's Gaussian KL.</p>
+  <aside class="notes">
+    <p>Split the log joint into likelihood plus prior, and group the prior with log q: E_q[log q − log p(θ)] is the KL from q to the prior. Note it is the prior here, not the posterior: both terms are computable.</p>
+    <p>Reading: the first term rewards q for putting mass on θ's that explain the data; the second penalises it for straying from the prior. Maximum likelihood is the first term alone with q a point mass.</p>
+  </aside>
+</section>

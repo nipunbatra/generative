@@ -1,0 +1,102 @@
+
+<!-- ===================================================================== VI LECTURE · PART 9 · NEURAL NETWORKS, THE VAE, RECAP -->
+
+<section class="slide sec-v9 opener break" id="a-open" data-section="9 · Towards the VAE">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 9 of 9</p>
+      <h2>Neural networks, and the VAE in one slide</h2>
+      <p class="why">What changes when $\theta$ has millions of entries, and how the same ELBO becomes the loss of a variational autoencoder.</p>
+    </div>
+    <!--viroute:9-->
+  </div>
+</section>
+
+<section class="slide sec-v9" id="a-nn" data-section="9 · Towards the VAE">
+  <p class="kicker">Millions of parameters</p>
+  <h2>For a neural network, $q$ is one Gaussian per weight: mean-field</h2>
+  <div class="body">
+    <div class="steps2">
+      <div class="callout plain"><h3>Full covariance</h3><p class="small" style="margin:0">One mean per weight, plus a correlation for every pair. A million weights: about $5\times 10^{11}$ numbers. Impossible to store, let alone fit.</p></div>
+      <div class="callout enc" data-b="2"><h3>Mean-field</h3><p class="small" style="margin:0">$q(\theta) = \prod_i \N(\theta_i\mid\mu_i, \sigma_i^2)$: two numbers per weight. Cheap, and <code>rsample</code> is one line, as in Part 5.</p></div>
+    </div>
+    <p class="small" style="text-align:center;margin-top:18px" data-b="3">The price is Part 3's 2-D picture: no correlations, and $\KL(q\|p)$ makes each width too narrow. Bayesian neural networks trained this way tend to be over-confident.</p>
+  </div>
+  <p class="q" data-b="3">MCMC remains the gold standard for small networks; mean-field VI is what scales.</p>
+  <p class="src">PML Variational-Inference slides, "Neural Networks" · PML Lecture 24 at 49:02–50:39 and 52:50–56:04</p>
+  <aside class="notes">
+    <p>A full covariance for d weights has d(d + 1)/2 entries; for d = 10⁶ that is 5 × 10¹¹. Mean-field has 2d.</p>
+    <p>One training step: draw ε for every weight, set θ = μ + σ·ε, run the network on a minibatch, and backpropagate the negative ELBO to every μ and σ. This is Bayes by Backprop (Blundell et al., 2015).</p>
+  </aside>
+</section>
+
+<section class="slide sec-v9" id="a-vae" data-section="9 · Towards the VAE">
+  <p class="kicker">Where this goes next lecture</p>
+  <h2>The VAE: one posterior per image, predicted by an encoder</h2>
+  <div class="body">
+    <div class="row top" style="gap:28px">
+      <table class="work vocab3" style="width:520px">
+        <tr><th>today</th><th>in the VAE</th></tr>
+        <tr><td>$\theta$, what we infer</td><td>$z$, an image's code</td></tr>
+        <tr><td>$D$, the data</td><td>$x$, one image</td></tr>
+        <tr><td>prior $p(\theta)$</td><td>$p(z) = \N(0, I)$</td></tr>
+        <tr><td>likelihood $p(D\mid\theta)$</td><td>the decoder $p(x\mid z)$</td></tr>
+        <tr><td>$q(\theta)$, one fit</td><td>$q(z\mid x) = \N\big(\mu(x), \sigma(x)^2\big)$, from an encoder</td></tr>
+      </table>
+      <div class="col grow">
+        <p class="small" data-b="2">Every image has its own posterior. Fitting a $q$ per image would be slow, so a network <b>predicts</b> $q$'s parameters from $x$: amortised inference.</p>
+        <div class="mathblock left" style="font-size:22px" data-b="3">$$-\ELBO = -\E_{q(z\mid x)}\big[\log p(x\mid z)\big] + \KL\big(q(z\mid x)\,\|\,\N(0, I)\big)$$</div>
+        <p class="small" data-b="3">The second form from Part 6. The KL is Part 2's Gaussian formula; the expectation uses $z = \mu + \sigma\cdot\varepsilon$ from Part 5.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Nothing new is needed: a VAE is today's ELBO, with a decoder for the likelihood and an encoder for $q$.</p>
+  <p class="src">PML Lecture 25 (VAEs) at 44:00–51:13 and 1:06:27–1:08:05</p>
+  <aside class="notes">
+    <p>Point to each piece and name the part of today's lecture it came from. The reconstruction term is −E_q[log p(x | z)]: with a Gaussian decoder it is a squared error. The KL term is ½ Σ(σ² + μ² − 1 − log σ²), the formula from Part 2 with p = N(0, 1).</p>
+    <p>The decoder's weights are trained by maximising the same ELBO, so a VAE learns the model and the approximate posterior together.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v9" id="a-recap" data-section="9 · Towards the VAE">
+  <p class="kicker">Today on one page</p>
+  <h2>From Bayes' rule to a loss we can train</h2>
+  <div class="body">
+    <div class="chain">
+      <span>Bayes: posterior $\propto$ likelihood $\times$ prior</span><span class="arrow">→</span>
+      <span>the evidence $p(D)$ is intractable</span><span class="arrow">→</span>
+      <span>propose a simple $q$</span><span class="arrow">→</span>
+      <span data-b="2">measure closeness: $\KL(q\|p)$</span><span class="arrow" data-b="2">→</span>
+      <span data-b="2">fit $q$ by gradient descent</span><span class="arrow" data-b="2">→</span>
+      <span data-b="3">no formula? Monte Carlo</span><span class="arrow" data-b="3">→</span>
+      <span data-b="3">gradients through draws: <code>rsample</code></span><span class="arrow" data-b="4">→</span>
+      <span data-b="4">the ELBO needs only the joint</span><span class="arrow" data-b="4">→</span>
+      <span data-b="4">the coin: VI recovers $\mathrm{Beta}(22, 16)$</span>
+    </div>
+    <div class="row" style="justify-content:center;gap:22px;margin-top:22px" data-b="5">
+      <div class="stat wide"><b>$\log p(D) = \ELBO + \KL$</b><span>for every $q$; the KL is $\ge 0$</span></div>
+      <div class="stat wide"><b>$z = \mu + \sigma\cdot\varepsilon$</b><span>a random draw with a gradient</span></div>
+    </div>
+  </div>
+  <p class="q" data-b="5">Two lines to remember. The VAE lecture uses both on its first slide.</p>
+  <aside class="notes">
+    <p>Walk the chain once, quickly, naming the slide or notebook section for each box. The notebook is the reference: N1 to N8 run end to end in about 30 seconds on a laptop.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v9" id="a-exit" data-section="9 · Towards the VAE">
+  <p class="kicker">Exit questions</p>
+  <h2>Five questions</h2>
+  <div class="body">
+    <ol class="exitq tight">
+      <li>Why can we not just compute $p(\theta\mid D)$ for a neural network? <span class="ans" data-b="2">The evidence is an integral over millions of weights with no formula. A grid is impossible, and sampling the prior wastes almost every draw: for two weights, the best 10 of 15,000 draws already carried {{vik.linreg_ev.top10}}% of the estimate.</span></li>
+      <li>Why does VI minimise $\KL(q\|p)$ rather than $\KL(p\|q)$, and what is the price? <span class="ans" data-b="2">A KL averages under its first argument, and we can draw from $q$ but not from the posterior. The price: $q$ seeks a mode and comes out too narrow.</span></li>
+      <li>Why does <code>q.sample()</code> break training, and what does <code>rsample</code> do instead? <span class="ans" data-b="2">A sample has no gradient path. <code>rsample</code> draws $\varepsilon\sim\N(0, 1)$ and returns $\text{loc} + \text{scale}\cdot\varepsilon$, whose gradients are 1 and $\varepsilon$.</span></li>
+      <li>$\log p(D) = \ELBO(q) + \,?$ <span class="ans" data-b="2">$\KL\big(q\,\|\,p(\theta\mid D)\big) \ge 0$. Since $\log p(D)$ does not depend on $q$, raising the ELBO lowers the KL, and the ELBO needs only $p(D, \theta)$.</span></li>
+      <li>For the coin, what does <code>neg_elbo</code> return at $q = \mathrm{Beta}(22, 16)$, and why is it the same on every run? <span class="ans" data-b="2">{{vik.coinvi.good}} $= -\log p(D)$. At the posterior, $\log p(D, \theta) - \log q(\theta) = \log p(D)$ for every $\theta$, so every draw gives the same number.</span></li>
+    </ol>
+  </div>
+  <aside class="notes">
+    <p>Ask them cold, one at a time; the answers come up together on the second click.</p>
+  </aside>
+</section>

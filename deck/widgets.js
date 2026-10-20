@@ -193,7 +193,6 @@
   const fx = (v, k = 3) => (Math.abs(v) < 0.5 * 10 ** -k ? 0 : v).toFixed(k).replace('-', '−');
   const SQ2PI = Math.sqrt(2 * Math.PI);
   const npdf = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * SQ2PI);
-  const logsig = a => (a >= 0 ? -Math.log1p(Math.exp(-a)) : a - Math.log1p(Math.exp(a)));
   const sig = a => 1 / (1 + Math.exp(-a));
   const linspace = (a, b, n) => Array.from({ length: n }, (_, i) => a + (b - a) * i / (n - 1));
 
@@ -257,14 +256,6 @@
     if (lab) { g.font = 'italic 15px "Times New Roman", serif'; g.fillText(lab, A.L + A.W / 2, A.Y(A.yr[0]) + 38); }
     g.restore();
   }
-  function hline(g, A, y, col, dash = [6, 4], lw = 1.6) {
-    g.save(); g.strokeStyle = col; g.lineWidth = lw; g.setLineDash(dash);
-    g.beginPath(); g.moveTo(A.L, A.Y(y)); g.lineTo(A.L + A.W, A.Y(y)); g.stroke(); g.restore();
-  }
-  function vline(g, A, x, col, dash = [], lw = 1.6) {
-    g.save(); g.strokeStyle = col; g.lineWidth = lw; g.setLineDash(dash);
-    g.beginPath(); g.moveTo(A.X(x), A.T); g.lineTo(A.X(x), A.T + A.H); g.stroke(); g.restore();
-  }
   const set = (root, cls, v) => root.querySelectorAll(cls).forEach(el => { el.textContent = v; });
   function adam(lr) {                      // Adam on a parameter vector, for gradient ASCENT
     const st = { m: null, v: null, t: 0 };
@@ -280,138 +271,93 @@
   }
   function onSlide(root) { const s = root.closest('section'); return !s || s.classList.contains('current'); }
 
-  // The one-number decoder: z ~ N(0, 1), theta = sigmoid(z), h heads and t tails.
-  function coinModel(h, t) {
-    const n = h + t;
-    const loglik = z => h * logsig(z) + t * logsig(-z);
-    const lj = z => -0.5 * z * z - 0.5 * Math.log(2 * Math.PI) + loglik(z);
-    const dlj = z => -z + h - n * sig(z);
-    const N = 12001, lo = -6, dz = 12 / (N - 1);       // the same grid as make_figures_vi.py
-    let mx = -Infinity; const v = new Float64Array(N);
-    for (let i = 0; i < N; i++) { v[i] = lj(lo + i * dz); mx = Math.max(mx, v[i]); }
-    let s = 0; for (let i = 0; i < N; i++) s += Math.exp(v[i] - mx);
-    const logpx = mx + Math.log(s * dz);
-    const K = 321, gx = linspace(-8, 8, K), gw = gx.map(x => Math.exp(-0.5 * x * x));
-    const tot = gw.reduce((a, b) => a + b, 0); for (let k = 0; k < K; k++) gw[k] /= tot;
-    const eq = (f, m, sd) => { let a = 0; for (let k = 0; k < K; k++) a += gw[k] * f(m + sd * gx[k]); return a; };
-    const klp = (m, sd) => 0.5 * (m * m + sd * sd - 1 - Math.log(sd * sd));
-    const fit = (m, sd) => eq(loglik, m, sd);
-    return { h, t, n, loglik, lj, dlj, logpx, post: z => Math.exp(lj(z) - logpx), eq, klp, fit, elbo: (m, sd) => fit(m, sd) - klp(m, sd) };
+  // The PML course's examples (vi-lab/vi_lecture.ipynb): the Beta(5, 3) coin, p = N(1, 4), two mixtures of Gaussians.
+  const softplus = v => (v > 20 ? v : Math.log1p(Math.exp(v)));
+  const invSoftplus = v => (v > 20 ? v : Math.log(Math.expm1(v)));
+  const LANCZOS = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059,
+    12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  function lgamma(z) {
+    if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lgamma(1 - z);
+    z -= 1;
+    let x = LANCZOS[0];
+    for (let i = 1; i < 9; i++) x += LANCZOS[i] / (z + i);
+    const t = z + 7.5;
+    return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
+  }
+  const lbeta = (a, b) => lgamma(a) + lgamma(b) - lgamma(a + b);
+  const betaLogPdf = (t, a, b) => (a - 1) * Math.log(t) + (b - 1) * Math.log1p(-t) - lbeta(a, b);
+  const nums = s => s.split(',').map(Number);
+  function mixture(spec) {                     // "w1,w2|m1,m2|s1,s2"
+    const [w, m, s] = spec.split('|').map(nums);
+    const comp = x => w.map((wk, k) => Math.log(wk) - 0.5 * ((x - m[k]) / s[k]) ** 2 - Math.log(s[k] * SQ2PI));
+    const logp = x => { const c = comp(x), mx = Math.max(...c); return mx + Math.log(c.reduce((a, v) => a + Math.exp(v - mx), 0)); };
+    const dlogp = x => {                       // d log p / dx = sum_k r_k * (-(x - m_k) / s_k^2)
+      const c = comp(x), mx = Math.max(...c), e = c.map(v => Math.exp(v - mx)), tot = e.reduce((a, v) => a + v, 0);
+      return e.reduce((a, ek, k) => a + ek / tot * (-(x - m[k]) / (s[k] * s[k])), 0);
+    };
+    return { logp, dlogp, pdf: x => Math.exp(logp(x)) };
   }
 
-  // ---------------------------------------------------------------- Part 1: toss by toss, the posterior sharpens
-  function bayes(root) {
+  // ---------------------------------------------------------------- W1: prior x likelihood -> posterior, the Beta coin
+  function betacoin(root) {
     const cv = root.querySelector('canvas');
-    const ours = root.dataset.seq || 'HHTHHHHTHH';
-    let seq = ours;
-    const xs = linspace(0.001, 0.999, 400), dx = xs[1] - xs[0];
+    const [ia, ib, ih, it] = root.querySelectorAll('input[type=range]');
+    const xs = linspace(0.001, 0.999, 400);
     function draw() {
-      const h = [...seq].filter(c => c === 'H').length, t = seq.length - h;
-      const prior = xs.map(x => 6 * x * (1 - x));
-      const un = xs.map(x => Math.exp((1 + h) * Math.log(x) + (1 + t) * Math.log(1 - x)));
-      const Z = un.reduce((a, b) => a + b, 0) * dx;
-      const post = un.map(v => v / Z), pmax = Math.max(...post);
-      const lk = xs.map(x => Math.exp(h * Math.log(x) + t * Math.log(1 - x)));
-      const lmax = Math.max(...lk), lik = lk.map(v => v / lmax * pmax);
+      const a = +ia.value, b = +ib.value, h = +ih.value, t = +it.value;
+      const prior = xs.map(x => Math.exp(betaLogPdf(x, a, b)));
+      const post = xs.map(x => Math.exp(betaLogPdf(x, a + h, b + t)));
+      const pmax = Math.max(...post, ...prior.map(v => Math.min(v, 12)));
+      const llk = xs.map(x => h * Math.log(x) + t * Math.log1p(-x)), lmax = Math.max(...llk);
+      const lik = llk.map(v => Math.exp(v - lmax) * Math.max(...post));
       const [g, W, Hh] = crisp(cv);
-      const A = axes([20, 14, W - 40, Hh - 58], [0, 1], [0, Math.max(pmax, 1.5) * 1.1]);
+      const A = axes([16, 10, W - 32, Hh - 52], [0, 1], [0, Math.min(pmax, 14) * 1.1]);
       area(g, A, xs, post, PAL.xt);
       line(g, A, xs, post, PAL.x, 3);
-      if (seq.length) line(g, A, xs, lik, PAL.dec, 2, [2, 3]);
-      line(g, A, xs, prior, PAL.z, 2, [7, 4]);
-      xaxis(g, A, [0, 0.5, 1], 'θ, the chance of heads');
-      set(root, '.b-h', h); set(root, '.b-t', t); set(root, '.b-a', 2 + h); set(root, '.b-b', 2 + t);
-      set(root, '.b-mean', fx((2 + h) / (4 + seq.length), 3));
-      root.querySelector('.b-seq').innerHTML = seq.length
-        ? [...seq].map((c, i) => `<span class="${c === 'T' ? 'tail' : ''}${i === seq.length - 1 ? ' last' : ''}">${c}</span>`).join('')
-        : '<em>no tosses yet</em>';
+      if (h + t > 0) line(g, A, xs, lik, PAL.dec, 2.2, [6, 4]);
+      line(g, A, xs, prior.map(v => Math.min(v, 14)), PAL.z, 2.4);
+      xaxis(g, A, [0, 0.25, 0.5, 0.75, 1], '');
+      set(root, '.bc-a', fx(a, 1)); set(root, '.bc-b', fx(b, 1)); set(root, '.bc-h', h); set(root, '.bc-t', t);
+      set(root, '.bc-pa', fx(a + h, 1)); set(root, '.bc-pb', fx(b + t, 1));
+      set(root, '.bc-mean', fx((a + h) / (a + b + h + t), 3)); set(root, '.bc-mle', h + t ? fx(h / (h + t), 3) : '—');
     }
-    root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-      const a = b.dataset.a;
-      if (a === 'H' || a === 'T') seq = (seq + a).slice(-40);
-      else if (a === 'ours') seq = ours;
-      else seq = '';
-      draw();
-    }));
+    [ia, ib, ih, it].forEach(el => el.addEventListener('input', draw));
     draw();
   }
 
-  // ---------------------------------------------------------------- Part 3: Monte Carlo, the running average settles
-  function mc(root) {
-    const cv = root.querySelector('canvas');
-    const mu = 1, sd = 0.5, exact = mu * mu + sd * sd, per = Math.sqrt(4 * mu * mu * sd * sd + 2 * sd ** 4);
-    const first = (root.dataset.first || '').split(',').filter(Boolean).map(Number);
-    let R, zs, means;
-    const push = z => { zs.push(z); const k = zs.length; means.push(((means[k - 2] || 0) * (k - 1) + z * z) / k); };
-    const reset = () => { R = rng(1); zs = []; means = []; first.forEach(push); draw(); };
-    const add = k => { for (let i = 0; i < k; i++) push(mu + sd * R.n()); draw(); };
-    function draw() {
-      const [g, W, Hh] = crisp(cv);
-      const A = axes([30, 10, W - 50, 92], [-0.6, 2.6], [0, 0.95]);
-      const xs = linspace(-0.6, 2.6, 300), ys = xs.map(x => npdf(x, mu, sd));
-      area(g, A, xs, ys, PAL.enct); line(g, A, xs, ys, PAL.enc, 2.2);
-      const recent = zs.slice(-300);
-      g.fillStyle = PAL.enc;
-      recent.forEach((z, i) => {
-        const last = i === recent.length - 1;
-        g.globalAlpha = last ? 1 : 0.35; g.beginPath(); g.arc(A.X(z), A.Y(0) + (last ? 0 : 0), last ? 6 : 3.5, 0, 7); g.fill();
-      });
-      g.globalAlpha = 1;
-      xaxis(g, A, [0, 1, 2], 'z');
-      const Smax = Math.max(1000, zs.length);
-      const B = axes([30, 160, W - 50, Hh - 200], [0, Math.log10(Smax)], [0.4, 2.1]);
-      g.fillStyle = PAL.dect;
-      g.beginPath();
-      const ks = linspace(0, Math.log10(Smax), 120);
-      ks.forEach((k, i) => { const y = exact + 2 * per / Math.sqrt(10 ** k); i ? g.lineTo(B.X(k), B.Y(Math.min(2.1, y))) : g.moveTo(B.X(k), B.Y(Math.min(2.1, y))); });
-      [...ks].reverse().forEach(k => g.lineTo(B.X(k), B.Y(Math.max(0.4, exact - 2 * per / Math.sqrt(10 ** k)))));
-      g.closePath(); g.fill();
-      hline(g, B, exact, PAL.ink, [], 1.4);
-      if (means.length) line(g, B, means.map((_, i) => Math.log10(i + 1)), means.map(v => Math.max(0.4, Math.min(2.1, v))), PAL.dec, 2.2);
-      g.save(); g.strokeStyle = '#9AA1AD'; g.lineWidth = 1; g.beginPath(); g.moveTo(B.L, B.Y(0.4)); g.lineTo(B.L + B.W, B.Y(0.4)); g.stroke();
-      g.fillStyle = PAL.ink3; g.font = FONT; g.textAlign = 'center';
-      for (let k = 0; k <= Math.floor(Math.log10(Smax)); k++) g.fillText((10 ** k).toLocaleString('en-US'), B.X(k), B.Y(0.4) + 18);
-      g.textAlign = 'left'; g.fillText('number of draws S (log scale)', B.L, B.Y(0.4) + 36);
-      g.fillStyle = PAL.ink; g.fillText('exact 1.25', B.L + B.W - 70, B.Y(exact) - 8);
-      g.restore();
-      set(root, '.mc-s', zs.length.toLocaleString('en-US'));
-      set(root, '.mc-est', zs.length ? fx(means[means.length - 1], 3) : '—');
-      set(root, '.mc-last', zs.length ? fx(zs[zs.length - 1], 2) : '—');
-    }
-    root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => (b.dataset.a === 'reset' ? reset() : add(+b.dataset.a))));
-    reset();
-    if (PRINT) add(995);
-  }
-
-  // ---------------------------------------------------------------- Part 4: KL between two bell curves, as an area
+  // ---------------------------------------------------------------- W2: KL between two Gaussians, both directions, as areas
   function klgauss(root) {
     const cv = root.querySelector('canvas');
     const [im, is] = root.querySelectorAll('input[type=range]');
+    const pm = +(root.dataset.pmu || 0), ps = +(root.dataset.psd || 1);
+    const lo = +(root.dataset.xlo || -4.5), hi = +(root.dataset.xhi || 4.5);
     let dir = 'qp';
-    const xs = linspace(-4.5, 4.5, 721), dx = xs[1] - xs[0];
+    const xs = linspace(lo, hi, 801), dx = xs[1] - xs[0];
     function draw() {
       const mu = +im.value, sd = +is.value;
-      const p = xs.map(x => npdf(x, 0, 1)), q = xs.map(x => npdf(x, mu, sd));
+      const p = xs.map(x => npdf(x, pm, ps)), q = xs.map(x => npdf(x, mu, sd));
       const f = dir === 'qp' ? q.map((v, i) => v * Math.log(v / p[i])) : p.map((v, i) => v * Math.log(v / q[i]));
-      const areaNum = f.reduce((a, b) => a + b, 0) * dx;
+      const areaNum = f.reduce((a, b) => (Number.isFinite(b) ? a + b : a), 0) * dx;
       const [g, W, Hh] = crisp(cv);
-      const A = axes([16, 8, W - 32, 150], [-4.5, 4.5], [0, Math.max(0.45, Math.max(...q)) * 1.08]);
-      area(g, A, xs, p, PAL.zt, 0.7); line(g, A, xs, p, PAL.z, 2.2);
+      const A = axes([16, 8, W - 32, 150], [lo, hi], [0, Math.max(...p, ...q) * 1.08]);
+      area(g, A, xs, p, PAL.xt); line(g, A, xs, p, PAL.x, 2.4);
       line(g, A, xs, q, PAL.enc, 2.6);
-      const fl = f.map(v => Math.max(-0.6, Math.min(1.6, v)));
-      const B = axes([16, 178, W - 32, Hh - 220], [-4.5, 4.5], [Math.min(-0.15, Math.min(...fl)) * 1.1, Math.max(0.3, Math.max(...fl)) * 1.1]);
+      const top = Math.max(0.02, ...f.filter(Number.isFinite)), bot = Math.min(-0.005, ...f.filter(Number.isFinite));
+      const B = axes([16, 178, W - 32, Hh - 220], [lo, hi], [bot * 1.15, top * 1.15]);
       g.save();
       for (const [sign, col] of [[1, '#F7B8C6'], [-1, '#E5E7EB']]) {
         g.fillStyle = col; g.beginPath(); g.moveTo(B.X(xs[0]), B.Y(0));
-        xs.forEach((x, i) => g.lineTo(B.X(x), B.Y(sign * fl[i] > 0 ? fl[i] : 0)));
+        xs.forEach((x, i) => g.lineTo(B.X(x), B.Y(sign * f[i] > 0 ? f[i] : 0)));
         g.lineTo(B.X(xs[xs.length - 1]), B.Y(0)); g.closePath(); g.fill();
       }
       g.restore();
-      line(g, B, xs, fl, PAL.loss, 2);
+      line(g, B, xs, f.map(v => (Number.isFinite(v) ? v : 0)), PAL.loss, 2);
       g.save(); g.strokeStyle = PAL.ink3; g.lineWidth = 0.8; g.beginPath(); g.moveTo(B.L, B.Y(0)); g.lineTo(B.L + B.W, B.Y(0)); g.stroke(); g.restore();
-      const Ax = axes([16, 178, W - 32, Hh - 220], [-4.5, 4.5], [B.yr[0], B.yr[1]]);
-      xaxis(g, Ax, [-4, -2, 0, 2, 4], 'z');
-      const qp = 0.5 * (mu * mu + sd * sd - 1 - Math.log(sd * sd)), pq = Math.log(sd) + (1 + mu * mu) / (2 * sd * sd) - 0.5;
+      const step = (hi - lo) > 12 ? 5 : 2, ticks = [];
+      for (let t = Math.ceil(lo / step) * step; t <= hi; t += step) ticks.push(t);
+      xaxis(g, B, ticks, '');
+      const qp = Math.log(ps / sd) + (sd * sd + (mu - pm) ** 2) / (2 * ps * ps) - 0.5;
+      const pq = Math.log(sd / ps) + (ps * ps + (pm - mu) ** 2) / (2 * sd * sd) - 0.5;
       set(root, '.kg-mu', fx(mu, 2)); set(root, '.kg-sd', fx(sd, 2));
       set(root, '.kg-qp', fx(qp, 3)); set(root, '.kg-pq', fx(pq, 3)); set(root, '.kg-area', fx(areaNum, 3));
       root.querySelectorAll('[data-dir]').forEach(b => b.classList.toggle('on', b.dataset.dir === dir));
@@ -421,13 +367,13 @@
     draw();
   }
 
-  // ---------------------------------------------------------------- Part 4: forward vs reverse KL on two bumps, by gradient descent
+  // ---------------------------------------------------------------- W3: forward vs reverse KL on a mixture, by gradient descent
   function fwdrev(root) {
     const cvs = [...root.querySelectorAll('canvas')];
-    const xs = linspace(-6, 6, 601), dx = xs[1] - xs[0];
-    const p = xs.map(x => 0.5 * npdf(x, -2, 0.5) + 0.5 * npdf(x, 2, 0.5));
-    const kl = (dir, m, ls) => {
-      const s = Math.exp(ls); let a = 0;
+    const xs = linspace(-8, 8, 801), dx = xs[1] - xs[0], xd = linspace(-6, 6, 481);   // the notebook's grid; draw the middle
+    let width = +(root.dataset.width || 0.5), start = -0.5, mix, p, pd;
+    const kl = (dir, m, rs) => {
+      const s = softplus(rs); let a = 0;
       for (let i = 0; i < xs.length; i++) {
         const q = npdf(xs[i], m, s) + 1e-300, pp = p[i] + 1e-300;
         a += dir === 'fwd' ? pp * Math.log(pp / q) : q * Math.log(q / pp);
@@ -435,264 +381,124 @@
       return a * dx;
     };
     let st, steps, timer = null;
-    const reset = () => { st = ['fwd', 'rev'].map(d => ({ d, p: [-0.6, Math.log(0.6)], opt: adam(0.05) })); steps = 0; draw(); };
+    function reset() {
+      if (timer) cancelAnimationFrame(timer);
+      timer = null;
+      mix = mixture(`0.7,0.3|-2,2|${width},${width}`);
+      p = xs.map(mix.pdf); pd = xd.map(mix.pdf);
+      st = [{ d: 'fwd', p: [0.5, invSoftplus(0.6)], opt: adam(0.05) }, { d: 'rev', p: [start, invSoftplus(0.6)], opt: adam(0.05) }];
+      steps = 0; draw();
+    }
     const step = () => {
       for (const s of st) {
-        const h = 1e-4, [m, ls] = s.p;
-        const g = [-(kl(s.d, m + h, ls) - kl(s.d, m - h, ls)) / (2 * h), -(kl(s.d, m, ls + h) - kl(s.d, m, ls - h)) / (2 * h)];
-        s.opt(s.p, g);
+        const h = 1e-4, [m, rs] = s.p;
+        s.opt(s.p, [-(kl(s.d, m + h, rs) - kl(s.d, m - h, rs)) / (2 * h), -(kl(s.d, m, rs + h) - kl(s.d, m, rs - h)) / (2 * h)]);
       }
       steps += 1;
     };
     function draw() {
       st.forEach((s, k) => {
         const [g, W, Hh] = crisp(cvs[k]);
-        const A = axes([12, 8, W - 24, Hh - 50], [-5, 5], [0, 1.2]);
-        area(g, A, xs, p, PAL.xt); line(g, A, xs, p, PAL.x, 1.6);
-        const [m, ls] = s.p;
-        line(g, A, xs, xs.map(x => npdf(x, m, Math.exp(ls))), PAL.enc, 2.8);
-        xaxis(g, A, [-4, -2, 0, 2, 4], 'z');
-        set(root, `.fr-${s.d}-m`, fx(m, 2)); set(root, `.fr-${s.d}-s`, fx(Math.exp(ls), 2)); set(root, `.fr-${s.d}-kl`, fx(kl(s.d, m, ls), 3));
+        const A = axes([12, 8, W - 24, Hh - 46], [-6, 6], [0, Math.max(...pd) * 1.5]);
+        area(g, A, xd, pd, PAL.xt); line(g, A, xd, pd, PAL.x, 1.6);
+        const [m, rs] = s.p;
+        line(g, A, xd, xd.map(x => npdf(x, m, softplus(rs))), PAL.enc, 2.8);
+        xaxis(g, A, [-4, -2, 0, 2, 4], '');
+        set(root, `.fr-${s.d}-m`, fx(m, 2)); set(root, `.fr-${s.d}-s`, fx(softplus(rs), 2)); set(root, `.fr-${s.d}-kl`, fx(kl(s.d, m, rs), 3));
       });
       set(root, '.fr-step', steps);
+      root.querySelectorAll('[data-width]').forEach(b => b.classList.toggle('on', +b.dataset.width === width));
+      root.querySelectorAll('[data-start]').forEach(b => b.classList.toggle('on', +b.dataset.start === start));
+      const pb = root.querySelector('[data-a="play"]'); if (pb) pb.textContent = timer ? 'pause' : 'play';
     }
-    const play = () => {
-      if (timer) return;
-      const tick = () => {
-        if (!onSlide(root) || steps >= 600) { timer = null; return; }
-        for (let i = 0; i < 3; i++) step();
-        draw(); timer = requestAnimationFrame(tick);
-      };
-      timer = requestAnimationFrame(tick);
+    const tick = () => {
+      if (!onSlide(root) || steps >= 800) { timer = null; draw(); return; }
+      for (let i = 0; i < 4; i++) step();
+      draw(); timer = requestAnimationFrame(tick);
     };
-    root.querySelector('[data-a="play"]').addEventListener('click', () => { if (steps >= 600) reset(); play(); });
-    root.querySelector('[data-a="reset"]').addEventListener('click', () => { if (timer) cancelAnimationFrame(timer); timer = null; reset(); });
+    root.querySelector('[data-a="play"]').addEventListener('click', () => {
+      if (timer) { cancelAnimationFrame(timer); timer = null; draw(); return; }
+      if (steps >= 800) reset();
+      timer = requestAnimationFrame(tick); draw();
+    });
+    root.querySelector('[data-a="reset"]').addEventListener('click', reset);
+    root.querySelectorAll('[data-width]').forEach(b => b.addEventListener('click', () => { width = +b.dataset.width; reset(); }));
+    root.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => { start = +b.dataset.start; reset(); }));
     reset();
-    if (PRINT) { while (steps < 600) step(); draw(); }
+    if (PRINT) { while (steps < 800) step(); draw(); }
   }
 
-  // ---------------------------------------------------------------- Part 5: fit q by hand: KL, ELBO + gap, or the two terms
-  function vifit(root) {
-    const M = coinModel(+(root.dataset.h || 8), +(root.dataset.t || 2));
-    const mode = root.dataset.mode || 'kl';
-    const cv = root.querySelector('canvas');
-    const [im, is] = root.querySelectorAll('input[type=range]');
-    const xs = linspace(-2.5, 3.8, 400), post = xs.map(M.post);
-    const lo = -10, hi = -5.5, pct = v => `${(Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * 100}%`;
-    function draw() {
-      const m = +im.value, s = +is.value;
-      const q = xs.map(x => npdf(x, m, s));
-      const [g, W, Hh] = crisp(cv);
-      const A = axes([12, 8, W - 24, Hh - 50], [-2.5, 3.8], [0, Math.max(1.0, Math.max(...q)) * 1.06]);
-      area(g, A, xs, post, PAL.xt); line(g, A, xs, post, PAL.x, 2);
-      area(g, A, xs, q, PAL.enc, 0.08); line(g, A, xs, q, PAL.enc, 2.8);
-      xaxis(g, A, [-2, -1, 0, 1, 2, 3], 'z');
-      const e = M.elbo(m, s), gap = M.logpx - e;
-      set(root, '.vf-m', fx(m, 2)); set(root, '.vf-s', fx(s, 2)); set(root, '.vf-kl', fx(gap, 3));
-      set(root, '.vf-elbo', fx(e, 3)); set(root, '.vf-lpx', fx(M.logpx, 3));
-      set(root, '.vf-fit', fx(M.fit(m, s), 3)); set(root, '.vf-klp', fx(M.klp(m, s), 3));
-      const nl = root.querySelector('.vf-line');
-      if (nl) {
-        nl.querySelector('.vf-mark-elbo').style.left = pct(e);
-        nl.querySelector('.vf-mark-lpx').style.left = pct(M.logpx);
-        const gp = nl.querySelector('.nl-gap'); gp.style.left = pct(e); gp.style.width = `calc(${pct(M.logpx)} - ${pct(e)})`;
+  // ---------------------------------------------------------------- W4 / W5: q chases a target by gradient descent on KL(q || p)
+  // data-mode="exact": p = N(pmu, psd), the closed-form KL and its gradient (notebook N3, G2)
+  // data-mode="mc":    p = a mixture, Monte Carlo KL with reparameterised draws (notebook N5, G4)
+  function chase(root) {
+    const mode = root.dataset.mode || 'exact';
+    const [cq, cl] = root.querySelectorAll('canvas');
+    const lo = +root.dataset.xlo, hi = +root.dataset.xhi, STEPS = +(root.dataset.steps || 400), S = +(root.dataset.draws || 200);
+    const init = nums(root.dataset.init || '4,0.5'), lr = +(root.dataset.lr || 0.05);
+    const pm = +(root.dataset.pmu || 1), ps = +(root.dataset.psd || 4);
+    const mix = mode === 'mc' ? mixture(root.dataset.mix) : null;
+    const xs = linspace(lo, hi, 400);
+    const p = xs.map(x => (mix ? mix.pdf(x) : npdf(x, pm, ps)));
+    let P, opt, step, trace, R, timer = null;
+    function lossGrad() {
+      const s = softplus(P[1]), ds = sig(P[1]);
+      if (!mix) {                                 // KL(N(m, s) || N(pm, ps)) and its gradient
+        const kl = Math.log(ps / s) + (s * s + (P[0] - pm) ** 2) / (2 * ps * ps) - 0.5;
+        return [kl, [(P[0] - pm) / (ps * ps), (s / (ps * ps) - 1 / s) * ds]];
       }
-      root.querySelectorAll('.vf-bar').forEach(b => { b.style.width = `${Math.min(100, Math.abs(+b.dataset.k === 1 ? M.klp(m, s) : M.fit(m, s)) / 10 * 100)}%`; });
+      let kl = 0, gm = 0, gs = 0;                 // z = m + s * eps; loss = mean(log q(z) - log p(z))
+      for (let k = 0; k < S; k++) {
+        const e = R.n(), z = P[0] + s * e, g = mix.dlogp(z);
+        kl += -Math.log(s) - 0.5 * e * e - 0.5 * Math.log(2 * Math.PI) - mix.logp(z);
+        gm += -g; gs += -g * e;
+      }
+      return [kl / S, [gm / S, (gs / S - 1 / s) * ds]];
     }
-    [im, is].forEach(el => el.addEventListener('input', draw));
-    draw();
-  }
-
-  // ---------------------------------------------------------------- Part 6: two gradient estimators, the same draws
-  function gradvar(root) {
-    const cv = root.querySelector('canvas');
-    const mu = 1, sd = 0.5;
-    let R, sf, rp, jit;
-    const push = e => { const z = mu + sd * e; rp.push(2 * z); sf.push(z * z * (z - mu) / (sd * sd)); jit.push(R.u()); };
-    const reset = () => { R = rng(3); sf = []; rp = []; jit = []; push(-0.4); draw(); };
-    const add = k => { for (let i = 0; i < k; i++) push(R.n()); draw(); };
-    const stats = a => { const n = a.length, m = a.reduce((x, y) => x + y, 0) / n; return [m, Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / n)]; };
-    function draw() {
-      const [g, W, Hh] = crisp(cv);
-      const rows = [[sf, PAL.ink2, 'score function'], [rp, PAL.enc, 'reparameterisation']];
-      const rowH = (Hh - 50) / 2;
-      rows.forEach(([a, col, lab], k) => {
-        const A = axes([20, 10 + k * rowH, W - 40, rowH - 26], [-6, 12], [0, 1]);
-        g.fillStyle = '#F6F7F9'; g.fillRect(A.L, A.T, A.W, A.H);
-        g.fillStyle = col; g.globalAlpha = a.length > 200 ? 0.25 : 0.55;
-        a.forEach((v, i) => { if (v < -6 || v > 12) return; g.beginPath(); g.arc(A.X(v), A.T + 8 + jit[i] * (A.H - 16), 3, 0, 7); g.fill(); });
-        g.globalAlpha = 1;
-        vline(g, A, 2, PAL.loss, [], 2);
-        const [m] = stats(a);
-        g.fillStyle = col; g.strokeStyle = '#fff'; g.lineWidth = 2;
-        g.beginPath(); const X = A.X(Math.max(-6, Math.min(12, m))), Y = A.T + A.H / 2;
-        g.moveTo(X, Y - 11); g.lineTo(X + 9, Y); g.lineTo(X, Y + 11); g.lineTo(X - 9, Y); g.closePath(); g.fill(); g.stroke();
-        g.font = '600 14px "Avenir Next", Avenir, sans-serif'; g.textAlign = 'right'; g.fillText(lab, A.L + A.W - 6, A.T + 16);
-        if (k === 1) xaxis(g, axes([20, 10 + k * rowH, W - 40, rowH - 26], [-6, 12], [0, 1]), [-6, -3, 0, 2, 3, 6, 9, 12], '');
-      });
-      const [m1, s1] = stats(sf), [m2, s2] = stats(rp);
-      set(root, '.gv-n', sf.length.toLocaleString('en-US'));
-      set(root, '.gv-sfm', fx(m1, 2)); set(root, '.gv-rpm', fx(m2, 2));
-      set(root, '.gv-sfs', sf.length > 1 ? fx(s1, 2) : '—'); set(root, '.gv-rps', rp.length > 1 ? fx(s2, 2) : '—');
-    }
-    root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => (b.dataset.a === 'reset' ? reset() : add(+b.dataset.a))));
-    reset();
-    if (PRINT) add(299);
-  }
-
-  // ---------------------------------------------------------------- Part 6: press play, VI climbs the ELBO
-  function ascent(root) {
-    const M = coinModel(8, 2);
-    const [cq, ce] = root.querySelectorAll('canvas');
-    const xs = linspace(-2.2, 3.6, 360), post = xs.map(M.post), STEPS = 400;
-    let S = 10, P, opt, step, trace, trail, R, timer = null;
-    const e0 = M.elbo(0, 1);
     function reset() {
       if (timer) cancelAnimationFrame(timer);
-      timer = null; P = [0, 0]; opt = adam(0.05); step = 0; trace = [e0]; trail = []; R = rng(1); draw();
+      timer = null; P = [init[0], invSoftplus(init[1])]; opt = adam(lr); step = 0; R = rng(0); trace = [lossGrad()[0]]; draw();
     }
     function once() {
-      const s = Math.exp(P[1]); let gm = 0, gs = 0;
-      for (let k = 0; k < S; k++) { const e = R.n(), z = P[0] + s * e, d = M.dlj(z); gm += d; gs += d * s * e; }
-      opt(P, [gm / S, gs / S + 1]);                 // d ELBO / d log s gets +1 from the entropy of q
+      const [, grad] = lossGrad();
+      opt(P, grad.map(v => -v));                  // adam() ascends, so pass minus the gradient
       step += 1;
-      trace.push(M.elbo(P[0], Math.exp(P[1])));
-      if (step % 8 === 0) trail.push([P[0], Math.exp(P[1])]);
+      trace.push(lossGrad()[0]);
     }
     function draw() {
-      const s = Math.exp(P[1]);
+      const s = softplus(P[1]);
       let [g, W, Hh] = crisp(cq);
-      const A = axes([12, 8, W - 24, Hh - 50], [-2.2, 3.6], [0, 0.95]);
-      area(g, A, xs, post, PAL.xt); line(g, A, xs, post, PAL.x, 1.8);
-      trail.slice(-12).forEach(([m, sd], i, a) => line(g, A, xs, xs.map(x => npdf(x, m, sd)), PAL.enc, 1.2, null, 0.12 + 0.3 * i / a.length));
-      line(g, A, xs, xs.map(x => npdf(x, P[0], s)), PAL.enc, 3);
-      xaxis(g, A, [-2, -1, 0, 1, 2, 3], 'z');
-      [g, W, Hh] = crisp(ce);
-      const B = axes([54, 12, W - 70, Hh - 54], [0, STEPS], [e0 - 0.2, M.logpx + 0.25]);
-      g.save(); g.strokeStyle = PAL.grid; g.lineWidth = 1;
-      for (let v = -8; v <= -6; v += 0.5) { g.beginPath(); g.moveTo(B.L, B.Y(v)); g.lineTo(B.L + B.W, B.Y(v)); g.stroke(); }
-      g.fillStyle = PAL.ink3; g.font = FONT; g.textAlign = 'right';
-      for (let v = -8; v <= -6; v += 0.5) g.fillText(fx(v, 1), B.L - 8, B.Y(v) + 4);
+      const q = xs.map(x => npdf(x, P[0], s));
+      const A = axes([12, 8, W - 24, Hh - 46], [lo, hi], [0, Math.max(...p) * 1.9]);
+      area(g, A, xs, p, PAL.xt); line(g, A, xs, p, PAL.x, 2.2);
+      const top = A.yr[1] * 0.98, qmax = Math.max(...q);
+      line(g, A, xs, q.map(v => Math.min(v, top)), PAL.enc, 2.8);
+      if (qmax > top) {                           // say so when q's peak is cut off
+        const right = P[0] > (lo + hi) / 2, off = A.X(P[0] + 2.2 * s) - A.X(P[0]) + 6;
+        g.save(); g.fillStyle = PAL.enc; g.font = FONT; g.textAlign = right ? 'right' : 'left';
+        g.fillText(`peak ${fx(qmax, 2)} ↑`, A.X(P[0]) + (right ? -off : off), A.T + 14); g.restore();
+      }
+      const span = hi - lo, stp = span > 10 ? 5 : 2, ticks = [];
+      for (let t = Math.ceil(lo / stp) * stp; t <= hi; t += stp) ticks.push(t);
+      xaxis(g, A, ticks, '');
+      [g, W, Hh] = crisp(cl);
+      const pos = trace.map(v => Math.max(v, 0.01));
+      const logScale = mode === 'mc';
+      const yv = logScale ? pos.map(Math.log10) : trace;
+      const ymax = logScale ? Math.log10(Math.max(...pos.slice(0, 1).concat([10]))) : Math.max(trace[0], 0.5);
+      const B = axes([48, 10, W - 80, Hh - 52], [0, STEPS], [logScale ? -2 : 0, ymax * 1.05]);
+      g.save(); g.fillStyle = PAL.ink3; g.font = FONT; g.textAlign = 'right';
+      const yt = logScale ? [-2, -1, 0, 1] : [0, ymax / 2, ymax];
+      for (const v of yt) { g.fillText(logScale ? (10 ** v).toString() : fx(v, 1), B.L - 6, B.Y(v) + 4); }
       g.restore();
-      hline(g, B, M.logpx, PAL.x);
-      line(g, B, trace.map((_, i) => i), trace, PAL.dec, 2.4);
-      xaxis(g, B, [0, 100, 200, 300, 400], 'step');
-      g.fillStyle = PAL.x; g.font = '600 14px "Avenir Next", Avenir, sans-serif'; g.textAlign = 'right';
-      g.fillText('log p(x)', B.L + B.W, B.Y(M.logpx) - 7);
-      const e = trace[trace.length - 1];
-      set(root, '.as-step', step); set(root, '.as-m', fx(P[0], 2)); set(root, '.as-s', fx(s, 2));
-      set(root, '.as-elbo', fx(e, 3)); set(root, '.as-gap', fx(M.logpx - e, 3)); set(root, '.as-S', S);
-      root.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', +b.dataset.s === S));
+      line(g, B, yv.map((_, i) => i), yv, PAL.loss, 2);
+      xaxis(g, B, [0, STEPS / 2, STEPS], 'step');
+      set(root, '.ch-step', step); set(root, '.ch-m', fx(P[0], 2)); set(root, '.ch-s', fx(s, 2)); set(root, '.ch-kl', fx(trace[trace.length - 1], 3));
       const pb = root.querySelector('[data-a="play"]'); if (pb) pb.textContent = timer ? 'pause' : (step >= STEPS ? 'play again' : 'play');
     }
     function tick() {
       if (!onSlide(root) || step >= STEPS) { timer = null; draw(); return; }
-      once(); if (step < 60 || step % 2 === 0) draw();
-      timer = requestAnimationFrame(tick);
-    }
-    root.querySelector('[data-a="play"]').addEventListener('click', () => {
-      if (timer) { cancelAnimationFrame(timer); timer = null; draw(); return; }
-      if (step >= STEPS) reset();
-      timer = requestAnimationFrame(tick); draw();
-    });
-    root.querySelector('[data-a="reset"]').addEventListener('click', reset);
-    root.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { S = +b.dataset.s; reset(); }));
-    reset();
-  }
-
-  // ---------------------------------------------------------------- Part 7: a Gaussian q in the plane, diagonal or full
-  const BLUES = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b'];
-  const TARGETS = {
-    tilted: (() => {
-      const rho = 0.9, det = 1 - rho * rho;
-      return { logp: (a, b) => -0.5 * (a * a - 2 * rho * a * b + b * b) / det - Math.log(2 * Math.PI) - 0.5 * Math.log(det),
-        grad: (a, b) => [-(a - rho * b) / det, -(b - rho * a) / det], init: [1.6, -1.2] };
-    })(),
-    banana: { logp: (a, b) => { const m2 = 0.6 * a * a - 1.2; return -0.5 * (a / 1.2) ** 2 - Math.log(1.2) - 0.5 * ((b - m2) / 0.45) ** 2 - Math.log(0.45) - Math.log(2 * Math.PI); },
-      grad: (a, b) => { const m2 = 0.6 * a * a - 1.2, r2 = (b - m2) / (0.45 * 0.45); return [-a / 1.44 + r2 * 1.2 * a, -r2]; }, init: [1.4, 1.6] },
-    bumps: (() => {
-      const s = 0.55, cs = [-1.5, 1.5];
-      const comp = (a, b) => cs.map(c => -0.5 * ((a - c) ** 2 + (b - c) ** 2) / (s * s) - 2 * Math.log(s) - Math.log(2 * Math.PI) + Math.log(0.5));
-      return { logp: (a, b) => { const [u, v] = comp(a, b), mx = Math.max(u, v); return mx + Math.log(Math.exp(u - mx) + Math.exp(v - mx)); },
-        grad: (a, b) => { const [u, v] = comp(a, b), mx = Math.max(u, v), wu = Math.exp(u - mx), wv = Math.exp(v - mx), r0 = wu / (wu + wv), r1 = 1 - r0;
-          return [-(r0 * (a - cs[0]) + r1 * (a - cs[1])) / (s * s), -(r0 * (b - cs[0]) + r1 * (b - cs[1])) / (s * s)]; }, init: [0.3, 0.2] };
-    })(),
-  };
-  function vi2d(root) {
-    const cv = root.querySelector('canvas');
-    const lim = 3.2, STEPS = 1500;
-    let tname = root.dataset.target || 'tilted', fam = root.dataset.family || 'diag';
-    let P, opt, step, R, timer = null, heat = null, klv = null;
-    const fixed = (() => { const r = rng(99), a = []; for (let i = 0; i < 3000; i++) a.push([r.n(), r.n()]); return a; })();
-    function makeHeat() {
-      const n = 230, img = document.createElement('canvas'); img.width = n; img.height = n;
-      const g = img.getContext('2d'), id = g.createImageData(n, n), T = TARGETS[tname];
-      const vals = new Float64Array(n * n); let mx = -Infinity;
-      for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
-        const a = -lim + (i + 0.5) / n * 2 * lim, b = lim - (j + 0.5) / n * 2 * lim, v = T.logp(a, b);
-        vals[j * n + i] = v; mx = Math.max(mx, v);
-      }
-      for (let k = 0; k < n * n; k++) {
-        const d = Math.exp(vals[k] - mx), lev = Math.floor(d * 9) - 1;
-        if (d < 0.04 || lev < 0) { id.data[4 * k + 3] = 0; continue; }
-        const c = BLUES[Math.min(BLUES.length - 1, lev)];
-        id.data[4 * k] = parseInt(c.slice(1, 3), 16); id.data[4 * k + 1] = parseInt(c.slice(3, 5), 16); id.data[4 * k + 2] = parseInt(c.slice(5, 7), 16);
-        id.data[4 * k + 3] = 235;
-      }
-      g.putImageData(id, 0, 0);
-      heat = img;
-    }
-    const Lmat = () => [Math.exp(P[2]), fam === 'full' ? P[4] : 0, Math.exp(P[3])];   // L = [[l11, 0], [l21, l22]]
-    function computeKL() {
-      const T = TARGETS[tname], [l11, l21, l22] = Lmat(); let a = 0;
-      for (const [e1, e2] of fixed) a += T.logp(P[0] + l11 * e1, P[1] + l21 * e1 + l22 * e2);
-      klv = -(a / fixed.length) - (P[2] + P[3] + Math.log(2 * Math.PI) + 1);
-    }
-    function reset() {
-      if (timer) cancelAnimationFrame(timer);
-      timer = null; const T = TARGETS[tname];
-      P = [T.init[0], T.init[1], Math.log(0.5), Math.log(0.5), 0]; opt = adam(0.03); step = 0; R = rng(5);
-      makeHeat(); computeKL(); draw();
-    }
-    function once() {
-      const T = TARGETS[tname], [l11, l21, l22] = Lmat(), S = 32, gr = [0, 0, 0, 0, 0];
-      for (let k = 0; k < S; k++) {
-        const e1 = R.n(), e2 = R.n(), [g1, g2] = T.grad(P[0] + l11 * e1, P[1] + l21 * e1 + l22 * e2);
-        gr[0] += g1; gr[1] += g2; gr[2] += g1 * e1 * l11; gr[3] += g2 * e2 * l22; gr[4] += g2 * e1;
-      }
-      for (let i = 0; i < 5; i++) gr[i] /= S;
-      gr[2] += 1; gr[3] += 1;                        // the entropy of q: log l11 + log l22 + const
-      if (fam !== 'full') gr[4] = 0;
-      opt(P, gr); step += 1;
-    }
-    function draw() {
-      const [g, W] = crisp(cv);
-      const X = v => (v + lim) / (2 * lim) * W, Y = v => W - (v + lim) / (2 * lim) * W;
-      g.fillStyle = '#fff'; g.fillRect(0, 0, W, W);
-      g.imageSmoothingEnabled = true; g.drawImage(heat, 0, 0, W, W);
-      const [l11, l21, l22] = Lmat();
-      const c11 = l11 * l11, c12 = l11 * l21, c22 = l21 * l21 + l22 * l22;
-      const tr = c11 + c22, dt = c11 * c22 - c12 * c12, disc = Math.sqrt(Math.max(0, tr * tr / 4 - dt));
-      const ev1 = tr / 2 + disc, ev2 = tr / 2 - disc;
-      const ang = Math.abs(c12) < 1e-12 ? (c11 >= c22 ? 0 : Math.PI / 2) : Math.atan2(ev1 - c11, c12);
-      g.strokeStyle = PAL.enc; g.lineWidth = 2.6;
-      for (const k of [1, 2]) {
-        g.beginPath();
-        g.ellipse(X(P[0]), Y(P[1]), k * Math.sqrt(ev1) / (2 * lim) * W, k * Math.sqrt(Math.max(ev2, 1e-9)) / (2 * lim) * W, -ang, 0, 2 * Math.PI);
-        g.stroke();
-      }
-      g.fillStyle = PAL.enc; g.beginPath(); g.arc(X(P[0]), Y(P[1]), 5, 0, 7); g.fill();
-      set(root, '.v2-kl', klv === null ? '—' : fx(Math.max(0, klv), 3));
-      set(root, '.v2-s1', fx(Math.sqrt(c11), 2)); set(root, '.v2-s2', fx(Math.sqrt(c22), 2));
-      set(root, '.v2-rho', fx(c12 / Math.sqrt(c11 * c22), 2)); set(root, '.v2-step', step);
-      root.querySelectorAll('[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === tname));
-      root.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === fam));
-      const pb = root.querySelector('[data-a="play"]'); if (pb) pb.textContent = timer ? 'pause' : (step >= STEPS ? 'play again' : 'play');
-    }
-    function tick() {
-      if (!onSlide(root) || step >= STEPS) { timer = null; computeKL(); draw(); return; }
-      for (let i = 0; i < 4; i++) once();
-      if (step % 20 === 0) computeKL();
+      for (let i = 0; i < Math.max(1, Math.round(STEPS / 240)); i++) if (step < STEPS) once();
       draw(); timer = requestAnimationFrame(tick);
     }
     root.querySelector('[data-a="play"]').addEventListener('click', () => {
@@ -701,12 +507,71 @@
       timer = requestAnimationFrame(tick); draw();
     });
     root.querySelector('[data-a="reset"]').addEventListener('click', reset);
-    root.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { tname = b.dataset.t; reset(); }));
-    root.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { fam = b.dataset.f; reset(); }));
     reset();
+    if (PRINT) { while (step < STEPS) once(); draw(); }
   }
 
-  const widgets = { kl, elbo, explorer, latent, gmmx, bayes, mc, klgauss, fwdrev, vifit, gradvar, ascent, vi2d };
+  // ---------------------------------------------------------------- W6: the coin's ELBO and KL for any Beta(alpha, beta), and VI by play
+  function coinelbo(root) {
+    const cv = root.querySelector('canvas');
+    const [ia, ib] = root.querySelectorAll('input[type=range]');
+    const h = +(root.dataset.heads || 17), t = +(root.dataset.tails || 13), a0 = +(root.dataset.pa || 5), b0 = +(root.dataset.pb || 3);
+    const N = 2000, th = Array.from({ length: N }, (_, i) => (i + 0.5) / N);
+    const l0 = th.map(Math.log), l1 = th.map(x => Math.log1p(-x));
+    const logJoint = th.map((x, i) => (a0 - 1 + h) * l0[i] + (b0 - 1 + t) * l1[i] - lbeta(a0, b0));
+    const logEv = lbeta(a0 + h, b0 + t) - lbeta(a0, b0);
+    const elbo = (a, b) => {                   // E_q[log p(D, theta) - log q(theta)], by the midpoint rule
+      const lb = lbeta(a, b);
+      let e = 0;
+      for (let i = 0; i < N; i++) { const lq = (a - 1) * l0[i] + (b - 1) * l1[i] - lb; e += Math.exp(lq) * (logJoint[i] - lq); }
+      return e / N;
+    };
+    const lo = logEv - 2.5, hi = logEv + 0.6, pct = v => `${(Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * 100}%`;
+    const xs = linspace(0.001, 0.999, 300), post = xs.map(x => Math.exp(betaLogPdf(x, a0 + h, b0 + t)));
+    let P = null, opt, step = 0, timer = null;
+    function draw() {
+      const a = +ia.value, b = +ib.value, e = elbo(a, b);
+      const [g, W, Hh] = crisp(cv);
+      const q = xs.map(x => Math.exp(betaLogPdf(x, a, b)));
+      const A = axes([12, 8, W - 24, Hh - 40], [0, 1], [0, Math.max(...post, ...q.map(v => Math.min(v, 12))) * 1.08]);
+      area(g, A, xs, post, PAL.xt); line(g, A, xs, post, PAL.x, 2.4);
+      line(g, A, xs, q.map(v => Math.min(v, A.yr[1])), PAL.enc, 2.6);
+      xaxis(g, A, [0, 0.5, 1], '');
+      set(root, '.ce-a', fx(a, 1)); set(root, '.ce-b', fx(b, 1));
+      set(root, '.ce-elbo', fx(e, 3)); set(root, '.ce-kl', fx(logEv - e, 3)); set(root, '.ce-lpx', fx(logEv, 3)); set(root, '.ce-step', step);
+      set(root, '.ce-lo', fx(lo, 1)); set(root, '.ce-hi', fx(hi, 1));
+      const nl = root.querySelector('.vf-line');
+      nl.querySelector('.ce-mark-elbo').style.left = pct(e);
+      nl.querySelector('.ce-mark-lpx').style.left = pct(logEv);
+      const gp = nl.querySelector('.nl-gap'); gp.style.left = pct(e); gp.style.width = `calc(${pct(logEv)} - ${pct(e)})`;
+      const pb = root.querySelector('[data-a="play"]'); if (pb) pb.textContent = timer ? 'pause' : 'play: fit from Beta(45, 45)';
+    }
+    function once() {                          // gradient ascent on the exact ELBO, in softplus coordinates
+      const f = (u, v) => elbo(softplus(u), softplus(v)), hh = 1e-3;
+      const g = [(f(P[0] + hh, P[1]) - f(P[0] - hh, P[1])) / (2 * hh), (f(P[0], P[1] + hh) - f(P[0], P[1] - hh)) / (2 * hh)];
+      opt(P, g); step += 1;
+      ia.value = softplus(P[0]); ib.value = softplus(P[1]);
+    }
+    function tick() {
+      if (!onSlide(root) || step >= 3000) { timer = null; draw(); return; }
+      for (let i = 0; i < 15; i++) once();
+      draw(); timer = requestAnimationFrame(tick);
+    }
+    [ia, ib].forEach(el => el.addEventListener('input', () => { if (timer) { cancelAnimationFrame(timer); timer = null; } P = null; step = 0; draw(); }));
+    const pb = root.querySelector('[data-a="play"]');
+    if (pb) pb.addEventListener('click', () => {
+      if (timer) { cancelAnimationFrame(timer); timer = null; draw(); return; }
+      if (!P || step >= 3000) { P = [invSoftplus(45), invSoftplus(45)]; opt = adam(0.05); step = 0; ia.value = 45; ib.value = 45; }
+      timer = requestAnimationFrame(tick); draw();
+    });
+    if (PRINT && pb) {                         // print the end of the fit
+      P = [invSoftplus(45), invSoftplus(45)]; opt = adam(0.05);
+      while (step < 3000) once();
+    }
+    draw();
+  }
+
+  const widgets = { kl, elbo, explorer, latent, gmmx, betacoin, klgauss, fwdrev, chase, coinelbo };
   document.querySelectorAll('[data-widget]').forEach(el => {
     const w = widgets[el.dataset.widget];
     if (w) w(el);

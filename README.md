@@ -18,43 +18,44 @@ Two 75-minute sessions, seven parts:
 ## The maths lecture before the VAE: `vi.html`
 
 **KL divergence and variational inference**, a separate 60–75 minute lecture that teaches the maths on toys, so the VAE lecture can
-apply it instead of introducing it. 89 slides (a cover and a map, then 8 parts), 217 clicks: `vi.html` · [exports/vi.pdf](exports/vi.pdf) · [exports/vi-builds.pdf](exports/vi-builds.pdf).
+apply it instead of introducing it. It follows the PML course's Lectures 23–24 (variational inference) frame by frame, with the
+course's own examples: the Beta(5, 3) coin with 17 heads in 30, p = N(1, 4²), and two mixtures of Gaussians. The plan it was built
+from, with the source of every slide, is [plan/vi-lecture-plan.md](plan/vi-lecture-plan.md).
+70 slides (a cover, then 9 parts), 168 clicks: `vi.html` · [exports/vi.pdf](exports/vi.pdf) · [exports/vi-builds.pdf](exports/vi-builds.pdf).
 It does not touch the VAE decks above (their Parts 4–6 are to be trimmed only after this deck is reviewed).
 
 | Part | Slides | Content |
 |---|---|---|
-| 1 · Bayes, as a reminder | 8 | ten tosses (8 heads); three candidate coins as a hand-computed Bayes table; prior × likelihood ∝ posterior (Beta(2, 2) → Beta(10, 4)); toss-by-toss widget; the evidence 6 B(10, 4) = 0.00210; the same five words in the VAE |
-| 2 · Why the posterior is hard | 7 | θ = sigmoid(z), z ~ N(0, 1): a one-number decoder; the posterior has no formula; the joint is one line of code but its area is p(x); a 1-D grid (log p(x) = −6.164) and why grids explode; **one** slide on Laplace, MCMC and VI |
-| 3 · Averages from samples | 7 | 𝔼 as a weighted average; darts estimate π (PML notebook); Monte Carlo by hand, live, and its 1/√S error; three lines of code |
-| 4 · KL divergence | 21 | the betting game, surprise (snow in Kashmir vs Gandhinagar), entropy 0.500, cross-entropy 0.592, KL 0.0915; KL in bits as extra code length (PML slides); KL as an average; KL ≥ 0; evidence piling up; asymmetry (slider); KL between bell curves as live shaded areas; the Gaussian KL formula; `kl_via_sampling` when there is no formula; forward vs reverse KL on two bumps, animated |
-| 5 · VI and the ELBO | 16 | a family of bell curves; "you are the optimiser" (sliders, live KL); the evidence hides in the KL; the ELBO derived one move per slide; ELBO + gap = log p(x) live; the neat/messy check by hand; unpacking into fit − KL to the prior; the tug of war, live; three readings of the ELBO |
-| 6 · Climbing the ELBO | 14 | a Monte Carlo ELBO in three lines; the gradient of an average; score function vs reparameterisation, derived, one draw by hand, live variance demo (22× and 13× more draws needed); `sample` vs `rsample`; the whole VI loop (PML notebook's `neg_elbo`); press play: VI runs live in the browser (1, 10 or 100 draws per step); the run in numbers; a Beta q recovers Beta(10, 4) exactly |
-| 7 · Beyond one number | 8 | mean-field on a correlated Gaussian (Bishop Fig 10.2: width 0.436 vs 1); full covariance; a live 2-D fitter (tilted, banana, two bumps × diagonal, full); banana (cannot bend); two bumps (log 2); skewed and two-bump 1-D targets; flows as the fix |
-| 8 · Towards the VAE | 6 | 500 coins; an encoder from tosses to (m, log s) trained on the summed ELBO with one draw per coin (amortisation gap 0.0045 nats); what the VAE lecture reuses; five exit questions |
+| 1 · Recap: Bayes and the evidence | 11 | Steve, librarian or farmer (posterior 1/6); Bayes for ML; the coin, prior Beta(5, 3) → posterior Beta(22, 16), with a live prior × likelihood widget; its evidence by formula (log p(D) = −21.397); linear-regression evidence in closed form (12.35) vs 15,000 prior draws (12.22; the best 10 draws carry 95%); a Normal prior on the logit has no formula; **one** slide on Laplace, MCMC and VI on a two-bump posterior; the VI objective and the notebook's goals G1–G6 |
+| 2 · KL divergence (G1) | 13 | built from a fruit survey (ratios, the log, weighting by p: 0.416 nats); the same in bits (weather codes, 0.25 extra bits); KL for densities, ≥ 0 by the tangent line, asymmetric; a 0.8 coin vs a fair one (325× after 30 tosses); which q is closer to N(1, 4²) (0.35 vs 0.07), live; ✎ derive the Gaussian KL, then torch's `_kl_normal_normal`; forward vs reverse KL on the two-bump mixture, static and live |
+| 3 · Fitting q (G2) | 6 | a grid of candidates; `TrainableNormal` with softplus and an Adam loop; press play from N(4, 0.5²) to N(1.00, 4.00²); the snapshots; diagonal vs full covariance on a correlated 2-D target (width 0.436 = √(1 − ρ²)) |
+| 4 · Monte Carlo (G3, G5) | 6 | the notebook's mixture and two candidates; torch's `NotImplementedError`; Monte Carlo and darts for π; `kl_via_sampling` (1.0276 vs exact 1.0288; mixture 9.45 vs 45.02); the spread vs N |
+| 5 · Reparameterisation (G4) | 8 | the computational graph with a blocked draw; `sample().backward()` fails; the reparameterised graph and ✎ its gradients; checked in code (scale.grad = ε = 0.3367); `rsample` inside torch; fitting the mixture from N(6, 0.1²) to N(0.43, 0.73²), static and live |
+| 6 · The ELBO | 8 | the catch (the KL contains the posterior); ✎ substitute Bayes; the evidence comes out; the lower bound; ELBO + KL = −21.397 for three Beta q's; a live Beta(α, β) number line; the two forms of the ELBO |
+| 7 · The coin, worked | 8 | the model as functions; why a Beta q; `neg_elbo`; two guesses (239.38 vs exactly 21.397); training from Beta(45, 45) to Beta(22.6, 16.4); press play; the same in Pyro |
+| 8 · Linear regression (G6) | 4 | the model and its `log_joint`; diagonal and full q against the exact posterior with 20 and with 200 points (homework if time is short) |
+| 9 · Neural networks and the VAE | 5 | mean-field for millions of weights; the VAE in one slide; recap; five exit questions |
 
-Everything is computed by `scripts/make_figures_vi.py` (no trained models; about 15 s): figures `figures/data/vik-*.svg` and
-`figures/data/numbers-vi.json`, merged by `build_deck.py` as `{{vik.*}}`. The KL figures are copies (as `vik-*`) of the VAE deck's, so this deck
-does not depend on `make_figures.py`. Slides live in `deck/slides/v0-open.html` … `v8-amortise.html`; the deck has its own 8-part route
-(`<!--viroute:N-->`, `VI_PARTS` in `build_deck.py`).
+Slides marked ▶ N1 … N8 have a matching section in the **companion notebook** `vi-lab/vi_lecture.ipynb` (helpers in
+`vi-lab/vi_utils.py`; torch, numpy and matplotlib only, no ASTRA; Pyro optional for one guarded cell; 63 cells, about 30 s).
+Slides marked ✎ are in-class exercises. The small grey line at the foot of a slide cites its PML source (lecture and timestamp,
+notebook cells, slide frame).
 
-Live widgets (in `deck/widgets.js`, each with a meaningful print state): `bayes` (toss by toss), `mc` (running Monte Carlo average),
-`klgauss` (KL between two Gaussians as shaded areas), `fwdrev` (forward vs reverse KL by gradient descent), `vifit` (fit q by hand: KL,
-ELBO + gap, or the two terms), `gradvar` (score-function vs reparameterised gradients on the same draws), `ascent` (VI on the coin, press play),
-`vi2d` (diagonal or full-covariance q on three 2-D targets). The existing `kl` and `elbo` widgets are reused unchanged. The browser widgets
-use the same grids and formulas as the script; the play-button runs draw their own random numbers, and the PDF shows the recorded run.
+Every number is computed: `scripts/make_figures_vi.py` replicates the notebook with the same seeds and writes the figures
+`figures/data/vik-*.svg` and `figures/data/numbers-vi.json` (merged by `build_deck.py` as `{{vik.*}}`); `scripts/diagrams.py` draws the
+two computational graphs (`figures/diagrams/vik-graph-*.svg`). Slides live in `deck/slides/v0-open.html` … `v9-vae.html`; the deck has
+its own 9-part route (`<!--viroute:N-->`, `VI_PARTS` in `build_deck.py`).
 
-**Rebuild in progress (plan v2, awaiting review):** [plan/vi-lecture-plan.md](plan/vi-lecture-plan.md) restructures this deck
-to follow the PML course's Lectures 23–24 frame by frame. Its companion notebook is built and run:
-`vi-lab/vi_lecture.ipynb` (helpers in `vi-lab/vi_utils.py`; torch, numpy and matplotlib only, no ASTRA), regenerated with
-`$PY scripts/make_vi_notebook.py`.
-
-Borrowed from the PML course (nipunbatra/pml-teaching): the coin-toss VI with a Beta q, `kl_via_sampling`, `neg_elbo`, the
-`sample` / reparameterise-by-hand / `rsample` sequence (variational-inference notebook); darts for π (mc_sampling_intro); the surprise
-question and code lengths (information-theory slides); the Gaussian-KL exercise (VI slides).
+Live widgets (in `deck/widgets.js`, each with a print state): `betacoin` (prior × likelihood → posterior), `klgauss` (KL between two
+Gaussians as shaded areas, both directions), `fwdrev` (forward vs reverse KL on the mixture, by gradient descent on the notebook's grid),
+`chase` (q chasing a target: exact KL to N(1, 4²), or a Monte Carlo KL with reparameterised draws to the mixture), `coinelbo` (the
+coin's exact ELBO and KL for any Beta(α, β) on a number line, and a play button that fits it). The VAE decks' `kl`, `elbo`, `explorer`,
+`latent` and `gmmx` widgets are unchanged.
 
 ```sh
 PY=/Users/nipun/git/clip-lab/.venv/bin/python
-$PY scripts/make_figures_vi.py && $PY scripts/build_deck.py
+$PY scripts/make_vi_notebook.py                  # rebuild and run the companion notebook
+$PY scripts/make_figures_vi.py && $PY scripts/diagrams.py && $PY scripts/build_deck.py
 python3 scripts/review_server.py --port 8774      # then http://127.0.0.1:8774/vi.html (8771: the VAE decks, 8773: the GAN deck)
 PORT=8774 node scripts/_overflow.mjs vi.html && PORT=8774 node scripts/_overlap.mjs vi.html
 node scripts/export_pdf.mjs vi                     # vi.pdf and vi-builds.pdf, with the maths check
@@ -117,8 +118,9 @@ node scripts/export_pdf.mjs     # session1/2, lecture and vi PDFs (+ -builds), a
 | `scripts/diagrams.py` | the SVG diagrams (encoder/decoder, VAE, reparameterisation, GAN steps …) |
 | `scripts/make_figures.py`, `scripts/make_figures_extra.py` | every chart and digit grid, `numbers.json` and `numbers-extra.json` |
 | `scripts/train_models.py` | all models: AE (2, 16, 64 and sparse-64 numbers), denoising AE, VAE (2, 16, β = 8), conditional VAE, PixelAR, and the GAN-lecture models |
-| `deck/slides/v0-open.html` … `v8-amortise.html` | the maths lecture `vi.html` (KL and VI on toys) |
+| `deck/slides/v0-open.html` … `v9-vae.html` | the maths lecture `vi.html` (KL and VI, after the PML course) |
 | `scripts/make_figures_vi.py` | every figure and number of `vi.html` (`figures/data/vik-*`, `numbers-vi.json`) |
+| `vi-lab/vi_utils.py`, `scripts/make_vi_notebook.py` | the VI lecture's companion notebook `vi-lab/vi_lecture.ipynb` (helpers, and the script that writes and runs it) |
 | `deck/deck.css`, `deck/deck.js`, `deck/widgets.js`, `deck/annotate.js` | look, navigation, the live widgets (the VI lecture's at the end of `widgets.js`), and right-click review notes |
 
 Build syntax: `data-b="3"` appears from click 3 on, `data-b="2-4"` only during clicks 2–4, `data-b="=1"` only on click 1, `data-hl="2"` highlights from click 2.

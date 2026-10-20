@@ -760,6 +760,70 @@ def reparam_numbers():
     d.save()
 
 
+# =============================================================== VI lecture (vi.html): the PML course's two computational graphs
+def _box(d, cx, cy, w, h, role, tex, size=22):
+    c, t = ROLE[role]
+    d.rect(cx - w / 2, cy - h / 2, w, h, c, t, r=10)
+    d.math(cx, cy + size * 0.36, tex, size, c)
+
+
+def vik_graph_sample():
+    """Monte Carlo KL with q.sample(): loc, scale -> q -> theta_s ~ q -> loss. The draw has no gradient path."""
+    d = SVG("vik-graph-sample", 1100, 330)
+    d.begin(1)
+    _box(d, 110, 90, 150, 64, "enc", r"\text{loc}")
+    _box(d, 110, 230, 150, 64, "enc", r"\text{scale}")
+    _box(d, 390, 160, 230, 70, "enc", r"q = \N(\text{loc}, \text{scale})")
+    _rnd(d, 660, 160, 62, r"\theta_s")
+    d.math(660, 258, r"\theta_s \sim q", 19, C["z"])
+    _box(d, 940, 160, 200, 70, "loss", r"\text{loss}")
+    d.math(940, 236, r"\tfrac1S\textstyle\sum_s \log\frac{q(\theta_s)}{p(\theta_s)}", 18, INK3)
+    d.line([(186, 100), (274, 140)], INK3)
+    d.line([(186, 220), (274, 180)], INK3)
+    d.line([(506, 160), (596, 160)], INK3)
+    d.line([(724, 160), (838, 160)], INK3)
+    d.add(f'<rect x="20" y="292" width="26" height="22" rx="5" fill="{ROLE["enc"][1]}" stroke="{C["enc"]}" stroke-width="2"/>')
+    d.text(56, 309, "deterministic", 16, INK3, 500, "start")
+    d.add(f'<circle cx="214" cy="303" r="12" fill="{ROLE["z"][1]}" stroke="{C["z"]}" stroke-width="2" stroke-dasharray="4 3"/>')
+    d.text(234, 309, "random draw", 16, INK3, 500, "start")
+    d.end()
+    d.begin(2)
+    d.line([(838, 130), (726, 130)], C["loss"], 2.8)
+    d.line([(598, 130), (508, 130)], C["loss"], 2.8, dash="5 4")
+    d.cross(553, 130, 14)
+    d.text(553, 96, "blocked", 17, C["loss"], 650)
+    d.label(760, 312, r"gradients reach $\theta_s$, but a draw is not a function of loc and scale", 18, C["loss"], 650, width=640)
+    d.end()
+    d.save()
+
+
+def vik_graph_reparam():
+    """The reparameterised version: eps ~ N(0, 1) is an input; z = loc + scale * eps is ordinary arithmetic."""
+    d = SVG("vik-graph-reparam", 1100, 330)
+    d.begin(1)
+    _box(d, 110, 70, 150, 64, "enc", r"\text{loc}")
+    _box(d, 110, 180, 150, 64, "enc", r"\text{scale}")
+    _rnd(d, 110, 280, 40, r"\varepsilon")
+    d.math(172, 262, r"\varepsilon \sim \N(0, 1)", 18, C["z"], "start")
+    _box(d, 520, 160, 330, 76, "z", r"z = \text{loc} + \text{scale}\cdot\varepsilon", 23)
+    _box(d, 940, 160, 200, 70, "loss", r"\text{loss}")
+    d.math(940, 236, r"\tfrac1S\textstyle\sum_s \log\frac{q(z_s)}{p(z_s)}", 18, INK3)
+    d.line([(186, 78), (354, 140)], INK3)
+    d.line([(186, 180), (354, 165)], INK3)
+    d.line([(152, 280), (380, 280), (430, 200)], INK3)
+    d.line([(686, 160), (838, 160)], INK3)
+    d.end()
+    d.begin(2)
+    d.line([(838, 128), (688, 128)], C["loss"], 3)
+    d.line([(356, 128), (188, 62)], C["loss"], 3)
+    d.line([(356, 150), (188, 194)], C["loss"], 3)
+    d.math(268, 66, r"\partial z/\partial\,\text{loc} = 1", 19, C["loss"], "start")
+    d.math(196, 230, r"\partial z/\partial\,\text{scale} = \varepsilon", 19, C["loss"], "start")
+    d.label(800, 300, r"$\varepsilon$ is just an input, like a data point", 18, C["loss"], 650, width=520)
+    d.end()
+    d.save()
+
+
 # =============================================================== GAN
 def gan_base(d, step=None):
     """Shared GAN layout. step: None (overview), 'D' or 'G'."""
@@ -1214,7 +1278,8 @@ def ae_archs():
 def main():
     for f in (common, two_ways, mixture_story, latent_story, ae, ae_generate, cloud_vs_point, vae_encode, vae_sample,
               vae_decode, vae, vae_generate, pgm, vae_shapes, pixels, task, route_a, story_decode, reparam_before, reparam_after, reparam_numbers,
-              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes, amortise, gmm_pipeline, pca_ae, ae_archs):
+              gan, gan_dstep, gan_gstep, freeze_detach, cgan, recipes, amortise, gmm_pipeline, pca_ae, ae_archs,
+              vik_graph_sample, vik_graph_reparam):
         f()
     print("wrote", len(list(OUT.glob("*.svg"))), "diagrams")
 

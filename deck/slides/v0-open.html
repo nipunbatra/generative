@@ -1,37 +1,17 @@
+
 <!-- ===================================================================== VI LECTURE · OPENING -->
 
 <section class="slide sec-v5 cover" id="vi-cover" data-section="KL and VI">
   <p class="kicker">ES 667 · Deep Learning · the maths before the VAE</p>
-  <h2 style="font-size:58px;margin-top:22px">KL divergence and variational inference<span class="sub" style="font-size:28px">Built slowly on a coin, two bumps and a few shapes in a plane</span></h2>
+  <h2 style="font-size:58px;margin-top:22px">KL divergence and variational inference<span class="sub" style="font-size:28px">A coin, two Gaussians and two mixtures, following the PML course</span></h2>
   <div class="body">
-    <img class="fig" src="figures/data/vik-ascent.svg" style="width:930px;margin:0 auto">
-    <p class="cap">A simple bell curve $q$ (purple) slides onto a posterior that has no formula (blue), while a number called the ELBO climbs to $\log p(x)$.<br>By the end of today, every word of that sentence will mean something precise.</p>
+    <img class="fig" src="figures/data/vik-coin-vi.svg" style="width:900px;margin:0 auto">
+    <p class="cap">Left: a simple $\mathrm{Beta}$ guess (purple) is trained until it sits on the coin's posterior (blue). Right: the training loss settles at exactly $-\log p(D)$.<br>By the end of today, every part of that picture will mean something precise.</p>
   </div>
-  <p class="tiny" style="margin:0">Nipun Batra · IIT Gandhinagar</p>
+  <p class="tiny" style="margin:0">Nipun Batra · IIT Gandhinagar · companion notebook: <code>vi-lab/vi_lecture.ipynb</code></p>
   <aside class="notes">
-    <p>This is the maths lecture that the VAE lecture stands on. Everything today is a toy: ten coin tosses, two bumps, a few shapes in a plane. Small enough to check every number by hand or on a 1-D grid.</p>
-    <p>The picture is a real run (scripts/make_figures_vi.py): stochastic gradient ascent on the ELBO with 10 draws per step, 400 steps. We will build it piece by piece and then press play on it live.</p>
-  </aside>
-</section>
-
-<section class="slide sec-v5" id="vi-map" data-section="KL and VI">
-  <p class="kicker">The plan</p>
-  <h2>One problem, two tools, one method, and where it leads</h2>
-  <div class="body">
-    <div class="mini-route">
-      <div class="r" style="--c:var(--x)"><i>1</i><b>Bayes, as a reminder</b><span>prior, likelihood, posterior, evidence, on ten coin tosses</span></div>
-      <div class="r" style="--c:var(--enc)" data-b="3"><i>5</i><b>Variational inference</b><span>pick the closest simple $q$; the ELBO, derived one move per slide</span></div>
-      <div class="r" style="--c:var(--z)"><i>2</i><b>Why the posterior is hard</b><span>the evidence integral, and three ways around it</span></div>
-      <div class="r" style="--c:var(--z)" data-b="3"><i>6</i><b>Climbing the ELBO</b><span>estimates from samples, gradients through a random draw, live</span></div>
-      <div class="r" style="--c:var(--dec)" data-b="2"><i>3</i><b>Averages from samples</b><span>what $\E$ means, and Monte Carlo</span></div>
-      <div class="r" style="--c:var(--dec)" data-b="4"><i>7</i><b>Beyond one number</b><span>shapes a simple $q$ cannot fit</span></div>
-      <div class="r" style="--c:var(--loss)" data-b="2"><i>4</i><b>KL divergence</b><span>a number for "how far apart" two distributions are</span></div>
-      <div class="r" style="--c:var(--enc)" data-b="4"><i>8</i><b>Many data points</b><span>learn to predict $q$: the VAE's encoder</span></div>
-    </div>
-  </div>
-  <p class="q" data-b="4">Every piece of the VAE's loss appears here first, on toys small enough to check by hand.</p>
-  <aside class="notes">
-    <p>Left column: the problem (1, 2) and the tools (3, 4). Right column: the method (5, 6) and where it goes (7, 8). Click through the four groups.</p>
-    <p>Students met Bayes, Laplace and MCMC in the probabilistic ML course; parts 1 and 2 are a deliberate reminder, because nothing in VI makes sense without "the posterior is what we want, and its normaliser is what we cannot compute".</p>
+    <p>This is the maths lecture the VAE lecture stands on. It follows the PML course's Lectures 23 and 24 (variational inference) frame by frame, with the same examples: the Beta(5, 3) coin, p = N(1, 4), and two mixtures of Gaussians.</p>
+    <p>The picture is a real run, from the companion notebook's section N7: a Beta(α, β) q starts at Beta(45, 45) and is trained for 3,000 steps by minimising the negative ELBO. It ends at Beta({{vik.coinvi.a1}}, {{vik.coinvi.b1}}); the true posterior is Beta(22, 16).</p>
+    <p>Students should open the notebook now. Every slide with a green ▶ chip has a matching notebook section; the cells are a few lines each.</p>
   </aside>
 </section>

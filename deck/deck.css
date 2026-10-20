@@ -490,7 +490,7 @@ body.print .vw-live { display: none !important; }
 body.print .vw-static { display: block; }
 body.print .vw-btns, body.print .vw input[type=range] { display: none; }
 .lg { font-size: 17px; color: var(--ink-2); display: flex; gap: 16px; flex-wrap: wrap; margin: 0 !important; }
-.lg span { display: inline-flex; align-items: center; gap: 6px; }
+.lg > span { display: inline-flex; align-items: center; gap: 6px; }
 .lg i { display: inline-block; width: 22px; height: 0; border-top: 3px solid var(--c); }
 .lg i.dash { border-top-style: dashed; }
 .lg i.fill { height: 12px; border: 1.5px solid var(--c); background: var(--f); }
@@ -521,7 +521,29 @@ table.work td.hlc { background: #FFF4C2; }
 .mini-route .r span { font-size: 19px; color: var(--ink-3); line-height: 1.3; }
 .mini-route { row-gap: 22px; }
 .sec-v1 { --sec: #245EDB; } .sec-v2 { --sec: #AA4E08; } .sec-v3 { --sec: #0F766E; } .sec-v4 { --sec: #BE123C; }
-.sec-v5 { --sec: #8B2CDE; } .sec-v6 { --sec: #AA4E08; } .sec-v7 { --sec: #0F766E; } .sec-v8 { --sec: #8B2CDE; }
+.sec-v5 { --sec: #8B2CDE; } .sec-v6 { --sec: #AA4E08; } .sec-v7 { --sec: #0F766E; } .sec-v8 { --sec: #245EDB; }
+.sec-v9 { --sec: #8B2CDE; }
+/* VI lecture v2: notebook and exercise chips, the coin's ELBO number line */
+.nbref { display: inline-block; margin-left: 12px; padding: 2px 10px; border-radius: 999px; background: var(--dec-t); color: var(--dec); letter-spacing: .04em; font-weight: 650; }
+.exref { display: inline-block; margin-left: 12px; padding: 2px 10px; border-radius: 999px; background: var(--z-t); color: var(--z); letter-spacing: .04em; font-weight: 650; }
+.ce-line .ce-mark-elbo { align-items: flex-end; transform: translateX(calc(-100% + 11px)); }
+.ce-line .ce-mark-lpx { align-items: flex-start; transform: translateX(-11px); }
+.ce-line .ce-mark-elbo > b, .ce-line .ce-mark-elbo > span { margin-right: 18px; }
+.ce-line .ce-mark-lpx > b, .ce-line .ce-mark-lpx > span { margin-left: 18px; }
+.vw.w2 canvas + .vw-side { gap: 10px; }
+ol.exitq.tight { font-size: 21px; } ol.exitq.tight li { margin-bottom: 10px; } ol.exitq.tight .ans { font-size: 16.5px; margin-top: 3px; }
+.fr-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fr-pair figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.fr-pair figcaption { font-size: 18px; color: var(--ink-2); }
+.fr-pair figcaption b { font-variant-numeric: tabular-nums; }
+.gmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 22px; }
+.gmap > div { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; border-left: 6px solid var(--c); }
+.gmap b { display: block; font-size: 21px; margin-bottom: 4px; }
+.gmap > div > span { font-size: 18px; color: var(--ink-2); line-height: 1.3; display: block; }
+.gmap i { font-style: normal; font-weight: 700; color: var(--c); margin-right: 6px; }
+.chain { display: flex; flex-wrap: wrap; gap: 10px 8px; align-items: center; justify-content: center; font-size: 21px; }
+.chain > span { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+.chain > .arrow { border: none; background: none; padding: 0; color: var(--ink-3); font-size: 24px; }
 .enc-diagram { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: nowrap; }
 .enc-diagram .node { font-size: 19px; padding: 10px 12px; min-width: 0; }
 .enc-diagram .arrow { font-size: 26px; }

@@ -1,0 +1,158 @@
+
+<!-- ===================================================================== VI LECTURE · PART 5 · GRADIENTS THROUGH SAMPLES (G4) -->
+
+<section class="slide sec-v5 opener break" id="g-open" data-section="5 · Reparameterisation">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 5 of 9 · goal G4</p>
+      <h2>Gradients through random samples: the reparameterisation trick</h2>
+      <p class="why">We can estimate the KL to a mixture by sampling from $q$. To <b>minimise</b> it we need its gradient with respect to $q$'s parameters, and a random draw seems to have none.</p>
+    </div>
+    <!--viroute:5-->
+  </div>
+</section>
+
+<section class="slide sec-v5" id="g-graph1" data-section="5 · Reparameterisation">
+  <p class="kicker">The original formulation, as a computational graph</p>
+  <h2>The loss depends on loc and scale only through a random draw</h2>
+  <div class="body">
+    <!--svg:vik-graph-sample-->
+  </div>
+  <p class="q" data-b="2">Backpropagation needs a derivative at every node. "Draw a sample" has none: the path is blocked.</p>
+  <p class="src">PML notebook, cell 48 (reparam.001) · PML Lecture 23 at 35:26–37:46</p>
+  <aside class="notes">
+    <p>Squares are deterministic functions: we know how their output changes with their input. The dashed circle is a random draw: run it twice with the same loc and scale and you get different θ_s.</p>
+    <p>What is "the derivative of a sample with respect to loc"? As drawn, the question has no answer: the sampler is a black box that hands back a number.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="g-code" data-section="5 · Reparameterisation">
+  <p class="kicker">The same, in code <span class="nbref">▶ N5</span></p>
+  <h2>torch agrees: <code>sample()</code> cuts the graph</h2>
+  <div class="body">
+    <pre class="code" style="font-size:19px;width:1000px;margin:0 auto"><span class="line">loc = torch.tensor(<span class="n">2.0</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line">scale = torch.tensor(<span class="n">0.5</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line">q = dist.Normal(loc, scale)</span>
+<span class="line" data-hl="2">s = q.sample()</span>
+<span class="line" data-hl="2">s.backward()</span>
+<span class="line" data-b="2"><span class="c"># RuntimeError: element 0 of tensors does not require grad</span></span>
+<span class="line" data-b="2"><span class="c">#               and does not have a grad_fn</span></span></pre>
+    <div class="callout plain" style="width:1000px;margin:16px auto 0;font-size:21px" data-b="3">The sample <code>s</code> is a plain number with no history. Any loss built from it, like <code>kl_via_sampling</code>, gives no gradient to loc or scale.</div>
+  </div>
+  <p class="q" data-b="3">So we cannot yet train $q$ on the Monte Carlo KL. We need the randomness to sit somewhere else.</p>
+  <p class="src">PML notebook, cell 39 · PML Lecture 24 at 9:27–10:15</p>
+  <aside class="notes">
+    <p>torch is right to refuse: sample() draws with torch.no_grad(). The value of s does depend on loc and scale, but not through any operation autograd recorded.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="g-graph2" data-section="5 · Reparameterisation">
+  <p class="kicker">The reparameterised formulation</p>
+  <h2>Draw the noise from a fixed $\N(0, 1)$; then shift and stretch it</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:28px;margin:0 0 4px">$$\varepsilon \sim \N(0, 1), \qquad z = \text{loc} + \text{scale}\cdot\varepsilon \quad\Longrightarrow\quad z \sim \N(\text{loc},\ \text{scale}^2)$$</div>
+    <!--svg:vik-graph-reparam-->
+  </div>
+  <p class="q"><span class="exref" style="margin:0 8px 0 0">✎</span>Before the next click: what are $\partial z/\partial\,\text{loc}$ and $\partial z/\partial\,\text{scale}$?</p>
+  <p class="src">PML notebook, cells 43–45 and 49 (reparam.002) · PML Lecture 23 at 38:53–41:33</p>
+  <aside class="notes">
+    <p>Same distribution for z, different graph. The randomness now enters as an input, ε, which does not depend on any parameter. Everything between the parameters and the loss is a deterministic function, so backpropagation goes straight through.</p>
+    <p>Second click shows the answers: 1, and ε itself. Then check in code on the next slide.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="g-ex" data-section="5 · Reparameterisation">
+  <p class="kicker">Check the exercise in code <span class="nbref">▶ N5</span></p>
+  <h2>Now the draw has a gradient: $\partial z/\partial\,\text{loc} = 1$, $\partial z/\partial\,\text{scale} = \varepsilon$</h2>
+  <div class="body">
+    <pre class="code" style="font-size:19px;width:1000px;margin:0 auto"><span class="line">torch.manual_seed(<span class="n">42</span>)</span>
+<span class="line">loc = torch.tensor(<span class="n">2.0</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line">scale = torch.tensor(<span class="n">0.5</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line" data-hl="=1">eps = dist.Normal(<span class="n">0.</span>, <span class="n">1.</span>).sample()   <span class="c"># randomness that does not depend on loc or scale</span></span>
+<span class="line" data-hl="=1">z = loc + scale * eps                <span class="c"># the reparameterised draw</span></span>
+<span class="line" data-hl="2">z.backward()</span>
+<span class="line" data-b="2">loc.grad, scale.grad, eps            <span class="c"># 1.0000, {{vik.rep.eps}}, {{vik.rep.eps}}</span></span></pre>
+  </div>
+  <p class="q" data-b="2">The gradient with respect to scale is the noise that was drawn. Different draw, different gradient: noisy but unbiased.</p>
+  <p class="src">PML notebook, cell 44 · PML Lecture 24 at 11:02–13:26</p>
+  <aside class="notes">
+    <p>With seed 42 the first standard-normal draw is ε = {{vik.rep.eps}}. Averaged over many draws, the gradient of E[f(z)] is E[f′(z)] for loc and E[f′(z) ε] for scale: exactly what averaging these per-draw gradients estimates.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="g-rsample" data-section="5 · Reparameterisation">
+  <p class="kicker">You do not have to write it yourself <span class="nbref">▶ N5</span></p>
+  <h2><code>rsample</code> is a reparameterised sample</h2>
+  <div class="body">
+    <div class="codewalk" style="grid-template-columns:1.3fr 1fr">
+      <pre class="code" style="font-size:16px"><span class="line"><span class="c"># torch/distributions/normal.py</span></span>
+<span class="line"><span class="k">def</span> <span class="f">rsample</span>(self, sample_shape=torch.Size()):</span>
+<span class="line">    shape = self._extended_shape(sample_shape)</span>
+<span class="line" data-hl="=1">    eps = _standard_normal(shape, dtype=self.loc.dtype,</span>
+<span class="line" data-hl="=1">                           device=self.loc.device)</span>
+<span class="line" data-hl="=1">    <span class="k">return</span> self.loc + eps * self.scale</span>
+<span class="line"></span>
+<span class="line" data-hl="=2">z = dist.Normal(loc, scale).rsample()</span>
+<span class="line" data-hl="=2">z.backward()        <span class="c"># loc.grad = 1.0000, scale.grad = {{vik.rep.eps}}</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1">The same three lines as ours, inside torch.</p>
+        <p class="small" data-b="2">Same seed, same numbers as our hand-made version.</p>
+        <table class="work" style="font-size:19px" data-b="3">
+          <tr><th>family</th><th><code>has_rsample</code></th></tr>
+          <tr><td>Normal</td><td>True</td></tr>
+          <tr><td>Beta</td><td>True</td></tr>
+          <tr><td>Poisson</td><td>False</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Continuous families with a smooth sampler have one (the Beta's goes through Gamma draws). Counts cannot be shifted and stretched.</p>
+  <p class="src">PML notebook, cells 46–47 · PML Lecture 24 at 14:15–18:18</p>
+  <aside class="notes">
+    <p>The notebook prints this source with inspect.getsource(dist.Normal.rsample) and checks has_rsample for three families.</p>
+    <p>Beta.rsample is reparameterised through Dirichlet/Gamma sampling with implicit gradients; that is why the coin's Beta q in Part 7 can be trained. A Poisson draw is an integer: a small change in its rate either leaves it unchanged or makes it jump, so there is no useful derivative.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="g-fit" data-section="5 · Reparameterisation">
+  <p class="kicker">Goal G4: fit a Gaussian to the mixture <span class="nbref">▶ N5</span></p>
+  <h2>Change <code>sample</code> to <code>rsample</code>, and the Monte Carlo KL trains</h2>
+  <div class="body">
+    <pre class="code" style="font-size:16px;width:1080px;margin:0 auto 10px"><span class="line"><span class="k">def</span> <span class="f">kl_loss</span>(q, n_samples=<span class="n">5000</span>):</span>
+<span class="line" data-hl="1">    sample_set = q.rsample([n_samples])                       <span class="c"># reparameterised</span></span>
+<span class="line">    <span class="k">return</span> torch.mean(q.log_prob(sample_set) - p_s.log_prob(sample_set))</span>
+<span class="line">history = fit(TrainableNormal(loc=<span class="n">6.0</span>, scale=<span class="n">0.1</span>), kl_loss, steps=<span class="n">1500</span>, lr=<span class="n">0.05</span>)</span></pre>
+    <img class="fig" src="figures/data/vik-g4-fit.svg" style="width:820px;margin:0 auto" data-b="2">
+  </div>
+  <p class="q" data-b="2">From $\N(6, 0.1^2)$ to $\N({{vik.g4.m}}, {{vik.g4.s}}^2)$: one Gaussian across both bumps, Monte Carlo KL about {{vik.g4.kl}}.</p>
+  <p class="src">PML notebook, cells 50–58 (kl_qp_mg.gif) · PML Lecture 24 at 20:03–21:51</p>
+  <aside class="notes">
+    <p>The PML run ended at N({{vik.g4.pml_m}}, {{vik.g4.pml_s}}²); ours at N({{vik.g4.m}}, {{vik.g4.s}}²). The right panel is the Monte Carlo KL on a log axis: it falls from about 50 and then fluctuates, because each step uses a fresh set of draws.</p>
+    <p>Here the two bumps overlap, so the best single Gaussian sits across both. Compare Part 2, where with well-separated bumps reverse KL picked one.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="g-live" data-section="5 · Reparameterisation">
+  <p class="kicker">Watch it</p>
+  <h2>Press play: 200 reparameterised draws per step</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="chase" data-mode="mc" data-mix="0.5,0.5|-0.2,1|0.4,0.5" data-xlo="-3" data-xhi="8" data-init="6,0.1" data-steps="1500" data-draws="200" data-lr="0.05">
+      <div class="col" style="gap:10px">
+        <canvas width="640" height="250"></canvas>
+        <canvas width="640" height="170"></canvas>
+      </div>
+      <div class="vw-side">
+        <div class="vw-btns"><button data-a="play">play</button><button data-a="reset">reset</button></div>
+        <p class="vw-read">step <b class="ch-step">0</b> of 1,500</p>
+        <p class="vw-big">$q = \N($<span class="ch-m">6.00</span>, <span class="ch-s">0.10</span>$^2)$</p>
+        <p class="vw-read">Monte Carlo $\KL(q\,\|\,p) \approx$ <b class="ch-kl">—</b></p>
+        <div class="lg"><span><i class="fill" style="--c:var(--x);--f:var(--x-t)"></i>mixture $p$</span><span><i style="--c:var(--enc)"></i>$q$</span><span><i style="--c:var(--loss)"></i>KL estimate (log scale)</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q">Each step: draw $\varepsilon$, form $z = \text{loc} + \text{scale}\cdot\varepsilon$, average $\log q(z) - \log p(z)$, and follow its gradient.</p>
+  <aside class="notes">
+    <p>The browser version: 200 standard-normal draws per step, the gradient of the Monte Carlo KL through z = loc + scale·ε written out by hand (the mixture's d log p/dz is a weighted sum over its two components), Adam with learning rate 0.05, softplus scale.</p>
+    <p>It ends within Monte Carlo noise of the notebook's N({{vik.g4.m}}, {{vik.g4.s}}²). The KL readout is a 200-draw estimate, so it wobbles around the notebook's 5,000-draw value of {{vik.g4.kl}}; the loss curve never settles to a line for the same reason, and that is harmless. Print and PDF show the end state.</p>
+  </aside>
+</section>

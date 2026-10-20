@@ -1,0 +1,180 @@
+
+<!-- ===================================================================== VI LECTURE · PART 7 · WORKED EXAMPLE: THE COIN -->
+
+<section class="slide sec-v7 opener break" id="c-open" data-section="7 · The coin">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 7 of 9 · worked example</p>
+      <h2>Variational inference for the coin, start to finish</h2>
+      <p class="why">Part 1's coin: prior $\mathrm{Beta}(5, 3)$, 17 heads in 30. We know the answer, $\mathrm{Beta}(22, 16)$ and $\log p(D) = {{vik.coin.log_ev2}}$, so we can check every step. VI will use only the joint.</p>
+    </div>
+    <!--viroute:7-->
+  </div>
+</section>
+
+<section class="slide sec-v7" id="c-model" data-section="7 · The coin">
+  <p class="kicker">The model, as functions <span class="nbref">▶ N7</span></p>
+  <h2>All VI needs from the model is $\log p(D, \theta)$ at any $\theta$</h2>
+  <div class="body">
+    <div class="codewalk" style="grid-template-columns:1.35fr 1fr">
+      <pre class="code" style="font-size:17px"><span class="line" data-hl="=1">prior = dist.Beta(<span class="n">5.</span>, <span class="n">3.</span>)</span>
+<span class="line"></span>
+<span class="line" data-hl="=2"><span class="k">def</span> <span class="f">log_likelihood</span>(theta):          <span class="c"># 17 heads, 13 tails</span></span>
+<span class="line" data-hl="=2">    <span class="k">return</span> <span class="n">17</span> * torch.log(theta) + <span class="n">13</span> * torch.log1p(-theta)</span>
+<span class="line"></span>
+<span class="line" data-hl="=3"><span class="k">def</span> <span class="f">log_joint</span>(theta):</span>
+<span class="line" data-hl="=3">    <span class="k">return</span> log_likelihood(theta) + prior.log_prob(theta)</span>
+<span class="line"></span>
+<span class="line" data-hl="4">true_posterior = dist.Beta(<span class="n">5</span> + <span class="n">17</span>, <span class="n">3</span> + <span class="n">13</span>)   <span class="c"># only to check</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Prior</b> $\log p(\theta)$: torch's Beta has <code>log_prob</code>.</p>
+        <p class="small" data-b="=2"><b>Likelihood</b> $\log p(D\mid\theta)$: the sum over tosses of $\log\theta$ or $\log(1-\theta)$. It works on a whole batch of $\theta$'s at once.</p>
+        <p class="small" data-b="=3"><b>Joint</b> $\log p(D, \theta)$: the unnormalised log posterior, what the ELBO uses.</p>
+        <p class="small" data-b="4"><b>The true posterior</b> is never used by VI. We keep it to check the answer.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="4">No evidence anywhere: the model is a prior and a likelihood, as in any Bayesian model.</p>
+  <p class="src">PML notebook, cells 62–65 · PML Lecture 24 at 30:14–37:42 · companion: <code>vu.Coin</code></p>
+  <aside class="notes">
+    <p>The PML notebook writes the likelihood with dist.Bernoulli(theta).log_prob(data).sum(); the counts form here is the same number and handles a batch of thetas. In the companion notebook these are coin.log_likelihood and coin.log_joint (with a clamp, because a Beta draw can underflow to exactly 0).</p>
+  </aside>
+</section>
+
+<section class="slide sec-v7" id="c-which" data-section="7 · The coin">
+  <p class="kicker">Which family for $q$?</p>
+  <h2>$\theta$ lives in $[0, 1]$, so let $q$ be a $\mathrm{Beta}(\alpha, \beta)$</h2>
+  <div class="body">
+    <div class="steps2">
+      <div class="callout dec"><h3>$q = \mathrm{Beta}(\alpha, \beta)$</h3><p class="small" style="margin:0">Right support, two parameters, and an <code>rsample</code> (Part 5). Here it even contains the true posterior, so VI can be exact.</p></div>
+      <div class="callout plain" data-b="2"><h3>$q = \N(\mu, \sigma^2)$?</h3><p class="small" style="margin:0">It puts mass below 0 and above 1, where $\log p(D\mid\theta)$ is undefined. The fix is to fit a Normal to $\mathrm{logit}(\theta)$ instead: automatic differentiation VI (ADVI) does this for every constrained parameter.</p></div>
+    </div>
+    <p class="small" style="text-align:center;margin-top:18px" data-b="3">Parameters $\psi = (\alpha, \beta)$, both kept positive with softplus, as the scale was in Part 3.</p>
+  </div>
+  <p class="q" data-b="3">In general the family will not contain the posterior; VI then finds the closest member. Here we get to see it hit the target.</p>
+  <p class="src">PML Lecture 24 at 31:50–32:37 and 47:15–48:04</p>
+  <aside class="notes">
+    <p>The choice of family is the modelling decision in VI. Too simple and the KL cannot reach zero; too rich and it is hard to sample or to optimise.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v7" id="c-negelbo" data-section="7 · The coin">
+  <p class="kicker">The loss: minus the ELBO, by Monte Carlo <span class="nbref">▶ N7</span></p>
+  <h2><code>neg_elbo</code>: four lines, one per term of the formula</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:27px">$$-\ELBO(q) \approx -\frac1S\sum_{s=1}^{S}\big[\log p(D, \theta_s) - \log q(\theta_s)\big], \qquad \theta_s \sim q \text{ (reparameterised)}$$</div>
+    <div class="codewalk" style="grid-template-columns:1.4fr 1fr;margin-top:4px">
+      <pre class="code" style="font-size:16.5px"><span class="line"><span class="k">def</span> <span class="f">neg_elbo</span>(log_joint_fn, q, n_mc_samples=<span class="n">100</span>):</span>
+<span class="line" data-hl="=1">    theta = q.rsample([n_mc_samples])     <span class="c"># draws from q, with gradients</span></span>
+<span class="line" data-hl="=2">    log_q_theta = q.log_prob(theta)</span>
+<span class="line" data-hl="=2">    log_joint = log_joint_fn(theta)</span>
+<span class="line" data-hl="=3">    <span class="k">return</span> -(log_joint - log_q_theta).mean()</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><code>rsample</code>, not <code>sample</code>, so the loss can be differentiated with respect to $\alpha$ and $\beta$.</p>
+        <p class="small" data-b="=2">Evaluate $\log q$ and $\log p(D, \theta)$ at the same 100 draws.</p>
+        <p class="small" data-b="3">Average, and flip the sign: optimisers minimise.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Compare Part 4's <code>kl_via_sampling</code>: the same code, with the joint in place of the target density.</p>
+  <p class="src">PML notebook, cells 66–67 · PML Lecture 24 at 38:29–40:57</p>
+  <aside class="notes">
+    <p>This is the PML notebook's function, unchanged. Its minimum over q is −log p(D) = {{vik.coin.neg_log_ev}}, reached when q is the posterior.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v7" id="c-score" data-section="7 · The coin">
+  <p class="kicker">Score two guesses <span class="nbref">▶ N7</span></p>
+  <h2>A bad $q$ scores in the hundreds; the posterior scores exactly $-\log p(D)$</h2>
+  <div class="body">
+    <table class="work" style="font-size:22px;margin:0 auto">
+      <tr><th>$q$</th><th><code>neg_elbo</code></th><th></th></tr>
+      <tr><td>$\mathrm{Beta}(0.1, 2)$: almost all mass near 0</td><td>{{vik.coinvi.bad}}</td><td>PML runs: {{vik.coinvi.pml_bad1}}, {{vik.coinvi.pml_bad2}}</td></tr>
+      <tr data-b="2"><td>$\mathrm{Beta}(22, 16)$: the true posterior</td><td><b>{{vik.coinvi.good}}</b></td><td>$= -\log p(D)$, every run</td></tr>
+    </table>
+    <div class="callout plain" style="width:980px;margin:18px auto 0;font-size:21px" data-b="3">Why exact? When $q$ is the posterior, $\log p(D, \theta) - \log q(\theta) = \log p(D)$ for <b>every</b> $\theta$. Each of the 100 draws gives the same number, so the estimate has no noise at all.</div>
+  </div>
+  <p class="q" data-b="3">The first is a Monte Carlo estimate and changes from run to run. The second is the bound itself.</p>
+  <p class="src">PML notebook, cells 68–69 (both versions of the notebook) · PML Lecture 24 at 40:57–41:46</p>
+  <aside class="notes">
+    <p>Beta(0.1, 2) puts most draws at θ extremely close to 0, where 17 log θ is hugely negative; a few draws dominate the average, so the estimate varies a lot between runs. Ours used seed 0.</p>
+    <p>The zero-variance property at the optimum is worth stating: the closer q is to the posterior, the less noisy the ELBO estimate.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v7" id="c-train" data-section="7 · The coin">
+  <p class="kicker">Train it <span class="nbref">▶ N7</span></p>
+  <h2>From $\mathrm{Beta}(45, 45)$ to $\mathrm{Beta}({{vik.coinvi.a1}}, {{vik.coinvi.b1}})$ in 3,000 steps</h2>
+  <div class="body">
+    <pre class="code" style="font-size:16.5px;width:1080px;margin:0 auto 10px"><span class="line">q_beta = TrainableBeta(alpha=<span class="n">45.0</span>, beta=<span class="n">45.0</span>)        <span class="c"># the PML notebook's starting point</span></span>
+<span class="line">history = fit(q_beta, <span class="k">lambda</span> q: neg_elbo(log_joint, q), steps=<span class="n">3000</span>, lr=<span class="n">0.05</span>)</span>
+<span class="line" data-b="2">q_beta    <span class="c"># TrainableBeta(alpha={{vik.coinvi.a}}, beta={{vik.coinvi.b}});  true posterior: Beta(22, 16)</span></span></pre>
+    <img class="fig" src="figures/data/vik-coin-vi.svg" style="width:860px;margin:0 auto" data-b="2">
+  </div>
+  <p class="q" data-b="2">VI recovered the posterior from the joint alone, and $-\ELBO$ settled at ${{vik.coinvi.final}} = -\log p(D)$.</p>
+  <p class="src">PML notebook, cells 70–71 · PML Lecture 24 at 41:46–42:32</p>
+  <aside class="notes">
+    <p>The remaining error, 22.6 vs 22 and 16.4 vs 16, is Monte Carlo noise in the gradient with 100 draws per step; it shrinks with more draws or a decaying learning rate. The mean of the fitted q is within 0.001 of the posterior mean.</p>
+    <p>Right panel: −ELBO per step (grey) and its running average (red), against −log p(D) (dashed). It cannot go below the dashed line, except by Monte Carlo noise.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v7" id="c-live" data-section="7 · The coin">
+  <p class="kicker">Watch it</p>
+  <h2>Press play: gradient ascent on the coin's ELBO</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="coinelbo" data-heads="17" data-tails="13" data-pa="5" data-pb="3">
+      <canvas width="560" height="330"></canvas>
+      <div class="vw-side">
+        <div class="vw-btns"><button data-a="play">play: fit from Beta(45, 45)</button></div>
+        <label class="sl">$\alpha$<input type="range" min="1" max="60" step="0.1" value="45"><b class="ce-a">45.0</b></label>
+        <label class="sl">$\beta$<input type="range" min="1" max="60" step="0.1" value="45"><b class="ce-b">45.0</b></label>
+        <p class="vw-read">step <b class="ce-step">0</b> · $\ELBO = $ <b class="ce-elbo">—</b> · $\KL = $ <b class="ce-kl">—</b></p>
+        <div class="numline vf-line ce-line">
+          <div class="nl-track"></div>
+          <div class="nl-mark ce-mark-elbo" style="left:40%;--c:var(--dec)"><b>ELBO</b><span class="ce-elbo">—</span></div>
+          <div class="nl-mark ce-mark-lpx" style="left:80%;--c:var(--x)"><b>$\log p(D)$</b><span class="ce-lpx">—</span></div>
+          <div class="nl-gap" style="left:40%;width:40%"><span>KL <span class="ce-kl">—</span></span></div>
+        </div>
+        <div class="vf-ends"><span class="ce-lo">—</span><span class="ce-hi">—</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q">The bracket closes as $q$ lands on the posterior: the ELBO meets $\log p(D)$ and the KL goes to zero.</p>
+  <aside class="notes">
+    <p>The browser version uses the exact ELBO on a grid and Adam (learning rate 0.05) in softplus coordinates, 3,000 steps; without Monte Carlo noise it lands on Beta(22.0, 16.0). The sliders move with it; you can also drag them to restart from anywhere.</p>
+    <p>The starting point, Beta(45, 45), already has a small KL (0.63): both curves sit near θ = 0.5–0.6. Most of the training is spent fixing the width and the small shift. Print and PDF show the end of the fit.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v7" id="c-pyro" data-section="7 · The coin">
+  <p class="kicker">The same in Pyro (optional) <span class="nbref">▶ N7</span></p>
+  <h2>A model, a guide, and <code>SVI</code> with <code>Trace_ELBO</code></h2>
+  <div class="body">
+    <div class="codewalk" style="grid-template-columns:1.4fr 1fr">
+      <pre class="code" style="font-size:15.5px"><span class="line" data-hl="=1"><span class="k">def</span> <span class="f">model</span>(data):</span>
+<span class="line" data-hl="=1">    theta = pyro.sample(<span class="n">"theta"</span>, dist.Beta(<span class="n">5.</span>, <span class="n">3.</span>))</span>
+<span class="line" data-hl="=1">    <span class="k">with</span> pyro.plate(<span class="n">"data"</span>, len(data)):</span>
+<span class="line" data-hl="=1">        pyro.sample(<span class="n">"obs"</span>, dist.Bernoulli(theta), obs=data)</span>
+<span class="line"></span>
+<span class="line" data-hl="=2"><span class="k">def</span> <span class="f">guide</span>(data):</span>
+<span class="line" data-hl="=2">    a = pyro.param(<span class="n">"alpha_q"</span>, torch.tensor(<span class="n">45.</span>), constraint=positive)</span>
+<span class="line" data-hl="=2">    b = pyro.param(<span class="n">"beta_q"</span>, torch.tensor(<span class="n">45.</span>), constraint=positive)</span>
+<span class="line" data-hl="=2">    pyro.sample(<span class="n">"theta"</span>, dist.Beta(a, b))</span>
+<span class="line"></span>
+<span class="line" data-hl="=3">svi = SVI(model, guide, Adam({<span class="n">"lr"</span>: <span class="n">0.05</span>}), loss=Trace_ELBO())</span>
+<span class="line" data-hl="=3"><span class="k">for</span> step <span class="k">in</span> range(<span class="n">8000</span>): svi.step(data)</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Model</b>: prior and likelihood, as sampling statements.</p>
+        <p class="small" data-b="=2"><b>Guide</b>: our $q$, with learnable $\alpha$, $\beta$. The names must match the model's.</p>
+        <p class="small" data-b="3"><b>SVI</b> builds <code>neg_elbo</code> for us. The PML run ended near $\alpha \approx {{vik.coinvi.pyro_a}}$, $\beta \approx {{vik.coinvi.pyro_b}}$.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Probabilistic programming languages automate exactly what we wrote by hand.</p>
+  <p class="src">PML notebook, cells 72–77 · PML Lecture 24 at 42:32–45:41</p>
+  <aside class="notes">
+    <p>Pyro is not installed in the course environment, so the companion notebook's cell is guarded and prints the PML run's result. pip install pyro-ppl to run it.</p>
+    <p>Trace_ELBO runs the guide to draw θ, runs the model with that θ to score log p(D, θ), and subtracts log q(θ): our neg_elbo with one draw per step by default.</p>
+  </aside>
+</section>

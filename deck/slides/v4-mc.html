@@ -1,0 +1,127 @@
+
+<!-- ===================================================================== VI LECTURE · PART 4 · NO FORMULA: MONTE CARLO (G3, G5) -->
+
+<section class="slide sec-v4 opener break" id="m-open" data-section="4 · Monte Carlo">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 4 of 9 · goals G3 and G5</p>
+      <h2>When there is no formula for the KL, estimate it by sampling</h2>
+      <p class="why">Real posteriors are not Gaussian, so the KL between our $q$ and the target has no formula. But a KL is an average under $q$, and we can draw from $q$ as often as we like.</p>
+    </div>
+    <!--viroute:4-->
+  </div>
+</section>
+
+<section class="slide sec-v4" id="m-mixb" data-section="4 · Monte Carlo">
+  <p class="kicker">A target from another family <span class="nbref">▶ N4</span></p>
+  <h2>Two bumps, and two Gaussian candidates. Which is closer?</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-g3.svg" style="width:560px">
+      <div class="col grow">
+        <div class="mathblock left" style="font-size:23px">$$p = 0.5\,\N(-0.2,\ 0.4^2) + 0.5\,\N(1,\ 0.5^2)$$</div>
+        <p class="small">$q_1 = \N(3, 1^2)$: the right sort of width, in the wrong place.</p>
+        <p class="small">$q_2 = \N(3, 4.5^2)$: so wide that it covers $p$, and much else.</p>
+        <p class="small" data-b="2"><b>Vote</b>, using Part 2: which one does $\KL(q\,\|\,p)$ prefer?</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">Remember: $\KL(q\|p)$ averages under $q$, so it punishes $q$ for mass where $p$ has almost none.</p>
+  <p class="src">PML notebook, cells 23–28 (dkl-different.png) · PML Lecture 23 at 28:48–29:36</p>
+  <aside class="notes">
+    <p>The mixture is torch's MixtureSameFamily: a Categorical over two components and a Normal with two locs and two scales. In the companion notebook it is vu.mog([0.5, 0.5], [−0.2, 1.0], [0.4, 0.5]).</p>
+    <p>Most students vote for q₂ because it overlaps p. The answer, two slides on, is q₁ by a factor of five.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v4" id="m-noimpl" data-section="4 · Monte Carlo">
+  <p class="kicker">Ask torch <span class="nbref">▶ N4</span></p>
+  <h2>torch has no formula between a Gaussian and a mixture</h2>
+  <div class="body">
+    <pre class="code" style="font-size:18px;width:1050px;margin:0 auto"><span class="line">p_s = MixtureSameFamily(Categorical(torch.tensor([<span class="n">0.5</span>, <span class="n">0.5</span>])),</span>
+<span class="line">                        Normal(torch.tensor([-<span class="n">0.2</span>, <span class="n">1.0</span>]), torch.tensor([<span class="n">0.4</span>, <span class="n">0.5</span>])))</span>
+<span class="line">q_1 = dist.Normal(<span class="n">3.</span>, <span class="n">1.</span>)</span>
+<span class="line"></span>
+<span class="line" data-hl="2">dist.kl_divergence(q_1, p_s)</span>
+<span class="line" data-b="2"><span class="c"># NotImplementedError: No KL(p || q) is implemented for p type Normal</span></span>
+<span class="line" data-b="2"><span class="c">#                      and q type MixtureSameFamily</span></span></pre>
+    <div class="callout plain" style="width:1050px;margin:16px auto 0;font-size:21px" data-b="3">The KL of a Gaussian from a mixture of Gaussians is an integral of $\log$ of a sum. It has no closed form. Neither will the KL to a real posterior.</div>
+  </div>
+  <p class="q" data-b="3">We cannot integrate it. Can we average it?</p>
+  <p class="src">PML notebook, cell 29 · PML Lecture 23 at 29:36–30:24</p>
+  <aside class="notes">
+    <p>torch keeps a registry of KL formulas for pairs of families (@register_kl, as in Part 2's _kl_normal_normal). Normal–MixtureSameFamily is not in it, because there is nothing to register.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v4" id="m-mc" data-section="4 · Monte Carlo">
+  <p class="kicker">Monte Carlo, the general form</p>
+  <h2>Any average under $p$ can be estimated from draws of $p$</h2>
+  <div class="body">
+    <div class="row" style="gap:40px;justify-content:center">
+      <img class="fig" src="figures/data/vik-darts.svg" style="height:380px">
+      <div class="col" style="width:660px">
+        <div class="mathblock left" style="font-size:24px">$$\E_{x\sim p}\big[f(x)\big] = \int f(x)\,p(x)\,dx \;\approx\; \frac1N\sum_{i=1}^{N} f(x_i), \quad x_i\sim p$$</div>
+        <p class="small" data-b="2">Example: darts thrown uniformly at the unit square. A dart lands inside the quarter circle with probability $\pi/4$, so</p>
+        <div class="mathblock left" style="font-size:24px" data-b="2">$$\pi \approx 4\times\frac{\text{darts inside}}{\text{darts thrown}} = 4\times\frac{ {{vik.darts.inside}} }{1000} = {{vik.darts.est}}$$</div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">An integral became an average of random draws. We need only to sample from $p$ and to evaluate $f$.</p>
+  <p class="src">PML Sampling-1, "General Form" and "Estimating Pi" · notebook mc_sampling_intro.ipynb</p>
+  <aside class="notes">
+    <p>Here f(x) is 1 if the dart is inside and 0 otherwise, and p is uniform on the square. The estimate is unbiased: averaged over many repetitions it is exactly π.</p>
+    <p>The question for the KL: what plays the role of p, and what of f?</p>
+  </aside>
+</section>
+
+<section class="slide sec-v4" id="m-klsamp" data-section="4 · Monte Carlo">
+  <p class="kicker">Goal G3: the KL by sampling <span class="nbref">▶ N4</span></p>
+  <h2>Draw from $q$, average $\log q - \log p$</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:27px">$$\KL(q\,\|\,p) = \E_{\theta\sim q}\big[\log q(\theta) - \log p(\theta)\big] \approx \frac1N\sum_{i=1}^{N}\big[\log q(\theta_i) - \log p(\theta_i)\big], \quad \theta_i\sim q$$</div>
+    <div class="codewalk" style="grid-template-columns:1.25fr 1fr;margin-top:4px">
+      <pre class="code" style="font-size:16px"><span class="line" data-hl="=2"><span class="k">def</span> <span class="f">kl_via_sampling</span>(q, p, n_samples=<span class="n">100_000</span>):</span>
+<span class="line" data-hl="=2">    sample_set = q.sample([n_samples])     <span class="c"># from the FIRST argument</span></span>
+<span class="line" data-hl="=2">    <span class="k">return</span> torch.mean(q.log_prob(sample_set) - p.log_prob(sample_set))</span></pre>
+      <table class="work" style="font-size:19px" data-b="3">
+        <tr><th></th><th>exact</th><th>sampling</th></tr>
+        <tr><td>$\KL(q_1\,\|\,q_2)$, two Gaussians</td><td>{{vik.g3.exact}}</td><td>{{vik.g3.mc}}</td></tr>
+        <tr data-b="4"><td>$\KL(q_1\,\|\,p)$, mixture</td><td>none</td><td><b>{{vik.g3.q1}}</b></td></tr>
+        <tr data-b="4"><td>$\KL(q_2\,\|\,p)$, mixture</td><td>none</td><td>{{vik.g3.q2}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="4">Check it where we know the answer, then use it where we do not: $q_1$ wins, by a factor of five.</p>
+  <p class="src">PML notebook, cells 30–35 · PML Lecture 23 at 30:24–34:39 · Lecture 24 at 6:18–8:40</p>
+  <aside class="notes">
+    <p>Three lines, no integral. All we need from q is .sample and .log_prob; all we need from p is .log_prob, which a mixture has. For a posterior, log p(θ | D) is the one thing we cannot evaluate; Part 6 deals with that.</p>
+    <p>The PML run gave 1.0273, 9.46 and 45.27; ours (seed 0) gives the numbers shown. They differ in the second decimal because they are random estimates.</p>
+    <p>Why q₂ loses: it puts much of its mass at θ = 6 to 10, where the mixture's density is essentially zero, so log q − log p is enormous there.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v4" id="m-g5" data-section="4 · Monte Carlo">
+  <p class="kicker">Goal G5: how many samples? <span class="nbref">▶ N4</span></p>
+  <h2>Unbiased, but the noise shrinks only like $1/\sqrt{N}$</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-g5.svg" style="width:540px">
+      <div class="col grow">
+        <p class="small">Run <code>kl_via_sampling</code> 200 times for each $N$, on $\KL(q_1\,\|\,q_2)$ where the answer is {{vik.g3.exact}}.</p>
+        <table class="work" style="font-size:20px" data-b="2">
+          <tr><th>$N$</th><th>{{vik.g5.ns.0}}</th><th>{{vik.g5.ns.1}}</th><th>{{vik.g5.ns.2}}</th><th>{{vik.g5.ns.3}}</th></tr>
+          <tr><td>spread</td><td>{{vik.g5.spread.0}}</td><td>{{vik.g5.spread.1}}</td><td>{{vik.g5.spread.2}}</td><td>{{vik.g5.spread.3}}</td></tr>
+        </table>
+        <p class="small" data-b="3">The average is right at every $N$ (unbiased). Each 100× more samples buys 10× less noise.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">For training we only need an unbiased estimate: a noisy loss gives a noisy, but correct on average, gradient.</p>
+  <p class="src">PML Sampling-1, "Unbiased Estimator?" · Jia-Bin Huang, 7:02–11:00</p>
+  <aside class="notes">
+    <p>The spread is the standard deviation over the 200 repetitions. 0.212 → 0.065 → 0.021 → 0.007: about √10 ≈ 3.2 times smaller for each tenfold N.</p>
+    <p>Jia-Bin Huang shows a lower-variance estimator of the same KL: average (r − 1) − log r with r = p(θ)/q(θ). It has the same mean, because E_q[r − 1] = 0, and every term is non-negative.</p>
+    <p>The catch for the next part: we now want to minimise this estimate by gradient descent. But the loss is computed from random draws. What is its gradient?</p>
+  </aside>
+</section>

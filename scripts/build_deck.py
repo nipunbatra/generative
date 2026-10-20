@@ -81,7 +81,7 @@ SESSIONS = {
     "part2.html": ("Session 2 · KL, variational inference, the VAE", ["05", "06", "07", "08", "09"]),
     "index.html": ("Generative Modelling I · VAEs", ["01", "02", "03", "04", "05", "06", "07", "08", "09"]),
     # the maths lecture before the VAE: deck/slides/v0-*.html ... v8-*.html, its own 8-part route
-    "vi.html": ("KL divergence and variational inference", ["v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8"]),
+    "vi.html": ("KL divergence and variational inference", ["v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9"]),
 }
 
 
@@ -93,9 +93,10 @@ PARTS = [
 
 
 VI_PARTS = [
-    ("--x", "Bayes: prior, likelihood, posterior"), ("--z", "Why the posterior is hard"), ("--dec", "Averages from samples"),
-    ("--loss", "KL divergence"), ("--enc", "Variational inference and the ELBO"), ("--z", "Climbing the ELBO: gradients through samples"),
-    ("--dec", "Beyond one number"), ("--enc", "Many data points: towards the VAE"),
+    ("--x", "Recap: Bayes, and why the evidence is hard"), ("--z", "KL divergence: how far is q from p?"),
+    ("--dec", "Fitting q by gradient descent"), ("--loss", "No formula for KL? Monte Carlo"),
+    ("--enc", "Gradients through samples"), ("--z", "The ELBO"), ("--dec", "VI for the coin"),
+    ("--x", "Linear regression: correlated weights"), ("--enc", "Neural networks and the VAE"),
 ]
 
 

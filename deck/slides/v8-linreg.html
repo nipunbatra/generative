@@ -1,0 +1,87 @@
+
+<!-- ===================================================================== VI LECTURE · PART 8 · WORKED EXAMPLE: LINEAR REGRESSION (G6) -->
+
+<section class="slide sec-v8 opener break" id="l-open" data-section="8 · Linear regression">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 8 of 9 · worked example · goal G6</p>
+      <h2>Two weights at once: VI for linear regression</h2>
+      <p class="why">The same <code>neg_elbo</code>, now with a 2-D $\theta$ and a 2-D Gaussian $q$. Bayesian linear regression has an exact posterior, so once more we can check the answer. If time is short, this part is homework: notebook N8.</p>
+    </div>
+    <!--viroute:8-->
+  </div>
+</section>
+
+<section class="slide sec-v8" id="l-model" data-section="8 · Linear regression">
+  <p class="kicker">The model, and the only new line <span class="nbref">▶ N8</span></p>
+  <h2>$y = 3x + 4 + \text{noise}$, and a Gaussian $q$ over (intercept, slope)</h2>
+  <div class="body">
+    <div class="codewalk" style="grid-template-columns:1.4fr 1fr">
+      <pre class="code" style="font-size:16px"><span class="line" data-hl="=1">x = torch.linspace(-<span class="n">5</span>, <span class="n">5</span>, n_points)</span>
+<span class="line" data-hl="=1">y = <span class="n">3</span> * x + <span class="n">4</span> + <span class="n">5</span> * torch.randn(n_points)</span>
+<span class="line" data-hl="=1">prior = dist.MultivariateNormal(torch.zeros(<span class="n">2</span>), torch.eye(<span class="n">2</span>))</span>
+<span class="line"></span>
+<span class="line" data-hl="=2"><span class="k">def</span> <span class="f">log_joint</span>(theta):                  <span class="c"># theta: [n, 2]</span></span>
+<span class="line" data-hl="=2">    mean = theta[:, :<span class="n">1</span>] + theta[:, <span class="n">1</span>:] * x</span>
+<span class="line" data-hl="=2">    log_lik = dist.Normal(mean, <span class="n">5.</span>).log_prob(y).sum(-<span class="n">1</span>)</span>
+<span class="line" data-hl="=2">    <span class="k">return</span> log_lik + prior.log_prob(theta)</span>
+<span class="line"></span>
+<span class="line" data-hl="=3"><span class="k">def</span> <span class="f">neg_elbo</span>(q, n=<span class="n">100</span>):</span>
+<span class="line" data-hl="=3">    theta = q.rsample([n])</span>
+<span class="line" data-hl="=3">    <span class="k">return</span> -(log_joint(theta) - q.log_prob(theta)).mean()</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1">The PML notebook's data: noise of scale 5, prior $\theta\sim\N(0, I)$.</p>
+        <p class="small" data-b="=2">Each row of <code>theta</code> is one line; the likelihood scores it on every point.</p>
+        <p class="small" data-b="3">The coin's <code>neg_elbo</code>, unchanged. Two choices of $q$: a <b>diagonal</b> Gaussian (two means, two widths) or a <b>full</b> one, $\Sigma = LL^\top$ (one more number, the tilt).</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Nothing about VI changed. Only the model's <code>log_joint</code> and the shape of $q$.</p>
+  <p class="src">PML notebook, cells 78–82 · PML Lecture 24 at 56:55–57:47</p>
+  <aside class="notes">
+    <p>In the companion notebook the model is vu.LinReg, and q is vu.TrainableGaussian2D(full=False or True), each trained with vu.fit for 2,000 steps. The likelihood uses the true noise scale, 5, so that the exact posterior is available to compare.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v8" id="l-20" data-section="8 · Linear regression">
+  <p class="kicker">20 points <span class="nbref">▶ N8</span></p>
+  <h2>Both $q$'s land on the exact posterior, and give a band of lines</h2>
+  <div class="body">
+    <div class="row" style="gap:22px">
+    <img class="fig" src="figures/data/vik-linreg-vi-20.svg" style="width:780px">
+    <table class="work" style="font-size:18px" data-b="2">
+      <tr><th></th><th>intercept</th><th>slope</th></tr>
+      <tr><td>exact<br>mean, sd</td><td>{{vik.linreg.n20.exact_m.0}}, {{vik.linreg.n20.exact_s.0}}</td><td>{{vik.linreg.n20.exact_m.1}}, {{vik.linreg.n20.exact_s.1}}</td></tr>
+      <tr><td>full $q$<br>by VI</td><td>{{vik.linreg.n20.q_m.0}}, {{vik.linreg.n20.q_s.0}}</td><td>{{vik.linreg.n20.q_m.1}}, {{vik.linreg.n20.q_s.1}}</td></tr>
+    </table>
+    </div>
+  </div>
+  <p class="q" data-b="2">The intercept is pulled from 4 towards the prior's 0: with 20 noisy points, the prior still matters.</p>
+  <p class="src">PML notebook, cells 83–86 · PML Lecture 24 at 57:47–1:01:57</p>
+  <aside class="notes">
+    <p>Left: the exact posterior (blue contours) with the diagonal (purple) and full (teal) q's. They overlap because x is centred on zero: then intercept and slope are uncorrelated in the posterior (exact ρ = {{vik.linreg.n20.exact_rho}}), and a diagonal q loses nothing. The full q's fitted correlation, {{vik.linreg.n20.rho}}, is optimisation noise.</p>
+    <p>Right: 1,000 lines drawn from q; the band is ±2 sd of their predictions. This is epistemic uncertainty only (about θ), not the noise in y.</p>
+    <p>Exercise for the notebook: shift x to [0, 10]. Intercept and slope become strongly correlated, and the diagonal q shrinks, as in Part 3's 2-D example.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v8" id="l-200" data-section="8 · Linear regression">
+  <p class="kicker">200 points <span class="nbref">▶ N8</span></p>
+  <h2>Ten times the data: the posterior, and the band, shrink</h2>
+  <div class="body">
+    <div class="row" style="gap:22px">
+    <img class="fig" src="figures/data/vik-linreg-vi-200.svg" style="width:780px">
+    <table class="work" style="font-size:18px" data-b="2">
+      <tr><th></th><th>intercept</th><th>slope</th></tr>
+      <tr><td>exact<br>mean, sd</td><td>{{vik.linreg.n200.exact_m.0}}, {{vik.linreg.n200.exact_s.0}}</td><td>{{vik.linreg.n200.exact_m.1}}, {{vik.linreg.n200.exact_s.1}}</td></tr>
+      <tr><td>full $q$<br>by VI</td><td>{{vik.linreg.n200.q_m.0}}, {{vik.linreg.n200.q_s.0}}</td><td>{{vik.linreg.n200.q_m.1}}, {{vik.linreg.n200.q_s.1}}</td></tr>
+    </table>
+    </div>
+  </div>
+  <p class="q" data-b="2">The widths fall two to three times, and the intercept moves close to 4: now the data dominate the prior.</p>
+  <p class="src">PML notebook, cells 87–89 · PML Lecture 24 at 1:01:57–1:05:09</p>
+  <aside class="notes">
+    <p>Note the axes on the left panel are much tighter than on the previous slide. The intercept sd falls from {{vik.linreg.n20.exact_s.0}} to {{vik.linreg.n200.exact_s.0}}, the slope's from {{vik.linreg.n20.exact_s.1}} to {{vik.linreg.n200.exact_s.1}}.</p>
+    <p>VI's widths are slightly smaller than the exact ones in both cases: the mild under-dispersion of KL(q‖p), plus Monte Carlo noise in the fit.</p>
+  </aside>
+</section>

@@ -1,0 +1,138 @@
+
+<!-- ===================================================================== VI LECTURE · PART 3 · FITTING q BY GRADIENT DESCENT (G2) -->
+
+<section class="slide sec-v3 opener break" id="o-open" data-section="3 · Fitting q">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 3 of 9 · goal G2</p>
+      <h2>Given $p$, find the closest $q$ by gradient descent</h2>
+      <p class="why">KL gives every candidate $q$ a score. Now treat the score as a loss, and let an optimiser move $q$'s parameters. The target stays simple for now, $p = \N(1, 4^2)$, so we can check every answer.</p>
+    </div>
+    <!--viroute:3-->
+  </div>
+</section>
+
+<section class="slide sec-v3" id="o-grid" data-section="3 · Fitting q">
+  <p class="kicker">First attempt: try a few candidates <span class="nbref">▶ N3</span></p>
+  <h2>Score a grid of $(\text{loc}, \text{scale})$ pairs against $p = \N(1, 4^2)$</h2>
+  <div class="body">
+    <table class="work" style="font-size:22px;margin:0 auto">
+      <tr><th>$\KL(q\,\|\,p)$</th><th>scale 1</th><th>scale 2</th><th>scale 4</th></tr>
+      <tr><td>loc 0</td><td>{{vik.g2grid.0.kl}}</td><td>{{vik.g2grid.1.kl}}</td><td>{{vik.g2grid.2.kl}}</td></tr>
+      <tr><td>loc 1</td><td>{{vik.g2grid.3.kl}}</td><td>{{vik.g2grid.4.kl}}</td><td class="hlc"><b>{{vik.g2grid.5.kl}}</b></td></tr>
+    </table>
+    <pre class="code" style="font-size:17px;width:820px;margin:18px auto 0" data-b="2"><span class="line"><span class="k">for</span> loc <span class="k">in</span> [<span class="n">0.</span>, <span class="n">1.</span>]:</span>
+<span class="line">    <span class="k">for</span> scale <span class="k">in</span> [<span class="n">1.</span>, <span class="n">2.</span>, <span class="n">4.</span>]:</span>
+<span class="line">        print(loc, scale, dist.kl_divergence(dist.Normal(loc, scale), p))</span></pre>
+  </div>
+  <p class="q" data-b="2">The grid found $p$ itself, only because we put it on the grid. With more parameters a grid is hopeless.</p>
+  <p class="src">PML notebook, cells 14–15 · PML Lecture 23 at 10:40–12:13</p>
+  <aside class="notes">
+    <p>Two parameters, six candidates. Shifting the centre by 1 costs little (compare the two rows); a width that is too small costs a lot (compare the columns).</p>
+    <p>Same objection as the grid for the evidence in Part 1: 100 values per parameter and d parameters means 100^d candidates. We need to follow the slope instead.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="o-gd" data-section="3 · Fitting q">
+  <p class="kicker">Then gradient descent <span class="nbref">▶ N3</span></p>
+  <h2>Make loc and scale parameters, and minimise the KL with Adam</h2>
+  <div class="body">
+    <div class="codewalk" style="grid-template-columns:1.45fr 1fr">
+      <pre class="code" style="font-size:15.5px"><span class="line" data-hl="=1"><span class="k">class</span> <span class="f">TrainableNormal</span>(nn.Module):</span>
+<span class="line" data-hl="=1">    <span class="k">def</span> <span class="f">__init__</span>(self, loc, scale):</span>
+<span class="line" data-hl="=1">        super().__init__()</span>
+<span class="line" data-hl="=1">        self.loc = nn.Parameter(torch.tensor(loc))</span>
+<span class="line" data-hl="=1">        self.raw_scale = nn.Parameter(inverse_softplus(scale))</span>
+<span class="line" data-hl="=1">    <span class="k">def</span> <span class="f">forward</span>(self):</span>
+<span class="line" data-hl="=1">        <span class="k">return</span> dist.Normal(self.loc, F.softplus(self.raw_scale))</span>
+<span class="line"></span>
+<span class="line" data-hl="=2">q = TrainableNormal(loc=<span class="n">4.0</span>, scale=<span class="n">0.5</span>)</span>
+<span class="line" data-hl="=2">opt = torch.optim.Adam(q.parameters(), lr=<span class="n">0.05</span>)</span>
+<span class="line" data-hl="=3"><span class="k">for</span> step <span class="k">in</span> range(<span class="n">400</span>):</span>
+<span class="line" data-hl="=3">    loss = dist.kl_divergence(q(), p)</span>
+<span class="line" data-hl="=3">    opt.zero_grad(); loss.backward(); opt.step()</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>A trainable $q$.</b> The scale must stay positive, so we learn a raw number and pass it through $\mathrm{softplus}(r) = \log(1 + e^{r}) > 0$.</p>
+        <p class="small" data-b="=2"><b>Start far away:</b> $q = \N(4, 0.5^2)$, the PML notebook's starting point.</p>
+        <p class="small" data-b="3"><b>The loop.</b> Every step: compute the KL, backpropagate to loc and raw_scale, take a step. Nothing here is specific to Gaussians except the formula inside <code>kl_divergence</code>.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">The loss is a KL; the parameters are a distribution's. Otherwise this is any training loop you have written.</p>
+  <p class="src">PML notebook, cells 16–17 · PML Lecture 23 at 12:13–14:33</p>
+  <aside class="notes">
+    <p>The PML notebook used ASTRA's train_fn for the loop. The companion notebook writes the loop out once (cell in N3) and afterwards calls vu.fit, a ten-line version of the same thing that also records the history for the animations.</p>
+    <p>Why not clamp the scale? A clamp has zero gradient at the boundary; softplus is smooth and lets the optimiser work in an unconstrained space. The Beta q in Part 7 does the same for α and β.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="o-live" data-section="3 · Fitting q">
+  <p class="kicker">Watch it <span class="nbref">▶ N3</span></p>
+  <h2>Press play: $q$ becomes $p$</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="chase" data-mode="exact" data-pmu="1" data-psd="4" data-xlo="-11" data-xhi="13" data-init="4,0.5" data-steps="400" data-lr="0.05">
+      <div class="col" style="gap:10px">
+        <canvas width="640" height="250"></canvas>
+        <canvas width="640" height="170"></canvas>
+      </div>
+      <div class="vw-side">
+        <div class="vw-btns"><button data-a="play">play</button><button data-a="reset">reset</button></div>
+        <p class="vw-read">step <b class="ch-step">0</b> of 400</p>
+        <p class="vw-big">$q = \N($<span class="ch-m">4.00</span>, <span class="ch-s">0.50</span>$^2)$</p>
+        <p class="vw-read">$\KL(q\,\|\,p) = $ <b class="ch-kl">1.869</b></p>
+        <div class="lg"><span><i class="fill" style="--c:var(--x);--f:var(--x-t)"></i>$p = \N(1, 4^2)$</span><span><i style="--c:var(--enc)"></i>$q$</span><span><i style="--c:var(--loss)"></i>KL, by step</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q">From $\N(4, 0.5^2)$ to $\N({{vik.g2.m}}, {{vik.g2.s}}^2)$: the KL falls from {{vik.g2.kl0}} to zero.</p>
+  <aside class="notes">
+    <p>The widget runs the same loop in the browser: the closed-form KL and its exact gradient, Adam with learning rate 0.05, softplus scale. The peak of the narrow starting q is clipped at the top of the plot.</p>
+    <p>What to point out: the centre moves first, the width grows more slowly. The KL is below 0.01 after {{vik.g2.below}} steps. Print and PDF show the end state.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="o-snap" data-section="3 · Fitting q">
+  <p class="kicker">What the optimiser did</p>
+  <h2>The centre moves first, then the width catches up</h2>
+  <div class="body">
+    <div class="row" style="gap:26px">
+      <img class="fig" src="figures/data/vik-g2-fit.svg" style="width:760px">
+      <table class="work" style="font-size:19px">
+        <tr><th>step</th><th>loc</th><th>scale</th><th>KL</th></tr>
+        <tr><td>{{vik.g2.snap.0.step}}</td><td>{{vik.g2.snap.0.m}}</td><td>{{vik.g2.snap.0.s}}</td><td>{{vik.g2.snap.0.kl}}</td></tr>
+        <tr><td>{{vik.g2.snap.1.step}}</td><td>{{vik.g2.snap.1.m}}</td><td>{{vik.g2.snap.1.s}}</td><td>{{vik.g2.snap.1.kl}}</td></tr>
+        <tr><td>{{vik.g2.snap.2.step}}</td><td>{{vik.g2.snap.2.m}}</td><td>{{vik.g2.snap.2.s}}</td><td>{{vik.g2.snap.2.kl}}</td></tr>
+        <tr><td>{{vik.g2.snap.3.step}}</td><td>{{vik.g2.snap.3.m}}</td><td>{{vik.g2.snap.3.s}}</td><td>{{vik.g2.snap.3.kl}}</td></tr>
+        <tr><td>{{vik.g2.snap.4.step}}</td><td>{{vik.g2.snap.4.m}}</td><td>{{vik.g2.snap.4.s}}</td><td>{{vik.g2.snap.4.kl}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q">Gradient descent found $p$ without being told where it was, only how far away each guess was.</p>
+  <p class="src">PML notebook, cells 18–21 (kl_qp.gif) · PML Lecture 24 at 4:46–5:32</p>
+  <aside class="notes">
+    <p>Same run as the widget, from the companion notebook (snapshots of vu.fit's history). The notebook's N3 cell also shows it as a play/step animation with a slider.</p>
+    <p>Of course this is circular: we used the formula for KL to p, so we knew p. Parts 4–6 remove that, one piece at a time.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="o-2d" data-section="3 · Fitting q">
+  <p class="kicker">The same in two dimensions · goal G6, first look <span class="nbref">▶ N3</span></p>
+  <h2>A correlated target: a diagonal $q$ cannot tilt, so it shrinks</h2>
+  <div class="body">
+    <div class="row" style="gap:26px">
+      <img class="fig" src="figures/data/vik-g2-2d.svg" style="width:660px">
+      <div class="col grow">
+        <p class="small">Target $p$: two dimensions, unit widths, correlation $\rho = 0.9$ (blue).</p>
+        <p class="small" data-b="2"><b>Diagonal</b> $q$ (one width per axis, no correlation): best width {{vik.g2d.diag_sd}} $= \sqrt{1-\rho^2}$, KL {{vik.g2d.diag_kl}}.</p>
+        <p class="small" data-b="3"><b>Full covariance</b> $q$, $\Sigma = LL^\top$ with $L$ lower-triangular: matches $p$ exactly, KL {{vik.g2d.full_kl}}.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">$\KL(q\|p)$ prefers a $q$ that is too narrow over one that spills outside $p$. Part 2's lesson, in 2-D.</p>
+  <p class="src">PML notebook, goal G6 (kl_qp_2.gif) · PML Lecture 23 at 1:00:19 · Bishop, PRML, Fig. 10.2</p>
+  <aside class="notes">
+    <p>The diagonal q must fit inside the tilted ellipse; its widths equal the target's conditional widths, √(1 − ρ²) = {{vik.g2d.formula}}, not the marginal widths, 1. That is Bishop's Figure 10.2.</p>
+    <p>The full q stores the covariance through a lower-triangular L with positive diagonal (torch's scale_tril), so LLᵀ is always a valid covariance. This matters again for linear regression (Part 8) and for why neural networks use the diagonal (Part 9).</p>
+    <p>Notebook N3 animates the diagonal fit.</p>
+  </aside>
+</section>

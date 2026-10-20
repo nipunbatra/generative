@@ -332,6 +332,8 @@ No formula between these two families. But KL is an expectation under $q$, so Mo
 $\mathrm{KL}(q\,\|\,p) \approx \frac1N \sum_i \big[\log q(\theta_i) - \log p(\theta_i)\big]$, with $\theta_i \sim q$.
 """)
 code(r"""
+torch.manual_seed(0)
+
 def kl_via_sampling(q, p, n_samples=100_000):
     sample_set = q.sample([n_samples])                    # draws from the FIRST argument
     return torch.mean(q.log_prob(sample_set) - p.log_prob(sample_set))
@@ -344,6 +346,7 @@ md(r"""
 **G5: how good is the estimate?** Unbiased, but the spread shrinks only like $1/\sqrt{N}$.
 """)
 code(r"""
+torch.manual_seed(1)
 Ns = [10, 100, 1_000, 10_000]
 reps = torch.stack([torch.stack([kl_via_sampling(q_1, q_2, n) for _ in range(200)]) for n in Ns])
 plt.errorbar(Ns, reps.mean(1), yerr=reps.std(1), fmt="o-", capsize=4, color=vu.COLORS["q"], label="estimate ± spread")
@@ -431,6 +434,8 @@ $$\log p(D) = \underbrace{\mathbb{E}_q\big[\log p(D,\theta) - \log q(\theta)\big
 On the coin we know every term, so we can check it for a few $q$'s.
 """)
 code(r"""
+torch.manual_seed(2)
+
 def elbo(log_joint, q, n=200_000):
     theta = q.sample([n]).clamp(1e-6, 1 - 1e-6)
     return (log_joint(theta) - q.log_prob(theta)).mean().item()

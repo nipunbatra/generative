@@ -1,0 +1,241 @@
+
+<!-- ===================================================================== VI LECTURE · PART 1 · RECAP: BAYES AND THE EVIDENCE -->
+
+<section class="slide sec-v1 opener break" id="r-open" data-section="1 · Recap">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 1 of 9</p>
+      <h2>A reminder: Bayes' rule, and why its denominator is hard</h2>
+      <p class="why">Everything today is about one quantity we want, the <b>posterior</b>, and one we cannot compute, the <b>evidence</b>. Ten minutes on what they are, on examples you have seen, before we learn to get around the second.</p>
+    </div>
+    <!--viroute:1-->
+  </div>
+</section>
+
+<section class="slide sec-v1" id="r-steve" data-section="1 · Recap">
+  <p class="kicker">Bayes' rule, the way the PML course began</p>
+  <h2>Steve is meek and orderly. Librarian or farmer?</h2>
+  <div class="body">
+    <div class="row" style="gap:44px;justify-content:center">
+      <img class="fig" src="figures/data/vik-steve.svg" style="width:540px">
+      <table class="work" style="font-size:21px">
+        <tr><th></th><th>librarian</th><th>farmer</th></tr>
+        <tr><td><b class="cz">prior</b>: out of 210 people</td><td>10</td><td>200</td></tr>
+        <tr data-b="2"><td><b class="cdec">likelihood</b>: fits the description</td><td>40%</td><td>10%</td></tr>
+        <tr data-b="3"><td>people who fit</td><td>4</td><td>20</td></tr>
+        <tr data-b="4"><td><b class="cx">posterior</b>: share of those who fit</td><td>4/24 = {{vik.steve.post_L}}</td><td>{{vik.steve.post_F}}</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="4">The description fits librarians four times better, yet Steve is five times likelier a farmer. The prior matters.</p>
+  <p class="src">▶ Notebook N1 · from PML Lecture 2 (Bayes for ML)</p>
+  <aside class="notes">
+    <p>PML Lecture 2 slides, pp. 6–18 (the Kahneman example). One librarian for every 20 farmers. Click through: prior, likelihood, the people who fit, the posterior.</p>
+    <p>Name the four words now, because the rest of the lecture uses them: prior P(job), likelihood P(description | job), evidence P(description) = 24/210 = {{vik.steve.ev}} (everyone who fits, over everyone), posterior P(job | description).</p>
+    <p>The evidence was easy here: add up over two jobs. Hold on to that; it is the step that breaks later.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-bayes" data-section="1 · Recap">
+  <p class="kicker">Bayes' rule for machine learning</p>
+  <h2>"Job" becomes the parameters $\theta$; "description" becomes the data $D$</h2>
+  <div class="body">
+    <div class="row" style="justify-content:center;gap:56px">
+      <div class="mathblock big" style="margin:0">$$\underbrace{p(\theta\mid D)}_{\text{posterior}} \;=\; \frac{\overbrace{p(D\mid\theta)}^{\text{likelihood}}\ \overbrace{p(\theta)}^{\text{prior}}}{\underbrace{p(D)}_{\text{evidence}}}$$</div>
+      <div class="mathblock" style="margin:0" data-b="2">$$p(D) = \int p(D\mid\theta)\,p(\theta)\,d\theta$$</div>
+    </div>
+    <div class="row" style="justify-content:center;gap:22px;margin-top:14px" data-b="3">
+      <div class="callout plain" style="width:350px"><b>$\theta$</b>: a coin's chance of heads; a regression line's two weights; a network's millions of weights.</div>
+      <div class="callout plain" style="width:350px"><b>$D$</b>: the tosses we saw; the $(x, y)$ points; the training set.</div>
+      <div class="callout x" style="width:350px">The posterior says which $\theta$'s explain $D$, and how sure we are.</div>
+    </div>
+  </div>
+  <p class="q" data-b="2">For Steve the evidence was a sum over two jobs. Here it is an integral over every possible $\theta$.</p>
+  <p class="src">PML Lecture 2, pp. 19–20 · PML Lecture 23, "Bayesian ML: Recap"</p>
+  <aside class="notes">
+    <p>PML Lecture 23 (VI part 1) opens with this frame, at 0:00. The evidence does not depend on θ: it is the number that makes the posterior integrate to one.</p>
+    <p>The posterior is a distribution, not a single answer. Predictions average over it, which is where uncertainty comes from.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-coin" data-section="1 · Recap">
+  <p class="kicker">The example we will come back to all lecture <span class="nbref">▶ N1</span></p>
+  <h2>A coin: prior $\mathrm{Beta}(5, 3)$, then 17 heads in 30 tosses</h2>
+  <div class="body">
+    <div class="row" style="gap:34px">
+      <div class="stack" style="width:640px;height:392px">
+        <img class="fig" src="figures/data/vik-coin-1.svg" style="width:640px" data-b="=1">
+        <img class="fig" src="figures/data/vik-coin-2.svg" style="width:640px" data-b="=2">
+        <img class="fig" src="figures/data/vik-coin-3.svg" style="width:640px" data-b="3">
+      </div>
+      <div class="col grow">
+        <p class="small"><b class="cz">Prior</b> $\mathrm{Beta}(5, 3)$: before any tosses we think heads is a bit likelier (mean {{vik.coin.prior_mean}}).</p>
+        <p class="small" data-b="2"><b class="cdec">Likelihood</b> $\theta^{17}(1-\theta)^{13}$: the data alone peak at $17/30 = {{vik.coin.mle}}$.</p>
+        <p class="small" data-b="3"><b class="cx">Posterior</b> $\propto$ prior $\times$ likelihood:</p>
+        <div class="mathblock left" style="font-size:24px" data-b="3">$$\theta^{4}(1-\theta)^{2}\cdot\theta^{17}(1-\theta)^{13} = \theta^{21}(1-\theta)^{15}$$</div>
+        <p class="small" data-b="3">which is $\mathrm{Beta}(22, 16)$, mean {{vik.coin.post_mean}}.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">The posterior is a compromise between the prior and the data, and it is narrower than both.</p>
+  <aside class="notes">
+    <p>The PML VI notebook's worked example (cells 61–65), and the Beta-Bernoulli frames of the MAP and Laplace lectures. Beta(α, β) has density ∝ θ^(α−1)(1−θ)^(β−1), so Beta(5, 3) is θ⁴(1−θ)².</p>
+    <p>Notebook N1, first cell: the same three curves from coin.prior, coin.log_likelihood and coin.posterior.</p>
+    <p>Mean of Beta(α, β) is α/(α + β): 5/8 = 0.625 before, 22/38 = 0.579 after.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-coin-live" data-section="1 · Recap">
+  <p class="kicker">Try it</p>
+  <h2>Change the prior, change the data</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="betacoin">
+      <canvas width="640" height="400"></canvas>
+      <div class="vw-side">
+        <label class="sl">$\alpha$<input type="range" min="0.5" max="30" step="0.5" value="5"><b class="bc-a">5.0</b></label>
+        <label class="sl">$\beta$<input type="range" min="0.5" max="30" step="0.5" value="3"><b class="bc-b">3.0</b></label>
+        <label class="sl">H<input type="range" min="0" max="100" step="1" value="17"><b class="bc-h">17</b></label>
+        <label class="sl">T<input type="range" min="0" max="100" step="1" value="13"><b class="bc-t">13</b></label>
+        <p class="vw-big">posterior $\mathrm{Beta}($<span class="bc-pa">22.0</span>, <span class="bc-pb">16.0</span>$)$</p>
+        <p class="vw-read">posterior mean <b class="bc-mean">0.579</b> · data alone <b class="bc-mle">0.567</b></p>
+        <div class="lg"><span><i style="--c:var(--z)"></i>prior</span><span><i class="dash" style="--c:var(--dec)"></i>likelihood (rescaled)</span><span><i class="fill" style="--c:var(--x);--f:var(--x-t)"></i>posterior</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q">Posterior $=\mathrm{Beta}(\alpha + H,\ \beta + T)$. With more tosses the data win; with few, the prior does.</p>
+  <aside class="notes">
+    <p>Things to try. Set H = 100, T = 75: the prior hardly matters. Set H = 1, T = 0: the posterior is nearly the prior. Make the prior strong and wrong, Beta(30, 2): it takes many tails to pull it back.</p>
+    <p>This mirrors plot_beta_all in the PML MAP notebook. Print and PDF show the lecture's setting, Beta(5, 3) with 17 heads and 13 tails.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-coin-ev" data-section="1 · Recap">
+  <p class="kicker">The denominator, for the coin <span class="nbref">▶ N1</span></p>
+  <h2>The coin's evidence has a formula, but only because we were lucky</h2>
+  <div class="body">
+    <div class="mathblock">$$p(D) = \int_0^1 \underbrace{\theta^{17}(1-\theta)^{13}}_{\text{likelihood}}\ \underbrace{\frac{\theta^{4}(1-\theta)^{2}}{B(5, 3)}}_{\text{prior}}\,d\theta \;=\; \frac{B(22, 16)}{B(5, 3)}$$</div>
+    <div class="row" style="justify-content:center;gap:22px;margin-top:8px" data-b="2">
+      <div class="stat wide"><b>$\log p(D) = {{vik.coin.log_ev}}$</b><span>from the formula; a 1-D grid over $\theta$ agrees: {{vik.coin.grid}}</span></div>
+      <div class="callout plain" style="width:560px;font-size:20px">$B(a, b) = \int_0^1 \theta^{a-1}(1-\theta)^{b-1}d\theta$ is the Beta function. The product of prior and likelihood is again a Beta shape, so the integral is known. A prior with this property is called <b>conjugate</b>.</div>
+    </div>
+  </div>
+  <p class="q" data-b="2">Remember $-21.40$: at the end of the lecture, variational inference will recover it without the formula.</p>
+  <aside class="notes">
+    <p>p(D) is the probability of this particular sequence of 30 tosses, averaged over the prior, so it is tiny; we always work with its log.</p>
+    <p>Notebook N1: coin.log_evidence uses torch.lgamma; vu.evidence_grid integrates the joint on a fine grid with log-sum-exp. Both give −21.397.</p>
+    <p>PML: the Beta-Bernoulli "evidence" frames (MAP and Laplace lectures). The VI notebook's last section checks its answer against exactly this Beta(22, 16).</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-linreg" data-section="1 · Recap">
+  <p class="kicker">The denominator, for linear regression <span class="nbref">▶ N1</span></p>
+  <h2>Linear regression also has a formula for the evidence</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-linreg-lines.svg" style="width:500px">
+      <div class="col grow">
+        <p class="small">100 points from $y = 1.5 + 0.5\,x + \text{noise}$ (noise sd 0.2). Prior on the two weights: $\theta \sim \N(0, I)$.</p>
+        <p class="small" data-b="2">The evidence averages the likelihood over every line the prior allows (60 of them drawn, in orange):</p>
+        <div class="mathblock left" style="font-size:24px" data-b="2">$$p(D) = \int \N\big(\mathbf y \mid X\theta,\ \sigma^2 I\big)\,\N(\theta \mid 0, I)\,d\theta$$</div>
+        <p class="small" data-b="3">Gaussian prior, Gaussian noise: the answer is again Gaussian,</p>
+        <div class="mathblock left" style="font-size:24px" data-b="3">$$p(D) = \N\big(\mathbf y \mid 0,\ XX^\top + \sigma^2 I\big), \quad \log p(D) = {{vik.linreg_ev.exact}}$$</div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Conjugate again. Now pretend we did not know the formula: could we estimate the integral by sampling the prior?</p>
+  <aside class="notes">
+    <p>From PML Sampling-1 ("marginal likelihood" frames) and the notebook mc-linreg-evidence.ipynb, cells 19–22. In general p(D) = N(y | X m₀, X S₀ Xᵀ + σ²I); here m₀ = 0 and S₀ = I.</p>
+    <p>The log evidence is positive because these are densities over y with a small noise scale (0.2), not probabilities.</p>
+    <p>Notice how few of the orange lines go anywhere near the data. That is the next slide.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-linreg-mc" data-section="1 · Recap">
+  <p class="kicker">Estimate the integral by sampling the prior? <span class="nbref">▶ N1</span></p>
+  <h2>Almost every prior draw explains the data terribly</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-linreg-sorted.svg" style="width:520px">
+      <div class="col grow">
+        <div class="mathblock left" style="font-size:24px">$$p(D) \approx \frac1N\sum_{i=1}^{N} p(D\mid\theta_i), \qquad \theta_i \sim p(\theta)$$</div>
+        <table class="work" style="font-size:20px" data-b="2">
+          <tr><th>$\log p(D)$</th><th></th></tr>
+          <tr><td>closed form</td><td>{{vik.linreg_ev.exact}}</td></tr>
+          <tr><td>15,000 prior draws, our run</td><td>{{vik.linreg_ev.mc}}</td></tr>
+          <tr><td>15,000 prior draws, the PML run</td><td>{{vik.linreg_ev.pml_mc}}</td></tr>
+        </table>
+        <p class="small" data-b="3">The best 10 of the 15,000 draws carry {{vik.linreg_ev.top10}}% of the average. The typical draw has $\log p(D\mid\theta_i)$ of about {{vik.linreg_ev.median}}, against {{vik.linreg_ev.ll_true}} at the true $\theta$.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Two weights, and sampling the prior already wastes almost every draw. With millions of weights it is hopeless.</p>
+  <aside class="notes">
+    <p>PML Sampling-1, "Log-sum-exp" and "Sampling converges slowly"; mc-linreg-evidence cells 14–18. The average of likelihoods is computed as logsumexp(log-likelihoods) − log N, because the likelihoods themselves underflow.</p>
+    <p>The worst draw here has a log-likelihood of {{vik.linreg_ev.worst}}. The estimate depends on the rare draws near the posterior, so it is noisy and biased low on the log scale: 11.20 in the PML run, 12.22 in ours, against 12.35.</p>
+    <p>The lesson for VI: draw θ from somewhere near the posterior, not from the prior. That "somewhere" will be q.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-nofor" data-section="1 · Recap">
+  <p class="kicker">When there is no formula at all</p>
+  <h2>Change the prior a little, and the integral has no closed form</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-logit-integrand.svg" style="width:540px">
+      <div class="col grow">
+        <p class="small">The same coin, but put a Normal prior on its logit: $\theta = \mathrm{sigmoid}(w)$, $w \sim \N(0, 1)$.</p>
+        <div class="mathblock left" style="font-size:23px">$$p(D) = \int \N(w\mid 0, 1)\ \theta(w)^{17}\big(1-\theta(w)\big)^{13}\,dw$$</div>
+        <p class="small" data-b="2">Bernoulli likelihood, Normal prior: not conjugate, no formula. In 1-D a grid still works ($\log p(D) = {{vik.logit.grid}}$).</p>
+        <p class="small" data-b="3">A neural network has millions of weights: a grid with 100 points per weight needs $100^{\text{millions}}$ points. The evidence is <b>intractable</b>.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">So we cannot normalise the posterior. We can still evaluate prior $\times$ likelihood at any $\theta$ we like.</p>
+  <p class="src">PML Lecture 2, p. 77 ("Bernoulli + Normal: intractable") · PML Laplace notebook, "Normal prior for coin toss" · PML Lecture 23 at 3:06</p>
+  <aside class="notes">
+    <p>The shaded curve is the joint p(D, w) = p(D | w) p(w) as a function of w. Its area is p(D). We can compute its height anywhere, but not its area by formula.</p>
+    <p>Notebook N1 also estimates this one by 100,000 prior draws: {{vik.logit.mc}}, close to the grid, because in 1-D the prior is not far from the posterior.</p>
+    <p>The key sentence for the rest of the lecture: we can evaluate the unnormalised posterior p(D | θ) p(θ), but not its normaliser p(D).</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-three" data-section="1 · Recap">
+  <p class="kicker">Three ways around it, on one hard shape <span class="nbref">▶ N1</span></p>
+  <h2>Laplace, MCMC and VI on a two-bump posterior</h2>
+  <div class="body">
+    <img class="fig" src="figures/data/vik-three-ways.svg" style="width:900px;margin:0 auto">
+    <div class="row top" style="gap:22px;margin-top:6px">
+      <div class="callout plain" style="flex:1;font-size:18px"><b>Laplace</b>: a Gaussian at the highest peak, with its curvature: $\N({{vik.three.lap_m}},\ {{vik.three.lap_s}}^2)$. Ignores the second bump.</div>
+      <div class="callout plain" style="flex:1;font-size:18px" data-b="2"><b>MCMC</b>: a random walk whose visits follow the posterior. Mean {{vik.three.mcmc_mean}} (true {{vik.three.true_mean}}). Exact in the limit; slow.</div>
+      <div class="callout enc" style="flex:1;font-size:18px" data-b="3"><b>VI</b>, today: the closest Gaussian, found by optimisation: $\N({{vik.three.vi_m}},\ {{vik.three.vi_s}}^2)$. Fast; approximate.</div>
+    </div>
+  </div>
+  <p class="q" data-b="3">"Closest" needs a measure of distance between two distributions. That is the KL divergence, Part 2.</p>
+  <aside class="notes">
+    <p>The "posterior" here is the mixture 0.7 N(−2, 1²) + 0.3 N(2, 1²), the target of the PML Laplace notebook. The MCMC panel is random-walk Metropolis, 20,000 steps, acceptance {{vik.three.mcmc_acc}} (the PML course's hamiltorch GIF shows the same idea on a 2-D mixture).</p>
+    <p>This is the one slide on Laplace and MCMC; students met both in PML Lectures 8 and 13–14. VI turns inference into optimisation, which is what lets it scale to neural networks and the VAE.</p>
+    <p>The VI fit is broad here because the two bumps overlap. Part 2 shows what happens when they do not.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v1" id="r-idea" data-section="1 · Recap">
+  <p class="kicker">The variational idea, and today's map</p>
+  <h2>Pick a simple family $q_\psi$, and find its member closest to the posterior</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:32px">$$\psi^\star = \arg\min_{\psi}\ \KL\big(\,q_\psi(\theta)\ \|\ p(\theta\mid D)\,\big)$$</div>
+    <div class="gmap" data-b="2">
+      <div style="--c:var(--z)"><b><i>G1</i>Which $q$ is closer?</b><span>the KL divergence, by formula · Part 2</span></div>
+      <div style="--c:var(--dec)"><b><i>G2</i>Find the closest $q$</b><span>gradient descent on its parameters · Part 3</span></div>
+      <div style="--c:var(--loss)"><b><i>G3</i>No formula for the KL?</b><span>Monte Carlo · Part 4</span></div>
+      <div style="--c:var(--enc)"><b><i>G4</i>Gradients through samples</b><span>the reparameterisation trick · Part 5</span></div>
+      <div style="--c:var(--loss)"><b><i>G5</i>How many samples?</b><span>the estimate's noise · Part 4</span></div>
+      <div style="--c:var(--x)"><b><i>G6</i>Diagonal or full covariance?</b><span>Parts 3 and 8</span></div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Then the ELBO (Part 6) removes the one thing we cannot compute, and the coin (Part 7) puts it all together.</p>
+  <p class="src">PML Lecture 23 at 3:06–4:38 · goals G1–G6 from cell 0 of the PML notebook variational-inference.ipynb</p>
+  <aside class="notes">
+    <p>q is any family we can sample from and whose density we can evaluate: a Gaussian, a Beta. ψ are its parameters (a mean and a width). The goals are the PML notebook's own list, in its order; this lecture follows it.</p>
+    <p>Spot the problem now and let students raise it: the objective contains p(θ | D), the thing we cannot compute. Part 6 deals with it. Parts 2–5 first learn to minimise a KL to a target we can evaluate.</p>
+  </aside>
+</section>
