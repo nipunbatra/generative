@@ -1,0 +1,437 @@
+{
+  "id": "lecture4",
+  "number": 4,
+  "title": "Generative adversarial networks",
+  "subtitle": "A learned critic supplies the learning signal",
+  "minutes": 60,
+  "notebook": "lecture4.ipynb",
+  "sections": [
+    {
+      "id": "signal",
+      "title": "A learning signal",
+      "minutes": 6
+    },
+    {
+      "id": "discriminator",
+      "title": "One discriminator update",
+      "minutes": 10
+    },
+    {
+      "id": "generator",
+      "title": "One generator update",
+      "minutes": 12
+    },
+    {
+      "id": "game",
+      "title": "Alternate the players",
+      "minutes": 11
+    },
+    {
+      "id": "failure",
+      "title": "Samples, coverage and failure",
+      "minutes": 11
+    },
+    {
+      "id": "images",
+      "title": "MNIST and retrieval",
+      "minutes": 10
+    }
+  ],
+  "coreSlides": 53,
+  "optionalSlides": 3,
+  "slides": [
+    {
+      "id": "start",
+      "title": "Where could a generator get feedback?",
+      "section": "signal",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "generator-is-sampler",
+      "title": "A generator turns a draw into a sample",
+      "section": "signal",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "likelihood-question",
+      "title": "Sampling is easier than evaluating a density",
+      "section": "signal",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "toy-vote",
+      "title": "Which distribution is missing something?",
+      "section": "signal",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "two-players",
+      "title": "One network proposes; one distinguishes",
+      "section": "signal",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "data-labels",
+      "title": "Fix the samples and label their source",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "chosen-networks",
+      "title": "Choose networks small enough to inspect",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "fake-arithmetic",
+      "title": "First compute the fake",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-logits",
+      "title": "A score comes before a probability",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-real-term",
+      "title": "Reward a high score on real data",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-fake-term",
+      "title": "Reward a low score on generated data",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-loss",
+      "title": "Add the two classification losses",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-gradient",
+      "title": "Which derivative changes the classifier?",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-update",
+      "title": "One D update, with G unchanged",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-recompute",
+      "title": "Check the same examples after the update",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "detach",
+      "title": "Stop this phase at the fake sample",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "detach-code",
+      "title": "Detach only the generated sample",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-check",
+      "title": "Check ownership of the update",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "d-only",
+      "title": "What happens if only D learns?",
+      "section": "discriminator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-goal",
+      "title": "Now let the generator ask for label 1",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "freeze-not-detach",
+      "title": "Frozen weights can still transmit a gradient",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-chain",
+      "title": "Follow the chain rule into the generator",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-gradient",
+      "title": "The generator receives a nonzero derivative",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-update",
+      "title": "One G update, with D unchanged",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-recompute",
+      "title": "Check the updated sample and loss",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-code",
+      "title": "Keep the path; freeze the owner",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "freeze-vs-detach",
+      "title": "Two operations with different effects",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-check",
+      "title": "Verify the actual parameter changes",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "g-only",
+      "title": "A fixed critic can be exploited",
+      "section": "generator",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "alternating",
+      "title": "The training loop alternates two objectives",
+      "section": "game",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "batch-d",
+      "title": "The discriminator has two expectations",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "batch-g",
+      "title": "The practical generator loss",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "minimax",
+      "title": "The original game uses a different G term",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "saturation-derivative",
+      "title": "A confident discriminator can weaken one signal",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "saturation-plot",
+      "title": "The difference is visible before any training",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "alternating-code-d",
+      "title": "The first half of one neural update",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "alternating-code-g",
+      "title": "The second half of one neural update",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "toy-progress",
+      "title": "Can alternating updates cover both regions?",
+      "section": "game",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "coverage",
+      "title": "Count mass near each known mode",
+      "section": "failure",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "collapse",
+      "title": "Plausible samples can omit a whole mode",
+      "section": "failure",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "losses-not-quality",
+      "title": "A loss curve is not a coverage certificate",
+      "section": "failure",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "moving-objective",
+      "title": "The target of optimisation keeps moving",
+      "section": "failure",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "diagnostic-grid",
+      "title": "Ask separate questions about the samples",
+      "section": "failure",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "image-representation",
+      "title": "Keep the data convention visible",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "image-g-shapes",
+      "title": "The generator expands a noise vector",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "image-d-shapes",
+      "title": "The discriminator returns one logit per image",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "image-training-early",
+      "title": "The same z before and after early learning",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "image-training-later",
+      "title": "Structure emerges, but quality varies",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "replay-evidence",
+      "title": "What did we reproduce today?",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "demo",
+      "title": "Live: inspect who changes",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "exit-detach",
+      "title": "Exit check: where should detach go?",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "compare-vae",
+      "title": "Two ways to train a sampler",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "next-question",
+      "title": "Can we create the training target ourselves?",
+      "section": "images",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "optional-optimal-d",
+      "title": "Optional: the ideal classifier at fixed G",
+      "section": "failure",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "optional-batchnorm",
+      "title": "Optional: frozen parameters are not all model state",
+      "section": "images",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "optional-controls",
+      "title": "Optional: changes to the game are experiments",
+      "section": "failure",
+      "builds": 2,
+      "optional": true
+    }
+  ],
+  "totalStates": 113
+}

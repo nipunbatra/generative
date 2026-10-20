@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "runtime": {
+    "seed": 20261020,
+    "dtype": "torch.float64",
+    "torch": "2.13.0",
+    "python": "3.12.9",
+    "numpy": "2.5.3",
+    "evidence": "computed locally; analytic, quadrature and Monte Carlo outputs labelled separately",
+    "source_spine": "PML 2023 variational-inference.ipynb; corrected standalone implementation"
+  },
+  "checks": {
+    "coin_quadrature": [
+      {
+        "a": 10.0,
+        "b": 10.0,
+        "numerical_elbo": -22.020154134036773,
+        "error": 3.552713678800501e-14
+      },
+      {
+        "a": 30.0,
+        "b": 20.0,
+        "numerical_elbo": -21.448585391137854,
+        "error": 8.526512829121202e-14
+      },
+      {
+        "a": 22.0,
+        "b": 16.0,
+        "numerical_elbo": -21.397241822312157,
+        "error": 4.973799150320701e-14
+      }
+    ],
+    "normal_analytic_vs_library": true,
+    "normal_gradient_finite_difference": true,
+    "positive_scales_and_shapes": true,
+    "fixed_noise_gradient_check": true,
+    "coin_direct_elbo_identity": true,
+    "coin_training_final_gap": 0.00022153846902073226
+  },
+  "executed_code_cells": "all cells in saved notebook",
+  "training": "toy CPU optimisation; measured trajectories, not schematic"
+}

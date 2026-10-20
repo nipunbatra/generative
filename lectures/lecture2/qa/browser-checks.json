@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "renderedStates": 114,
+  "coreSlides": 54,
+  "optionalSlides": 3,
+  "errors": [],
+  "failures": [],
+  "checks": [
+    {
+      "name": "right arrow advances",
+      "pass": true
+    },
+    {
+      "name": "left arrow returns",
+      "pass": true
+    },
+    {
+      "name": "complete reveals final state",
+      "pass": true
+    },
+    {
+      "name": "reset restores first state",
+      "pass": true
+    },
+    {
+      "name": "speaker notes available",
+      "pass": true
+    },
+    {
+      "name": "fresh deep link",
+      "pass": true
+    },
+    {
+      "name": "mobile reading has no page overflow",
+      "pass": true
+    },
+    {
+      "name": "reading has all scenes",
+      "pass": true
+    }
+  ],
+  "scope": "Every authored state captured. Geometry checks do not replace visual inspection or classroom rehearsal."
+}

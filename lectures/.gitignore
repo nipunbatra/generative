@@ -1,0 +1,13 @@
+# Large visual QA evidence and machine-local kernels stay local.
+# Publish the compact review and verification reports.
+/qa/*
+!/qa/*.json
+!/qa/*.md
+!/qa/*.txt
+/lecture*/qa/*
+!/lecture*/qa/*.json
+!/lecture*/qa/*.md
+!/lecture*/qa/*.txt
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store

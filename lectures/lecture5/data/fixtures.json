@@ -1,0 +1,146 @@
+{
+  "schedule": {
+    "T": 1000,
+    "betaStart": 0.0001,
+    "betaEnd": 0.02,
+    "alphaBarT": 4.0358297653756754e-05,
+    "variance": "posterior variance beta_tilde",
+    "timeIndexing": "one-based, t = 1,\u2026,1000; alpha_bar[0]=1",
+    "selected": [
+      {
+        "t": 1,
+        "beta": 0.0001,
+        "alpha": 0.9999,
+        "alphaBar": 0.9999,
+        "signal": 0.9999499987499375,
+        "noise": 0.009999999999999449,
+        "posteriorVariance": 0.0
+      },
+      {
+        "t": 7,
+        "beta": 0.00021951951951951952,
+        "alpha": 0.9997804804804805,
+        "alphaBar": 0.998882211974978,
+        "signal": 0.9994409497188805,
+        "noise": 0.033433337030904474,
+        "posteriorVariance": 0.00017644737849709376
+      },
+      {
+        "t": 100,
+        "beta": 0.002072072072072072,
+        "alpha": 0.997927927927928,
+        "alphaBar": 0.89701814567496,
+        "signal": 0.9471104189454153,
+        "noise": 0.3209078595563531,
+        "posteriorVariance": 0.002034596259490786
+      },
+      {
+        "t": 350,
+        "beta": 0.007052052052052052,
+        "alpha": 0.9929479479479479,
+        "alphaBar": 0.28519950718066717,
+        "signal": 0.5340407355068217,
+        "noise": 0.8454587469648255,
+        "posteriorVariance": 0.007032068694305391
+      },
+      {
+        "t": 600,
+        "beta": 0.012032032032032033,
+        "alpha": 0.9879679679679679,
+        "alphaBar": 0.025879389423334884,
+        "signal": 0.16087072270408587,
+        "noise": 0.9869754863099007,
+        "posteriorVariance": 0.012028139103881714
+      },
+      {
+        "t": 920,
+        "beta": 0.018406406406406405,
+        "alpha": 0.9815935935935935,
+        "alphaBar": 0.00019053132045811485,
+        "signal": 0.01380330831569428,
+        "noise": 0.9999047298015656,
+        "posteriorVariance": 0.01840634063222825
+      },
+      {
+        "t": 1000,
+        "beta": 0.02,
+        "alpha": 0.98,
+        "alphaBar": 4.0358297653756754e-05,
+        "signal": 0.006352818087570016,
+        "noise": 0.99997982064757,
+        "posteriorVariance": 0.01999998352656061
+      }
+    ]
+  },
+  "scalar": {
+    "x0": 0.8,
+    "epsilon": -0.4,
+    "t": 350,
+    "xt": 0.08904908961952718,
+    "thetaBefore": 0.3,
+    "prediction": 0.026714726885858152,
+    "lossBefore": 0.18208545814127253,
+    "gradient": 0.07599711591286169,
+    "finiteDifference": 0.0759971159197681,
+    "eta": 0.1,
+    "thetaAfter": 0.2924002884087138,
+    "lossAfter": 0.1815083599656067,
+    "kind": "chosen single-pixel calculation, float64, squared-error objective"
+  },
+  "reverse": {
+    "xt": 0.08904908961952718,
+    "predictedNoise": 0.25,
+    "x0Estimate": -0.22903795345423936,
+    "mean": 0.08727208385462694,
+    "posteriorFormMean": 0.08727208385462697,
+    "variance": 0.007032068694305391,
+    "sigma": 0.08385743076379928,
+    "xi": -0.7,
+    "previousSample": 0.02857188231996744,
+    "t": 350,
+    "coefficientX0": 0.005287395657480392,
+    "coefficientXt": 0.993644050861987
+  },
+  "checks": {
+    "forwardMeanError": 0.00036895182184970565,
+    "forwardVarianceError": 0.0018814607725142762,
+    "reverseMeanResidual": 2.7755575615628914e-17,
+    "finalStepIndependentOfNoise": true
+  },
+  "neuralUpdate": {
+    "batchSize": 4,
+    "timesteps": [
+      7,
+      100,
+      350,
+      920
+    ],
+    "seed": 2026,
+    "learningRate": 0.001,
+    "lossBefore": 0.09844866394996643,
+    "lossAfterSameBatch": 0.09611958265304565,
+    "gradientNorm": 1.6255487203598022,
+    "maxParameterChange": 0.0001037372276186943,
+    "split": "train indices 0:4",
+    "reduction": "mean over B\u00d71\u00d728\u00d728"
+  },
+  "checkpoint": {
+    "sha256": "9dc135888ec05bceebc35fcf6b7c6b5ee1823f2cea7c0b2ec32906368b793585",
+    "trainingSteps": 2000,
+    "trainingSeed": 667,
+    "parameters": 814145,
+    "sampleSeed": 667,
+    "sampleCount": 8,
+    "samplerSteps": 1000,
+    "replaySeconds": 13.009360790252686,
+    "maxDifferenceFromOriginalDevice": 1.8805265426635742e-05,
+    "freshFullTraining": false,
+    "dataRepresentation": "uint8/127.5\u22121",
+    "heldExample": {
+      "split": "test",
+      "index": 0,
+      "label": 7
+    },
+    "display": "images clip values to [\u22121,1] only for viewing; neither training states nor sampler states are clipped"
+  }
+}

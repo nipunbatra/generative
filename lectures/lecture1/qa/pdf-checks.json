@@ -1,0 +1,101 @@
+{
+  "lecture": 1,
+  "checks": [
+    {
+      "name": "completed page count",
+      "passed": true,
+      "actual": 72,
+      "expected": 72
+    },
+    {
+      "name": "completed page geometry",
+      "passed": true
+    },
+    {
+      "name": "completed nonempty text",
+      "passed": true
+    },
+    {
+      "name": "completed rendered count",
+      "passed": true
+    },
+    {
+      "name": "all-builds page count",
+      "passed": true,
+      "actual": 157,
+      "expected": 157
+    },
+    {
+      "name": "all-builds page geometry",
+      "passed": true
+    },
+    {
+      "name": "all-builds nonempty text",
+      "passed": true
+    },
+    {
+      "name": "all-builds rendered count",
+      "passed": true
+    },
+    {
+      "name": "completed equals final reveal, excluding footer",
+      "passed": true,
+      "maximumMeanAbsoluteDifference": 0.0014630325814536341
+    },
+    {
+      "name": "browser and print body appearance",
+      "passed": true,
+      "worst": [
+        {
+          "id": "noisy-elbo",
+          "meanAbsolutePixelDifference": 3.8787424297753477,
+          "unregisteredDifference": 3.8899173715538846,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "mc-variability",
+          "meanAbsolutePixelDifference": 3.633164025881434,
+          "unregisteredDifference": 3.6857260338345865,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "sample-path",
+          "meanAbsolutePixelDifference": 2.656826757849242,
+          "unregisteredDifference": 2.9284617794486216,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "coin-check",
+          "meanAbsolutePixelDifference": 2.527473730470757,
+          "unregisteredDifference": 2.5074604479949874,
+          "registrationPixels": [
+            0,
+            0
+          ]
+        },
+        {
+          "id": "mixture-candidates",
+          "meanAbsolutePixelDifference": 2.506552561980597,
+          "unregisteredDifference": 2.728051378446115,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        }
+      ],
+      "tolerance": 5,
+      "registration": "At most one pixel globally in each axis; accommodates subpixel rounding between screenshot and PDF rasterisation."
+    }
+  ],
+  "scope": "Every PDF page rasterised; completed/final-reveal parity and browser/print comparison for every scene.",
+  "passed": true
+}

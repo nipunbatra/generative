@@ -1,0 +1,202 @@
+{
+  "passed": true,
+  "errors": [],
+  "mobileNoPageOverflow": true,
+  "links": [
+    {
+      "label": "KL and variational inference",
+      "href": "http://127.0.0.1:8767/lecture1/",
+      "status": 200
+    },
+    {
+      "label": "Present →",
+      "href": "http://127.0.0.1:8767/lecture1/",
+      "status": 200
+    },
+    {
+      "label": "Read with notes",
+      "href": "http://127.0.0.1:8767/lecture1/?reading",
+      "status": 200
+    },
+    {
+      "label": "Notebook",
+      "href": "http://127.0.0.1:8767/lecture1/lecture1-variational-inference.ipynb",
+      "status": 200
+    },
+    {
+      "label": "Speaker notes",
+      "href": "http://127.0.0.1:8767/lecture1/speaker-notes.md",
+      "status": 200
+    },
+    {
+      "label": "Completed PDF",
+      "href": "http://127.0.0.1:8767/lecture1/exports/completed.pdf",
+      "status": 200
+    },
+    {
+      "label": "All reveals PDF",
+      "href": "http://127.0.0.1:8767/lecture1/exports/all-builds.pdf",
+      "status": 200
+    },
+    {
+      "label": "From generative models to autoencoders",
+      "href": "http://127.0.0.1:8767/lecture2/",
+      "status": 200
+    },
+    {
+      "label": "Present →",
+      "href": "http://127.0.0.1:8767/lecture2/",
+      "status": 200
+    },
+    {
+      "label": "Read with notes",
+      "href": "http://127.0.0.1:8767/lecture2/?reading",
+      "status": 200
+    },
+    {
+      "label": "Notebook",
+      "href": "http://127.0.0.1:8767/lecture2/lecture2.ipynb",
+      "status": 200
+    },
+    {
+      "label": "Speaker notes",
+      "href": "http://127.0.0.1:8767/lecture2/speaker-notes.md",
+      "status": 200
+    },
+    {
+      "label": "Completed PDF",
+      "href": "http://127.0.0.1:8767/lecture2/exports/completed.pdf",
+      "status": 200
+    },
+    {
+      "label": "All reveals PDF",
+      "href": "http://127.0.0.1:8767/lecture2/exports/all-builds.pdf",
+      "status": 200
+    },
+    {
+      "label": "Variational autoencoders",
+      "href": "http://127.0.0.1:8767/lecture3/",
+      "status": 200
+    },
+    {
+      "label": "Present →",
+      "href": "http://127.0.0.1:8767/lecture3/",
+      "status": 200
+    },
+    {
+      "label": "Read with notes",
+      "href": "http://127.0.0.1:8767/lecture3/?reading",
+      "status": 200
+    },
+    {
+      "label": "Notebook",
+      "href": "http://127.0.0.1:8767/lecture3/lecture3.ipynb",
+      "status": 200
+    },
+    {
+      "label": "Speaker notes",
+      "href": "http://127.0.0.1:8767/lecture3/speaker-notes.md",
+      "status": 200
+    },
+    {
+      "label": "Completed PDF",
+      "href": "http://127.0.0.1:8767/lecture3/exports/completed.pdf",
+      "status": 200
+    },
+    {
+      "label": "All reveals PDF",
+      "href": "http://127.0.0.1:8767/lecture3/exports/all-builds.pdf",
+      "status": 200
+    },
+    {
+      "label": "Generative adversarial networks",
+      "href": "http://127.0.0.1:8767/lecture4/",
+      "status": 200
+    },
+    {
+      "label": "Present →",
+      "href": "http://127.0.0.1:8767/lecture4/",
+      "status": 200
+    },
+    {
+      "label": "Read with notes",
+      "href": "http://127.0.0.1:8767/lecture4/?reading",
+      "status": 200
+    },
+    {
+      "label": "Notebook",
+      "href": "http://127.0.0.1:8767/lecture4/lecture4.ipynb",
+      "status": 200
+    },
+    {
+      "label": "Speaker notes",
+      "href": "http://127.0.0.1:8767/lecture4/speaker-notes.md",
+      "status": 200
+    },
+    {
+      "label": "Completed PDF",
+      "href": "http://127.0.0.1:8767/lecture4/exports/completed.pdf",
+      "status": 200
+    },
+    {
+      "label": "All reveals PDF",
+      "href": "http://127.0.0.1:8767/lecture4/exports/all-builds.pdf",
+      "status": 200
+    },
+    {
+      "label": "Denoising diffusion probabilistic models",
+      "href": "http://127.0.0.1:8767/lecture5/",
+      "status": 200
+    },
+    {
+      "label": "Present →",
+      "href": "http://127.0.0.1:8767/lecture5/",
+      "status": 200
+    },
+    {
+      "label": "Read with notes",
+      "href": "http://127.0.0.1:8767/lecture5/?reading",
+      "status": 200
+    },
+    {
+      "label": "Notebook",
+      "href": "http://127.0.0.1:8767/lecture5/lecture5.ipynb",
+      "status": 200
+    },
+    {
+      "label": "Speaker notes",
+      "href": "http://127.0.0.1:8767/lecture5/speaker-notes.md",
+      "status": 200
+    },
+    {
+      "label": "Completed PDF",
+      "href": "http://127.0.0.1:8767/lecture5/exports/completed.pdf",
+      "status": 200
+    },
+    {
+      "label": "All reveals PDF",
+      "href": "http://127.0.0.1:8767/lecture5/exports/all-builds.pdf",
+      "status": 200
+    },
+    {
+      "label": "Teaching guide",
+      "href": "http://127.0.0.1:8767/TEACHING-GUIDE.md",
+      "status": 200
+    },
+    {
+      "label": "Maths & diagram conventions",
+      "href": "http://127.0.0.1:8767/MATHS-AND-DIAGRAMS.md",
+      "status": 200
+    },
+    {
+      "label": "Run & reproduce",
+      "href": "http://127.0.0.1:8767/README.md",
+      "status": 200
+    },
+    {
+      "label": "Verification",
+      "href": "http://127.0.0.1:8767/QA.md",
+      "status": 200
+    }
+  ]
+}

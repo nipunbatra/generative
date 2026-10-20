@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "torch": "2.13.0",
+  "device": "cpu",
+  "elapsedSeconds": 0.5472781658172607,
+  "scalarFiniteDifferenceResidual": 2.2917390207766175e-11,
+  "mnistReplayMaxAbsError": 5.27501106262207e-06,
+  "claim": "fresh arithmetic/gradient checks and replay of existing checkpoints; no fresh full MNIST training"
+}

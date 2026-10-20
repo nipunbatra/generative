@@ -1,0 +1,121 @@
+[
+  {
+    "path": "figures/code-cloud-prior.svg",
+    "sha256": "839252f5a43b86c48d04e43486937a20b4983c10ced7ff0567f1718dbc42af86",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/code-cloud.svg",
+    "sha256": "c6d6fa9a0ce1e7592d141c2484a5e3d0951cfd1948de3b3faec3202a81cf9b38",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/fitted-code-decodes.png",
+    "sha256": "f00768ae06018647a12c338d6e168ad711281badb46015652af82a251569d1f4",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/held3-ae16.png",
+    "sha256": "0f6b83615226a5f9aeaa3378fd5ab0c628b0ad6dce2900f6c51457eb17e894a6",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/held3-ae2.png",
+    "sha256": "fd353ceec6651d1951dc4269673175ef7f27ddb2c6a5050b580a1730e87b95d4",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/held3.png",
+    "sha256": "9153828e522f2fa9833137d0795fbb5b0a27b8b8fb4916471afdbf85b4729694",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/independent-pixels.png",
+    "sha256": "eb884900bba489805f4ec833d3c761aac81ac37007815b56d41f9a92d6eaf0e6",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/interpolation-path.svg",
+    "sha256": "97b9cdc39fc062b87064f5fa7e7f23455a03d267d3e64ed9132474a4c3191ee1",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/interpolation.png",
+    "sha256": "0a5bfa577fb341f86ff1762bbc5dcd736cf524260a14c67cad30d4535d777ed8",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/mean-pixel.png",
+    "sha256": "bbeddb84df2128aa75ae21ef0143a6d157a788e40dddc0665a29524ec9e3814f",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/prior-decodes.png",
+    "sha256": "e9b560a841743225234f47bc4854ab08cfd06870e052432d9f19f151071a94a1",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/reconstruction-2-16.png",
+    "sha256": "57efab0516138bfe00bef94f0ff30a3ef9ee26b26f8fafbd852e58f92bc4415a",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/test-digits.png",
+    "sha256": "5d9ac6297126b10a0a682c36d4d1a3d9070428a2faf79961685e688e09191530",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/toy-data.svg",
+    "sha256": "23f85d71020797e58a156712cdcc8c7ef72f2ce3188a66e0c1c00733d90bff30",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/toy-draws.svg",
+    "sha256": "0adb3283b75d5141a6a6b25a0611dc97db106568fec6616661b3a078561d9559",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/toy-gaussian.svg",
+    "sha256": "754c80217a149a2530a1d800e64c6523b9155202cd117b33996cdcd1121f1cf4",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  },
+  {
+    "path": "figures/toy-mixture.svg",
+    "sha256": "9308e0734c0606c694047b17cbd4a69d45a76bf2b509e12e2824960d59d34dd3",
+    "type": "replayed model output or computed plot",
+    "generator": "lecture2/scripts/build_evidence.py",
+    "checkpoints": "see data/provenance.json"
+  }
+]

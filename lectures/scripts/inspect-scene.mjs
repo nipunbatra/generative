@@ -1,0 +1,3 @@
+import {browser,base} from './browser.mjs';
+const b=await browser(),p=await b.newPage();
+try {await p.setViewport({width:1280,height:720}); await p.goto(`${base}/lecture${process.argv[2]}/?all#${process.argv[3]}/${process.argv[4]||2}`,{waitUntil:'networkidle0'}); await p.waitForFunction(()=>window.deckReady);console.log(JSON.stringify(await p.evaluate(()=>[...document.querySelectorAll('.scene.current svg text')].map(e=>{const r=e.getBoundingClientRect();return {text:e.textContent,left:r.left,right:r.right,top:r.top,bottom:r.bottom,font:getComputedStyle(e).fontSize}})),null,2));} finally {await b.close();}

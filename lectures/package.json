@@ -1,0 +1,11 @@
+{
+  "name": "generative-lectures",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 8767 --bind 127.0.0.1",
+    "scaffold": "node scripts/scaffold.mjs",
+    "verify": "node scripts/verify.mjs",
+    "export": "node scripts/export.mjs"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "states": 157,
+  "textChecks": 268,
+  "findings": [],
+  "scope": "Text bounds inside inline SVG viewBoxes at a desktop viewport. External SVG images, mathematical glyphs, mobile layout and visual semantics require separate review."
+}

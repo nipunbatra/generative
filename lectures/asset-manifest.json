@@ -1,0 +1,1441 @@
+{
+  "created": "2026-10-20T10:35:08.423Z",
+  "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 277,
+      "sha256": "32b931081b84df6ccd39f660e5419baf4f43de8d2a9326587085c596f7bafb6f"
+    },
+    {
+      "path": "AUTHORING.md",
+      "bytes": 4882,
+      "sha256": "00cef2858917e6e1d72fd7735d6cbafaa831de2ae34968eff8300b0900851bbc"
+    },
+    {
+      "path": "MATHS-AND-DIAGRAMS.md",
+      "bytes": 4983,
+      "sha256": "afaaa5907a96e8a1a8890e58866b484bfa3a1067098401fb95cefc8f73762202"
+    },
+    {
+      "path": "QA.md",
+      "bytes": 5277,
+      "sha256": "c8ee71e93e1a0f91e7019dcfda3feeaf9065a7196ad455750f856d6a3dd9a55b"
+    },
+    {
+      "path": "README.md",
+      "bytes": 3901,
+      "sha256": "b23e340875535d2a2d66f9ec0172e042f0940bfe75961b2cecd3d84c496c052c"
+    },
+    {
+      "path": "TEACHING-GUIDE.md",
+      "bytes": 5565,
+      "sha256": "29cc478dd52299a4ed653d3a17cc3c61abfdf8b0fe9ca147f3c51f8ac0fb842b"
+    },
+    {
+      "path": "index.html",
+      "bytes": 5801,
+      "sha256": "b3baac60c68f2c2d627d6417f9f0014d666c955a48202369a548e7f4921ed00b"
+    },
+    {
+      "path": "lecture1/README.md",
+      "bytes": 3251,
+      "sha256": "9f03abe5c01f979164d2914a7ac42b8c10439a7006e8ec81f9ae7c9e73ca2875"
+    },
+    {
+      "path": "lecture1/content.js",
+      "bytes": 58362,
+      "sha256": "30e8ad2e6d85d4a9697fd706c9b327aaae3001308ccd393636429ea70e56f036"
+    },
+    {
+      "path": "lecture1/data/science.json",
+      "bytes": 576618,
+      "sha256": "988b6d93b0588ecda0986f11d121f255668b9894130e4bb7d2cff0dbbc24802b"
+    },
+    {
+      "path": "lecture1/exports/all-builds.pdf",
+      "bytes": 1445800,
+      "sha256": "39a2393adfc39a2046a7b1e036bb4621a9fd1076228225aba96884ac8da9f4fc"
+    },
+    {
+      "path": "lecture1/exports/completed.pdf",
+      "bytes": 879968,
+      "sha256": "93fc66e67a42b4f959e0f49728f69291a25b6f722a85236b0cfebfbf597a62d5"
+    },
+    {
+      "path": "lecture1/figures/coin-fit.png",
+      "bytes": 81739,
+      "sha256": "0747a46248548b75b06cf6ebf527200cf0f5548ab6417c05cdaa9fd6d436b0de"
+    },
+    {
+      "path": "lecture1/figures/coin-fit.svg",
+      "bytes": 24806,
+      "sha256": "e8e1807e8ad6c6b9150c1103f287da4b91fbd827c2c6dbc064677ed5458963f6"
+    },
+    {
+      "path": "lecture1/figures/coin-noisy-objective.png",
+      "bytes": 69940,
+      "sha256": "02f59e2d9e3889c8cc560c6ea4f9a7cff2400829d91cf3709678ebfbe4f06276"
+    },
+    {
+      "path": "lecture1/figures/coin-noisy-objective.svg",
+      "bytes": 28454,
+      "sha256": "f82d24ff1de925a81839858dd1de5e088fcf371770210241012a9d2c34fc9841"
+    },
+    {
+      "path": "lecture1/figures/gaussian-candidates.png",
+      "bytes": 79327,
+      "sha256": "55aa0c04d1c21726a005f852901e09ab1a33773354ffa804f47b881f4a0e633a"
+    },
+    {
+      "path": "lecture1/figures/gaussian-candidates.svg",
+      "bytes": 16556,
+      "sha256": "4bdcfb588acd02c29fa8661196d466aa7aa4a42dab532c8e42804b2128f58a40"
+    },
+    {
+      "path": "lecture1/figures/gaussian-fit.png",
+      "bytes": 95421,
+      "sha256": "ca547924772330ff1a555646680a1b0cc8b2d5b9e7dbc1950b5b1b62e1e81130"
+    },
+    {
+      "path": "lecture1/figures/gaussian-fit.svg",
+      "bytes": 27524,
+      "sha256": "94555c0b1654b7687a01afb15130e823b5d5c23d14731bf6f1fc47057fb37caa"
+    },
+    {
+      "path": "lecture1/figures/mc-variability.png",
+      "bytes": 59860,
+      "sha256": "772f5a6f4bb211eaef1a06706bd4ac73126cdd9df6b3035c11ee990258e87669"
+    },
+    {
+      "path": "lecture1/figures/mc-variability.svg",
+      "bytes": 32301,
+      "sha256": "4dfc519dec3be2669db8b6941522bb5d6277fc7780c418686a1dc54cfeabc766"
+    },
+    {
+      "path": "lecture1/figures/mixture-candidates.png",
+      "bytes": 58750,
+      "sha256": "817e77ecac53f438cb3eff1847e7d3fc30902ac959e54752f9553adc9f643406"
+    },
+    {
+      "path": "lecture1/figures/mixture-candidates.svg",
+      "bytes": 15046,
+      "sha256": "dcfd3e1d15276ac62033c0f020a13605469cd48db5d29484294e0d51e3f231a0"
+    },
+    {
+      "path": "lecture1/figures/provenance.json",
+      "bytes": 3544,
+      "sha256": "6487b4ff91f2a2e3440b50ac03324374a44de36cbe8b95231590ac1d9627b867"
+    },
+    {
+      "path": "lecture1/index.html",
+      "bytes": 1290,
+      "sha256": "6b77d7af13b1f085c3eee508f39f65d2182e1bf50826a9094f8cda341500534f"
+    },
+    {
+      "path": "lecture1/lecture1-variational-inference.ipynb",
+      "bytes": 394347,
+      "sha256": "3909e3d1b692dc4e40f4f3fe57f6d44e310f0c5a63d7a77dc44743bc4eaa5229"
+    },
+    {
+      "path": "lecture1/manifest.json",
+      "bytes": 14023,
+      "sha256": "c8211ebc5ff356ba58a78329a5aa69660d7fad94ac7381003d7b5223a028bab2"
+    },
+    {
+      "path": "lecture1/math.mjs",
+      "bytes": 9969,
+      "sha256": "c7f9a64485ce0830953b411fda9071ec7ca1291f89a74b8c99fdf08e91ba8541"
+    },
+    {
+      "path": "lecture1/scripts/build_notebook.py",
+      "bytes": 30921,
+      "sha256": "668e5ffeeeba1617c658081a8c89324ab04c2d42929fc17d5e3ea6f729408f49"
+    },
+    {
+      "path": "lecture1/scripts/check-science.mjs",
+      "bytes": 6757,
+      "sha256": "5756355012fcd53286c4ab5a5cc0e6c03cdc9bff2f7d9138b1cf8f4c0637510c"
+    },
+    {
+      "path": "lecture1/scripts/check-svg-bounds.mjs",
+      "bytes": 2229,
+      "sha256": "dc04eccb8dbfa41a59bd035f426dbc78f7261f3349e0a8fa53dc20e6cfee8f39"
+    },
+    {
+      "path": "lecture1/scripts/run_science.py",
+      "bytes": 19365,
+      "sha256": "46759c682d39ecf7de88f07e1c900d92c9580f0d40d34b58b8ab7e67e2f68509"
+    },
+    {
+      "path": "lecture1/speaker-notes.md",
+      "bytes": 49520,
+      "sha256": "beaee6da728a6af3c477bfabea64cd96af5edee391a3f3b786459fb981dc0266"
+    },
+    {
+      "path": "lecture2/README.md",
+      "bytes": 4996,
+      "sha256": "5a93c825170fe5d66a31e44edf041fadca2d5fe915878a16ab78845e5c550abe"
+    },
+    {
+      "path": "lecture2/content.js",
+      "bytes": 27308,
+      "sha256": "dec214727515baf9c1e41e72e487079f0d706a2fa07d938829de88bc9e1ee9a9"
+    },
+    {
+      "path": "lecture2/data/figure-manifest.json",
+      "bytes": 4871,
+      "sha256": "baa6ded44cae9a143cba801fa6a7c9cbbe6dcfe1c46883e8cfba9b48e3eee055"
+    },
+    {
+      "path": "lecture2/data/fixtures.json",
+      "bytes": 8394,
+      "sha256": "e1ca454371615e9d26d33664321094c14427a0b190b5588fe6d7f1c33ac913d9"
+    },
+    {
+      "path": "lecture2/data/mnist-snapshot.npz",
+      "bytes": 87363,
+      "sha256": "70f9d8471b564b87f1bb2f913cca28dfed803cb5d0e33e9ccb4c64e1690b22ce"
+    },
+    {
+      "path": "lecture2/data/original-training.json",
+      "bytes": 10485,
+      "sha256": "3073c1d489761253d81b75882fe4bf71541b78850c8c9466afaeb8ad43c22f43"
+    },
+    {
+      "path": "lecture2/data/provenance.json",
+      "bytes": 1054,
+      "sha256": "082f94a2fdd6ec238e6583df77e35df7bc9ca491c4fac0311efba7a95326f1b0"
+    },
+    {
+      "path": "lecture2/exports/all-builds.pdf",
+      "bytes": 1807956,
+      "sha256": "fe10b637111954642b6e4b036dc5005a20d34c97bd54c5a94ba5d7047078048e"
+    },
+    {
+      "path": "lecture2/exports/completed.pdf",
+      "bytes": 1431885,
+      "sha256": "69f2aab2b614880c89388410ddf35cf29bd71607809cdfef40f5843be855b205"
+    },
+    {
+      "path": "lecture2/figures/code-cloud-prior.svg",
+      "bytes": 319247,
+      "sha256": "839252f5a43b86c48d04e43486937a20b4983c10ced7ff0567f1718dbc42af86"
+    },
+    {
+      "path": "lecture2/figures/code-cloud.svg",
+      "bytes": 308563,
+      "sha256": "c6d6fa9a0ce1e7592d141c2484a5e3d0951cfd1948de3b3faec3202a81cf9b38"
+    },
+    {
+      "path": "lecture2/figures/fitted-code-decodes.png",
+      "bytes": 68370,
+      "sha256": "f00768ae06018647a12c338d6e168ad711281badb46015652af82a251569d1f4"
+    },
+    {
+      "path": "lecture2/figures/held3-ae16.png",
+      "bytes": 7414,
+      "sha256": "0f6b83615226a5f9aeaa3378fd5ab0c628b0ad6dce2900f6c51457eb17e894a6"
+    },
+    {
+      "path": "lecture2/figures/held3-ae2.png",
+      "bytes": 8801,
+      "sha256": "fd353ceec6651d1951dc4269673175ef7f27ddb2c6a5050b580a1730e87b95d4"
+    },
+    {
+      "path": "lecture2/figures/held3.png",
+      "bytes": 793,
+      "sha256": "9153828e522f2fa9833137d0795fbb5b0a27b8b8fb4916471afdbf85b4729694"
+    },
+    {
+      "path": "lecture2/figures/independent-pixels.png",
+      "bytes": 3801,
+      "sha256": "eb884900bba489805f4ec833d3c761aac81ac37007815b56d41f9a92d6eaf0e6"
+    },
+    {
+      "path": "lecture2/figures/interpolation-path.svg",
+      "bytes": 310491,
+      "sha256": "97b9cdc39fc062b87064f5fa7e7f23455a03d267d3e64ed9132474a4c3191ee1"
+    },
+    {
+      "path": "lecture2/figures/interpolation.png",
+      "bytes": 54823,
+      "sha256": "0a5bfa577fb341f86ff1762bbc5dcd736cf524260a14c67cad30d4535d777ed8"
+    },
+    {
+      "path": "lecture2/figures/mean-pixel.png",
+      "bytes": 8175,
+      "sha256": "bbeddb84df2128aa75ae21ef0143a6d157a788e40dddc0665a29524ec9e3814f"
+    },
+    {
+      "path": "lecture2/figures/prior-decodes.png",
+      "bytes": 74772,
+      "sha256": "e9b560a841743225234f47bc4854ab08cfd06870e052432d9f19f151071a94a1"
+    },
+    {
+      "path": "lecture2/figures/reconstruction-2-16.png",
+      "bytes": 165467,
+      "sha256": "57efab0516138bfe00bef94f0ff30a3ef9ee26b26f8fafbd852e58f92bc4415a"
+    },
+    {
+      "path": "lecture2/figures/test-digits.png",
+      "bytes": 2810,
+      "sha256": "5d9ac6297126b10a0a682c36d4d1a3d9070428a2faf79961685e688e09191530"
+    },
+    {
+      "path": "lecture2/figures/toy-data.svg",
+      "bytes": 9497,
+      "sha256": "23f85d71020797e58a156712cdcc8c7ef72f2ce3188a66e0c1c00733d90bff30"
+    },
+    {
+      "path": "lecture2/figures/toy-draws.svg",
+      "bytes": 14693,
+      "sha256": "0adb3283b75d5141a6a6b25a0611dc97db106568fec6616661b3a078561d9559"
+    },
+    {
+      "path": "lecture2/figures/toy-gaussian.svg",
+      "bytes": 11328,
+      "sha256": "754c80217a149a2530a1d800e64c6523b9155202cd117b33996cdcd1121f1cf4"
+    },
+    {
+      "path": "lecture2/figures/toy-mixture.svg",
+      "bytes": 15959,
+      "sha256": "9308e0734c0606c694047b17cbd4a69d45a76bf2b509e12e2824960d59d34dd3"
+    },
+    {
+      "path": "lecture2/index.html",
+      "bytes": 1290,
+      "sha256": "450bbabad6223a89784e1a74607d8496f696356fd0940725a6dd5415d772fb11"
+    },
+    {
+      "path": "lecture2/lecture2.ipynb",
+      "bytes": 226132,
+      "sha256": "af2e6266ceae8edaed039fe5b89d993dc3bafe1aaf27862b7bcbdc95400f5048"
+    },
+    {
+      "path": "lecture2/manifest.json",
+      "bytes": 10554,
+      "sha256": "9af763fb4066929a1a265f2fcb475ba8e8e2f4e1467392049a76a0bc24bce723"
+    },
+    {
+      "path": "lecture2/models/ae16.pt",
+      "bytes": 4306185,
+      "sha256": "ba2a4d4ffec50af84b6ca6bb3c3dbbfe08534b0b44bcd447a3ddd2f951faa27d"
+    },
+    {
+      "path": "lecture2/models/ae2.pt",
+      "bytes": 4277495,
+      "sha256": "c5344d14dfd1ca329bb9c1fe2f9f85d6776ea1fc79049e8c0c8412e509d5cf6b"
+    },
+    {
+      "path": "lecture2/notebooks/lab.py",
+      "bytes": 6791,
+      "sha256": "9c7578edf42f15d5bc3df720d82ea356a4fc158d9f67db1c6581f56019327da9"
+    },
+    {
+      "path": "lecture2/scripts/build_evidence.py",
+      "bytes": 11597,
+      "sha256": "1041949c87762ea0236584d8f40cb941df8bb7737cd73bccbd3c9436c7158d11"
+    },
+    {
+      "path": "lecture2/scripts/make_notebooks.py",
+      "bytes": 20940,
+      "sha256": "34bdce05856af5762fd3156f6c0fac97e67d3280a39012b871787c42304e911b"
+    },
+    {
+      "path": "lecture2/scripts/prepare_data.py",
+      "bytes": 1829,
+      "sha256": "d437327233d0da5548f5627cc1702a313e03591877b51d2dbccfa0cccc036c1e"
+    },
+    {
+      "path": "lecture2/speaker-notes.md",
+      "bytes": 28754,
+      "sha256": "22a53c70a33b6bc5cd80608d1bd431ab01af27615aa20f6b193aa6aa9dc0d545"
+    },
+    {
+      "path": "lecture3/README.md",
+      "bytes": 5593,
+      "sha256": "0d1ed83140ee023bdd2d71586530249dec752e25f4396769e8354a20fcd677ff"
+    },
+    {
+      "path": "lecture3/content.js",
+      "bytes": 29717,
+      "sha256": "40807c71d1079d57517e48cc581c372c091bb7147e2027fd70d9910c536c4020"
+    },
+    {
+      "path": "lecture3/data/figure-manifest.json",
+      "bytes": 4609,
+      "sha256": "dc31b4c331dd6a758256f7f4cfebe9b334d2d7896b13a9bfb037ee92a77edabe"
+    },
+    {
+      "path": "lecture3/data/fixtures.json",
+      "bytes": 8394,
+      "sha256": "e1ca454371615e9d26d33664321094c14427a0b190b5588fe6d7f1c33ac913d9"
+    },
+    {
+      "path": "lecture3/data/mnist-snapshot.npz",
+      "bytes": 87363,
+      "sha256": "70f9d8471b564b87f1bb2f913cca28dfed803cb5d0e33e9ccb4c64e1690b22ce"
+    },
+    {
+      "path": "lecture3/data/original-training.json",
+      "bytes": 24273,
+      "sha256": "3e6b825e32604a8aef9bf8745ccf79741eefb9ce144b331a62aba4eaee430b6a"
+    },
+    {
+      "path": "lecture3/data/provenance.json",
+      "bytes": 1343,
+      "sha256": "5e82598d466f00840bbdcd517ea46effa5715dfe0b076a2c0084dc4253784890"
+    },
+    {
+      "path": "lecture3/exports/all-builds.pdf",
+      "bytes": 2020574,
+      "sha256": "59a32724bab7f07f587459cb06aadd9ed43496eadc6e3d9541c8f11282e053a1"
+    },
+    {
+      "path": "lecture3/exports/completed.pdf",
+      "bytes": 1624253,
+      "sha256": "9e23bcf790da35de6e0b824556c7ca8d9b86ab7b08d50c38507518154a563852"
+    },
+    {
+      "path": "lecture3/figures/ae-failure-cloud.svg",
+      "bytes": 319247,
+      "sha256": "839252f5a43b86c48d04e43486937a20b4983c10ced7ff0567f1718dbc42af86"
+    },
+    {
+      "path": "lecture3/figures/ae-prior-decodes.png",
+      "bytes": 74772,
+      "sha256": "e9b560a841743225234f47bc4854ab08cfd06870e052432d9f19f151071a94a1"
+    },
+    {
+      "path": "lecture3/figures/beta8-prior.png",
+      "bytes": 61945,
+      "sha256": "ca56ffa053233be0804d933f596dea04213232184d721e7ae44c9766b65a6269"
+    },
+    {
+      "path": "lecture3/figures/held3-draw.png",
+      "bytes": 842,
+      "sha256": "f7d0a4932dda0e3fd3c8a7b105a55b792f9c59d73ade3bdfc0c95b9292737c41"
+    },
+    {
+      "path": "lecture3/figures/held3-mean-decode.png",
+      "bytes": 8196,
+      "sha256": "98ca1052553403b222a42bd0b19f1f308cb5c05c6ba92525218c9ff5e4010326"
+    },
+    {
+      "path": "lecture3/figures/held3-probability.png",
+      "bytes": 8063,
+      "sha256": "c10976d14c53aa9b5ed7065f967b0f77f24f562b5a6f55816cc7e9d891ecea7d"
+    },
+    {
+      "path": "lecture3/figures/held3.png",
+      "bytes": 793,
+      "sha256": "9153828e522f2fa9833137d0795fbb5b0a27b8b8fb4916471afdbf85b4729694"
+    },
+    {
+      "path": "lecture3/figures/per-image-fit.svg",
+      "bytes": 10746,
+      "sha256": "3b02e9af5d763133d4248fa0569103e21335633e6e18998de627cfab77866d18"
+    },
+    {
+      "path": "lecture3/figures/per-image-path.svg",
+      "bytes": 310962,
+      "sha256": "72437444fa22f7498ef065fc2b0433ff25012a1a06182592ea9a64ad314e8507"
+    },
+    {
+      "path": "lecture3/figures/prior-16.png",
+      "bytes": 61954,
+      "sha256": "e440b9e875ea056b424eb81939f9f9c1c63a88fc5c65cb42396ee73dec654407"
+    },
+    {
+      "path": "lecture3/figures/prior-observations.png",
+      "bytes": 3336,
+      "sha256": "2050dc181ccd580e2e0500961eb6ee39841f88c542e0fd1da10c7ac75b838bbd"
+    },
+    {
+      "path": "lecture3/figures/prior-probabilities.png",
+      "bytes": 62935,
+      "sha256": "687d4179c227c43ca4efd2c2dbc37f33fd6880d17e09ed94b5528df1d5866716"
+    },
+    {
+      "path": "lecture3/figures/reconstructions-16.png",
+      "bytes": 61681,
+      "sha256": "a41ede3c0dc5870e48832618bfe49536c1da1136ab9247115659cc6954b66c72"
+    },
+    {
+      "path": "lecture3/figures/reconstructions.png",
+      "bytes": 105910,
+      "sha256": "e38c2ec86c2bf6e1c0cfb5c3058889b974c44615de987ea81d63e0bd9974639a"
+    },
+    {
+      "path": "lecture3/figures/test-digits.png",
+      "bytes": 2810,
+      "sha256": "5d9ac6297126b10a0a682c36d4d1a3d9070428a2faf79961685e688e09191530"
+    },
+    {
+      "path": "lecture3/figures/vae-cloud-prior.svg",
+      "bytes": 319372,
+      "sha256": "435d9be9412b93830582f1c8bbf09e6b11003dbc8ea718a58e277fb7478f1c0b"
+    },
+    {
+      "path": "lecture3/index.html",
+      "bytes": 1290,
+      "sha256": "9350981ee225f841313a02d98a6e3afa558cb68533e7e0fd7f1494eebee6bd56"
+    },
+    {
+      "path": "lecture3/lecture3.ipynb",
+      "bytes": 164092,
+      "sha256": "b2cd74c0b8ebdda3ca03b978ab92a664270382d3629ed21733fcae02e0c28d39"
+    },
+    {
+      "path": "lecture3/manifest.json",
+      "bytes": 11379,
+      "sha256": "7fedbd0504a95efc1e4f3d10e44327e1d5ca48650b75ca1ba62aec604179df4b"
+    },
+    {
+      "path": "lecture3/models/vae16.pt",
+      "bytes": 4323089,
+      "sha256": "f97d3f879b336dfccb61c95be99c199597a01ff75723e743cb82a5de22ee4d11"
+    },
+    {
+      "path": "lecture3/models/vae2.pt",
+      "bytes": 4280061,
+      "sha256": "b38e8bdb2c3a2d38e20cba7b257856e4ee230fc9672705d09a8b22c4c71cd1d5"
+    },
+    {
+      "path": "lecture3/models/vae2b8.pt",
+      "bytes": 4280101,
+      "sha256": "55c0922e1ba375121259291dff924f1bea19ce0223075b76069f1bb27a2e8451"
+    },
+    {
+      "path": "lecture3/notebooks/lab.py",
+      "bytes": 6791,
+      "sha256": "9c7578edf42f15d5bc3df720d82ea356a4fc158d9f67db1c6581f56019327da9"
+    },
+    {
+      "path": "lecture3/speaker-notes.md",
+      "bytes": 31376,
+      "sha256": "dab2ec30d56e33125c0e39325b50d70851891483dac6c0190a7fe22522a00235"
+    },
+    {
+      "path": "lecture4/README.md",
+      "bytes": 4590,
+      "sha256": "d43503cd85ce9753ef159c8553e71a86878991896ae1bbc0e311f6d5425bec11"
+    },
+    {
+      "path": "lecture4/content.js",
+      "bytes": 28695,
+      "sha256": "5ab3a04dabb6bc47e2139c0a201a899758a88e0897d445d7b643fa6863ccb33b"
+    },
+    {
+      "path": "lecture4/data/fixtures.json",
+      "bytes": 20322,
+      "sha256": "3a650f73df98be6fcc5df594deea199ab1c520994cac60ee6c32648b6ff4845c"
+    },
+    {
+      "path": "lecture4/data/gan_mnist_snapshots.npz",
+      "bytes": 1417931,
+      "sha256": "80e3184a9375e74397b081b9ef3a4f59e32a36ae26f3d647d1b8de43070afa66"
+    },
+    {
+      "path": "lecture4/data/mnist-subset.npz",
+      "bytes": 104019,
+      "sha256": "2cd5365b46589878864ec8da9acd7d9eac048f6a78f44349ed19ea1a654aa4ff"
+    },
+    {
+      "path": "lecture4/data/original-training.json",
+      "bytes": 5960,
+      "sha256": "a19b41f17e5690cc58bb4d7a89642b2a8cc6a20c930ff92e3fd3784170c7901a"
+    },
+    {
+      "path": "lecture4/data/reuse-manifest.json",
+      "bytes": 1969,
+      "sha256": "56b4558f4c6153f708e90454dcee3ca650e133fb07b6106973a96147c5b290d4"
+    },
+    {
+      "path": "lecture4/data/toy_gan_collapse.json",
+      "bytes": 523232,
+      "sha256": "28e280a5d44b838adb8703c6a498de0f21635ac1a912d487f6bb6b4f39d12270"
+    },
+    {
+      "path": "lecture4/data/toy_gan_runs.json",
+      "bytes": 4178288,
+      "sha256": "947b72fc38e7c9a97731d05ef966da45c9484accad4111a5ff097a711218d8d8"
+    },
+    {
+      "path": "lecture4/data/toy_one_player.json",
+      "bytes": 497611,
+      "sha256": "13d2914fa5c12508e65779054c3776db31cbf86135f8ebb6c0ab5dfe4ae3e5cf"
+    },
+    {
+      "path": "lecture4/exports/all-builds.pdf",
+      "bytes": 1012829,
+      "sha256": "fcda085c01488612723af7cf472d24129444dce64bd21732389acf9624e6de43"
+    },
+    {
+      "path": "lecture4/exports/completed.pdf",
+      "bytes": 659823,
+      "sha256": "58f994e1c99620a241109b83a4d819d54bf2cfc4f4f001fff74f6fa9526a0916"
+    },
+    {
+      "path": "lecture4/figures/d_only-0.svg",
+      "bytes": 8514,
+      "sha256": "2e0832c0fbc8f73ef9bfe33bc21cdcf3c3b9386453344e218e4aeecb1210ff7e"
+    },
+    {
+      "path": "lecture4/figures/d_only-200.svg",
+      "bytes": 9786,
+      "sha256": "3a70942bc9e826437ac1bbb8c7a7e772b923eb43e7349debabcd39c0f73c5257"
+    },
+    {
+      "path": "lecture4/figures/d_only-samples-0.svg",
+      "bytes": 9344,
+      "sha256": "11f98d1b4b314dd387446d3991eb446ca36eb3875dcafe455adca9887a8f01b9"
+    },
+    {
+      "path": "lecture4/figures/d_only-samples-200.svg",
+      "bytes": 9344,
+      "sha256": "cdfa1266ff526481a94f3715e57de72d49e16dd549d614338cc5b8fa0c52cb79"
+    },
+    {
+      "path": "lecture4/figures/g_only-0.svg",
+      "bytes": 9786,
+      "sha256": "40e2741b8d7f30a7a6e5262806db9012f9a2ff2c9ea9aa5516918a3bebd7c7e6"
+    },
+    {
+      "path": "lecture4/figures/g_only-300.svg",
+      "bytes": 9786,
+      "sha256": "ba83d1cc6866ca0e197707a4f66df89f57f49370c938f63648fb64ea0506739d"
+    },
+    {
+      "path": "lecture4/figures/g_only-samples-0.svg",
+      "bytes": 9572,
+      "sha256": "0a226a181c51d225197e4f1f40805ac38086d6a32cdea2ed48300c76b8d3a97f"
+    },
+    {
+      "path": "lecture4/figures/g_only-samples-300.svg",
+      "bytes": 12046,
+      "sha256": "e4d02ca75947fff4aad25b1c684a19a7af4de32f27739437d941355c31d3a552"
+    },
+    {
+      "path": "lecture4/figures/held-digit3.png",
+      "bytes": 1017,
+      "sha256": "a80b87da660cefdd56c5497b1eeff478758d47b01b1e12f1b33e42213d66e87d"
+    },
+    {
+      "path": "lecture4/figures/loss-vs-coverage.svg",
+      "bytes": 50517,
+      "sha256": "364458d02e0e9e233004a7d661a2dcfb23ff920cf1f496de44be801493f6a4a7"
+    },
+    {
+      "path": "lecture4/figures/mnist-epoch-0.png",
+      "bytes": 19801,
+      "sha256": "4bd92e1a9b484d7ff559550150c0994f5d46eef5d508b9e9c86a234cb66d63a8"
+    },
+    {
+      "path": "lecture4/figures/mnist-epoch-1.png",
+      "bytes": 19220,
+      "sha256": "d3bb0da4dbcc7cd1c4e2724bb5955bf2be77db59052bfc934062485dc81f3b02"
+    },
+    {
+      "path": "lecture4/figures/mnist-epoch-30.png",
+      "bytes": 12715,
+      "sha256": "32acebf9d3f1369f19efb6afc4931984602a8d0da0065c343061c6a000c6e0f9"
+    },
+    {
+      "path": "lecture4/figures/mnist-epoch-5.png",
+      "bytes": 13721,
+      "sha256": "c9125e2c4162dc14559d3b742a5d62edcd13102a06a27a1db52106e6d1235732"
+    },
+    {
+      "path": "lecture4/figures/mnist-replayed.png",
+      "bytes": 12715,
+      "sha256": "32acebf9d3f1369f19efb6afc4931984602a8d0da0065c343061c6a000c6e0f9"
+    },
+    {
+      "path": "lecture4/figures/saturation.svg",
+      "bytes": 9721,
+      "sha256": "9054a50aedcc267545baaca5f7c552a141258c919c1898599fd91f36bb2904e6"
+    },
+    {
+      "path": "lecture4/figures/toy-collapse.svg",
+      "bytes": 9593,
+      "sha256": "6be1e48409dc0452dcf1df1cb60b056efb16f8c441f24c18bb8abf49dfe9f085"
+    },
+    {
+      "path": "lecture4/figures/toy-initial.svg",
+      "bytes": 9344,
+      "sha256": "1bdd5383e751aa5b2122fd09168390b7727a999cf98f711ba6341cbb45b1d021"
+    },
+    {
+      "path": "lecture4/figures/toy-stable.svg",
+      "bytes": 10455,
+      "sha256": "56230867f03a9e77ed0ba948755332ca5259ee44269efbdc01140161daffb590"
+    },
+    {
+      "path": "lecture4/index.html",
+      "bytes": 1290,
+      "sha256": "cd35d855271ddd67a8958867bd008b8fc18148866b2ed448587c23258015aa82"
+    },
+    {
+      "path": "lecture4/lecture4.ipynb",
+      "bytes": 189007,
+      "sha256": "df6e357d99a68b147723be537bef10aa03b138b66daa68c8d901004abd3d0f47"
+    },
+    {
+      "path": "lecture4/manifest.json",
+      "bytes": 10335,
+      "sha256": "7b947401c9f1bd9a13794b49ac8b2e14233f015fd21c6628a39d52beb74b06fc"
+    },
+    {
+      "path": "lecture4/models/gan_mnist.pt",
+      "bytes": 8459986,
+      "sha256": "7066dd6cba027c3a9ad1d432c4f6fb67c96a2cf52a1bafc3f7a3c2c6e09a7f87"
+    },
+    {
+      "path": "lecture4/scripts/execute_notebook.py",
+      "bytes": 1020,
+      "sha256": "71691712d0806f8b84baa9b59fc7180baf02ce884ead2b8cea4b2f1c67415361"
+    },
+    {
+      "path": "lecture4/scripts/gan.py",
+      "bytes": 9536,
+      "sha256": "25975b3b3626adac75053024d97e3135d8447ab66a8643364cb283eabc22a2ff"
+    },
+    {
+      "path": "lecture4/scripts/make_notebook.py",
+      "bytes": 9729,
+      "sha256": "c486d4b774a5746dcdf58edc6b18dfac35149723407ae860cf23510b64385403"
+    },
+    {
+      "path": "lecture4/scripts/prepare.py",
+      "bytes": 8759,
+      "sha256": "f9b7b77a2855bb09a16e8ec2ea1f245c462e1bbc7d2fbc89aedd9b85b3872c0a"
+    },
+    {
+      "path": "lecture4/speaker-notes.md",
+      "bytes": 31631,
+      "sha256": "9de9d4b54e3daab4f6ad8721a6d9b6bdc7cde28d7c0240d509fa9d55376ce99d"
+    },
+    {
+      "path": "lecture5/README.md",
+      "bytes": 5365,
+      "sha256": "6916cbce71f2120cf5cecf8a593c93627e546f9944dbfab4341124fc36631dcc"
+    },
+    {
+      "path": "lecture5/content.js",
+      "bytes": 35169,
+      "sha256": "2718d4a1bef74779bd5ce89a4ba8bd8767475f6c51e4e166d128aeef5b066165"
+    },
+    {
+      "path": "lecture5/data/fixtures.json",
+      "bytes": 4274,
+      "sha256": "6a1b2ee4d32b3e412457357481ec7aecde477eda5c1a85b8b7af5d339f3c46c4"
+    },
+    {
+      "path": "lecture5/data/mnist-subset.npz",
+      "bytes": 104019,
+      "sha256": "2cd5365b46589878864ec8da9acd7d9eac048f6a78f44349ed19ea1a654aa4ff"
+    },
+    {
+      "path": "lecture5/data/original-training.json",
+      "bytes": 3015,
+      "sha256": "0b44c662a69cc52ab4299ce8bb5edc39ce8dba7e313cdce82c3f86f6abdd11e4"
+    },
+    {
+      "path": "lecture5/data/original-trajectory.npz",
+      "bytes": 356379,
+      "sha256": "5bd544bafe769db78c84ffb166c694d3524d06c2436b20a9e39d52915a2f1bf7"
+    },
+    {
+      "path": "lecture5/data/replayed-trajectory.npz",
+      "bytes": 201899,
+      "sha256": "aaf1a2708539d65eec767b890cf9d24864408e284b27f1d7e5d2b94c1e1210fa"
+    },
+    {
+      "path": "lecture5/data/reuse-manifest.json",
+      "bytes": 932,
+      "sha256": "bd48c5c31d86197e9e3ba544adf8af1e0bf0a4b71ea2abd4ae2c0d3006f16517"
+    },
+    {
+      "path": "lecture5/exports/all-builds.pdf",
+      "bytes": 1053376,
+      "sha256": "ed809e5b588e3dd7784beffa9b452b53415e9c5b1ce2f27215624a1702b41c3f"
+    },
+    {
+      "path": "lecture5/exports/completed.pdf",
+      "bytes": 753788,
+      "sha256": "8450801ded0436e2c84e53b9464699d002a1021f5389144e29420bf3501ac4f0"
+    },
+    {
+      "path": "lecture5/figures/clean-estimate.png",
+      "bytes": 1741,
+      "sha256": "f8ff0999a8dc642f5eda363d58c028bac313e8daea78d95e15d5ec416adb20d8"
+    },
+    {
+      "path": "lecture5/figures/forward-1.png",
+      "bytes": 1206,
+      "sha256": "ab9cd27fe07e4f5431985ad9dfa83129c2271fb74d25fe2248bc22ed874b5390"
+    },
+    {
+      "path": "lecture5/figures/forward-100.png",
+      "bytes": 1931,
+      "sha256": "60180ca346b93f860ee86c4dc9546cb87c0dadde7cf7a3889d5df5c245f8cfd3"
+    },
+    {
+      "path": "lecture5/figures/forward-1000.png",
+      "bytes": 2040,
+      "sha256": "ca2b32f126ce6cf115dc02161d7d7cef530eb974ca4fcbe01a8c1ac0d6526bd5"
+    },
+    {
+      "path": "lecture5/figures/forward-350.png",
+      "bytes": 2061,
+      "sha256": "56a8b20dcea7c12ae6c9ed5b840836dcb730f29c30a7376ce6d23b0aadd9ba6f"
+    },
+    {
+      "path": "lecture5/figures/forward-600.png",
+      "bytes": 2068,
+      "sha256": "67012a953335a0934f5c72c6dce1b4adaff71b30d18580a3653624d529cc74fa"
+    },
+    {
+      "path": "lecture5/figures/forward-7.png",
+      "bytes": 1538,
+      "sha256": "b9ff748f146e2c65245713270d83d32f8568310abe574b9f3b436bb31eac597c"
+    },
+    {
+      "path": "lecture5/figures/forward-920.png",
+      "bytes": 2032,
+      "sha256": "f696027baab66c2528cc70c2456b8e3fa94a551e6055014930aa32bf673dd5d3"
+    },
+    {
+      "path": "lecture5/figures/held-seven.png",
+      "bytes": 785,
+      "sha256": "d7a66b8f20c4408a2dcf3531bf2a5e889b2bd38016e4d73c2e50b3458bd2f668"
+    },
+    {
+      "path": "lecture5/figures/injected-noise.png",
+      "bytes": 2107,
+      "sha256": "a761af4c3126cbaf221386a3e6e707f4f03d935d92811e9ef2afd264187e96a7"
+    },
+    {
+      "path": "lecture5/figures/predicted-noise.png",
+      "bytes": 2110,
+      "sha256": "6cb212ea2bb32880708141de6e0d88ac27a69deed1b82117a9a6ee7023bd8830"
+    },
+    {
+      "path": "lecture5/figures/reverse-0.png",
+      "bytes": 1454,
+      "sha256": "6bdbe4a1942e19ae2909bcd634fafa15410b52dac5a8a924463e4535f3a512bb"
+    },
+    {
+      "path": "lecture5/figures/reverse-1.png",
+      "bytes": 1585,
+      "sha256": "6c59922b9d5b4d557eba7368e9cc7b181a9179830933e9d879e9928330d07667"
+    },
+    {
+      "path": "lecture5/figures/reverse-1000.png",
+      "bytes": 2046,
+      "sha256": "beef8ce657a0fb811dbce9a9ec635184d8ff25ac173fd9d528eacab77d5e7aed"
+    },
+    {
+      "path": "lecture5/figures/reverse-200.png",
+      "bytes": 2029,
+      "sha256": "2b3f3903c4ac8b993035e516c85f92f91d26967e837aac8a194c46ba6e21d977"
+    },
+    {
+      "path": "lecture5/figures/reverse-400.png",
+      "bytes": 2047,
+      "sha256": "75136c2d1d2d428c56cda48be39541675346784f4da9748f2924028f952dd4aa"
+    },
+    {
+      "path": "lecture5/figures/reverse-50.png",
+      "bytes": 1896,
+      "sha256": "ef5bc095a18b463d352f212fdae30f54b9aa4ec2ffd08adb698e85adff7a103f"
+    },
+    {
+      "path": "lecture5/figures/reverse-600.png",
+      "bytes": 2073,
+      "sha256": "cdf05cfed650d9085bc4667e51eb2e6970a4c934c07e3834c0f0907ba3d38193"
+    },
+    {
+      "path": "lecture5/figures/reverse-800.png",
+      "bytes": 2089,
+      "sha256": "4938e305fc37dcc749aae655d4c185fa3307b9a4505331bd3ebb17e10e785c54"
+    },
+    {
+      "path": "lecture5/figures/samples-replayed.png",
+      "bytes": 13563,
+      "sha256": "3a6012557c06407f6abd0ae2da97ca0b4fe06d23cb67ca9820c8c20531456a65"
+    },
+    {
+      "path": "lecture5/figures/schedule.svg",
+      "bytes": 9592,
+      "sha256": "d5ce145c00989c2fc8a5dfefe73b2c0c379601b4af478d536f1c829985f1a458"
+    },
+    {
+      "path": "lecture5/figures/training-history.svg",
+      "bytes": 8139,
+      "sha256": "44866316babb5a1a248c513283a9d73a1aea4b11bf4418be784d236aa866cd75"
+    },
+    {
+      "path": "lecture5/index.html",
+      "bytes": 1290,
+      "sha256": "b74aafc5acb5ca4cd885d94e82cb052cfb3e0b960a88bbf1d7aee8b471e89fee"
+    },
+    {
+      "path": "lecture5/lecture5.ipynb",
+      "bytes": 103084,
+      "sha256": "474693b5e55d105d15fcf43d673600bc330eb2fbbafbc19724322d82c30e1756"
+    },
+    {
+      "path": "lecture5/manifest.json",
+      "bytes": 11884,
+      "sha256": "52ea08642521cb63a8aba4926b8285f82414df504cea41679e661a142a8216d6"
+    },
+    {
+      "path": "lecture5/models/ddpm.pt",
+      "bytes": 3274809,
+      "sha256": "9dc135888ec05bceebc35fcf6b7c6b5ee1823f2cea7c0b2ec32906368b793585"
+    },
+    {
+      "path": "lecture5/scripts/ddpm.py",
+      "bytes": 3910,
+      "sha256": "3bee8378814605d441178e17be1080ad14962c2a46a5bf1ebc9bd6b93857cac1"
+    },
+    {
+      "path": "lecture5/scripts/execute_notebook.py",
+      "bytes": 1020,
+      "sha256": "71691712d0806f8b84baa9b59fc7180baf02ce884ead2b8cea4b2f1c67415361"
+    },
+    {
+      "path": "lecture5/scripts/make_notebook.py",
+      "bytes": 11778,
+      "sha256": "6f0326d2629c7ea2f15987d4698b67723b50ceb77b9ae8d5cba6dda86fd59366"
+    },
+    {
+      "path": "lecture5/scripts/prepare.py",
+      "bytes": 8872,
+      "sha256": "3c32941e0a9a19f0a781460f6d4575534431c0a1983ca97953eecb0cbc9e7ab9"
+    },
+    {
+      "path": "lecture5/scripts/train.py",
+      "bytes": 2461,
+      "sha256": "763237b91ba551e554199dc20df7b9cb646b54047a3ece9c748b2ef9b824f50f"
+    },
+    {
+      "path": "lecture5/speaker-notes.md",
+      "bytes": 39005,
+      "sha256": "24acf8e8632d25f3f4b004626fc6ba0801a4a2dfa96a0965ff9ee4aacc858c4a"
+    },
+    {
+      "path": "notebook-verification.json",
+      "bytes": 706,
+      "sha256": "ffa00499895e0343f0e7e0b4d5ae8243009cd7910aeba48c8e9c6ce35139c8ea"
+    },
+    {
+      "path": "package.json",
+      "bytes": 282,
+      "sha256": "8addcbd27860b72175a9d949dd90af5bce59bf065ea493d64dec6cd3e1003fe8"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 100,
+      "sha256": "46994fc67a584ac7b05e06d19584b3570f28b75747169899cff269420ca84f67"
+    },
+    {
+      "path": "scripts/browser.mjs",
+      "bytes": 469,
+      "sha256": "fe56016a810b79234e5b6e9d6f8f3bf3c906b294b624d74c657ded322d0cccb6"
+    },
+    {
+      "path": "scripts/check-hub.mjs",
+      "bytes": 1363,
+      "sha256": "4a04f7fa8acb94b9ed46f32cc926462b3ea6efb9ae3a78cab323351c70781248"
+    },
+    {
+      "path": "scripts/contact_sheets.py",
+      "bytes": 1264,
+      "sha256": "299d2c8cd4ab396c04ee292493e18c1655073f735ddc1b5d338bc6824bf5c432"
+    },
+    {
+      "path": "scripts/export.mjs",
+      "bytes": 1548,
+      "sha256": "1f81e65810bbcaffb57561e1c5b6f7b5063833022272dc80b2b714bdaec22baa"
+    },
+    {
+      "path": "scripts/inspect-layout.mjs",
+      "bytes": 816,
+      "sha256": "a06300464d084f56453d317b45c5dfc7f0ee4735d21da3356a2dcfc1b662291f"
+    },
+    {
+      "path": "scripts/inspect-scene.mjs",
+      "bytes": 613,
+      "sha256": "aa4adbdd72a2e7dc398cc87d574db8429234c5bebfe5011f04eccdb027dc7535"
+    },
+    {
+      "path": "scripts/install-local.py",
+      "bytes": 1339,
+      "sha256": "48861fe8e5f9c6225b6783a87aee5fa48be246f0b2395f6bfa05bea9d3fe043e"
+    },
+    {
+      "path": "scripts/package.mjs",
+      "bytes": 5048,
+      "sha256": "4933b2b6eb0a3a0b00aede6f210fed1f61adad4a85016a21662516198313ffc0"
+    },
+    {
+      "path": "scripts/pdf_qa.py",
+      "bytes": 5206,
+      "sha256": "926a7c400076045db691ab8f1f562a599c32c6997ab48ca907b81cd52801d529"
+    },
+    {
+      "path": "scripts/quality-report.mjs",
+      "bytes": 7029,
+      "sha256": "18f00adafce0cf013229d1392667566e7cb633b4f569671e21270a4bcf47ec16"
+    },
+    {
+      "path": "scripts/scaffold.mjs",
+      "bytes": 1668,
+      "sha256": "1ae132fd40d822bacb39c43529ffac4645749b9bd0985444528052d9f28ae39c"
+    },
+    {
+      "path": "scripts/verify.mjs",
+      "bytes": 7095,
+      "sha256": "6e183aadacd46e8b50ed4df478af4c882b1bdc35f6bb2d3ffeef9a2acdc7c439"
+    },
+    {
+      "path": "shared/author.js",
+      "bytes": 6809,
+      "sha256": "486e0d5ab0584556db6ef7c8e7003a67eb220bdf103312c8c1c49301a52939bf"
+    },
+    {
+      "path": "shared/deck.css",
+      "bytes": 7733,
+      "sha256": "70387a3ac73ada5a9dfbd2cee45d5a8d48a0cda7bd7510dcc928a61725722cbb"
+    },
+    {
+      "path": "shared/deck.js",
+      "bytes": 7709,
+      "sha256": "4bae65dbe1c61b323a2bfb1f3343d1f93a1a0b1e360d4eb978cc3e27b8b20e6f"
+    },
+    {
+      "path": "shared/katex/LICENSE",
+      "bytes": 1107,
+      "sha256": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3"
+    },
+    {
+      "path": "shared/katex/README.md",
+      "bytes": 7261,
+      "sha256": "9bd68aae2c9d49c04b8995eed626e2b96bc8dc8dd28495c1c6d8acd9557a6e41"
+    },
+    {
+      "path": "shared/katex/contrib/auto-render.js",
+      "bytes": 10529,
+      "sha256": "4cfb141d56e2c5644f5226e6b8709a3eadd39989fcec86a38c8150adb196d89b"
+    },
+    {
+      "path": "shared/katex/contrib/auto-render.min.js",
+      "bytes": 3486,
+      "sha256": "e5372d199bcdae8b4de71d0f7ceba72a4ba12774a27c60a6f1f77d03b3228ee4"
+    },
+    {
+      "path": "shared/katex/contrib/auto-render.mjs",
+      "bytes": 6929,
+      "sha256": "e0410e8ce6c38869bf2f703fcc3b8d192308b5f3b34264625d605d742b1309e0"
+    },
+    {
+      "path": "shared/katex/contrib/copy-tex.js",
+      "bytes": 4469,
+      "sha256": "75d6dbee9697706dc694d9500e876a1ad392db3e8a4588213e0cc300b280eb0a"
+    },
+    {
+      "path": "shared/katex/contrib/copy-tex.min.js",
+      "bytes": 1671,
+      "sha256": "c571c49b520cb8e9040287338286b21783e39b476660b8b56d9e1c037eeaeaff"
+    },
+    {
+      "path": "shared/katex/contrib/copy-tex.mjs",
+      "bytes": 3715,
+      "sha256": "d3a214e3f8c2de12410df5b4de45086dc54566b1919c0078e9ae947a15964283"
+    },
+    {
+      "path": "shared/katex/contrib/mathtex-script-type.js",
+      "bytes": 4204,
+      "sha256": "198d29707a4a152cdd99b4de695a350960a3c16c6749725a5aa75f2dcb619b3d"
+    },
+    {
+      "path": "shared/katex/contrib/mathtex-script-type.min.js",
+      "bytes": 1286,
+      "sha256": "b4e3488de2be4a0aa243ae839af055e18bb5095858ce52a2084751b7c66d0097"
+    },
+    {
+      "path": "shared/katex/contrib/mathtex-script-type.mjs",
+      "bytes": 748,
+      "sha256": "033e6822df7253052c689e9eca1d8f103b1a004886e66ef7b0619aca52a84e1e"
+    },
+    {
+      "path": "shared/katex/contrib/mhchem.js",
+      "bytes": 78561,
+      "sha256": "b193073c57b9ba833ca09faa72013c8995eb56fd2d27d65a6814c2e75f2370ab"
+    },
+    {
+      "path": "shared/katex/contrib/mhchem.min.js",
+      "bytes": 33706,
+      "sha256": "aaf20145c0b8ecd450ccf6eb0cebece2f77d8e6a02c30d291f28c1167b57b2df"
+    },
+    {
+      "path": "shared/katex/contrib/mhchem.mjs",
+      "bytes": 75445,
+      "sha256": "d590d100ede9335bda7648d029db5510877205538af36b53d56cd8bac1de79c1"
+    },
+    {
+      "path": "shared/katex/contrib/render-a11y-string.js",
+      "bytes": 23548,
+      "sha256": "219bf971728c8562fd66cebccf2d9475309412617ca82724fd4cf6ec8d399860"
+    },
+    {
+      "path": "shared/katex/contrib/render-a11y-string.min.js",
+      "bytes": 8364,
+      "sha256": "11b47e83b549040c50f289113b41342826fabd01d32e241b0fe9341e22728cf9"
+    },
+    {
+      "path": "shared/katex/contrib/render-a11y-string.mjs",
+      "bytes": 19988,
+      "sha256": "edab8d622f9e9bc09c4fd9bd40f77f271dfe4942519317ca269de7f8cea2338d"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_AMS-Regular.ttf",
+      "bytes": 63632,
+      "sha256": "68534840bcfdd2bffb6f0e8deb48684dd01e7f04ea2813267577afb906de1d13"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_AMS-Regular.woff",
+      "bytes": 33516,
+      "sha256": "30da91e84c893f875e252689faebdc590b2871145e8adc7f9a9d4dbd8ce0b251"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_AMS-Regular.woff2",
+      "bytes": 28076,
+      "sha256": "0cdd387c9590a1a9f9794560022dbb59654a7d86f187aa0c81495ad42d3a7308"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Caligraphic-Bold.ttf",
+      "bytes": 12368,
+      "sha256": "07d8e303ce4fc12b4bb54f1004170dd190a1f3db45d400fe68060df3e0897268"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Caligraphic-Bold.woff",
+      "bytes": 7716,
+      "sha256": "1ae6bd7475590e97e7f145a89e09ccde322f7a6bc0b91607b1c8b8ee28290fed"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Caligraphic-Bold.woff2",
+      "bytes": 6912,
+      "sha256": "de7701e42cf1f4cf0b766c03fb27977207eee2f4fd5d76fa82188406da43ea4c"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Caligraphic-Regular.ttf",
+      "bytes": 12344,
+      "sha256": "ed0b74372feefcbb9c0666b2e210da37b7e49fa7fbbf3eeb11db5f693dacfbb7"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Caligraphic-Regular.woff",
+      "bytes": 7656,
+      "sha256": "3398dd02302557a793f2863f88e02d96ce10df2abffa07c8e9fa90775116e65c"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Caligraphic-Regular.woff2",
+      "bytes": 6908,
+      "sha256": "5d53e70ad607c2352162dec9e0923fb54ecdafaccbf604cd8dcf7d00facb989b"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Fraktur-Bold.ttf",
+      "bytes": 19584,
+      "sha256": "9163df9c7122432e6495b4229fa9071cf9ae86a758ae5efc4924ec2e1a6dbce1"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Fraktur-Bold.woff",
+      "bytes": 13296,
+      "sha256": "9be7ceb88004ab8ad124082246fbfcca4091e36385d4ec6ed1df67375dad50fb"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Fraktur-Bold.woff2",
+      "bytes": 11348,
+      "sha256": "74444efd593c005e3f4573b44524704c0af0a937fe911cca9e94068d0d140d3f"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Fraktur-Regular.ttf",
+      "bytes": 19572,
+      "sha256": "1e6f9579e90e2cac37f8f60a597c436e075c114385652b7cbeb0dec0421291b3"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Fraktur-Regular.woff",
+      "bytes": 13208,
+      "sha256": "5e28753be717dac97f559f49bc10be9cf3c124ddcabda6659d11cb68febc6463"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Fraktur-Regular.woff2",
+      "bytes": 11316,
+      "sha256": "51814d270d06ff0255dba0799994fa4d8c84d11f09951d47595f4abb1f3602dc"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Bold.ttf",
+      "bytes": 51336,
+      "sha256": "138ac28d1663b3037e9c5f52371fa5c63d8324f4a38d22cd573e6ea3a3fd0cf8"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Bold.woff",
+      "bytes": 29912,
+      "sha256": "c76c5d696297d51b9cb1639c7da4334f0e7dec81b42b11213b5e25ef671bb822"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Bold.woff2",
+      "bytes": 25324,
+      "sha256": "0f60d1b897938ec918c8ce073092411baf9438f6739465693ff18b0f9d20b021"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-BoldItalic.ttf",
+      "bytes": 32968,
+      "sha256": "70ee1f64a20f2048c21940ef46d0144fd215baa953ca69afd1e31e98544f708f"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-BoldItalic.woff",
+      "bytes": 19412,
+      "sha256": "a6f7ec0d846ac7ad975adb8959c37ed49b94acbc4ae436db9ce9e20287e4a64c"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-BoldItalic.woff2",
+      "bytes": 16780,
+      "sha256": "99cd42a3c072d918f2f44984a807cf7aa16e13545fd0875fc07c6c65f99e715b"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Italic.ttf",
+      "bytes": 33580,
+      "sha256": "0d85ae7cc30f23790a7f1a58c4a112fdca8aae769b6ba11429af1d98b1b6cb3a"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Italic.woff",
+      "bytes": 19676,
+      "sha256": "f1d6ef86f3b11a528bd5185199bd2443ecb2b0dead96d88674b5a2c12be24bdf"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Italic.woff2",
+      "bytes": 16988,
+      "sha256": "97479ca6cce906abc961ecac96faa5f9ca2e61b8e7670d475826bcdee9a7c267"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Regular.ttf",
+      "bytes": 53580,
+      "sha256": "d0332f52868370fd83ae7fa46470f90c8f2eab2fcf12bc4f88080b340c95a830"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Regular.woff",
+      "bytes": 30772,
+      "sha256": "c6368d87e8a1a3a5d337623d83d8dc4b868f242a9ad476237d6f8d1e0f168cdc"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Main-Regular.woff2",
+      "bytes": 26272,
+      "sha256": "c2342cd8b869e01752a9321dc17213fc40d4d04c79688c1d43f2cf316abd7866"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Math-BoldItalic.ttf",
+      "bytes": 31196,
+      "sha256": "f9377ab0271cda59af24bcffbd46a4d0c8a3572ffafdbb38de2ad5ea7b0d5ee5"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Math-BoldItalic.woff",
+      "bytes": 18668,
+      "sha256": "850c0af5c2238497febaf5e461d880bf458c341f42f4f330f1b1ab5698b1998e"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Math-BoldItalic.woff2",
+      "bytes": 16400,
+      "sha256": "dc47344dbb6cb5b655c8460d561f4df5f501b90c804ad3c6cec65fe322351ab1"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Math-Italic.ttf",
+      "bytes": 31308,
+      "sha256": "08ce98e51b04d58945a301e639e02b6998af29fdfd61a7b8afdd07bbfc479d4a"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Math-Italic.woff",
+      "bytes": 18748,
+      "sha256": "8a8d244581371912b8f3f5a23e2437cb2a59cd9bcaebb0346e722c05737a2571"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Math-Italic.woff2",
+      "bytes": 16440,
+      "sha256": "7af58c5ec8f132a2ddde9027c6d7814decce4d3b822a11192a42a20e2e973264"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Bold.ttf",
+      "bytes": 24504,
+      "sha256": "1ece03f79f95277d57dc7f6b435a74e1379b0d46104a8530286b60ff49369ea0"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Bold.woff",
+      "bytes": 14408,
+      "sha256": "ece03cfd83e22c212cdef66feb8442d25a083beb988db3f1883f3f9738d750ba"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Bold.woff2",
+      "bytes": 12216,
+      "sha256": "e99ae51144bf1232efcc1bfe5add36262c6866b0faab24fa75740e1b98577a62"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Italic.ttf",
+      "bytes": 22364,
+      "sha256": "3931dd81faed86ba021bb2bbdc36f5bed9a38d6b4f4077aca59b265aa1b02083"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Italic.woff",
+      "bytes": 14112,
+      "sha256": "91ee67500cc0129aa0ace3ac5c61ff1692102f0f31d02b69347fba35dcb75bf2"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Italic.woff2",
+      "bytes": 12028,
+      "sha256": "00b26ac825e2095056396e0553b8ac26d3f8ad158c3826e28b4c45b385c4714a"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Regular.ttf",
+      "bytes": 19436,
+      "sha256": "f36ea897e19f4a2e571d1e900e4e3710e438deb05a842486045ba0a3e616a4ad"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Regular.woff",
+      "bytes": 12316,
+      "sha256": "11e4dc8a6471ff6d6ee561d53d10fde8f7489e798257ff449c5d37c197435605"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_SansSerif-Regular.woff2",
+      "bytes": 10344,
+      "sha256": "68e8c73ef42afd3ccec58bf0fba302cce448938e7fc020a5e31f8a952eee1342"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Script-Regular.ttf",
+      "bytes": 16648,
+      "sha256": "1c67f068fea8bb09bf099c088b1cf64bd27516a6e07f4684344873564bb66a67"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Script-Regular.woff",
+      "bytes": 10588,
+      "sha256": "d96cdf2b3bdd4d64a8fd5f74a4c467f123a8a73931cd435889f08ffaf9bf947a"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Script-Regular.woff2",
+      "bytes": 9644,
+      "sha256": "036d4e95149b69ff9bcc0cd55771efeb25ffa3947293e69acd78d5ac328c684b"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size1-Regular.ttf",
+      "bytes": 12228,
+      "sha256": "95b6d2f1a50173bfedb8c63e1d1c99b10427d0a4df4201cb44513b226951a22b"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size1-Regular.woff",
+      "bytes": 6496,
+      "sha256": "c943cc986384f59e86bea5fd7dc50a9c4dfe567a7c05eb40d6790720dead97c9"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size1-Regular.woff2",
+      "bytes": 5468,
+      "sha256": "6b47c40166b6dbe21a5dfca7718413f2147fd2399be1ba605d8ad39cedf25dfe"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size2-Regular.ttf",
+      "bytes": 11508,
+      "sha256": "a6b2099fb555c60e3a0db3a08842ebf1d732c6eb4e4bf44913613bed4fc4e39b"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size2-Regular.woff",
+      "bytes": 6188,
+      "sha256": "2014c523c3210bcc166648c4d4cc57f05b747df07a24277bf71c51e67dc79e3d"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size2-Regular.woff2",
+      "bytes": 5208,
+      "sha256": "d04c54219f9eaec6d4d4fd42dfb28785975a4794d6b2fc71e566b9cd6db842dd"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size3-Regular.ttf",
+      "bytes": 7588,
+      "sha256": "500e04d54f0d51666332c9d2089aa803be22aa878eca539e59fa53c6e522b082"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size3-Regular.woff",
+      "bytes": 4420,
+      "sha256": "6ab6b62e9b62dae2c00dd90f791bd10950be0ecc3490d7d6045f51c2e8fe0949"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size3-Regular.woff2",
+      "bytes": 3624,
+      "sha256": "73d591271b1604960cb10bb90fee021670af7297017e0e98480b332d11f51995"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size4-Regular.ttf",
+      "bytes": 10364,
+      "sha256": "c647367d1dd4e162468717d020e1fc0f1dc5c26ebfdffbe55261713bf88c5877"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size4-Regular.woff",
+      "bytes": 5980,
+      "sha256": "99f9c6750b489c9462bf04900bd3f939df9b829339daaaaa99ef5495cdddea58"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Size4-Regular.woff2",
+      "bytes": 4928,
+      "sha256": "a4af7d414440a1c1790825cfb700cf9cf43b0f2c4b04f0ebc523011ad9853ec0"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Typewriter-Regular.ttf",
+      "bytes": 27556,
+      "sha256": "f01f3e87d9c6a61c0c081ceb577abd864eb00a612f7ac1620dd6915fad2ef5aa"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Typewriter-Regular.woff",
+      "bytes": 16028,
+      "sha256": "e14fed02b1aba7ce9f5afd5844b5d0321b22351febc720e0de8b8723527609f7"
+    },
+    {
+      "path": "shared/katex/fonts/KaTeX_Typewriter-Regular.woff2",
+      "bytes": 13568,
+      "sha256": "71d517d67827787cfabdf186914cc3358eda539e37931941f2b2fd4a21f68c0b"
+    },
+    {
+      "path": "shared/katex/katex-swap.css",
+      "bytes": 31931,
+      "sha256": "1833c0a56057ef1135823ee47d396b22cc9fc5fba004331e3c85ccc9404bd162"
+    },
+    {
+      "path": "shared/katex/katex-swap.min.css",
+      "bytes": 23784,
+      "sha256": "0efccf78a20a7a8484f83aa4d03824e477233ecc13d66875396378eb76a9aec8"
+    },
+    {
+      "path": "shared/katex/katex.css",
+      "bytes": 31951,
+      "sha256": "be62cce2bb080b2af5d86b115cc4fda61ead12d782e580046bcfe5598534820b"
+    },
+    {
+      "path": "shared/katex/katex.js",
+      "bytes": 613031,
+      "sha256": "12916f9d26e5168a9bc218a350b6d7d1e75417bf9f031b0c5919b373df0a70be"
+    },
+    {
+      "path": "shared/katex/katex.min.css",
+      "bytes": 23804,
+      "sha256": "23aefa0850248a16478b9f55d6b67028f74cc0b46b82b24dc22af068acaa4170"
+    },
+    {
+      "path": "shared/katex/katex.min.js",
+      "bytes": 270325,
+      "sha256": "e1c5d9e1b5b906881c40faf67950585a3f5d5adb4636d10e9678b9ba74b57dcc"
+    },
+    {
+      "path": "shared/katex/katex.mjs",
+      "bytes": 597917,
+      "sha256": "e1b9ee63435797f929ceb2faf1defa4e13785d0b93f6330fa263c0dce07f2158"
+    }
+  ]
+}

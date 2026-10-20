@@ -1,0 +1,38 @@
+{
+  "data": {
+    "source": "MNIST official train/test split, local existing copy",
+    "source_path": "/Users/nipun/git/psdv-teaching/datasets/MNIST",
+    "preprocessing": "x=(raw/255>0.5); fixed binary observations",
+    "train_indices": [
+      0,
+      255
+    ],
+    "test_indices": [
+      0,
+      1999
+    ],
+    "held_digit_test_index": 90,
+    "train_test_overlap": false
+  },
+  "models": [
+    {
+      "name": "vae2",
+      "source": "/Users/nipun/git/generative/assets/models/vae2.pt",
+      "sha256": "b38e8bdb2c3a2d38e20cba7b257856e4ee230fc9672705d09a8b22c4c71cd1d5",
+      "status": "existing trained checkpoint replayed; not freshly trained for this package"
+    },
+    {
+      "name": "vae16",
+      "source": "/Users/nipun/git/generative/assets/models/vae16.pt",
+      "sha256": "f97d3f879b336dfccb61c95be99c199597a01ff75723e743cb82a5de22ee4d11",
+      "status": "existing trained checkpoint replayed; not freshly trained for this package"
+    },
+    {
+      "name": "vae2b8",
+      "source": "/Users/nipun/git/generative/assets/models/vae2b8.pt",
+      "sha256": "55c0922e1ba375121259291dff924f1bea19ce0223075b76069f1bb27a2e8451",
+      "status": "existing trained checkpoint replayed; not freshly trained for this package"
+    }
+  ],
+  "snapshot_sha256": "70f9d8471b564b87f1bb2f913cca28dfed803cb5d0e33e9ccb4c64e1690b22ce"
+}

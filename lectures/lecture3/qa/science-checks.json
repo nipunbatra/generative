@@ -1,0 +1,88 @@
+{
+  "status": "passed",
+  "checks": {
+    "gaussian_KL_library_error": 0.0,
+    "BCE_hand_error": 2.220446049250313e-16,
+    "four_pixel_BCE": 1.196004634676759,
+    "pathwise_grad_mu": [
+      [
+        1.6152261338166976,
+        -4.9418931115739895
+      ]
+    ],
+    "pathwise_grad_logvar": [
+      [
+        0.40995494576860436,
+        3.1404410146112185
+      ]
+    ],
+    "checks": "KL/library; Bernoulli/hand; both reparameterisation derivatives"
+  },
+  "actual_step": {
+    "batch_size": 8,
+    "eta": 1e-06,
+    "seed": 667,
+    "before": 126.01692473981953,
+    "after_same_noise": 125.91750493375213,
+    "recon_before": 119.3393558332917,
+    "kl_before": 6.677568906527815,
+    "gradient_norms": {
+      "encoder.body.1.weight": 26.924201371902168,
+      "encoder.body.1.bias": 2.8081053282558526,
+      "encoder.body.3.weight": 142.33542408284444,
+      "encoder.body.3.bias": 17.711912371135345,
+      "encoder.mu.weight": 274.7752550022112,
+      "encoder.mu.bias": 44.236290769494694,
+      "encoder.logvar.weight": 2.2537208951424903,
+      "encoder.logvar.bias": 0.21358162873312825,
+      "decoder.net.0.weight": 21.773642806414305,
+      "decoder.net.0.bias": 19.000228127723652,
+      "decoder.net.2.weight": 36.20393922941541,
+      "decoder.net.2.bias": 5.587758867930499,
+      "decoder.net.4.weight": 25.832914472860228,
+      "decoder.net.4.bias": 2.287251644944812
+    },
+    "parameter_delta_norms": {
+      "encoder.body.1.weight": 2.692420137188663e-05,
+      "encoder.body.1.bias": 2.8081053282957463e-06,
+      "encoder.body.3.weight": 0.00014233542408284948,
+      "encoder.body.3.bias": 1.7711912371158618e-05,
+      "encoder.mu.weight": 0.00027477525500221254,
+      "encoder.mu.bias": 4.4236290769498934e-05,
+      "encoder.logvar.weight": 2.253720895135646e-06,
+      "encoder.logvar.bias": 2.1358162875160692e-07,
+      "decoder.net.0.weight": 2.1773642806399675e-05,
+      "decoder.net.0.bias": 1.9000228127681145e-05,
+      "decoder.net.2.weight": 3.6203939229422656e-05,
+      "decoder.net.2.bias": 5.587758867931595e-06,
+      "decoder.net.4.weight": 2.5832914472862434e-05,
+      "decoder.net.4.bias": 2.2872516449441762e-06
+    },
+    "same_noise_note": "Fixed epsilon isolates this one update. Ordinary training draws fresh epsilon."
+  },
+  "reconstruction_only_path": {
+    "objective": "reconstruction only; no prior KL",
+    "seed": 675,
+    "gradient_norm_sums": {
+      "encoder.mu": 224.95479005820263,
+      "encoder.logvar": 4.217652235751896,
+      "decoder": 108.42780118345442
+    },
+    "passed": true
+  },
+  "binary_observations": true,
+  "held_digit": 3,
+  "same_cloud_bytes": true,
+  "axis_limits": [
+    [
+      -34.83891677856445,
+      46.38788604736328
+    ],
+    [
+      -40.53256607055664,
+      41.107322692871094
+    ]
+  ],
+  "torch": "2.13.0",
+  "numpy": "2.5.3"
+}

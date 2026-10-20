@@ -1,0 +1,84 @@
+{
+  "figures": [
+    {
+      "id": "coin-fit",
+      "files": [
+        "figures/coin-fit.svg",
+        "figures/coin-fit.png"
+      ],
+      "type": "original calculated plot",
+      "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+      "data": "data/science.json",
+      "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+      "third_party_image_reuse": false,
+      "licence_note": "Original figures generated for this teaching package; no external image copied."
+    },
+    {
+      "id": "coin-noisy-objective",
+      "files": [
+        "figures/coin-noisy-objective.svg",
+        "figures/coin-noisy-objective.png"
+      ],
+      "type": "original calculated plot",
+      "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+      "data": "data/science.json",
+      "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+      "third_party_image_reuse": false,
+      "licence_note": "Original figures generated for this teaching package; no external image copied."
+    },
+    {
+      "id": "gaussian-candidates",
+      "files": [
+        "figures/gaussian-candidates.svg",
+        "figures/gaussian-candidates.png"
+      ],
+      "type": "original calculated plot",
+      "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+      "data": "data/science.json",
+      "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+      "third_party_image_reuse": false,
+      "licence_note": "Original figures generated for this teaching package; no external image copied."
+    },
+    {
+      "id": "gaussian-fit",
+      "files": [
+        "figures/gaussian-fit.svg",
+        "figures/gaussian-fit.png"
+      ],
+      "type": "original calculated plot",
+      "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+      "data": "data/science.json",
+      "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+      "third_party_image_reuse": false,
+      "licence_note": "Original figures generated for this teaching package; no external image copied."
+    },
+    {
+      "id": "mc-variability",
+      "files": [
+        "figures/mc-variability.svg",
+        "figures/mc-variability.png"
+      ],
+      "type": "original calculated plot",
+      "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+      "data": "data/science.json",
+      "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+      "third_party_image_reuse": false,
+      "licence_note": "Original figures generated for this teaching package; no external image copied."
+    },
+    {
+      "id": "mixture-candidates",
+      "files": [
+        "figures/mixture-candidates.svg",
+        "figures/mixture-candidates.png"
+      ],
+      "type": "original calculated plot",
+      "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+      "data": "data/science.json",
+      "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+      "third_party_image_reuse": false,
+      "licence_note": "Original figures generated for this teaching package; no external image copied."
+    }
+  ],
+  "count": 6,
+  "computed_curves": "All SVG curves and training traces are calculated; no raster image generation."
+}

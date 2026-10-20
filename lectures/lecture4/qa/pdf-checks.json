@@ -1,0 +1,101 @@
+{
+  "lecture": 4,
+  "checks": [
+    {
+      "name": "completed page count",
+      "passed": true,
+      "actual": 56,
+      "expected": 56
+    },
+    {
+      "name": "completed page geometry",
+      "passed": true
+    },
+    {
+      "name": "completed nonempty text",
+      "passed": true
+    },
+    {
+      "name": "completed rendered count",
+      "passed": true
+    },
+    {
+      "name": "all-builds page count",
+      "passed": true,
+      "actual": 113,
+      "expected": 113
+    },
+    {
+      "name": "all-builds page geometry",
+      "passed": true
+    },
+    {
+      "name": "all-builds nonempty text",
+      "passed": true
+    },
+    {
+      "name": "all-builds rendered count",
+      "passed": true
+    },
+    {
+      "name": "completed equals final reveal, excluding footer",
+      "passed": true,
+      "maximumMeanAbsoluteDifference": 0.0
+    },
+    {
+      "name": "browser and print body appearance",
+      "passed": true,
+      "worst": [
+        {
+          "id": "image-training-early",
+          "meanAbsolutePixelDifference": 4.5686588352089945,
+          "unregisteredDifference": 5.339106359649123,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "start",
+          "meanAbsolutePixelDifference": 4.358269032860822,
+          "unregisteredDifference": 5.443850642230577,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "image-training-later",
+          "meanAbsolutePixelDifference": 4.150195154107721,
+          "unregisteredDifference": 5.104451754385965,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "losses-not-quality",
+          "meanAbsolutePixelDifference": 3.451323712370194,
+          "unregisteredDifference": 3.474828477443609,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "saturation-plot",
+          "meanAbsolutePixelDifference": 3.1177939602609643,
+          "unregisteredDifference": 3.0923962249373433,
+          "registrationPixels": [
+            0,
+            0
+          ]
+        }
+      ],
+      "tolerance": 5,
+      "registration": "At most one pixel globally in each axis; accommodates subpixel rounding between screenshot and PDF rasterisation."
+    }
+  ],
+  "scope": "Every PDF page rasterised; completed/final-reveal parity and browser/print comparison for every scene.",
+  "passed": true
+}
