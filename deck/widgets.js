@@ -181,7 +181,532 @@
     update();
   }
 
-  const widgets = { kl, elbo, explorer, latent, gmmx };
+
+  // ======================================================================== the VI lecture (vi.html)
+  // Every widget below draws a meaningful state on load, so ?print shows something useful.
+  // The quantities match scripts/make_figures_vi.py: same grids, same formulas.
+  const PAL = { x: '#245EDB', xt: '#E4ECFF', enc: '#8B2CDE', enct: '#F1E5FC', dec: '#0F766E', dect: '#D9F2EF',
+    z: '#AA4E08', zt: '#FCEFD9', loss: '#BE123C', losst: '#FDE2E7', ink: '#14171F', ink2: '#4A5160', ink3: '#6B7280',
+    line: '#D9DDE5', grid: '#ECEEF2', grey: '#C7CCD4' };
+  const PRINT = new URLSearchParams(location.search).has('print');
+  const FONT = '13px "Avenir Next", Avenir, "Segoe UI", sans-serif';
+  const fx = (v, k = 3) => (Math.abs(v) < 0.5 * 10 ** -k ? 0 : v).toFixed(k).replace('-', '−');
+  const SQ2PI = Math.sqrt(2 * Math.PI);
+  const npdf = (x, m, s) => Math.exp(-0.5 * ((x - m) / s) ** 2) / (s * SQ2PI);
+  const logsig = a => (a >= 0 ? -Math.log1p(Math.exp(-a)) : a - Math.log1p(Math.exp(a)));
+  const sig = a => 1 / (1 + Math.exp(-a));
+  const linspace = (a, b, n) => Array.from({ length: n }, (_, i) => a + (b - a) * i / (n - 1));
+
+  function rng(seed) {                      // a seeded uniform (mulberry32) and standard normal (Box-Muller)
+    let a = seed >>> 0, spare = null;
+    const u = () => {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const n = () => {
+      if (spare !== null) { const s = spare; spare = null; return s; }
+      let x = 0; while (x === 0) x = u();
+      const y = u(), rr = Math.sqrt(-2 * Math.log(x));
+      spare = rr * Math.sin(2 * Math.PI * y);
+      return rr * Math.cos(2 * Math.PI * y);
+    };
+    return { u, n };
+  }
+
+  function crisp(cv) {                      // draw in CSS pixels on a 2x backing store
+    if (!cv.dataset.w) {
+      cv.dataset.w = cv.getAttribute('width'); cv.dataset.h = cv.getAttribute('height');
+      cv.style.width = cv.dataset.w + 'px'; cv.style.height = cv.dataset.h + 'px';
+      cv.width = 2 * cv.dataset.w; cv.height = 2 * cv.dataset.h;
+    }
+    const g = cv.getContext('2d');
+    g.setTransform(2, 0, 0, 2, 0, 0);
+    g.clearRect(0, 0, +cv.dataset.w, +cv.dataset.h);
+    return [g, +cv.dataset.w, +cv.dataset.h];
+  }
+
+  function axes(box, xr, yr) {
+    const [L, T, W, Hh] = box;
+    return { L, T, W, H: Hh, xr, yr,
+      X: v => L + (v - xr[0]) / (xr[1] - xr[0]) * W,
+      Y: v => T + Hh - (v - yr[0]) / (yr[1] - yr[0]) * Hh };
+  }
+  function path(g, A, xs, ys) {
+    g.beginPath();
+    xs.forEach((x, i) => (i ? g.lineTo(A.X(x), A.Y(ys[i])) : g.moveTo(A.X(x), A.Y(ys[i]))));
+  }
+  function line(g, A, xs, ys, col, lw = 2.4, dash = null, alpha = 1) {
+    g.save(); g.globalAlpha = alpha; g.strokeStyle = col; g.lineWidth = lw; g.lineJoin = 'round';
+    if (dash) g.setLineDash(dash);
+    path(g, A, xs, ys); g.stroke(); g.restore();
+  }
+  function area(g, A, xs, ys, col, alpha = 1) {
+    g.save(); g.globalAlpha = alpha; g.fillStyle = col;
+    path(g, A, xs, ys); g.lineTo(A.X(xs[xs.length - 1]), A.Y(0)); g.lineTo(A.X(xs[0]), A.Y(0)); g.closePath(); g.fill(); g.restore();
+  }
+  function xaxis(g, A, ticks, lab) {
+    g.save(); g.strokeStyle = '#9AA1AD'; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(A.L, A.Y(A.yr[0]) + 0.5); g.lineTo(A.L + A.W, A.Y(A.yr[0]) + 0.5); g.stroke();
+    g.fillStyle = PAL.ink3; g.font = FONT; g.textAlign = 'center';
+    for (const t of ticks) {
+      g.beginPath(); g.moveTo(A.X(t), A.Y(A.yr[0])); g.lineTo(A.X(t), A.Y(A.yr[0]) + 5); g.stroke();
+      g.fillText(fx(t, Number.isInteger(t) ? 0 : 1), A.X(t), A.Y(A.yr[0]) + 19);
+    }
+    if (lab) { g.font = 'italic 15px "Times New Roman", serif'; g.fillText(lab, A.L + A.W / 2, A.Y(A.yr[0]) + 38); }
+    g.restore();
+  }
+  function hline(g, A, y, col, dash = [6, 4], lw = 1.6) {
+    g.save(); g.strokeStyle = col; g.lineWidth = lw; g.setLineDash(dash);
+    g.beginPath(); g.moveTo(A.L, A.Y(y)); g.lineTo(A.L + A.W, A.Y(y)); g.stroke(); g.restore();
+  }
+  function vline(g, A, x, col, dash = [], lw = 1.6) {
+    g.save(); g.strokeStyle = col; g.lineWidth = lw; g.setLineDash(dash);
+    g.beginPath(); g.moveTo(A.X(x), A.T); g.lineTo(A.X(x), A.T + A.H); g.stroke(); g.restore();
+  }
+  const set = (root, cls, v) => root.querySelectorAll(cls).forEach(el => { el.textContent = v; });
+  function adam(lr) {                      // Adam on a parameter vector, for gradient ASCENT
+    const st = { m: null, v: null, t: 0 };
+    return (p, grad) => {
+      if (!st.m) { st.m = grad.map(() => 0); st.v = grad.map(() => 0); }
+      st.t += 1;
+      for (let i = 0; i < p.length; i++) {
+        st.m[i] = 0.9 * st.m[i] + 0.1 * grad[i];
+        st.v[i] = 0.999 * st.v[i] + 0.001 * grad[i] * grad[i];
+        p[i] += lr * (st.m[i] / (1 - 0.9 ** st.t)) / (Math.sqrt(st.v[i] / (1 - 0.999 ** st.t)) + 1e-8);
+      }
+    };
+  }
+  function onSlide(root) { const s = root.closest('section'); return !s || s.classList.contains('current'); }
+
+  // The one-number decoder: z ~ N(0, 1), theta = sigmoid(z), h heads and t tails.
+  function coinModel(h, t) {
+    const n = h + t;
+    const loglik = z => h * logsig(z) + t * logsig(-z);
+    const lj = z => -0.5 * z * z - 0.5 * Math.log(2 * Math.PI) + loglik(z);
+    const dlj = z => -z + h - n * sig(z);
+    const N = 12001, lo = -6, dz = 12 / (N - 1);       // the same grid as make_figures_vi.py
+    let mx = -Infinity; const v = new Float64Array(N);
+    for (let i = 0; i < N; i++) { v[i] = lj(lo + i * dz); mx = Math.max(mx, v[i]); }
+    let s = 0; for (let i = 0; i < N; i++) s += Math.exp(v[i] - mx);
+    const logpx = mx + Math.log(s * dz);
+    const K = 321, gx = linspace(-8, 8, K), gw = gx.map(x => Math.exp(-0.5 * x * x));
+    const tot = gw.reduce((a, b) => a + b, 0); for (let k = 0; k < K; k++) gw[k] /= tot;
+    const eq = (f, m, sd) => { let a = 0; for (let k = 0; k < K; k++) a += gw[k] * f(m + sd * gx[k]); return a; };
+    const klp = (m, sd) => 0.5 * (m * m + sd * sd - 1 - Math.log(sd * sd));
+    const fit = (m, sd) => eq(loglik, m, sd);
+    return { h, t, n, loglik, lj, dlj, logpx, post: z => Math.exp(lj(z) - logpx), eq, klp, fit, elbo: (m, sd) => fit(m, sd) - klp(m, sd) };
+  }
+
+  // ---------------------------------------------------------------- Part 1: toss by toss, the posterior sharpens
+  function bayes(root) {
+    const cv = root.querySelector('canvas');
+    const ours = root.dataset.seq || 'HHTHHHHTHH';
+    let seq = ours;
+    const xs = linspace(0.001, 0.999, 400), dx = xs[1] - xs[0];
+    function draw() {
+      const h = [...seq].filter(c => c === 'H').length, t = seq.length - h;
+      const prior = xs.map(x => 6 * x * (1 - x));
+      const un = xs.map(x => Math.exp((1 + h) * Math.log(x) + (1 + t) * Math.log(1 - x)));
+      const Z = un.reduce((a, b) => a + b, 0) * dx;
+      const post = un.map(v => v / Z), pmax = Math.max(...post);
+      const lk = xs.map(x => Math.exp(h * Math.log(x) + t * Math.log(1 - x)));
+      const lmax = Math.max(...lk), lik = lk.map(v => v / lmax * pmax);
+      const [g, W, Hh] = crisp(cv);
+      const A = axes([20, 14, W - 40, Hh - 58], [0, 1], [0, Math.max(pmax, 1.5) * 1.1]);
+      area(g, A, xs, post, PAL.xt);
+      line(g, A, xs, post, PAL.x, 3);
+      if (seq.length) line(g, A, xs, lik, PAL.dec, 2, [2, 3]);
+      line(g, A, xs, prior, PAL.z, 2, [7, 4]);
+      xaxis(g, A, [0, 0.5, 1], 'θ, the chance of heads');
+      set(root, '.b-h', h); set(root, '.b-t', t); set(root, '.b-a', 2 + h); set(root, '.b-b', 2 + t);
+      set(root, '.b-mean', fx((2 + h) / (4 + seq.length), 3));
+      root.querySelector('.b-seq').innerHTML = seq.length
+        ? [...seq].map((c, i) => `<span class="${c === 'T' ? 'tail' : ''}${i === seq.length - 1 ? ' last' : ''}">${c}</span>`).join('')
+        : '<em>no tosses yet</em>';
+    }
+    root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const a = b.dataset.a;
+      if (a === 'H' || a === 'T') seq = (seq + a).slice(-40);
+      else if (a === 'ours') seq = ours;
+      else seq = '';
+      draw();
+    }));
+    draw();
+  }
+
+  // ---------------------------------------------------------------- Part 3: Monte Carlo, the running average settles
+  function mc(root) {
+    const cv = root.querySelector('canvas');
+    const mu = 1, sd = 0.5, exact = mu * mu + sd * sd, per = Math.sqrt(4 * mu * mu * sd * sd + 2 * sd ** 4);
+    const first = (root.dataset.first || '').split(',').filter(Boolean).map(Number);
+    let R, zs, means;
+    const push = z => { zs.push(z); const k = zs.length; means.push(((means[k - 2] || 0) * (k - 1) + z * z) / k); };
+    const reset = () => { R = rng(1); zs = []; means = []; first.forEach(push); draw(); };
+    const add = k => { for (let i = 0; i < k; i++) push(mu + sd * R.n()); draw(); };
+    function draw() {
+      const [g, W, Hh] = crisp(cv);
+      const A = axes([30, 10, W - 50, 92], [-0.6, 2.6], [0, 0.95]);
+      const xs = linspace(-0.6, 2.6, 300), ys = xs.map(x => npdf(x, mu, sd));
+      area(g, A, xs, ys, PAL.enct); line(g, A, xs, ys, PAL.enc, 2.2);
+      const recent = zs.slice(-300);
+      g.fillStyle = PAL.enc;
+      recent.forEach((z, i) => {
+        const last = i === recent.length - 1;
+        g.globalAlpha = last ? 1 : 0.35; g.beginPath(); g.arc(A.X(z), A.Y(0) + (last ? 0 : 0), last ? 6 : 3.5, 0, 7); g.fill();
+      });
+      g.globalAlpha = 1;
+      xaxis(g, A, [0, 1, 2], 'z');
+      const Smax = Math.max(1000, zs.length);
+      const B = axes([30, 160, W - 50, Hh - 200], [0, Math.log10(Smax)], [0.4, 2.1]);
+      g.fillStyle = PAL.dect;
+      g.beginPath();
+      const ks = linspace(0, Math.log10(Smax), 120);
+      ks.forEach((k, i) => { const y = exact + 2 * per / Math.sqrt(10 ** k); i ? g.lineTo(B.X(k), B.Y(Math.min(2.1, y))) : g.moveTo(B.X(k), B.Y(Math.min(2.1, y))); });
+      [...ks].reverse().forEach(k => g.lineTo(B.X(k), B.Y(Math.max(0.4, exact - 2 * per / Math.sqrt(10 ** k)))));
+      g.closePath(); g.fill();
+      hline(g, B, exact, PAL.ink, [], 1.4);
+      if (means.length) line(g, B, means.map((_, i) => Math.log10(i + 1)), means.map(v => Math.max(0.4, Math.min(2.1, v))), PAL.dec, 2.2);
+      g.save(); g.strokeStyle = '#9AA1AD'; g.lineWidth = 1; g.beginPath(); g.moveTo(B.L, B.Y(0.4)); g.lineTo(B.L + B.W, B.Y(0.4)); g.stroke();
+      g.fillStyle = PAL.ink3; g.font = FONT; g.textAlign = 'center';
+      for (let k = 0; k <= Math.floor(Math.log10(Smax)); k++) g.fillText((10 ** k).toLocaleString('en-US'), B.X(k), B.Y(0.4) + 18);
+      g.textAlign = 'left'; g.fillText('number of draws S (log scale)', B.L, B.Y(0.4) + 36);
+      g.fillStyle = PAL.ink; g.fillText('exact 1.25', B.L + B.W - 70, B.Y(exact) - 8);
+      g.restore();
+      set(root, '.mc-s', zs.length.toLocaleString('en-US'));
+      set(root, '.mc-est', zs.length ? fx(means[means.length - 1], 3) : '—');
+      set(root, '.mc-last', zs.length ? fx(zs[zs.length - 1], 2) : '—');
+    }
+    root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => (b.dataset.a === 'reset' ? reset() : add(+b.dataset.a))));
+    reset();
+    if (PRINT) add(995);
+  }
+
+  // ---------------------------------------------------------------- Part 4: KL between two bell curves, as an area
+  function klgauss(root) {
+    const cv = root.querySelector('canvas');
+    const [im, is] = root.querySelectorAll('input[type=range]');
+    let dir = 'qp';
+    const xs = linspace(-4.5, 4.5, 721), dx = xs[1] - xs[0];
+    function draw() {
+      const mu = +im.value, sd = +is.value;
+      const p = xs.map(x => npdf(x, 0, 1)), q = xs.map(x => npdf(x, mu, sd));
+      const f = dir === 'qp' ? q.map((v, i) => v * Math.log(v / p[i])) : p.map((v, i) => v * Math.log(v / q[i]));
+      const areaNum = f.reduce((a, b) => a + b, 0) * dx;
+      const [g, W, Hh] = crisp(cv);
+      const A = axes([16, 8, W - 32, 150], [-4.5, 4.5], [0, Math.max(0.45, Math.max(...q)) * 1.08]);
+      area(g, A, xs, p, PAL.zt, 0.7); line(g, A, xs, p, PAL.z, 2.2);
+      line(g, A, xs, q, PAL.enc, 2.6);
+      const fl = f.map(v => Math.max(-0.6, Math.min(1.6, v)));
+      const B = axes([16, 178, W - 32, Hh - 220], [-4.5, 4.5], [Math.min(-0.15, Math.min(...fl)) * 1.1, Math.max(0.3, Math.max(...fl)) * 1.1]);
+      g.save();
+      for (const [sign, col] of [[1, '#F7B8C6'], [-1, '#E5E7EB']]) {
+        g.fillStyle = col; g.beginPath(); g.moveTo(B.X(xs[0]), B.Y(0));
+        xs.forEach((x, i) => g.lineTo(B.X(x), B.Y(sign * fl[i] > 0 ? fl[i] : 0)));
+        g.lineTo(B.X(xs[xs.length - 1]), B.Y(0)); g.closePath(); g.fill();
+      }
+      g.restore();
+      line(g, B, xs, fl, PAL.loss, 2);
+      g.save(); g.strokeStyle = PAL.ink3; g.lineWidth = 0.8; g.beginPath(); g.moveTo(B.L, B.Y(0)); g.lineTo(B.L + B.W, B.Y(0)); g.stroke(); g.restore();
+      const Ax = axes([16, 178, W - 32, Hh - 220], [-4.5, 4.5], [B.yr[0], B.yr[1]]);
+      xaxis(g, Ax, [-4, -2, 0, 2, 4], 'z');
+      const qp = 0.5 * (mu * mu + sd * sd - 1 - Math.log(sd * sd)), pq = Math.log(sd) + (1 + mu * mu) / (2 * sd * sd) - 0.5;
+      set(root, '.kg-mu', fx(mu, 2)); set(root, '.kg-sd', fx(sd, 2));
+      set(root, '.kg-qp', fx(qp, 3)); set(root, '.kg-pq', fx(pq, 3)); set(root, '.kg-area', fx(areaNum, 3));
+      root.querySelectorAll('[data-dir]').forEach(b => b.classList.toggle('on', b.dataset.dir === dir));
+    }
+    [im, is].forEach(el => el.addEventListener('input', draw));
+    root.querySelectorAll('[data-dir]').forEach(b => b.addEventListener('click', () => { dir = b.dataset.dir; draw(); }));
+    draw();
+  }
+
+  // ---------------------------------------------------------------- Part 4: forward vs reverse KL on two bumps, by gradient descent
+  function fwdrev(root) {
+    const cvs = [...root.querySelectorAll('canvas')];
+    const xs = linspace(-6, 6, 601), dx = xs[1] - xs[0];
+    const p = xs.map(x => 0.5 * npdf(x, -2, 0.5) + 0.5 * npdf(x, 2, 0.5));
+    const kl = (dir, m, ls) => {
+      const s = Math.exp(ls); let a = 0;
+      for (let i = 0; i < xs.length; i++) {
+        const q = npdf(xs[i], m, s) + 1e-300, pp = p[i] + 1e-300;
+        a += dir === 'fwd' ? pp * Math.log(pp / q) : q * Math.log(q / pp);
+      }
+      return a * dx;
+    };
+    let st, steps, timer = null;
+    const reset = () => { st = ['fwd', 'rev'].map(d => ({ d, p: [-0.6, Math.log(0.6)], opt: adam(0.05) })); steps = 0; draw(); };
+    const step = () => {
+      for (const s of st) {
+        const h = 1e-4, [m, ls] = s.p;
+        const g = [-(kl(s.d, m + h, ls) - kl(s.d, m - h, ls)) / (2 * h), -(kl(s.d, m, ls + h) - kl(s.d, m, ls - h)) / (2 * h)];
+        s.opt(s.p, g);
+      }
+      steps += 1;
+    };
+    function draw() {
+      st.forEach((s, k) => {
+        const [g, W, Hh] = crisp(cvs[k]);
+        const A = axes([12, 8, W - 24, Hh - 50], [-5, 5], [0, 1.2]);
+        area(g, A, xs, p, PAL.xt); line(g, A, xs, p, PAL.x, 1.6);
+        const [m, ls] = s.p;
+        line(g, A, xs, xs.map(x => npdf(x, m, Math.exp(ls))), PAL.enc, 2.8);
+        xaxis(g, A, [-4, -2, 0, 2, 4], 'z');
+        set(root, `.fr-${s.d}-m`, fx(m, 2)); set(root, `.fr-${s.d}-s`, fx(Math.exp(ls), 2)); set(root, `.fr-${s.d}-kl`, fx(kl(s.d, m, ls), 3));
+      });
+      set(root, '.fr-step', steps);
+    }
+    const play = () => {
+      if (timer) return;
+      const tick = () => {
+        if (!onSlide(root) || steps >= 600) { timer = null; return; }
+        for (let i = 0; i < 3; i++) step();
+        draw(); timer = requestAnimationFrame(tick);
+      };
+      timer = requestAnimationFrame(tick);
+    };
+    root.querySelector('[data-a="play"]').addEventListener('click', () => { if (steps >= 600) reset(); play(); });
+    root.querySelector('[data-a="reset"]').addEventListener('click', () => { if (timer) cancelAnimationFrame(timer); timer = null; reset(); });
+    reset();
+    if (PRINT) { while (steps < 600) step(); draw(); }
+  }
+
+  // ---------------------------------------------------------------- Part 5: fit q by hand: KL, ELBO + gap, or the two terms
+  function vifit(root) {
+    const M = coinModel(+(root.dataset.h || 8), +(root.dataset.t || 2));
+    const mode = root.dataset.mode || 'kl';
+    const cv = root.querySelector('canvas');
+    const [im, is] = root.querySelectorAll('input[type=range]');
+    const xs = linspace(-2.5, 3.8, 400), post = xs.map(M.post);
+    const lo = -10, hi = -5.5, pct = v => `${(Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * 100}%`;
+    function draw() {
+      const m = +im.value, s = +is.value;
+      const q = xs.map(x => npdf(x, m, s));
+      const [g, W, Hh] = crisp(cv);
+      const A = axes([12, 8, W - 24, Hh - 50], [-2.5, 3.8], [0, Math.max(1.0, Math.max(...q)) * 1.06]);
+      area(g, A, xs, post, PAL.xt); line(g, A, xs, post, PAL.x, 2);
+      area(g, A, xs, q, PAL.enc, 0.08); line(g, A, xs, q, PAL.enc, 2.8);
+      xaxis(g, A, [-2, -1, 0, 1, 2, 3], 'z');
+      const e = M.elbo(m, s), gap = M.logpx - e;
+      set(root, '.vf-m', fx(m, 2)); set(root, '.vf-s', fx(s, 2)); set(root, '.vf-kl', fx(gap, 3));
+      set(root, '.vf-elbo', fx(e, 3)); set(root, '.vf-lpx', fx(M.logpx, 3));
+      set(root, '.vf-fit', fx(M.fit(m, s), 3)); set(root, '.vf-klp', fx(M.klp(m, s), 3));
+      const nl = root.querySelector('.vf-line');
+      if (nl) {
+        nl.querySelector('.vf-mark-elbo').style.left = pct(e);
+        nl.querySelector('.vf-mark-lpx').style.left = pct(M.logpx);
+        const gp = nl.querySelector('.nl-gap'); gp.style.left = pct(e); gp.style.width = `calc(${pct(M.logpx)} - ${pct(e)})`;
+      }
+      root.querySelectorAll('.vf-bar').forEach(b => { b.style.width = `${Math.min(100, Math.abs(+b.dataset.k === 1 ? M.klp(m, s) : M.fit(m, s)) / 10 * 100)}%`; });
+    }
+    [im, is].forEach(el => el.addEventListener('input', draw));
+    draw();
+  }
+
+  // ---------------------------------------------------------------- Part 6: two gradient estimators, the same draws
+  function gradvar(root) {
+    const cv = root.querySelector('canvas');
+    const mu = 1, sd = 0.5;
+    let R, sf, rp, jit;
+    const push = e => { const z = mu + sd * e; rp.push(2 * z); sf.push(z * z * (z - mu) / (sd * sd)); jit.push(R.u()); };
+    const reset = () => { R = rng(3); sf = []; rp = []; jit = []; push(-0.4); draw(); };
+    const add = k => { for (let i = 0; i < k; i++) push(R.n()); draw(); };
+    const stats = a => { const n = a.length, m = a.reduce((x, y) => x + y, 0) / n; return [m, Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / n)]; };
+    function draw() {
+      const [g, W, Hh] = crisp(cv);
+      const rows = [[sf, PAL.ink2, 'score function'], [rp, PAL.enc, 'reparameterisation']];
+      const rowH = (Hh - 50) / 2;
+      rows.forEach(([a, col, lab], k) => {
+        const A = axes([20, 10 + k * rowH, W - 40, rowH - 26], [-6, 12], [0, 1]);
+        g.fillStyle = '#F6F7F9'; g.fillRect(A.L, A.T, A.W, A.H);
+        g.fillStyle = col; g.globalAlpha = a.length > 200 ? 0.25 : 0.55;
+        a.forEach((v, i) => { if (v < -6 || v > 12) return; g.beginPath(); g.arc(A.X(v), A.T + 8 + jit[i] * (A.H - 16), 3, 0, 7); g.fill(); });
+        g.globalAlpha = 1;
+        vline(g, A, 2, PAL.loss, [], 2);
+        const [m] = stats(a);
+        g.fillStyle = col; g.strokeStyle = '#fff'; g.lineWidth = 2;
+        g.beginPath(); const X = A.X(Math.max(-6, Math.min(12, m))), Y = A.T + A.H / 2;
+        g.moveTo(X, Y - 11); g.lineTo(X + 9, Y); g.lineTo(X, Y + 11); g.lineTo(X - 9, Y); g.closePath(); g.fill(); g.stroke();
+        g.font = '600 14px "Avenir Next", Avenir, sans-serif'; g.textAlign = 'right'; g.fillText(lab, A.L + A.W - 6, A.T + 16);
+        if (k === 1) xaxis(g, axes([20, 10 + k * rowH, W - 40, rowH - 26], [-6, 12], [0, 1]), [-6, -3, 0, 2, 3, 6, 9, 12], '');
+      });
+      const [m1, s1] = stats(sf), [m2, s2] = stats(rp);
+      set(root, '.gv-n', sf.length.toLocaleString('en-US'));
+      set(root, '.gv-sfm', fx(m1, 2)); set(root, '.gv-rpm', fx(m2, 2));
+      set(root, '.gv-sfs', sf.length > 1 ? fx(s1, 2) : '—'); set(root, '.gv-rps', rp.length > 1 ? fx(s2, 2) : '—');
+    }
+    root.querySelectorAll('button').forEach(b => b.addEventListener('click', () => (b.dataset.a === 'reset' ? reset() : add(+b.dataset.a))));
+    reset();
+    if (PRINT) add(299);
+  }
+
+  // ---------------------------------------------------------------- Part 6: press play, VI climbs the ELBO
+  function ascent(root) {
+    const M = coinModel(8, 2);
+    const [cq, ce] = root.querySelectorAll('canvas');
+    const xs = linspace(-2.2, 3.6, 360), post = xs.map(M.post), STEPS = 400;
+    let S = 10, P, opt, step, trace, trail, R, timer = null;
+    const e0 = M.elbo(0, 1);
+    function reset() {
+      if (timer) cancelAnimationFrame(timer);
+      timer = null; P = [0, 0]; opt = adam(0.05); step = 0; trace = [e0]; trail = []; R = rng(1); draw();
+    }
+    function once() {
+      const s = Math.exp(P[1]); let gm = 0, gs = 0;
+      for (let k = 0; k < S; k++) { const e = R.n(), z = P[0] + s * e, d = M.dlj(z); gm += d; gs += d * s * e; }
+      opt(P, [gm / S, gs / S + 1]);                 // d ELBO / d log s gets +1 from the entropy of q
+      step += 1;
+      trace.push(M.elbo(P[0], Math.exp(P[1])));
+      if (step % 8 === 0) trail.push([P[0], Math.exp(P[1])]);
+    }
+    function draw() {
+      const s = Math.exp(P[1]);
+      let [g, W, Hh] = crisp(cq);
+      const A = axes([12, 8, W - 24, Hh - 50], [-2.2, 3.6], [0, 0.95]);
+      area(g, A, xs, post, PAL.xt); line(g, A, xs, post, PAL.x, 1.8);
+      trail.slice(-12).forEach(([m, sd], i, a) => line(g, A, xs, xs.map(x => npdf(x, m, sd)), PAL.enc, 1.2, null, 0.12 + 0.3 * i / a.length));
+      line(g, A, xs, xs.map(x => npdf(x, P[0], s)), PAL.enc, 3);
+      xaxis(g, A, [-2, -1, 0, 1, 2, 3], 'z');
+      [g, W, Hh] = crisp(ce);
+      const B = axes([54, 12, W - 70, Hh - 54], [0, STEPS], [e0 - 0.2, M.logpx + 0.25]);
+      g.save(); g.strokeStyle = PAL.grid; g.lineWidth = 1;
+      for (let v = -8; v <= -6; v += 0.5) { g.beginPath(); g.moveTo(B.L, B.Y(v)); g.lineTo(B.L + B.W, B.Y(v)); g.stroke(); }
+      g.fillStyle = PAL.ink3; g.font = FONT; g.textAlign = 'right';
+      for (let v = -8; v <= -6; v += 0.5) g.fillText(fx(v, 1), B.L - 8, B.Y(v) + 4);
+      g.restore();
+      hline(g, B, M.logpx, PAL.x);
+      line(g, B, trace.map((_, i) => i), trace, PAL.dec, 2.4);
+      xaxis(g, B, [0, 100, 200, 300, 400], 'step');
+      g.fillStyle = PAL.x; g.font = '600 14px "Avenir Next", Avenir, sans-serif'; g.textAlign = 'right';
+      g.fillText('log p(x)', B.L + B.W, B.Y(M.logpx) - 7);
+      const e = trace[trace.length - 1];
+      set(root, '.as-step', step); set(root, '.as-m', fx(P[0], 2)); set(root, '.as-s', fx(s, 2));
+      set(root, '.as-elbo', fx(e, 3)); set(root, '.as-gap', fx(M.logpx - e, 3)); set(root, '.as-S', S);
+      root.querySelectorAll('[data-s]').forEach(b => b.classList.toggle('on', +b.dataset.s === S));
+      const pb = root.querySelector('[data-a="play"]'); if (pb) pb.textContent = timer ? 'pause' : (step >= STEPS ? 'play again' : 'play');
+    }
+    function tick() {
+      if (!onSlide(root) || step >= STEPS) { timer = null; draw(); return; }
+      once(); if (step < 60 || step % 2 === 0) draw();
+      timer = requestAnimationFrame(tick);
+    }
+    root.querySelector('[data-a="play"]').addEventListener('click', () => {
+      if (timer) { cancelAnimationFrame(timer); timer = null; draw(); return; }
+      if (step >= STEPS) reset();
+      timer = requestAnimationFrame(tick); draw();
+    });
+    root.querySelector('[data-a="reset"]').addEventListener('click', reset);
+    root.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => { S = +b.dataset.s; reset(); }));
+    reset();
+  }
+
+  // ---------------------------------------------------------------- Part 7: a Gaussian q in the plane, diagonal or full
+  const BLUES = ['#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c', '#08306b'];
+  const TARGETS = {
+    tilted: (() => {
+      const rho = 0.9, det = 1 - rho * rho;
+      return { logp: (a, b) => -0.5 * (a * a - 2 * rho * a * b + b * b) / det - Math.log(2 * Math.PI) - 0.5 * Math.log(det),
+        grad: (a, b) => [-(a - rho * b) / det, -(b - rho * a) / det], init: [1.6, -1.2] };
+    })(),
+    banana: { logp: (a, b) => { const m2 = 0.6 * a * a - 1.2; return -0.5 * (a / 1.2) ** 2 - Math.log(1.2) - 0.5 * ((b - m2) / 0.45) ** 2 - Math.log(0.45) - Math.log(2 * Math.PI); },
+      grad: (a, b) => { const m2 = 0.6 * a * a - 1.2, r2 = (b - m2) / (0.45 * 0.45); return [-a / 1.44 + r2 * 1.2 * a, -r2]; }, init: [1.4, 1.6] },
+    bumps: (() => {
+      const s = 0.55, cs = [-1.5, 1.5];
+      const comp = (a, b) => cs.map(c => -0.5 * ((a - c) ** 2 + (b - c) ** 2) / (s * s) - 2 * Math.log(s) - Math.log(2 * Math.PI) + Math.log(0.5));
+      return { logp: (a, b) => { const [u, v] = comp(a, b), mx = Math.max(u, v); return mx + Math.log(Math.exp(u - mx) + Math.exp(v - mx)); },
+        grad: (a, b) => { const [u, v] = comp(a, b), mx = Math.max(u, v), wu = Math.exp(u - mx), wv = Math.exp(v - mx), r0 = wu / (wu + wv), r1 = 1 - r0;
+          return [-(r0 * (a - cs[0]) + r1 * (a - cs[1])) / (s * s), -(r0 * (b - cs[0]) + r1 * (b - cs[1])) / (s * s)]; }, init: [0.3, 0.2] };
+    })(),
+  };
+  function vi2d(root) {
+    const cv = root.querySelector('canvas');
+    const lim = 3.2, STEPS = 1500;
+    let tname = root.dataset.target || 'tilted', fam = root.dataset.family || 'diag';
+    let P, opt, step, R, timer = null, heat = null, klv = null;
+    const fixed = (() => { const r = rng(99), a = []; for (let i = 0; i < 3000; i++) a.push([r.n(), r.n()]); return a; })();
+    function makeHeat() {
+      const n = 230, img = document.createElement('canvas'); img.width = n; img.height = n;
+      const g = img.getContext('2d'), id = g.createImageData(n, n), T = TARGETS[tname];
+      const vals = new Float64Array(n * n); let mx = -Infinity;
+      for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+        const a = -lim + (i + 0.5) / n * 2 * lim, b = lim - (j + 0.5) / n * 2 * lim, v = T.logp(a, b);
+        vals[j * n + i] = v; mx = Math.max(mx, v);
+      }
+      for (let k = 0; k < n * n; k++) {
+        const d = Math.exp(vals[k] - mx), lev = Math.floor(d * 9) - 1;
+        if (d < 0.04 || lev < 0) { id.data[4 * k + 3] = 0; continue; }
+        const c = BLUES[Math.min(BLUES.length - 1, lev)];
+        id.data[4 * k] = parseInt(c.slice(1, 3), 16); id.data[4 * k + 1] = parseInt(c.slice(3, 5), 16); id.data[4 * k + 2] = parseInt(c.slice(5, 7), 16);
+        id.data[4 * k + 3] = 235;
+      }
+      g.putImageData(id, 0, 0);
+      heat = img;
+    }
+    const Lmat = () => [Math.exp(P[2]), fam === 'full' ? P[4] : 0, Math.exp(P[3])];   // L = [[l11, 0], [l21, l22]]
+    function computeKL() {
+      const T = TARGETS[tname], [l11, l21, l22] = Lmat(); let a = 0;
+      for (const [e1, e2] of fixed) a += T.logp(P[0] + l11 * e1, P[1] + l21 * e1 + l22 * e2);
+      klv = -(a / fixed.length) - (P[2] + P[3] + Math.log(2 * Math.PI) + 1);
+    }
+    function reset() {
+      if (timer) cancelAnimationFrame(timer);
+      timer = null; const T = TARGETS[tname];
+      P = [T.init[0], T.init[1], Math.log(0.5), Math.log(0.5), 0]; opt = adam(0.03); step = 0; R = rng(5);
+      makeHeat(); computeKL(); draw();
+    }
+    function once() {
+      const T = TARGETS[tname], [l11, l21, l22] = Lmat(), S = 32, gr = [0, 0, 0, 0, 0];
+      for (let k = 0; k < S; k++) {
+        const e1 = R.n(), e2 = R.n(), [g1, g2] = T.grad(P[0] + l11 * e1, P[1] + l21 * e1 + l22 * e2);
+        gr[0] += g1; gr[1] += g2; gr[2] += g1 * e1 * l11; gr[3] += g2 * e2 * l22; gr[4] += g2 * e1;
+      }
+      for (let i = 0; i < 5; i++) gr[i] /= S;
+      gr[2] += 1; gr[3] += 1;                        // the entropy of q: log l11 + log l22 + const
+      if (fam !== 'full') gr[4] = 0;
+      opt(P, gr); step += 1;
+    }
+    function draw() {
+      const [g, W] = crisp(cv);
+      const X = v => (v + lim) / (2 * lim) * W, Y = v => W - (v + lim) / (2 * lim) * W;
+      g.fillStyle = '#fff'; g.fillRect(0, 0, W, W);
+      g.imageSmoothingEnabled = true; g.drawImage(heat, 0, 0, W, W);
+      const [l11, l21, l22] = Lmat();
+      const c11 = l11 * l11, c12 = l11 * l21, c22 = l21 * l21 + l22 * l22;
+      const tr = c11 + c22, dt = c11 * c22 - c12 * c12, disc = Math.sqrt(Math.max(0, tr * tr / 4 - dt));
+      const ev1 = tr / 2 + disc, ev2 = tr / 2 - disc;
+      const ang = Math.abs(c12) < 1e-12 ? (c11 >= c22 ? 0 : Math.PI / 2) : Math.atan2(ev1 - c11, c12);
+      g.strokeStyle = PAL.enc; g.lineWidth = 2.6;
+      for (const k of [1, 2]) {
+        g.beginPath();
+        g.ellipse(X(P[0]), Y(P[1]), k * Math.sqrt(ev1) / (2 * lim) * W, k * Math.sqrt(Math.max(ev2, 1e-9)) / (2 * lim) * W, -ang, 0, 2 * Math.PI);
+        g.stroke();
+      }
+      g.fillStyle = PAL.enc; g.beginPath(); g.arc(X(P[0]), Y(P[1]), 5, 0, 7); g.fill();
+      set(root, '.v2-kl', klv === null ? '—' : fx(Math.max(0, klv), 3));
+      set(root, '.v2-s1', fx(Math.sqrt(c11), 2)); set(root, '.v2-s2', fx(Math.sqrt(c22), 2));
+      set(root, '.v2-rho', fx(c12 / Math.sqrt(c11 * c22), 2)); set(root, '.v2-step', step);
+      root.querySelectorAll('[data-t]').forEach(b => b.classList.toggle('on', b.dataset.t === tname));
+      root.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === fam));
+      const pb = root.querySelector('[data-a="play"]'); if (pb) pb.textContent = timer ? 'pause' : (step >= STEPS ? 'play again' : 'play');
+    }
+    function tick() {
+      if (!onSlide(root) || step >= STEPS) { timer = null; computeKL(); draw(); return; }
+      for (let i = 0; i < 4; i++) once();
+      if (step % 20 === 0) computeKL();
+      draw(); timer = requestAnimationFrame(tick);
+    }
+    root.querySelector('[data-a="play"]').addEventListener('click', () => {
+      if (timer) { cancelAnimationFrame(timer); timer = null; draw(); return; }
+      if (step >= STEPS) reset();
+      timer = requestAnimationFrame(tick); draw();
+    });
+    root.querySelector('[data-a="reset"]').addEventListener('click', reset);
+    root.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { tname = b.dataset.t; reset(); }));
+    root.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => { fam = b.dataset.f; reset(); }));
+    reset();
+  }
+
+  const widgets = { kl, elbo, explorer, latent, gmmx, bayes, mc, klgauss, fwdrev, vifit, gradvar, ascent, vi2d };
   document.querySelectorAll('[data-widget]').forEach(el => {
     const w = widgets[el.dataset.widget];
     if (w) w(el);

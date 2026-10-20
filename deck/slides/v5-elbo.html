@@ -1,0 +1,282 @@
+<!-- ===================================================================== VI LECTURE · PART 5 · VARIATIONAL INFERENCE AND THE ELBO
+     The derivation follows deck/slides/06-elbo.html (vi-goal, vi-d1..vi-d4) and the PML course's VI slides, on the coin. -->
+
+<section class="slide sec-v5 opener break" id="e-open" data-section="5 · VI and the ELBO">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 5 of 8</p>
+      <h2>Variational inference: pick the closest simple $q$</h2>
+      <p class="why">We have a posterior we cannot compute (Part 2), averages from samples (Part 3) and a number for "close" (Part 4). Put them together, <b>one move per slide</b>, and the integral we could not do disappears from the problem.</p>
+    </div>
+    <!--viroute:5-->
+  </div>
+</section>
+
+<section class="slide sec-v5" id="e-family" data-section="5 · VI and the ELBO">
+  <p class="kicker">Step 1: choose a family of simple shapes</p>
+  <h2>Every bell curve $q(z) = \N(m, s^2)$: two dials</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-candidates.svg" style="width:640px">
+      <div class="col grow">
+        <p class="small">Blue: the coin's posterior over $z$ (Part 2's grid, for checking only). Purple: three members of the family.</p>
+        <p class="small" data-b="2">Which is closest? Guess first.</p>
+        <table class="work" style="font-size:20px" data-b="3">
+          <tr><th>$q$</th><th>$m$</th><th>$s$</th><th>$\KL(q\,\|\,\text{posterior})$</th></tr>
+          <tr><td>$q_a$: the prior</td><td>{{vik.vi.cand.0.m}}</td><td>{{vik.vi.cand.0.s}}</td><td>{{vik.vi.cand.0.kl}}</td></tr>
+          <tr><td>$q_b$: narrow, at $\log 4$</td><td>{{vik.vi.cand.1.m}}</td><td>{{vik.vi.cand.1.s}}</td><td>{{vik.vi.cand.1.kl}}</td></tr>
+          <tr><td>$q_c$</td><td>{{vik.vi.cand.2.m}}</td><td>{{vik.vi.cand.2.s}}</td><td><b>{{vik.vi.cand.2.kl}}</b></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Step 2: of all the bell curves, take the one with the smallest KL to the posterior. That is variational inference.</p>
+  <aside class="notes">
+    <p>q_b sits at z = log 4 = 1.386, where sigmoid(z) = 0.8: the data's favourite value, with a narrow width. It is confident and slightly wrong. q_a is the prior: right shape, wrong place. q_c is the best Gaussian (found by optimisation, next slides).</p>
+    <p>"Variational" comes from the calculus of variations: optimising over functions. Here the "function" q is pinned down by just two numbers.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="e-goal" data-section="5 · VI and the ELBO">
+  <p class="kicker">The goal, written down</p>
+  <h2>Find the $q$ with the smallest KL to the posterior</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:34px">$$q^{\star} = \arg\min_{q\,\in\,\mathcal Q}\; \KL\big(\,\cenc{q(z)}\,\|\,\cx{p(z\mid x)}\,\big)$$</div>
+    <div class="row top" style="gap:26px;margin-top:14px">
+      <div class="callout enc" style="flex:1"><h3>$\mathcal Q$: the shapes we allow</h3>Gaussians $\N(m, s^2)$. Two numbers to find. (The VAE: a few dozen.)</div>
+      <div class="callout x" style="flex:1" data-b="2"><h3>Why $q$ first?</h3>KL averages under its first argument (Part 4). We can draw from $q$; we cannot draw from the posterior (Part 3's catch).</div>
+      <div class="callout loss" style="flex:1" data-b="3"><h3>What it will do</h3>$q$ first means mode-seeking (Part 4's two bumps): $q$ will hide inside the posterior rather than spread over it.</div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Inference has become optimisation: two numbers, one objective. Before any maths, try it by hand.</p>
+  <aside class="notes"><p>Same formula as the PML course's VI slides: Ψ* = argmin KL(q_Ψ(θ) ‖ P(θ | D)), with Ψ = (m, s) and θ = z here.</p></aside>
+</section>
+
+<section class="slide sec-v5" id="e-you" data-section="5 · VI and the ELBO">
+  <p class="kicker">Try it</p>
+  <h2>You are the optimiser</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="vifit" data-mode="kl">
+      <canvas width="640" height="360"></canvas>
+      <div class="vw-side">
+        <p class="vw-read">Move $q = \N(m, s^2)$ (purple) onto the posterior (blue):</p>
+        <label class="sl">$m$<input type="range" min="-1.5" max="2.5" step="0.01" value="0"><b class="vf-m">0.00</b></label>
+        <label class="sl">$s$<input type="range" min="0.1" max="1.5" step="0.01" value="1"><b class="vf-s">1.00</b></label>
+        <p class="vw-big">$\KL(q\,\|\,\text{posterior}) =$ <span class="vf-kl closs">1.897</span></p>
+        <p class="vw-read">The best possible: {{vik.vi.gap}} nats, at $m = {{vik.vi.m}}$, $s = {{vik.vi.s}}$.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q">We cheated: that readout uses the exact posterior from Part 2's grid. In a real problem there is no grid. Can we score $q$ without it?</p>
+  <aside class="notes">
+    <p>Let a student drive. Typical path: slide m right first (big drop), then shrink s. Below 0.01 nats the two curves are visually identical.</p>
+    <p>The readout is computed as log p(x) − ELBO(q), with log p(x) from the grid: exactly the identity we are about to derive.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="e-catch" data-section="5 · VI and the ELBO">
+  <p class="kicker">The catch</p>
+  <h2>The KL to the posterior contains the evidence</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:31px">$$\KL\big(q\,\|\,p(z\mid x)\big) = \E_{z\sim q}\big[\log q(z) - \log p(z\mid x)\big]$$</div>
+    <div class="mathblock" style="font-size:31px" data-b="2">$$p(z\mid x) = \frac{p(x, z)}{\hl{p(x)}}$$</div>
+    <p class="small" style="text-align:center" data-b="3">To score $q$ this way we need $p(x)$: the integral of Part 2. We are back where we started.</p>
+  </div>
+  <p class="q" data-b="3">Four short moves get the evidence out of the way. Watch where $\log p(x)$ goes.</p>
+</section>
+
+<section class="slide sec-v5" id="e-d1" data-section="5 · VI and the ELBO">
+  <p class="kicker">From the KL to the ELBO · move 1 of 4</p>
+  <h2>Write out the KL</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\KL\big(q(z)\,\|\,p(z\mid x)\big)$$</div>
+    <div class="mathblock big">$$= \E_{z\sim q}\big[\,\log q(z) - \hl{\log p(z\mid x)}\,\big]$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">The definition from Part 4: the average, under the first argument, of the log of the ratio. The highlighted term is the one we cannot compute.</div>
+  </div>
+</section>
+
+<section class="slide sec-v5" id="e-d2" data-section="5 · VI and the ELBO">
+  <p class="kicker">From the KL to the ELBO · move 2 of 4</p>
+  <h2>Bayes: the posterior is the joint over the evidence</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\E_{q}\big[\log q(z) - \log p(z\mid x)\big]$$</div>
+    <div class="mathblock big">$$= \E_{q}\big[\log q(z) - \log p(x,z)\big] \;+\; \hl{\log p(x)}$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">$\log p(z\mid x) = \log p(x,z) - \log p(x)$. The evidence has no $z$ in it: the same number for every draw, so it comes out of the average.</div>
+  </div>
+  <p class="q" data-b="2">The joint $p(x,z) = p(z)\,p(x\mid z)$ is Part 2's one line of code. All the difficulty is now in one number.</p>
+</section>
+
+<section class="slide sec-v5" id="e-d3" data-section="5 · VI and the ELBO">
+  <p class="kicker">From the KL to the ELBO · move 3 of 4</p>
+  <h2>Move the evidence to the other side</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\KL\big(q\,\|\,p(z\mid x)\big) = \E_{q}\big[\log q(z) - \log p(x,z)\big] + \log p(x)$$</div>
+    <div class="mathblock big">$$\log p(x) = \underbrace{\hl{\E_{q}\big[\log p(x,z) - \log q(z)\big]}}_{\ELBO(q)} \;+\; \KL\big(q\,\|\,p(z\mid x)\big)$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:960px" data-b="2">Rearrange, and give the highlighted average a name: the <b>ELBO</b>. Every piece of it is computable: the joint (one line of code) and $q$ (ours, so we can evaluate it and draw from it).</div>
+  </div>
+  <p class="q" data-b="2">Why "Evidence Lower BOund"? The last move.</p>
+</section>
+
+<section class="slide sec-v5" id="e-d4" data-section="5 · VI and the ELBO">
+  <p class="kicker">From the KL to the ELBO · move 4 of 4</p>
+  <h2>The KL is never negative, so the ELBO is a lower bound</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:28px;margin:0">$$\log p(x) = \ELBO(q) + \underbrace{\KL\big(q\,\|\,p(z\mid x)\big)}_{\ge\, 0} \;\ge\; \ELBO(q)$$</div>
+    <p class="small" style="text-align:center;margin:6px 0 0" data-b="2">Our coin, two choices of $q$. The right end, $\log p(x) = {{vik.coin.log_px}}$, is fixed by the model and the data: it does not move when $q$ changes.</p>
+    <div class="bound-lines" data-b="2">
+      <span class="who">$q = \N(0, 1)$,<br>the prior</span>
+      <div class="numline">
+        <div class="nl-track"></div>
+        <div class="nl-mark" style="left:6%;--c:var(--dec)"><b>ELBO</b><span>{{vik.vi.elbo0}}</span></div>
+        <div class="nl-mark" style="left:94%;--c:var(--x)"><b>$\log p(x)$</b><span>{{vik.coin.log_px}}</span></div>
+        <div class="nl-gap" style="left:6%;width:88%"><span>gap = KL to the posterior = {{vik.vi.gap0}} nats</span></div>
+      </div>
+      <span class="who" data-b="3">the best $q$,<br>$\N({{vik.vi.m}},\ {{vik.vi.s}}^2)$</span>
+      <div class="numline short" data-b="3">
+        <div class="nl-track"></div>
+        <div class="nl-mark" style="left:auto;right:calc(6% - 11px);transform:none;align-items:flex-end;--c:var(--dec)"><b>ELBO {{vik.vi.elbo}} &nbsp;·&nbsp; gap {{vik.vi.gap}}</b><span>the two points overlap</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">The total cannot move, so raising the ELBO must shrink the KL. Maximise the ELBO, and $q$ approaches the posterior, without ever computing $p(x)$.</p>
+  <aside class="notes">
+    <p>Pause here: this is the single idea of variational inference. It is the picture in Bishop, PRML, Figure 10.2 (and the mbernste ELBO figure in the PML slides), with real numbers. Axis not to scale.</p>
+    <p>At q = prior the KL to the prior is 0, so the ELBO there is just the average log-likelihood of codes drawn from the prior: {{vik.vi.rec0}}.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="e-total" data-section="5 · VI and the ELBO">
+  <p class="kicker">Try it</p>
+  <h2>Move $q$: the ELBO and the gap change, their sum never does</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="vifit" data-mode="elbo">
+      <canvas width="560" height="300"></canvas>
+      <div class="vw-side">
+        <label class="sl">$m$<input type="range" min="-1.5" max="2.5" step="0.01" value="0"><b class="vf-m">0.00</b></label>
+        <label class="sl">$s$<input type="range" min="0.1" max="1.5" step="0.01" value="1"><b class="vf-s">1.00</b></label>
+        <div class="numline vf-line">
+          <div class="nl-track"></div>
+          <div class="nl-mark vf-mark-elbo" style="left:40%;--c:var(--dec)"><b>ELBO</b><span class="vf-elbo">−8.061</span></div>
+          <div class="nl-mark vf-mark-lpx" style="left:85%;--c:var(--x)"><b>$\log p(x)$</b><span class="vf-lpx">−6.164</span></div>
+          <div class="nl-gap" style="left:40%;width:45%"><span>KL <span class="vf-kl">1.897</span></span></div>
+        </div>
+        <div class="vf-ends"><span>−10</span><span>−5.5</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q">Same dials as before, but now the score is the ELBO, which needs no grid. Push the ELBO up and the gap closes by exactly the same amount.</p>
+  <aside class="notes">
+    <p>Drag m and s and watch the blue marker: it never moves. Only the green one does. The red bracket between them is KL(q ‖ posterior).</p>
+    <p>In a real problem only the green marker can be computed. That is enough: climbing it is the same as closing the gap.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="e-hand" data-section="5 · VI and the ELBO">
+  <p class="kicker">Check it with numbers you can do by hand</p>
+  <h2>A two-value hidden cause: neat or messy writer?</h2>
+  <div class="body">
+    <div class="row top" style="gap:36px">
+      <div class="col" style="width:520px">
+        <p class="small">$z\in\{\text{neat},\text{messy}\}$, prior $\tfrac12, \tfrac12$. Observation $x$: a thick stroke.</p>
+        <p class="small">$p(x\mid\text{neat}) = 0.8,\quad p(x\mid\text{messy}) = 0.2$</p>
+        <p class="small" data-b="2">evidence $p(x) = 0.5$ · true posterior $(0.8,\ 0.2)$</p>
+        <p class="small" data-b="3">Our guess $q = (q_0,\ 1-q_0)$:</p>
+        <div class="ctrl interactive" data-widget="elbo" data-b="3"><span>$q_0$ =</span><input type="range" min="0.02" max="0.98" step="0.01" value="0.6"><span class="readout q0">0.60</span></div>
+      </div>
+      <table class="work elbo-table" style="font-size:22px" data-b="3">
+        <tr><th>quantity</th><th>value</th></tr>
+        <tr><td>$\E_q[\log p(x\mid z)]$</td><td class="v-ell">−0.778</td></tr>
+        <tr><td>$-\,\KL(q\,\|\,\text{prior})$</td><td class="v-klp">−0.020</td></tr>
+        <tr class="total"><td>$\ELBO$</td><td class="v-elbo">−0.798</td></tr>
+        <tr><td>$+\,\KL(q\,\|\,\text{posterior})$</td><td class="v-gap">0.105</td></tr>
+        <tr class="total"><td>$\log p(x)$</td><td class="v-lpx">−0.693</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="q" data-b="3">Every row is a sum of two terms you can work out on paper. At $q_0 = 0.8$ the gap is exactly 0.</p>
+  <aside class="notes">
+    <p>At q = (0.6, 0.4): E_q[log p(x|z)] = 0.6 log 0.8 + 0.4 log 0.2 = −0.778. KL to the prior = 0.6 log 1.2 + 0.4 log 0.8 = 0.020. Gap = KL((0.6, 0.4) ‖ (0.8, 0.2)) = 0.105: the same "KL(Q‖P)" as the 1s and 7s in Part 4.</p>
+    <p>Drag the slider: ELBO + gap = log 0.5 = −0.693 for every q0. The first two rows are the ELBO split into two named terms: the next three slides derive that split.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="e-unpack1" data-section="5 · VI and the ELBO">
+  <p class="kicker">Unpacking the ELBO · step 1 of 2</p>
+  <h2>The joint is prior times likelihood</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\ELBO(q) = \E_{q}\big[\log p(x,z) - \log q(z)\big]$$</div>
+    <div class="mathblock big">$$= \E_{q}\Big[\hl{\log p(x\mid z) + \log p(z) - \log q(z)}\Big]$$</div>
+    <div class="mathblock big" data-b="2">$$= \E_{q}\big[\log p(x\mid z)\big] \;+\; \E_{q}\big[\log p(z) - \log q(z)\big]$$</div>
+    <div class="callout plain why" style="margin:8px auto 0;width:900px" data-b="2">The log of a product is a sum of logs; the average of a sum is the sum of the averages. Group the likelihood on its own, and the two terms that only involve $z$ together.</div>
+  </div>
+</section>
+
+<section class="slide sec-v5" id="e-unpack2" data-section="5 · VI and the ELBO">
+  <p class="kicker">Unpacking the ELBO · step 2 of 2</p>
+  <h2>Recognise the second average: a KL to the prior</h2>
+  <div class="body">
+    <div class="deriv-prev mathblock">$$\E_{q}\big[\log p(z) - \log q(z)\big]$$</div>
+    <div class="mathblock big">$$= -\,\E_{q}\!\left[\log\frac{q(z)}{p(z)}\right] = \hl{-\KL\big(q(z)\,\|\,p(z)\big)}$$</div>
+    <div class="callout plain why" style="margin:12px auto 0;width:900px" data-b="2">Flip the sign to flip the fraction, then Part 4's definition. And for $q = \N(m, s^2)$, $p(z) = \N(0, 1)$, Part 4 already has the formula: $\tfrac12\big(m^2 + s^2 - 1 - \log s^2\big)$.</div>
+  </div>
+  <p class="q" data-b="2">Two KLs now appear: to the <b>posterior</b> (the gap, not computable) and to the <b>prior</b> (inside the ELBO, by formula). Do not mix them up.</p>
+</section>
+
+<section class="slide sec-v5" id="e-final" data-section="5 · VI and the ELBO">
+  <p class="kicker">Put the pieces together</p>
+  <h2>The ELBO, in symbols and in words</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:36px;margin-top:10px">$$\ELBO = \underbrace{\E_{z\sim\cenc q}\big[\cdec{\log p(x\mid z)}\big]}_{\text{explain the data}} \;-\; \underbrace{\closs{\KL\big(q(z)\,\|\,p(z)\big)}}_{\text{stay close to the prior}}$$</div>
+    <div class="row" style="justify-content:center;gap:24px;margin-top:20px" data-b="2">
+      <div class="callout dec" style="width:520px">For the coin: the average, over draws $z$ from $q$, of $8\log\mathrm{sigmoid}(z) + 2\log(1-\mathrm{sigmoid}(z))$.</div>
+      <div class="callout loss" style="width:520px">For the coin: $\tfrac12\big(m^2 + s^2 - 1 - \log s^2\big)$, no sampling needed.</div>
+    </div>
+  </div>
+  <p class="q" data-b="2">In the VAE these two terms get names: the <b>reconstruction</b> term and the <b>KL</b> term. Same two terms, a bigger $x$.</p>
+</section>
+
+<section class="slide sec-v5" id="e-tug" data-section="5 · VI and the ELBO">
+  <p class="kicker">Try it</p>
+  <h2>The two terms pull against each other</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="vifit" data-mode="terms">
+      <canvas width="470" height="250"></canvas>
+      <div class="vw-side">
+        <label class="sl">$m$<input type="range" min="-1.5" max="2.5" step="0.01" value="1.39"><b class="vf-m">1.39</b></label>
+        <label class="sl">$s$<input type="range" min="0.1" max="1.5" step="0.01" value="0.3"><b class="vf-s">0.30</b></label>
+        <table class="work" style="font-size:18px">
+          <tr><td>explain the data: $\E_q[\log p(x\mid z)]$</td><td class="vf-fit">−5.076</td></tr>
+          <tr><td>$-$ stay near the prior: $\KL(q\,\|\,p(z))$</td><td class="vf-klp">1.715</td></tr>
+          <tr class="total"><td>ELBO</td><td class="vf-elbo">−6.791</td></tr>
+        </table>
+      </div>
+    </div>
+    <table class="work" style="margin:8px auto 0;font-size:17px" data-b="2">
+      <tr><th></th><th>$\E_q[\log p(x\mid z)]$</th><th>$\KL(q\,\|\,p(z))$</th><th>ELBO</th></tr>
+      <tr><td>$q_a$, the prior</td><td>{{vik.vi.cand.0.rec}}</td><td>{{vik.vi.cand.0.klp}}</td><td>{{vik.vi.cand.0.elbo}}</td></tr>
+      <tr><td>$q_b$, narrow at $\log 4$</td><td>{{vik.vi.cand.1.rec}}</td><td>{{vik.vi.cand.1.klp}}</td><td>{{vik.vi.cand.1.elbo}}</td></tr>
+      <tr class="total"><td>$q_c$, the best</td><td>{{vik.vi.cand.2.rec}}</td><td>{{vik.vi.cand.2.klp}}</td><td>{{vik.vi.cand.2.elbo}}</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="2">The prior explains the data badly; the narrow $q$ explains it best but strays far from the prior. The best $q$ is the compromise.</p>
+  <aside class="notes">
+    <p>The widget starts at q_b. Widen it (s up): the KL to the prior falls but the data term drops too. Shrink it to s = 0.1: the data term barely improves, the KL keeps growing.</p>
+    <p>This is the VAE's tug of war in miniature: reconstruction wants a precise code, the KL term wants the code to look like the prior.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v5" id="e-three" data-section="5 · VI and the ELBO">
+  <p class="kicker">End of Part 5</p>
+  <h2>Three ways to read the same number</h2>
+  <div class="body">
+    <div class="ladder" style="margin:0 auto;width:1100px;font-size:27px;row-gap:14px">
+      <span class="lhs">$\ELBO(q)$</span><span>$\le$</span><span>$\log p(x)$</span>
+      <span></span><span></span><span class="why"><b>a lower bound</b> on the evidence, for every $q$</span>
+      <span class="lhs" data-b="2">$\ELBO(q)$</span><span data-b="2">$=$</span><span data-b="2">$\log p(x) - \KL\big(q\,\|\,p(z\mid x)\big)$</span>
+      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2"><b>the evidence minus the gap</b>: maximising it pulls $q$ onto the posterior</span>
+      <span class="lhs" data-b="3">$\ELBO(q)$</span><span data-b="3">$=$</span><span data-b="3">$\E_q\big[\log p(x\mid z)\big] - \KL\big(q\,\|\,p(z)\big)$</span>
+      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3"><b>fit minus cost</b>: the form we compute, and (with a minus sign) the VAE's loss</span>
+    </div>
+  </div>
+  <p class="q" data-b="3">Next: actually climb it, with samples and gradients, and watch $q$ move.</p>
+</section>

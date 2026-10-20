@@ -1,0 +1,278 @@
+<!-- ===================================================================== VI LECTURE · PART 6 · CLIMBING THE ELBO
+     Code follows the PML course's variational-inference notebook (log_joint, neg_elbo, rsample). -->
+
+<section class="slide sec-v6 opener break" id="g-open" data-section="6 · Climbing the ELBO">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 6 of 8</p>
+      <h2>Climbing the ELBO with samples and gradients</h2>
+      <p class="why">The ELBO is an average under $q$. Estimate it from a few draws (Part 3), then climb it by gradient ascent on $m$ and $s$. One step needs care: <b>a gradient through a random draw</b>.</p>
+    </div>
+    <!--viroute:6-->
+  </div>
+</section>
+
+<section class="slide sec-v6" id="g-mc" data-section="6 · Climbing the ELBO">
+  <p class="kicker">Step 1: estimate the ELBO from draws</p>
+  <h2>Three lines, using only things we can compute</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code" style="font-size:17px"><span class="line" data-hl="=1"><span class="k">def</span> <span class="f">log_joint</span>(z):                <span class="c"># Part 2's one line</span></span>
+<span class="line" data-hl="=1">    <span class="k">return</span> (Normal(<span class="n">0</span>, <span class="n">1</span>).log_prob(z)</span>
+<span class="line" data-hl="=1">            + <span class="n">8</span> * F.logsigmoid(z) + <span class="n">2</span> * F.logsigmoid(-z))</span>
+<span class="line"></span>
+<span class="line" data-hl="=2">q = Normal(<span class="n">0.0</span>, <span class="n">1.0</span>)                 <span class="c"># start: q is the prior</span></span>
+<span class="line" data-hl="=2">z = q.sample((S,))                   <span class="c"># S draws from q</span></span>
+<span class="line" data-hl="=3">elbo = (log_joint(z) - q.log_prob(z)).mean()</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>The joint:</b> prior times likelihood, in logs. Any $z$, one line.</p>
+        <p class="small" data-b="=2"><b>Draws from $q$:</b> easy, because we chose $q$.</p>
+        <p class="small" data-b="3"><b>The ELBO's definition, averaged:</b> $\E_q[\log p(x,z) - \log q(z)]$.</p>
+        <table class="work" style="font-size:19px" data-b="4">
+          <tr><th>draws $S$</th><th>estimate</th></tr>
+          <tr><td>10</td><td>{{vik.mcelbo.s10}}</td></tr>
+          <tr><td>100</td><td>{{vik.mcelbo.s100}}</td></tr>
+          <tr><td>10,000</td><td>{{vik.mcelbo.s10000}}</td></tr>
+          <tr class="total"><td>exact</td><td>{{vik.mcelbo.exact}}</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="4">No $p(x)$, no grid. With 10 draws the estimate wobbles by about {{vik.mcelbo.spread10}} nats; that is fine for climbing, as Part 3 promised.</p>
+  <aside class="notes">
+    <p>"exact" here is the ELBO computed by numerical integration over q, only to check the estimates. With S = 10 the estimate's spread over 2,000 repeats is {{vik.mcelbo.spread10}}.</p>
+    <p>This is the PML notebook's neg_elbo, without the minus sign: sample from q, evaluate the log joint and log q at the samples, average the difference.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="g-problem" data-section="6 · Climbing the ELBO">
+  <p class="kicker">Step 2: the gradient. The subtle part.</p>
+  <h2>The gradient of an average whose draws move</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:30px">$$\frac{\partial}{\partial m}\;\E_{z\sim\N(m,\,s^2)}\big[f(z)\big] \;=\; ?$$</div>
+    <p class="small" style="text-align:center" data-b="2">Move $m$ and the draws themselves move. The randomness depends on what we differentiate.</p>
+    <div class="callout plain" style="margin:10px auto 0;width:980px" data-b="3">A toy with a known answer (Part 3's): $q = \N(\mu, \sigma^2)$ with $\mu = 1$, $\sigma = 0.5$, and $f(z) = z^2$. Since $\E[z^2] = \mu^2 + \sigma^2$, the exact gradient is $\dfrac{\partial}{\partial\mu}(\mu^2 + \sigma^2) = 2\mu = 2$.</div>
+  </div>
+  <p class="q" data-b="3">Two standard ways to estimate it from draws: the score function, and reparameterisation.</p>
+  <aside class="notes"><p>We write μ, σ for the toy and m, s for the coin's q; they play the same role. The VAE lecture uses μ, σ for the encoder's outputs.</p></aside>
+</section>
+
+<section class="slide sec-v6" id="g-score" data-section="6 · Climbing the ELBO">
+  <p class="kicker">Way 1</p>
+  <h2>The score function (the log-derivative trick)</h2>
+  <div class="body">
+    <div class="ladder" style="margin:0 auto;width:1120px;font-size:26px">
+      <span class="lhs">$\dfrac{\partial}{\partial\mu}\displaystyle\int q_\mu(z)\,f(z)\,dz$</span><span>$=$</span><span>$\displaystyle\int \frac{\partial q_\mu(z)}{\partial\mu}\,f(z)\,dz$</span>
+      <span></span><span></span><span class="why">$f$ does not depend on $\mu$; only $q$ does</span>
+      <span class="lhs" data-b="2"></span><span data-b="2">$=$</span><span data-b="2">$\displaystyle\int q_\mu(z)\,\frac{\partial \log q_\mu(z)}{\partial\mu}\,f(z)\,dz$</span>
+      <span data-b="2"></span><span data-b="2"></span><span class="why" data-b="2">$\partial q = q\,\partial\log q$: multiply and divide by $q$</span>
+      <span class="lhs" data-b="3"></span><span data-b="3">$=$</span><span data-b="3">$\displaystyle\E_{z\sim q}\Big[f(z)\,\frac{z-\mu}{\sigma^2}\Big]$</span>
+      <span data-b="3"></span><span data-b="3"></span><span class="why" data-b="3">an average under $q$ again; for a Gaussian, $\partial\log q/\partial\mu = (z-\mu)/\sigma^2$</span>
+    </div>
+  </div>
+  <p class="q" data-b="3">Estimate it with draws: average $f(z)\,(z-\mu)/\sigma^2$. Works for any $q$ and any $f$, even an $f$ you cannot differentiate.</p>
+  <aside class="notes"><p>Also called REINFORCE (from reinforcement learning, where f is a reward you cannot differentiate). ∂ log q / ∂μ is called the score of q.</p></aside>
+</section>
+
+<section class="slide sec-v6" id="g-reparam" data-section="6 · Climbing the ELBO">
+  <p class="kicker">Way 2</p>
+  <h2>Reparameterisation: stretch and shift standard noise</h2>
+  <div class="body center col" style="gap:2px">
+    <img class="fig" src="figures/data/vik-reparam-dots.svg" style="width:760px">
+    <div class="mathblock" style="font-size:24px">$$z = \mu + \sigma\eps,\ \eps\sim\N(0,1) \;\;\Rightarrow\;\; \E_{z\sim q}\big[f(z)\big] = \E_{\eps}\big[f(\mu + \sigma\eps)\big] \;\;\Rightarrow\;\; \frac{\partial}{\partial\mu}\E = \E_{\eps}\big[f'(\mu + \sigma\eps)\big]$$</div>
+  </div>
+  <p class="q">Now the randomness, $\eps$, does not depend on $\mu$. The parameter sits inside $f$'s argument, and the ordinary chain rule applies.</p>
+  <aside class="notes">
+    <p>Follow the red dot: ε = −0.4, scaled by σ = 0.5 to −0.2, shifted by μ = 1 to 0.8. Same distribution as before; the draw is now a deterministic function of (μ, σ, ε).</p>
+    <p>Part 3's sampling line, z = mu + sigma * torch.randn(...), was already reparameterised. That is why it matters how you write a draw.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="g-onedraw" data-section="6 · Climbing the ELBO">
+  <p class="kicker">One draw, both ways</p>
+  <h2>$\eps = -0.4$, so $z = 1 + 0.5\times(-0.4) = 0.8$</h2>
+  <div class="body">
+    <div class="steps2">
+      <div class="callout plain"><h3>Score function</h3>
+        <div class="mathblock" style="font-size:25px">$$f(z)\,\frac{z-\mu}{\sigma^2} = 0.64\times\frac{-0.2}{0.25} = {{vik.grad.one_sf}}$$</div></div>
+      <div class="callout enc" data-b="2"><h3>Reparameterisation</h3>
+        <div class="mathblock" style="font-size:25px">$$f'(z)\,\frac{\partial z}{\partial\mu} = 2z\times 1 = {{vik.grad.one_rep}}$$</div></div>
+    </div>
+  </div>
+  <p class="q" data-b="3">The exact answer is 2. One draw says $-0.51$ one way and $1.6$ the other. Both are right <b>on average</b>; how noisy is each?</p>
+</section>
+
+<section class="slide sec-v6" id="g-var" data-section="6 · Climbing the ELBO">
+  <p class="kicker">Try it</p>
+  <h2>Same draws, same average, very different noise</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="gradvar">
+      <canvas width="700" height="330"></canvas>
+      <div class="vw-side">
+        <div class="vw-btns"><button data-a="1">draw 1</button><button data-a="10">draw 10</button><button data-a="100">draw 100</button><button data-a="reset">reset</button></div>
+        <p class="vw-read">draws: <b class="gv-n">1</b> (the first is $\eps = -0.4$)</p>
+        <p class="vw-read">score function: mean <b class="gv-sfm">−0.51</b>, spread <b class="gv-sfs">—</b></p>
+        <p class="vw-read" style="color:var(--enc)">reparameterisation: mean <b class="gv-rpm">1.60</b>, spread <b class="gv-rps">—</b></p>
+        <p class="vw-read">exact: 2 (red line); diamonds: running means</p>
+      </div>
+    </div>
+  </div>
+  <p class="q">Over a million draws: spread {{vik.grad.sf_sd}} for the score function, {{vik.grad.rep_sd}} for reparameterisation. The score function needs about {{vik.grad.ratio}}× more draws for the same accuracy.</p>
+  <aside class="notes">
+    <p>Both rows use the same ε each time; only the formula differs. Click "draw 100" a few times: the purple diamond settles near 2 quickly, the grey one wanders (and some grey dots fall off the right edge).</p>
+    <p>Variance ratio {{vik.grad.sf_sd}}² / {{vik.grad.rep_sd}}² ≈ {{vik.grad.ratio}}. The figure vik-grad-hist.svg shows the two histograms.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="g-coin" data-section="6 · Climbing the ELBO">
+  <p class="kicker">On the coin's ELBO, the same story</p>
+  <h2>Reparameterisation is the low-noise choice</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-grad-S.svg" style="width:560px">
+      <div class="col grow">
+        <p class="small">$\partial\,\ELBO/\partial m$ at $q = \N(0, 1)$. Exact: {{vik.grad.coin_exact}} (push $m$ up, towards more heads).</p>
+        <p class="small" data-b="2">Spread of a one-draw estimate: {{vik.grad.coin_sf_sd}} (score function) vs {{vik.grad.coin_rep_sd}} (reparameterisation).</p>
+        <p class="small" data-b="3">Both shrink like $1/\sqrt{S}$, but the score function needs about {{vik.grad.coin_ratio}}× more draws to match.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">That is why VI with Gaussians, and the VAE, use reparameterisation. The score function returns when $z$ is discrete and $f'(z)$ does not exist.</p>
+  <aside class="notes"><p>Reparameterised one-draw gradient: d/dm log p(x, m + sε) = −z + 8 − 10·sigmoid(z) at z = m + sε. Score-function one-draw gradient: (log p(x, z) − log q(z)) (z − m)/s². Both average to {{vik.grad.coin_exact}}.</p></aside>
+</section>
+
+<section class="slide sec-v6" id="g-torch" data-section="6 · Climbing the ELBO">
+  <p class="kicker">In PyTorch (as in the PML course's VI notebook)</p>
+  <h2><code>rsample</code>, not <code>sample</code></h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code" style="font-size:17px"><span class="line" data-hl="=1">mu    = torch.tensor(<span class="n">1.0</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line" data-hl="=1">sigma = torch.tensor(<span class="n">0.5</span>, requires_grad=<span class="k">True</span>)</span>
+<span class="line" data-hl="=1">q = Normal(mu, sigma)</span>
+<span class="line"></span>
+<span class="line" data-hl="=2">z = q.sample()</span>
+<span class="line" data-hl="=2">(z**<span class="n">2</span>).backward()</span>
+<span class="line" data-hl="=2"><span class="c"># RuntimeError: element 0 of tensors does not require grad</span></span>
+<span class="line" data-hl="=2"><span class="c">#               and does not have a grad_fn</span></span>
+<span class="line"></span>
+<span class="line" data-hl="=3">z = q.rsample()                <span class="c"># = mu + sigma * eps, eps ~ N(0, 1)</span></span>
+<span class="line" data-hl="=3">(z**<span class="n">2</span>).backward()</span>
+<span class="line" data-hl="=3">mu.grad                        <span class="c"># 2 z: one reparameterised draw</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1">The toy again: $\mu = 1$, $\sigma = 0.5$, $f(z) = z^2$.</p>
+        <p class="small" data-b="=2"><b><code>sample()</code></b> returns a plain number: the graph is cut at $z$, so no gradient can reach $\mu$.</p>
+        <p class="small" data-b="3"><b><code>rsample()</code></b> ("reparameterised sample") draws $\eps$ and returns $\mu + \sigma\eps$: same distribution, but a graph from $z$ back to $\mu$ and $\sigma$.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Writing <code>mu + sigma * torch.randn(...)</code> by hand does exactly the same thing.</p>
+  <aside class="notes"><p>The error text is what PyTorch prints (checked with torch 2.13). The PML notebook shows the same three versions: the default sample, the reparameterisation done by hand, and rsample.</p></aside>
+</section>
+
+<section class="slide sec-v6" id="g-loop" data-section="6 · Climbing the ELBO">
+  <p class="kicker">Variational inference for the coin</p>
+  <h2>The whole loop: two numbers, gradient ascent on the ELBO</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code" style="font-size:16px"><span class="line" data-hl="=1"><span class="k">def</span> <span class="f">neg_elbo</span>(q, S=<span class="n">10</span>):</span>
+<span class="line" data-hl="=1">    z = q.rsample((S,))                       <span class="c"># S reparameterised draws</span></span>
+<span class="line" data-hl="=1">    <span class="k">return</span> -(log_joint(z) - q.log_prob(z)).mean()</span>
+<span class="line"></span>
+<span class="line" data-hl="=2">m     = torch.tensor(<span class="n">0.0</span>, requires_grad=<span class="k">True</span>)   <span class="c"># start at the prior</span></span>
+<span class="line" data-hl="=2">log_s = torch.tensor(<span class="n">0.0</span>, requires_grad=<span class="k">True</span>)   <span class="c"># s = exp(log_s) = 1</span></span>
+<span class="line" data-hl="=2">opt = torch.optim.Adam([m, log_s], lr=<span class="n">0.05</span>)</span>
+<span class="line"></span>
+<span class="line" data-hl="=3"><span class="k">for</span> step <span class="k">in</span> range(<span class="n">400</span>):</span>
+<span class="line" data-hl="=3">    loss = neg_elbo(Normal(m, log_s.exp()))</span>
+<span class="line" data-hl="=3">    opt.zero_grad(); loss.backward(); opt.step()</span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>The loss:</b> minus the ELBO estimate of two slides ago, now with <code>rsample</code> so gradients flow.</p>
+        <p class="small" data-b="=2"><b>Only $q$ is learned:</b> two numbers. We learn $\log s$ so that $s$ stays positive.</p>
+        <p class="small" data-b="3"><b>The same three-line loop as fitting any model.</b> 400 steps of 10 draws each: $m = {{vik.run.table.5.m}}$, $s = {{vik.run.table.5.s}}$. The best Gaussian: ${{vik.vi.m}}$, ${{vik.vi.s}}$.</p>
+      </div>
+    </div>
+  </div>
+  <aside class="notes"><p>Real run (scripts/make_figures_vi.py, the part_vi function) with this loop. neg_elbo has the same shape as the PML notebook's function of the same name; the only change is a Gaussian q over z instead of a Beta q over θ (that version is the last slide of this part).</p></aside>
+</section>
+
+<section class="slide sec-v6" id="g-play" data-section="6 · Climbing the ELBO">
+  <p class="kicker">Press play</p>
+  <h2>Watch $q$ climb the ELBO, live</h2>
+  <div class="body">
+    <div class="interactive" data-widget="ascent">
+      <div class="vw-live">
+        <div class="row" style="justify-content:center;gap:20px">
+          <div class="vw"><canvas width="560" height="320"></canvas></div>
+          <div class="vw"><canvas width="560" height="320"></canvas></div>
+        </div>
+        <div class="row" style="justify-content:center;gap:26px;margin-top:10px">
+          <div class="vw-btns"><button data-a="play">play</button><button data-a="reset">reset</button><span class="lab">draws per step</span><button data-s="1">1</button><button data-s="10">10</button><button data-s="100">100</button></div>
+          <p class="vw-read">step <b class="as-step">0</b> · $m$ = <b class="as-m">0.00</b> · $s$ = <b class="as-s">1.00</b> · ELBO <b class="as-elbo">−8.061</b> · gap <b class="as-gap">1.897</b></p>
+        </div>
+      </div>
+      <img class="fig vw-static" src="figures/data/vik-ascent.svg" style="width:1080px;margin:0 auto">
+    </div>
+  </div>
+  <p class="q">Left: $q$ (purple) slides onto the posterior. Right: the ELBO climbs to the dashed $\log p(x) = {{vik.coin.log_px}}$ and stops just under it.</p>
+  <aside class="notes">
+    <p>This runs the loop of the previous slide in the browser: Adam, learning rate 0.05, reparameterised gradients, its own random draws (so the end point differs from the recorded run by a few hundredths). Try 1 draw per step (the VAE's choice): noisier, still gets there. Try 100: smooth.</p>
+    <p>The ELBO plotted is the exact ELBO of the current q (by numerical integration), so the curve shows where q is, not the noisy estimate the optimiser sees. PDF: the recorded run from make_figures_vi.py.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v6" id="g-table" data-section="6 · Climbing the ELBO">
+  <p class="kicker">The recorded run, in numbers</p>
+  <h2>Most of the gap closes in 25 steps</h2>
+  <div class="body">
+    <table class="work" style="margin:0 auto;font-size:23px">
+      <tr><th>step</th><th>$m$</th><th>$s$</th><th>ELBO</th><th>gap $= \KL(q\,\|\,\text{posterior})$</th></tr>
+      <tr><td>{{vik.run.table.0.step}} · the prior</td><td>{{vik.run.table.0.m}}</td><td>{{vik.run.table.0.s}}</td><td>{{vik.run.table.0.elbo}}</td><td>{{vik.run.table.0.gap}}</td></tr>
+      <tr data-b="2"><td>{{vik.run.table.1.step}}</td><td>{{vik.run.table.1.m}}</td><td>{{vik.run.table.1.s}}</td><td>{{vik.run.table.1.elbo}}</td><td>{{vik.run.table.1.gap}}</td></tr>
+      <tr data-b="2"><td>{{vik.run.table.2.step}}</td><td>{{vik.run.table.2.m}}</td><td>{{vik.run.table.2.s}}</td><td>{{vik.run.table.2.elbo}}</td><td>{{vik.run.table.2.gap}}</td></tr>
+      <tr data-b="3"><td>{{vik.run.table.3.step}}</td><td>{{vik.run.table.3.m}}</td><td>{{vik.run.table.3.s}}</td><td>{{vik.run.table.3.elbo}}</td><td>{{vik.run.table.3.gap}}</td></tr>
+      <tr data-b="3"><td>{{vik.run.table.4.step}}</td><td>{{vik.run.table.4.m}}</td><td>{{vik.run.table.4.s}}</td><td>{{vik.run.table.4.elbo}}</td><td>{{vik.run.table.4.gap}}</td></tr>
+      <tr data-b="3"><td>{{vik.run.table.5.step}}</td><td>{{vik.run.table.5.m}}</td><td>{{vik.run.table.5.s}}</td><td>{{vik.run.table.5.elbo}}</td><td>{{vik.run.table.5.gap}}</td></tr>
+      <tr class="total" data-b="4"><td>best possible</td><td>{{vik.vi.m}}</td><td>{{vik.vi.s}}</td><td>{{vik.vi.elbo}}</td><td>{{vik.vi.gap}}</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="4">After step 25 the noise from 10 draws keeps $q$ jittering within about 0.01 nats of the best. One draw per step works too: averaged over its last 100 steps, $m = {{vik.run.s1_m}}$, $s = {{vik.run.s1_s}}$.</p>
+  <aside class="notes"><p>The gap column is computed with the grid's log p(x), only to show how close q is; the optimiser never saw it. A decaying learning rate would remove the jitter. The VAE uses exactly one draw per image per step.</p></aside>
+</section>
+
+<section class="slide sec-v6" id="g-result" data-section="6 · Climbing the ELBO">
+  <p class="kicker">How good is the answer?</p>
+  <h2>For this posterior, a bell curve is almost perfect</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-result.svg" style="width:620px">
+      <div class="col grow">
+        <table class="work" style="font-size:21px">
+          <tr><th></th><th>exact posterior</th><th>best $q$</th></tr>
+          <tr><td>mean of $z$</td><td>{{vik.coin.post_mean}}</td><td>{{vik.vi.m}}</td></tr>
+          <tr><td>spread of $z$</td><td>{{vik.coin.post_sd}}</td><td>{{vik.vi.s3}}</td></tr>
+          <tr><td>chance the next toss is heads</td><td>{{vik.coin.pred_exact}}</td><td>{{vik.vi.pred}}</td></tr>
+        </table>
+        <p class="small" style="margin-top:14px" data-b="2">The leftover gap, {{vik.vi.gap}} nats, is the posterior's slight right skew, which no bell curve can match.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="2">VI found, without ever computing $p(x)$, an answer that matches the exact one to two decimals. Part 7: shapes where it cannot.</p>
+  <aside class="notes"><p>Blue: the exact posterior from the grid; purple dashed: the best Gaussian. The chance of heads is E[sigmoid(z)] under each. Note q is very slightly narrower than the posterior (0.583 vs 0.586): reverse KL's caution, in miniature.</p></aside>
+</section>
+
+<section class="slide sec-v6" id="g-beta" data-section="6 · Climbing the ELBO">
+  <p class="kicker">A check where the answer is known (from the PML course)</p>
+  <h2>On Part 1's coin, a Beta $q$ finds the exact posterior</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-betavi.svg" style="width:600px">
+      <div class="col grow">
+        <p class="small">Back to the $\mathrm{Beta}(2,2)$ prior on $\theta$, whose posterior we know: $\mathrm{Beta}(10, 4)$.</p>
+        <p class="small" data-b="2">Let $q = \mathrm{Beta}(\alpha, \beta)$, start at $\mathrm{Beta}(45, 45)$, and run the same loop: <code>rsample</code>, 100 draws per step, Adam, {{vik.betavi.steps}} steps.</p>
+        <p class="small" data-b="3">It ends near $\mathrm{Beta}({{vik.betavi.a}},\ {{vik.betavi.b}})$: ELBO {{vik.betavi.elbo}} against $\log p(x) = {{vik.beta.log_ev}}$, a gap of {{vik.betavi.gap}} nats.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">When the family contains the posterior, VI finds it. The gap is a measure of how much the family is missing.</p>
+  <aside class="notes"><p>Same setup as the PML variational-inference notebook (which used a Beta(5, 3) prior and 17 heads in 30). torch's Beta supports rsample through implicit reparameterisation gradients. α and β keep jittering around 10 and 4 by a few tenths because of the sampling noise: at step 500 they were already ({{vik.betavi.trace.1.a}}, {{vik.betavi.trace.1.b}}). Pyro's SVI with Trace_ELBO does the same thing in a library.</p></aside>
+</section>

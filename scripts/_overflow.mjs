@@ -1,10 +1,11 @@
 // one-off: list slides whose content spills outside the 1280x720 frame or overlaps (print mode, final builds)
 import puppeteer from 'puppeteer';
+const PORT = process.env.PORT || 8771;   // the review server's port (vi.html review: 8774)
 const deck = process.argv[2] || 'index.html';
 const b = await puppeteer.launch({headless:true, executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
 const p = await b.newPage(); await p.setViewport({width:1280,height:720});
 const errs = []; p.on('pageerror', e => errs.push(String(e)));
-await p.goto(`http://127.0.0.1:8771/${deck}?print`, {waitUntil:'load'});
+await p.goto(`http://127.0.0.1:${PORT}/${deck}?print`, {waitUntil:'load'});
 await p.waitForFunction(() => window.deckReady);
 await new Promise(r => setTimeout(r, 1500));
 const res = await p.evaluate(() => {

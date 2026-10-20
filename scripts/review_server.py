@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REVIEW = ROOT / "review"
 NOTES = REVIEW / "notes.json"
 INBOX = REVIEW / "inbox.jsonl"
-WATCH = ["index.html", "part1.html", "part2.html", "deck/deck.css", "deck/deck.js", "deck/widgets.js", "deck/annotate.js"]
+WATCH = ["index.html", "part1.html", "part2.html", "vi.html", "deck/deck.css", "deck/deck.js", "deck/widgets.js", "deck/annotate.js"]
 LOCK = threading.Lock()
 CLAUDE_FIELDS = ("status", "reply", "done_at")  # written by Claude in notes.json, never overwritten by the page
 

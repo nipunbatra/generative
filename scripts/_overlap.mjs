@@ -1,9 +1,10 @@
 // one-off: find slides where the body's content runs into the title or the take-away line (print mode, final builds)
 import puppeteer from 'puppeteer';
+const PORT = process.env.PORT || 8771;   // the review server's port (vi.html review: 8774)
 const deck = process.argv[2] || 'index.html';
 const b = await puppeteer.launch({headless:true, executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'});
 const p = await b.newPage(); await p.setViewport({width:1280,height:720});
-await p.goto(`http://127.0.0.1:8771/${deck}?print`, {waitUntil:'load'});
+await p.goto(`http://127.0.0.1:${PORT}/${deck}?print`, {waitUntil:'load'});
 await p.waitForFunction(() => window.deckReady);
 await new Promise(r => setTimeout(r, 1500));
 const res = await p.evaluate(() => {

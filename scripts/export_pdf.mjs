@@ -1,6 +1,7 @@
 // Export the deck to PDF with headless Chrome.
 //   node scripts/export_pdf.mjs            -> exports/lecture.pdf (final build of every slide)
 //                                             exports/lecture-builds.pdf (every click)
+//   node scripts/export_pdf.mjs vi         -> only the decks whose file name starts with "vi" (vi.pdf, vi-builds.pdf)
 import puppeteer from 'puppeteer';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -39,8 +40,10 @@ const jobs = [
   ['part1.html', '', 'session1.pdf'], ['part1.html', 'builds', 'session1-builds.pdf'],
   ['part2.html', '', 'session2.pdf'], ['part2.html', 'builds', 'session2-builds.pdf'],
   ['index.html', '', 'lecture.pdf'], ['index.html', 'builds', 'lecture-builds.pdf'],
+  ['vi.html', '', 'vi.pdf'], ['vi.html', 'builds', 'vi-builds.pdf'],
 ];
-for (const [file, mode, out] of jobs) {
+const only = process.argv[2];
+for (const [file, mode, out] of jobs.filter(([f]) => !only || f.startsWith(only))) {
   const url = pathToFileURL(path.join(root, file)).href + '?print' + (mode ? '=' + mode : '');
   await page.goto(url, { waitUntil: 'load' });
   await page.waitForFunction(() => window.deckReady === true);

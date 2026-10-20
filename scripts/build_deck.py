@@ -21,6 +21,9 @@ if _gmm.exists():
 _bridge = ROOT / "figures" / "data" / "numbers-bridge.json"   # from scripts/make_figures_bridge.py, as {{bridge.*}}
 if _bridge.exists():
     NUM["bridge"] = json.loads(_bridge.read_text())
+_vik = ROOT / "figures" / "data" / "numbers-vi.json"         # from scripts/make_figures_vi.py, as {{vik.*}}
+if _vik.exists():
+    NUM["vik"] = json.loads(_vik.read_text())
 
 
 def fmt(v):
@@ -77,6 +80,8 @@ SESSIONS = {
     "part1.html": ("Session 1 · Fitting, autoencoders, the probabilistic view", ["01", "02", "03", "04"]),
     "part2.html": ("Session 2 · KL, variational inference, the VAE", ["05", "06", "07", "08", "09"]),
     "index.html": ("Generative Modelling I · VAEs", ["01", "02", "03", "04", "05", "06", "07", "08", "09"]),
+    # the maths lecture before the VAE: deck/slides/v0-*.html ... v8-*.html, its own 8-part route
+    "vi.html": ("KL divergence and variational inference", ["v0", "v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8"]),
 }
 
 
@@ -87,10 +92,17 @@ PARTS = [
 ]
 
 
-def route(current):
-    """The 7-part route with finished parts ticked and the current one highlighted."""
+VI_PARTS = [
+    ("--x", "Bayes: prior, likelihood, posterior"), ("--z", "Why the posterior is hard"), ("--dec", "Averages from samples"),
+    ("--loss", "KL divergence"), ("--enc", "Variational inference and the ELBO"), ("--z", "Climbing the ELBO: gradients through samples"),
+    ("--dec", "Beyond one number"), ("--enc", "Many data points: towards the VAE"),
+]
+
+
+def route(current, parts=PARTS):
+    """The route with finished parts ticked and the current one highlighted."""
     items = []
-    for i, (col, name) in enumerate(PARTS, 1):
+    for i, (col, name) in enumerate(parts, 1):
         state = "done" if i < current else ("now" if i == current else "todo")
         items.append(f'<li class="{state}" style="--c:var({col})"><span class="dot">{"✓" if state == "done" else i}</span>{name}</li>')
     return '<ol class="route-mini">' + "".join(items) + "</ol>"
@@ -106,6 +118,7 @@ def assemble(prefixes):
 
     body = re.sub(r"<!--svg:([\w-]+)-->", svg, body)
     body = re.sub(r"<!--route:(\d)-->", lambda m: route(int(m.group(1))), body)
+    body = re.sub(r"<!--viroute:(\d)-->", lambda m: route(int(m.group(1)), VI_PARTS), body)
 
     def num(m):
         v = lookup(m.group(1))

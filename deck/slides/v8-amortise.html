@@ -1,0 +1,116 @@
+<!-- ===================================================================== VI LECTURE · PART 8 · MANY DATA POINTS: TOWARDS THE VAE -->
+
+<section class="slide sec-v8 opener break" id="a-open" data-section="8 · Towards the VAE">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 8 of 8</p>
+      <h2>Many data points: learn to predict $q$</h2>
+      <p class="why">So far: one coin, one $q$, 400 steps. A dataset has thousands of items, each with its <b>own</b> posterior. Running VI separately for each is wasteful. Learn a function from the data to $q$ instead.</p>
+    </div>
+    <!--viroute:8-->
+  </div>
+</section>
+
+<section class="slide sec-v8" id="a-many" data-section="8 · Towards the VAE">
+  <p class="kicker">A dataset of coins</p>
+  <h2>{{vik.amort.n}} coins, each with its own hidden $z$</h2>
+  <div class="body">
+    <div class="row top" style="gap:40px;justify-content:center">
+      <div class="col" style="width:560px">
+        <p class="small">For each coin $n$: draw $z_n \sim \N(0, 1)$, toss it 10 times with $\theta_n = \mathrm{sigmoid}(z_n)$. The data: $x_n$, its ten tosses.</p>
+        <p class="small" data-b="2">Each coin has its own posterior $p(z_n \mid x_n)$, and so its own best $q_n = \N(m_n, s_n^2)$.</p>
+        <p class="small" data-b="3">Per-coin VI: {{vik.amort.n}} separate loops of 400 steps. A new coin: another loop.</p>
+      </div>
+      <div class="col" style="width:420px">
+        <p class="small muted" style="margin:0">how many coins showed each number of heads</p>
+        <div class="bars" style="grid-template-columns:auto 1fr auto;font-size:17px;gap:3px 10px">
+          <span class="lab">0</span><div class="bar" style="width:{{vik.amort.counts.0}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.0}}</span>
+          <span class="lab">1</span><div class="bar" style="width:{{vik.amort.counts.1}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.1}}</span>
+          <span class="lab">2</span><div class="bar" style="width:{{vik.amort.counts.2}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.2}}</span>
+          <span class="lab">3</span><div class="bar" style="width:{{vik.amort.counts.3}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.3}}</span>
+          <span class="lab">4</span><div class="bar" style="width:{{vik.amort.counts.4}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.4}}</span>
+          <span class="lab">5</span><div class="bar" style="width:{{vik.amort.counts.5}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.5}}</span>
+          <span class="lab">6</span><div class="bar" style="width:{{vik.amort.counts.6}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.6}}</span>
+          <span class="lab">7</span><div class="bar" style="width:{{vik.amort.counts.7}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.7}}</span>
+          <span class="lab">8</span><div class="bar" style="width:{{vik.amort.counts.8}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.8}}</span>
+          <span class="lab">9</span><div class="bar" style="width:{{vik.amort.counts.9}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.9}}</span>
+          <span class="lab">10</span><div class="bar" style="width:{{vik.amort.counts.10}}%;--c:var(--x)"></div><span class="val">{{vik.amort.counts.10}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">But each coin's best $q$ depends only on its tosses. So learn the map from $x$ to $(m, s)$ once.</p>
+  <aside class="notes"><p>The dataset is generated from the model itself (scripts/make_figures_vi.py, part_amortise). Bars are scaled so that 100 coins would fill the width.</p></aside>
+</section>
+
+<section class="slide sec-v8" id="a-enc" data-section="8 · Towards the VAE">
+  <p class="kicker">Amortised inference</p>
+  <h2>An encoder: a small network from $x$ to $q$'s two numbers</h2>
+  <div class="body">
+    <div class="enc-diagram">
+      <span class="node x">$x_n$<small>10 tosses</small></span><span class="arrow">→</span>
+      <span class="node enc">encoder<small>10 → 16 → 2</small></span><span class="arrow">→</span>
+      <span class="node enc">$m_n,\ \log s_n$</span><span class="arrow">→</span>
+      <span class="node z">$z = m_n + s_n\eps$</span><span class="arrow">→</span>
+      <span class="node loss">$-\ELBO_n$</span>
+    </div>
+    <pre class="code" style="font-size:16px;margin:18px auto 0;width:1000px" data-b="2"><span class="line">m, log_s = encoder(X).unbind(-<span class="n">1</span>)                    <span class="c"># X: [500, 10] tosses, one row per coin</span></span>
+<span class="line">z   = m + log_s.exp() * torch.randn(<span class="n">500</span>)          <span class="c"># one draw per coin</span></span>
+<span class="line">rec = h * F.logsigmoid(z) + (<span class="n">10</span> - h) * F.logsigmoid(-z)   <span class="c"># h: heads per coin</span></span>
+<span class="line">kl  = <span class="n">0.5</span> * (m**<span class="n">2</span> + (<span class="n">2</span>*log_s).exp() - <span class="n">1</span> - <span class="n">2</span>*log_s)</span>
+<span class="line">loss = -(rec - kl).mean()                              <span class="c"># minus the average ELBO</span></span></pre>
+  </div>
+  <p class="q" data-b="2">Train the encoder's weights on the average ELBO over all coins: {{vik.amort.steps}} Adam steps, one draw per coin. Then one forward pass gives any coin's $q$.</p>
+  <aside class="notes"><p>Every line is something from today: the reparameterised draw (Part 6), the likelihood term (Part 2's log joint without the prior), the Gaussian KL to the prior (Part 4), the ELBO (Part 5). The only new thing is that m and log s come out of a network.</p></aside>
+</section>
+
+<section class="slide sec-v8" id="a-result" data-section="8 · Towards the VAE">
+  <p class="kicker">Does it work?</p>
+  <h2>One pass of the encoder ≈ 400 steps of VI per coin</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-amortise.svg" style="width:660px">
+      <div class="col grow">
+        <p class="small">Black: per-coin VI, centre $m$ with $\pm s$. Purple: the encoder's $m$ for each of the {{vik.amort.n}} coins.</p>
+        <p class="small" data-b="2">For the {{vik.amort.counts.8}} coins with 8 heads: VI gives $m = {{vik.amort.h8_m}}$, the encoder {{vik.amort.h8_enc_m}}; both give $s = {{vik.amort.h8_s}}$.</p>
+        <p class="small" data-b="3">ELBO lost per coin, on average: {{vik.amort.gap_mean}} nats (at most {{vik.amort.gap_max}}). That loss is the <b>amortisation gap</b>.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">That network is the VAE's encoder. The VAE also learns the decoder (here sigmoid$(z)$ was fixed), on the same ELBO.</p>
+  <aside class="notes"><p>"Amortised": the cost of inference is paid once, during training, and then spread over every future data point, like paying off a loan. The gap is tiny here because the map from heads to (m, s) is smooth and the encoder has plenty of capacity.</p></aside>
+</section>
+
+<section class="slide sec-v8" id="a-map" data-section="8 · Towards the VAE">
+  <p class="kicker">Recap</p>
+  <h2>What the VAE lecture will reuse</h2>
+  <div class="body">
+    <table class="work vocab3" style="margin:0 auto;width:1120px">
+      <tr><th>today, on toys</th><th>in the VAE</th></tr>
+      <tr><td>prior $p(z) = \N(0, 1)$ on one number</td><td>$p(z) = \N(0, I)$ on a code of a few numbers</td></tr>
+      <tr data-b="2"><td>likelihood through $\mathrm{sigmoid}(z)$</td><td>the decoder network: 784 pixel probabilities</td></tr>
+      <tr data-b="2"><td>posterior with no formula; evidence intractable</td><td>the same, for every image</td></tr>
+      <tr data-b="3"><td>$\log p(x) = \ELBO + \KL(q\,\|\,\text{posterior})$</td><td>the loss is $-\ELBO$</td></tr>
+      <tr data-b="3"><td>$\E_q[\log p(x\mid z)]$ from a few draws</td><td>the reconstruction term, one draw per image</td></tr>
+      <tr data-b="3"><td>$\tfrac12(m^2 + s^2 - 1 - \log s^2)$</td><td>the KL term, one per code coordinate</td></tr>
+      <tr data-b="4"><td>$z = m + s\eps$, <code>rsample</code></td><td>$z = \mu + \sigma\odot\eps$</td></tr>
+      <tr data-b="4"><td>diagonal $q$ is too narrow on tilted posteriors</td><td>the VAE's $q$ is diagonal</td></tr>
+      <tr data-b="4"><td>an encoder from $x$ to $(m, s)$</td><td>the VAE's encoder, $q_\varphi(z\mid x)$</td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="4">Next lecture: the same few lines of loss, with an image in place of ten tosses, and a decoder that is learned too.</p>
+</section>
+
+<section class="slide sec-v8" id="a-exit" data-section="8 · Towards the VAE">
+  <p class="kicker">Before you leave</p>
+  <h2>Five questions</h2>
+  <div class="body">
+    <ol class="exitq">
+      <li>Why can't we compute $p(z\mid x)$ for the one-number decoder? <span class="ans" data-b="2">The evidence $\int p(z)\,p(x\mid z)\,dz$ has no formula. A grid works in 1-D but explodes with dimension.</span></li>
+      <li>$\log p(x) = \ELBO(q) + \,?$ <span class="ans" data-b="2">$\KL(q\,\|\,p(z\mid x)) \ge 0$. So the ELBO is a lower bound, and since $\log p(x)$ does not depend on $q$, raising the ELBO shrinks the KL.</span></li>
+      <li>Why does VI minimise $\KL(q\|p)$, not $\KL(p\|q)$? <span class="ans" data-b="2">KL averages under its first argument: we can draw from $q$, not from the posterior. The price: $q$ is mode-seeking and often too narrow.</span></li>
+      <li>What does reparameterisation buy? <span class="ans" data-b="2">Gradients through random draws, with far less noise than the score function: {{vik.grad.ratio}}× fewer draws on the toy, {{vik.grad.coin_ratio}}× on the coin.</span></li>
+      <li>A diagonal Gaussian $q$ fitted to a correlated target comes out too ...? <span class="ans" data-b="2">Narrow: width {{vik.corr.mf_sd}} instead of 1 for $\rho = 0.9$.</span></li>
+    </ol>
+  </div>
+</section>

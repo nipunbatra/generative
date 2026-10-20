@@ -4,8 +4,22 @@
     {
       "name": "review",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["scripts/review_server.py", "--port", "8771"],
+      "runtimeArgs": [
+        "scripts/review_server.py",
+        "--port",
+        "8771"
+      ],
       "port": 8771
+    },
+    {
+      "name": "vi-review",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "scripts/review_server.py",
+        "--port",
+        "8774"
+      ],
+      "port": 8774
     }
   ]
 }

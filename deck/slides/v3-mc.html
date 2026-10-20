@@ -1,0 +1,136 @@
+<!-- ===================================================================== VI LECTURE · PART 3 · AVERAGES FROM SAMPLES -->
+
+<section class="slide sec-v3 opener break" id="m-open" data-section="3 · Averages">
+  <div class="break-grid">
+    <div>
+      <p class="kicker">Part 3 of 8</p>
+      <h2>Averages, and estimating them from samples</h2>
+      <p class="why">Variational inference's loss is an <b>average over a distribution</b>. We will almost never compute it exactly; we will estimate it from a handful of random draws. Here is why that works, and how noisy it is.</p>
+    </div>
+    <!--viroute:3-->
+  </div>
+</section>
+
+<section class="slide sec-v3" id="m-avg" data-section="3 · Averages">
+  <p class="kicker">Notation for the rest of the lecture</p>
+  <h2>$\E$ means "average over"</h2>
+  <div class="body">
+    <div class="erows" style="margin:0 auto;grid-template-columns:780px 1fr;font-size:20px">
+      <div class="mathblock left" style="font-size:23px">$$\E_{\theta\sim p(\theta\mid x)}[\theta] = 0.0002\times 0.2 + 0.127\times 0.5 + 0.873\times 0.8 = {{vik.three.pred}}$$</div><span class="lab">the three-coin posterior (Part 1): the chance the <b>next</b> toss is heads</span>
+      <div class="mathblock left" style="font-size:23px" data-b="2">$$\E_{\theta\sim \mathrm{Beta}(10, 4)}[\theta] = \int_0^1 \theta\;p(\theta\mid x)\,d\theta = \tfrac{10}{14} = {{vik.beta.mean}}$$</div><span class="lab" data-b="2">a continuous variable: the sum becomes an integral</span>
+      <div class="mathblock left" style="font-size:23px" data-b="3">$$\E_{z\sim q}\big[f(z)\big] = \int q(z)\,f(z)\,dz$$</div><span class="lab" data-b="3">in general: weight each value $f(z)$ by how likely $z$ is under $q$</span>
+    </div>
+  </div>
+  <p class="q" data-b="3">The subscript says which distribution we average under. It will matter: KL and the ELBO are both averages, and the choice of subscript is the key decision in VI.</p>
+  <aside class="notes">
+    <p>Posterior predictive: a posterior is not just for looking at; averages under it answer questions. The three-coin answer 0.762 and the Beta answer 0.714 differ because the priors differ.</p>
+    <p>Read "z ∼ q" aloud as "z drawn from q".</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="m-darts" data-section="3 · Averages">
+  <p class="kicker">Monte Carlo in one picture (from the PML course)</p>
+  <h2>Throw darts at a square to estimate $\pi$</h2>
+  <div class="body">
+    <div class="row" style="gap:36px;justify-content:center">
+      <img class="fig" src="figures/data/vik-darts.svg" style="height:400px">
+      <div class="col" style="width:560px">
+        <p class="small">Throw darts uniformly at the unit square. The quarter circle covers $\pi/4$ of its area, so</p>
+        <div class="mathblock left" style="font-size:25px">$$\pi = 4\,\E\big[\mathbb{1}\{\text{dart inside}\}\big] \approx 4\times\frac{\text{darts inside}}{\text{darts thrown}}$$</div>
+        <p class="small" data-b="2">Here: {{vik.darts.in1000}} of 1,000 inside, so $\pi \approx {{vik.darts.est1000}}$.</p>
+        <table class="work" style="font-size:19px" data-b="3">
+          <tr><th>darts</th><th>10</th><th>100</th><th>1,000</th><th>10,000</th><th>100,000</th></tr>
+          <tr><td>spread over 6 runs</td><td>{{vik.darts.rows.0.sd}}</td><td>{{vik.darts.rows.1.sd}}</td><td>{{vik.darts.rows.2.sd}}</td><td>{{vik.darts.rows.3.sd}}</td><td>{{vik.darts.rows.4.sd}}</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">An area, which is an integral, became an average of random yes/no answers. That is the whole idea of Monte Carlo.</p>
+  <aside class="notes">
+    <p>From the PML course's mc_sampling_intro notebook. Means over the six runs: {{vik.darts.rows.0.mean}}, {{vik.darts.rows.1.mean}}, {{vik.darts.rows.2.mean}}, {{vik.darts.rows.3.mean}}, {{vik.darts.rows.4.mean}}.</p>
+    <p>In theory each tenfold increase in darts shrinks the spread √10 ≈ 3.2 times (the 1/√S rule, two slides from now); with only six runs per size the measured ratios scatter around that.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="m-mc" data-section="3 · Averages">
+  <p class="kicker">The one idea we need: Monte Carlo</p>
+  <h2>Replace the integral by an average of draws</h2>
+  <div class="body">
+    <div class="mathblock" style="font-size:31px">$$\E_{z\sim q}\big[f(z)\big] \;\approx\; \frac1S\sum_{s=1}^{S} f(z_s), \qquad z_s \sim q$$</div>
+    <p class="small" style="text-align:center;margin-top:6px" data-b="2">Example: $q = \N(1,\ 0.5^2)$ and $f(z) = z^2$. Exact answer: $\E[z^2] = \mu^2 + \sigma^2 = 1 + 0.25 = 1.25$.</p>
+    <table class="work" style="margin:8px auto 0;font-size:22px" data-b="3">
+      <tr><th>draw $s$</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>average</th></tr>
+      <tr><td>$z_s$</td><td>{{vik.mc.first.0}}</td><td>{{vik.mc.first.1}}</td><td>{{vik.mc.first.2}}</td><td>{{vik.mc.first.3}}</td><td>{{vik.mc.first.4}}</td><td></td></tr>
+      <tr><td>$f(z_s) = z_s^2$</td><td>{{vik.mc.first_f.0}}</td><td>{{vik.mc.first_f.1}}</td><td>{{vik.mc.first_f.2}}</td><td>{{vik.mc.first_f.3}}</td><td>{{vik.mc.first_f.4}}</td><td><b>{{vik.mc.first_mean}}</b></td></tr>
+    </table>
+  </div>
+  <p class="q" data-b="3">Five draws: {{vik.mc.first_mean}} instead of 1.25. Not bad, not great. More draws?</p>
+  <aside class="notes">
+    <p>The variance of N(μ, σ²) is E[(z − μ)²] = σ², so E[z²] = μ² + σ². We use a case with a known answer so we can see the error.</p>
+    <p>The same q, N(1, 0.5²), and the same f(z) = z² come back in Part 6, where we need the gradient of this average.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="m-live" data-section="3 · Averages">
+  <p class="kicker">Try it</p>
+  <h2>Draw more, get closer</h2>
+  <div class="body">
+    <div class="vw interactive" data-widget="mc" data-first="{{vik.mc.first.0}},{{vik.mc.first.1}},{{vik.mc.first.2}},{{vik.mc.first.3}},{{vik.mc.first.4}}">
+      <canvas width="720" height="420"></canvas>
+      <div class="vw-side">
+        <div class="vw-btns"><button data-a="1">draw 1</button><button data-a="10">draw 10</button><button data-a="100">draw 100</button><button data-a="1000">draw 1,000</button><button data-a="reset">reset</button></div>
+        <p class="vw-read">draws so far: <b class="mc-s">5</b></p>
+        <p class="vw-read">latest $z$: <b class="mc-last">—</b></p>
+        <p class="vw-big">estimate <span class="mc-est">—</span></p>
+        <p class="vw-read">exact: 1.25</p>
+        <div class="lg"><span><i class="fill" style="--c:var(--enc);--f:var(--enc-t)"></i>$q$ and its draws</span><span><i style="--c:var(--dec)"></i>running average</span><span><i class="fill" style="--c:var(--dec-t);--f:var(--dec-t)"></i>$1.25 \pm 2\times 1.061/\sqrt{S}$: 95% of runs</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="q">More draws: closer to 1.25. The teal band is where 95% of runs end up after $S$ draws; it narrows like $1/\sqrt{S}$.</p>
+  <aside class="notes">
+    <p>The widget starts with the five draws from the previous slide. Click "draw 10" a few times, then "draw 1,000". The running average wanders early and settles inside the shrinking band.</p>
+    <p>Print and PDF show the state after 1,000 draws.</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="m-error" data-section="3 · Averages">
+  <p class="kicker">How noisy is the estimate?</p>
+  <h2>The error shrinks like $1/\sqrt{S}$</h2>
+  <div class="body">
+    <div class="row" style="gap:30px">
+      <img class="fig" src="figures/data/vik-mc-error.svg" style="width:600px">
+      <div class="col grow">
+        <p class="small">One draw of $z^2$ has a spread (standard deviation) of {{vik.mc.per_sd}}.</p>
+        <p class="small" data-b="2">An average of $S$ draws has spread $1.061/\sqrt{S}$: {{vik.mc.th10}}, {{vik.mc.th100}}, {{vik.mc.th1000}} for $S$ = 10, 100, 1,000.</p>
+        <p class="small" data-b="3">Measured over 2,000 repeats: {{vik.mc.s10}}, {{vik.mc.s100}}, {{vik.mc.s1000}}.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">Centred on the right answer (unbiased), but noisy: 100 times more draws buy 10 times less noise.</p>
+  <aside class="notes">
+    <p>For z ∼ N(μ, σ²), Var(z²) = 4μ²σ² + 2σ⁴ = 1 + 0.125, so the one-draw spread is √1.125 = 1.061. The average of S independent draws has variance Var/S.</p>
+    <p>Two facts to carry forward. Unbiased: on average the estimate is exactly right, which is all stochastic gradient descent needs. 1/√S: the cost of precision grows quickly, so in practice we use few draws (the VAE uses one per image).</p>
+  </aside>
+</section>
+
+<section class="slide sec-v3" id="m-code" data-section="3 · Averages">
+  <p class="kicker">In code</p>
+  <h2>Three lines, in any number of dimensions</h2>
+  <div class="body">
+    <div class="codewalk">
+      <pre class="code" style="font-size:18px"><span class="line" data-hl="=1">mu, sigma = <span class="n">1.0</span>, <span class="n">0.5</span></span>
+<span class="line" data-hl="=1">z = mu + sigma * torch.randn(<span class="n">1000</span>)   <span class="c"># 1,000 draws from q</span></span>
+<span class="line" data-hl="=2">estimate = (z**<span class="n">2</span>).mean()             <span class="c"># about 1.25</span></span></pre>
+      <div class="notes-col">
+        <p class="small" data-b="=1"><b>Draw from $q$:</b> standard noise, stretched by $\sigma$ and shifted by $\mu$. Remember this line: it returns in Part 6.</p>
+        <p class="small" data-b="=2"><b>Average $f$:</b> evaluate $f$ at each draw and take the mean. No integral anywhere.</p>
+        <p class="small" data-b="3"><b>The catch:</b> we need draws from the distribution we average under. For a $q$ we chose, easy. For the posterior, that is the very problem we started with.</p>
+      </div>
+    </div>
+  </div>
+  <p class="q" data-b="3">So variational inference will arrange for every average to be under $q$, never under the posterior.</p>
+  <aside class="notes">
+    <p>With 100,000 draws this gives {{vik.mc.big}}. The same three lines work for a 32-dimensional z: draw a 32-vector of noise per sample. That is why Monte Carlo, unlike the grid, does not explode with dimension.</p>
+  </aside>
+</section>
