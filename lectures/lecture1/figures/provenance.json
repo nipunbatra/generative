@@ -79,19 +79,6 @@
    "licence_note": "Original figures generated for this teaching package; no external image copied."
   },
   {
-   "id": "wall-logit-joint",
-   "files": [
-    "figures/wall-logit-joint.svg",
-    "figures/wall-logit-joint.png"
-   ],
-   "type": "original calculated plot",
-   "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
-   "data": "data/science.json",
-   "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
-   "third_party_image_reuse": false,
-   "licence_note": "Original figures generated for this teaching package; no external image copied."
-  },
-  {
    "id": "three-ways",
    "files": [
     "figures/three-ways.svg",
@@ -144,10 +131,49 @@
    "licence_note": "Original figures generated for this teaching package; no external image copied."
   },
   {
-   "id": "logit-vi",
+   "id": "bnn-prior-and-fits",
    "files": [
-    "figures/logit-vi.svg",
-    "figures/logit-vi.png"
+    "figures/bnn-prior-and-fits.svg",
+    "figures/bnn-prior-and-fits.png"
+   ],
+   "type": "original calculated plot",
+   "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+   "data": "data/science.json",
+   "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+   "third_party_image_reuse": false,
+   "licence_note": "Original figures generated for this teaching package; no external image copied."
+  },
+  {
+   "id": "bnn-evidence-mc",
+   "files": [
+    "figures/bnn-evidence-mc.svg",
+    "figures/bnn-evidence-mc.png"
+   ],
+   "type": "original calculated plot",
+   "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+   "data": "data/science.json",
+   "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+   "third_party_image_reuse": false,
+   "licence_note": "Original figures generated for this teaching package; no external image copied."
+  },
+  {
+   "id": "bnn-posterior-predictive",
+   "files": [
+    "figures/bnn-posterior-predictive.svg",
+    "figures/bnn-posterior-predictive.png"
+   ],
+   "type": "original calculated plot",
+   "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
+   "data": "data/science.json",
+   "source_concept": "Nipun Batra PML2023 VI notebook, adapted standalone implementation",
+   "third_party_image_reuse": false,
+   "licence_note": "Original figures generated for this teaching package; no external image copied."
+  },
+  {
+   "id": "bnn-vi-vs-hmc",
+   "files": [
+    "figures/bnn-vi-vs-hmc.svg",
+    "figures/bnn-vi-vs-hmc.png"
    ],
    "type": "original calculated plot",
    "generator": "scripts/build_notebook.py; saved execution in lecture1-variational-inference.ipynb",
@@ -157,7 +183,7 @@
    "licence_note": "Original figures generated for this teaching package; no external image copied."
   }
  ],
- "count": 12,
+ "count": 14,
  "computed_curves": "All SVG curves and training traces are calculated; no raster image generation.",
  "slide_figures": "Slides draw their own SVG charts and animations at load time from data/science.json, using widgets.js and content.js; the notebook figures above are for the notebook and reading."
 }

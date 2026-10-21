@@ -41,39 +41,131 @@ def normal_kl(q, p):
     return torch.log(p.scale/q.scale) + (q.scale.square() + (q.loc-p.loc).square())/(2*p.scale.square()) - .5
 print("CPU; float64; PyTorch", torch.__version__, "· fixed seeds recorded per experiment")
 
-heads_w, tails_w = 17, 13
-def lgB(a, b):
-    return math.lgamma(a) + math.lgamma(b) - math.lgamma(a + b)
-conj_log_evidence = lgB(22, 16) - lgB(5, 3)
-w_prior = dist.Normal(torch.tensor(0.), torch.tensor(1.))
-def logit_log_joint(w):
-    F = torch.nn.functional
-    return w_prior.log_prob(w) + heads_w * F.logsigmoid(w) + tails_w * F.logsigmoid(-w)
-w_grid = torch.linspace(-10, 10, 200_001)
-dw = number(w_grid[1] - w_grid[0])
-logit_log_evidence = number(torch.logsumexp(logit_log_joint(w_grid), 0)) + math.log(dw)
-torch.manual_seed(31)
-w_draws = w_prior.sample((100_000,))
-F = torch.nn.functional
-w_loglik = heads_w * F.logsigmoid(w_draws) + tails_w * F.logsigmoid(-w_draws)
-logit_log_evidence_mc = number(torch.logsumexp(w_loglik, 0)) - math.log(len(w_draws))
-w_plot = torch.linspace(-3, 3.5, 261)
-joint_plot = logit_log_joint(w_plot).exp()
-posterior_w_plot = (logit_log_joint(w_plot) - logit_log_evidence).exp()
-fig, ax = plt.subplots(figsize=(8.8, 4.0))
-ax.fill_between(w_plot, 0, joint_plot * 1e10, color="#E5E7EB")
-ax.plot(w_plot, joint_plot * 1e10, color=C["p"])
-ax.set(xlabel="w, the coin's logit (r = sigmoid(w))", ylabel="p(D, w) × 1e10")
-ax.set_title("The shaded area is p(D). No formula gives it.", loc="left")
-savefig("wall-logit-joint")
-fixtures["story"] = {"wall": dict(
-    heads=heads_w, tails=tails_w, conj_log_evidence=conj_log_evidence,
-    logit_prior=[0., 1.], logit_log_evidence_grid=logit_log_evidence,
-    logit_log_evidence_mc=logit_log_evidence_mc, mc_draws=100_000, mc_seed=31, grid_points=200_001,
-    plot=dict(w=w_plot.tolist(), joint_e10=(joint_plot * 1e10).tolist(), posterior=posterior_w_plot.tolist()))}
-print(f"Beta(5, 3) prior: log p(D) = {conj_log_evidence:.4f}, from the formula B(22,16)/B(5,3)")
-print(f"Normal prior on the logit: log p(D) = {logit_log_evidence:.4f} on a 200,001-point grid; "
-      f"{logit_log_evidence_mc:.4f} from 100,000 prior draws")
+bnn_names = ["w1", "w2", "b1", "b2", "v1", "v2", "c"]
+def net(theta, x):
+    # theta [..., 7] and inputs x [N] give outputs [..., N]
+    w, b, v, c = theta[..., 0:2], theta[..., 2:4], theta[..., 4:6], theta[..., 6:7]
+    hidden = torch.tanh(w[..., None, :] * x[:, None] + b[..., None, :])
+    return (hidden * v[..., None, :]).sum(-1) + c
+torch.manual_seed(7)
+x_train = torch.cat([torch.linspace(-1.5, -0.4, 9), torch.linspace(0.5, 1.5, 8)])
+noise_sd = 0.1
+y_train = 0.8 * torch.tanh(3 * x_train) + 0.3 * x_train + noise_sd * torch.randn(len(x_train))
+theta_prior = dist.Normal(torch.zeros(7), torch.ones(7))
+def bnn_log_lik(theta):
+    return dist.Normal(net(theta, x_train), noise_sd).log_prob(y_train).sum(-1)
+def bnn_log_prior(theta):
+    return theta_prior.log_prob(theta).sum(-1)
+def bnn_log_joint(theta):
+    return bnn_log_lik(theta) + bnn_log_prior(theta)
+# theta_A: the most probable parameters (MAP), best of ten restarts. theta_B: one draw from the prior.
+best = None
+for seed in range(10):
+    torch.manual_seed(seed)
+    th = torch.nn.Parameter(torch.randn(7))
+    opt_map = torch.optim.Adam([th], lr=.05)
+    for _ in range(2000):
+        loss = -bnn_log_joint(th)
+        opt_map.zero_grad(); loss.backward(); opt_map.step()
+    if best is None or number(loss) < best[0]:
+        best = (number(loss), th.detach().clone())
+theta_A = best[1]
+torch.manual_seed(11)
+theta_B = theta_prior.sample()
+def bnn_terms(theta):
+    point = dist.Normal(net(theta, x_train), noise_sd).log_prob(y_train)
+    return dict(theta=theta.tolist(), fitted=net(theta, x_train).tolist(), log_lik_points=point.tolist(),
+                log_lik=number(point.sum()), log_prior_terms=theta_prior.log_prob(theta).tolist(),
+                log_prior=number(bnn_log_prior(theta)), log_joint=number(bnn_log_joint(theta)))
+x_grid = torch.linspace(-2.5, 2.5, 121)
+torch.manual_seed(12)
+prior_draws = theta_prior.sample((20,))
+fixtures["story"] = {"bnn": dict(names=bnn_names, x=x_train.tolist(), y=y_train.tolist(), noise_sd=noise_sd,
+    prior=[0., 1.], data="y = 0.8 tanh(3x) + 0.3x + N(0, 0.1²) noise, seed 7", grid=x_grid.tolist(),
+    theta_A=bnn_terms(theta_A), theta_B=bnn_terms(theta_B),
+    f_A=net(theta_A, x_grid).tolist(), f_B=net(theta_B, x_grid).tolist(),
+    prior_draws=net(prior_draws, x_grid).tolist())}
+for name, th in [("A, the MAP", theta_A), ("B, a prior draw", theta_B)]:
+    print(f"theta {name}: log p(D|θ) = {number(bnn_log_lik(th)):.2f}, log p(θ) = {number(bnn_log_prior(th)):.2f}")
+fig, axes = plt.subplots(1, 2, figsize=(12, 3.8), sharey=True)
+for f_draw in net(prior_draws, x_grid):
+    axes[0].plot(x_grid, f_draw, color="#9CA3AF", lw=1.2)
+axes[0].set_title("20 functions drawn from the prior", loc="left")
+axes[1].scatter(x_train, y_train, color=C["data"], zorder=3, label="data")
+axes[1].plot(x_grid, net(theta_A, x_grid), color=C["q"], label="θ_A, the MAP")
+axes[1].plot(x_grid, net(theta_B, x_grid), color=C["noise"], label="θ_B, a prior draw")
+for ax in axes:
+    ax.set(xlabel="x", ylim=(-3, 3))
+axes[1].legend(frameon=False, fontsize=14)
+savefig("bnn-prior-and-fits")
+
+mc_sizes = [10, 100, 1_000, 10_000, 100_000, 1_000_000, 10_000_000]
+evidence_runs = []
+for seed in range(4):
+    torch.manual_seed(1000 + seed)
+    ll = torch.cat([bnn_log_lik(theta_prior.sample((500_000,))) for _ in range(20)])
+    weights = torch.exp(ll - ll.max())
+    evidence_runs.append(dict(seed=1000 + seed,
+        estimates=[number(torch.logsumexp(ll[:S], 0)) - math.log(S) for S in mc_sizes],
+        effective_draws=number(weights.sum() ** 2 / (weights ** 2).sum()),
+        largest_share=number(weights.max() / weights.sum())))
+log_evidence_bnn = float(np.mean([r["estimates"][-1] for r in evidence_runs]))
+fixtures["story"]["bnn"]["evidence"] = dict(sizes=mc_sizes, runs=evidence_runs, estimate=log_evidence_bnn,
+    grid_points_per_parameter=100, parameters=7)
+for r in evidence_runs:
+    print(r["seed"], [round(v, 2) for v in r["estimates"]], "· effective draws",
+          round(r["effective_draws"]), "· largest share", round(r["largest_share"], 3))
+print(f"log p(D) ≈ {log_evidence_bnn:.2f}, the mean of the four 10-million-draw estimates")
+fig, ax = plt.subplots(figsize=(8.8, 3.8))
+for r in evidence_runs:
+    ax.plot(mc_sizes, r["estimates"], marker="o", color=C["q"], alpha=.7)
+ax.set(xscale="log", ylim=(-60, 5), xlabel="prior draws S", ylabel="estimate of log p(D)")
+savefig("bnn-evidence-mc")
+
+def hmc_chain(theta0, n_keep, n_warm, step_size, leapfrog, seed):
+    torch.manual_seed(seed)
+    def potential(t):
+        t = t.clone().requires_grad_(True)
+        U = -bnn_log_joint(t)
+        grad, = torch.autograd.grad(U, t)
+        return U.detach(), grad
+    th, (U, grad) = theta0.clone(), potential(theta0)
+    kept, accepted = [], 0
+    for it in range(n_warm + n_keep):
+        p0 = torch.randn(7)
+        p_mom, t_new = p0 - .5 * step_size * grad, th.clone()
+        for l in range(leapfrog):
+            t_new = t_new + step_size * p_mom
+            U_new, grad_new = potential(t_new)
+            if l < leapfrog - 1:
+                p_mom = p_mom - step_size * grad_new
+        p_mom = p_mom - .5 * step_size * grad_new
+        if torch.log(torch.rand(())) < (U + .5 * (p0 ** 2).sum()) - (U_new + .5 * (p_mom ** 2).sum()):
+            th, U, grad = t_new, U_new, grad_new
+            accepted += it >= n_warm
+        if it >= n_warm:
+            kept.append(th.clone())
+    return torch.stack(kept), accepted / n_keep
+chains = [hmc_chain(theta_A, 2000, 500, .02, 25, seed) for seed in (1, 2, 3, 4)]
+hmc_samples = torch.cat([chain for chain, _ in chains])
+F_post = net(hmc_samples, x_grid)
+post_sd_f = F_post.std(0)
+post_sd = (post_sd_f ** 2 + noise_sd ** 2).sqrt()
+torch.manual_seed(13)
+show = torch.randperm(len(hmc_samples))[:20]
+fixtures["story"]["bnn"]["hmc"] = dict(chains=4, kept=2000, warmup=500, step_size=.02, leapfrog=25,
+    acceptance=[rate for _, rate in chains], mean=F_post.mean(0).tolist(), sd_f=post_sd_f.tolist(),
+    sd=post_sd.tolist(), draws=F_post[show].tolist())
+print("acceptance", [round(rate, 3) for _, rate in chains])
+print("predictive sd at x = −2.5, 0, 2.5:", [round(number(post_sd[i]), 3) for i in (0, 60, 120)])
+fig, ax = plt.subplots(figsize=(8.8, 4))
+m = F_post.mean(0)
+ax.fill_between(x_grid, m - 2 * post_sd, m + 2 * post_sd, color="#D9F2EF")
+for f_draw in F_post[show]:
+    ax.plot(x_grid, f_draw, color=C["p"], lw=1, alpha=.5)
+ax.scatter(x_train, y_train, color=C["data"], zorder=3)
+ax.set(xlabel="x", ylabel="y", ylim=(-3, 3))
+savefig("bnn-posterior-predictive")
 
 three_target = dist.MixtureSameFamily(dist.Categorical(probs=torch.tensor([.7, .3])),
     dist.Normal(torch.tensor([-2., 2.]), torch.tensor([1., 1.])))
@@ -590,47 +682,58 @@ savefig("coin-noisy-objective")
 fixtures["coin"]["sampled_estimates_above_evidence"]=int(np.sum(sampled>number(log_evidence)))
 print("MC estimates above the exact evidence:",fixtures["coin"]["sampled_estimates_above_evidence"])
 
-torch.manual_seed(3301)
-m_w = torch.nn.Parameter(torch.tensor(0.)); rho_w = torch.nn.Parameter(torch.tensor(0.))
-opt_w = torch.optim.Adam([m_w, rho_w], lr=.05)
-w_quad = torch.linspace(-8, 8, 16_001)
-def logit_exact_elbo(m, s):
-    q = dist.Normal(torch.tensor(m), torch.tensor(s)); lq = q.log_prob(w_quad)
-    return number(torch.trapezoid(lq.exp() * (logit_log_joint(w_quad) - lq), w_quad))
-logit_frames = []
-for step in range(601):
-    q = dist.Normal(m_w, rho_w.exp())
-    w_s = q.rsample((256,))
-    elbo_estimate = (logit_log_joint(w_s) - q.log_prob(w_s)).mean()
-    if step <= 60 or step % 10 == 0:  # dense frames while q moves, for the slide animation
-        logit_frames.append([step, number(m_w), number(rho_w.exp()), number(elbo_estimate),
-                             logit_exact_elbo(number(m_w), number(rho_w.exp()))])
-    if step == 600:
-        break
-    opt_w.zero_grad(); (-elbo_estimate).backward(); opt_w.step()
-_, m_end, s_end, _, elbo_end = logit_frames[-1]
-logit_gap = logit_log_evidence - elbo_end
-assert logit_gap > -1e-6
-theta = torch.linspace(.2, .9, 281)
-w_of_theta = torch.log(theta) - torch.log1p(-theta)
-jacobian = 1 / (theta * (1 - theta))
-q_theta = dist.Normal(m_end, s_end).log_prob(w_of_theta).exp() * jacobian
-posterior_theta = (logit_log_joint(w_of_theta) - logit_log_evidence).exp() * jacobian
-fixtures["story"]["logitvi"] = dict(start=[0., 1.], lr=.05, steps=600, draws=256, seed=3301,
-    frames=logit_frames, final=dict(m=m_end, s=s_end, exact_elbo=elbo_end,
-    log_evidence_grid=logit_log_evidence, gap=logit_gap),
-    theta=dict(x=theta.tolist(), q=q_theta.tolist(), posterior=posterior_theta.tolist()))
-print(f"q(w) = N({m_end:.3f}, {s_end:.3f}^2); exact ELBO {elbo_end:.4f}; grid log p(D) {logit_log_evidence:.4f}; "
-      f"gap = KL(q || posterior) = {logit_gap:.4f}")
-fig, axes = plt.subplots(1, 2, figsize=(12, 3.8))
-axes[0].fill_between(w_plot, 0, posterior_w_plot, color="#D9F2EF")
-axes[0].plot(w_plot, dist.Normal(0., 1.).log_prob(w_plot).exp(), color=C["q"], ls=":", label="q at the start (the prior)")
-axes[0].plot(w_plot, dist.Normal(m_end, s_end).log_prob(w_plot).exp(), color=C["q"], label="q after 600 steps")
-axes[0].set(xlabel="w"); axes[0].legend(frameon=False)
-axes[1].fill_between(theta, 0, posterior_theta, color="#D9F2EF")
-axes[1].plot(theta, q_theta, color=C["q"])
-axes[1].set(xlabel="r = sigmoid(w)")
-savefig("logit-vi")
+def fit_bnn_vi(seed, steps=4000, draws=16, lr=.02, record=False):
+    torch.manual_seed(seed)
+    mu = torch.nn.Parameter(.5 * torch.randn(7))
+    rho = torch.nn.Parameter(torch.full((7,), math.log(.1)))
+    opt_vi = torch.optim.Adam([mu, rho], lr=lr)
+    eps_eval = torch.randn(2000, 7)  # fixed draws, so the recorded ELBO curve is smooth
+    frames = []
+    for step in range(steps + 1):
+        q = dist.Normal(mu, rho.exp())
+        if record and ((step <= 200 and step % 5 == 0) or step % 50 == 0):
+            with torch.no_grad():
+                th_eval = mu + rho.exp() * eps_eval
+                F_eval = net(th_eval, x_grid)
+                elbo_eval = bnn_log_lik(th_eval).mean() - dist.kl_divergence(q, theta_prior).sum()
+                frames.append([step, round(number(elbo_eval), 4), [round(v, 4) for v in F_eval.mean(0).tolist()],
+                               [round(v, 4) for v in (F_eval.var(0) + noise_sd ** 2).sqrt().tolist()]])
+        if step == steps:
+            break
+        theta_s = q.rsample((draws,))
+        elbo = bnn_log_lik(theta_s).mean() - dist.kl_divergence(q, theta_prior).sum()
+        opt_vi.zero_grad(); (-elbo).backward(); opt_vi.step()
+    q = dist.Normal(mu.detach(), rho.detach().exp())
+    torch.manual_seed(20_000 + seed)
+    th_final = q.sample((20_000,))
+    expected_log_lik = number(bnn_log_lik(th_final).mean())
+    kl_prior = number(dist.kl_divergence(q, theta_prior).sum())
+    return dict(seed=seed, q=q, frames=frames, expected_log_lik=expected_log_lik, kl_prior=kl_prior,
+                elbo=expected_log_lik - kl_prior)
+restarts = [fit_bnn_vi(seed) for seed in range(5)]
+vi_run = fit_bnn_vi(max(restarts, key=lambda r: r["elbo"])["seed"], record=True)
+assert abs(vi_run["elbo"] - max(r["elbo"] for r in restarts)) < 1e-9  # same seed, same run
+q_vi = vi_run["q"]
+torch.manual_seed(14)
+F_vi = net(q_vi.sample((4000,)), x_grid)
+vi_sd = (F_vi.var(0) + noise_sd ** 2).sqrt()
+assert vi_run["elbo"] < log_evidence_bnn
+fixtures["story"]["bnn"]["vi"] = dict(steps=4000, draws=16, lr=.02, restart_elbos=[r["elbo"] for r in restarts],
+    seed=vi_run["seed"], mu=q_vi.loc.tolist(), sigma=q_vi.scale.tolist(), elbo=vi_run["elbo"],
+    expected_log_lik=vi_run["expected_log_lik"], kl_prior=vi_run["kl_prior"], gap=log_evidence_bnn - vi_run["elbo"],
+    frames=vi_run["frames"], mean=F_vi.mean(0).tolist(), sd=vi_sd.tolist())
+print("restart ELBOs", [round(r["elbo"], 2) for r in restarts], "· kept seed", vi_run["seed"])
+print(f"ELBO {vi_run['elbo']:.2f} = E_q[log p(D|θ)] {vi_run['expected_log_lik']:.2f} − KL(q||prior) {vi_run['kl_prior']:.2f}")
+print(f"log p(D) ≈ {log_evidence_bnn:.2f}, so KL(q || posterior) ≈ {log_evidence_bnn - vi_run['elbo']:.2f} nats")
+print("predictive sd at x = −2.5, 0, 2.5: VI", [round(number(vi_sd[i]), 3) for i in (0, 60, 120)],
+      "· HMC", [round(number(post_sd[i]), 3) for i in (0, 60, 120)])
+fig, ax = plt.subplots(figsize=(8.8, 4))
+for mean, sd, color, label in [(F_post.mean(0), post_sd, C["p"], "HMC reference"), (F_vi.mean(0), vi_sd, C["q"], "mean-field VI")]:
+    ax.fill_between(x_grid, mean - 2 * sd, mean + 2 * sd, color=color, alpha=.18)
+    ax.plot(x_grid, mean, color=color, label=label)
+ax.scatter(x_train, y_train, color=C["data"], zorder=3)
+ax.set(xlabel="x", ylabel="y", ylim=(-3, 3)); ax.legend(frameon=False)
+savefig("bnn-vi-vs-hmc")
 
 grid=torch.linspace(0,1,100001)
 interior=grid[1:-1]

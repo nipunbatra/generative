@@ -1,7 +1,7 @@
 {
   "status": "passed",
-  "assertions": 3215,
-  "numericalComparisons": 2232,
+  "assertions": 3628,
+  "numericalComparisons": 2636,
   "maximumAbsoluteError": 0.00014682216466876952,
   "source": "Independent JavaScript formulae versus executed float64 PyTorch notebook; no new training in this check.",
   "tolerances": {
@@ -21933,29 +21933,6 @@
       "passed": true
     },
     {
-      "name": "Conjugate evidence on the wall slide",
-      "kind": "numerical",
-      "actual": -21.397241822312104,
-      "expected": -21.397241822312104,
-      "error": 0,
-      "tolerance": 5e-11,
-      "passed": true
-    },
-    {
-      "name": "Logit-prior coin evidence (independent quadrature)",
-      "kind": "numerical",
-      "actual": -21.616018414210913,
-      "expected": -21.616018414208586,
-      "error": 2.327027459614328e-12,
-      "tolerance": 0.000001,
-      "passed": true
-    },
-    {
-      "name": "Logit-prior MC evidence close to the grid",
-      "kind": "assertion",
-      "passed": true
-    },
-    {
       "name": "Fruit KL",
       "kind": "numerical",
       "actual": 0.4158883083359671,
@@ -24983,16 +24960,3720 @@
       "passed": true
     },
     {
-      "name": "Logit VI exact ELBO (independent quadrature)",
+      "name": "theta_A likelihood term 0",
       "kind": "numerical",
-      "actual": -21.61657006126025,
-      "expected": -21.61657006126026,
-      "error": 7.105427357601002e-15,
-      "tolerance": 0.000001,
+      "actual": 1.1556358056900808,
+      "expected": 1.1556358056900806,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
       "passed": true
     },
     {
-      "name": "Logit VI ELBO sits below the evidence",
+      "name": "theta_A likelihood term 1",
+      "kind": "numerical",
+      "actual": 0.9479710592863608,
+      "expected": 0.9479710592863606,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 2",
+      "kind": "numerical",
+      "actual": 1.3791501882766661,
+      "expected": 1.379150188276666,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 3",
+      "kind": "numerical",
+      "actual": 0.6396472375681046,
+      "expected": 0.6396472375681044,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 4",
+      "kind": "numerical",
+      "actual": 0.8296016332406393,
+      "expected": 0.8296016332406391,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 5",
+      "kind": "numerical",
+      "actual": 0.12335605824924856,
+      "expected": 0.12335605824924833,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 6",
+      "kind": "numerical",
+      "actual": -0.09691401852702386,
+      "expected": -0.09691401852702408,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 7",
+      "kind": "numerical",
+      "actual": 1.2239329153572605,
+      "expected": 1.2239329153572602,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 8",
+      "kind": "numerical",
+      "actual": 0.6679071355489897,
+      "expected": 0.6679071355489894,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 9",
+      "kind": "numerical",
+      "actual": 1.3824905554370832,
+      "expected": 1.3824905554370828,
+      "error": 4.440892098500626e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 10",
+      "kind": "numerical",
+      "actual": 0.7069848027879574,
+      "expected": 0.706984802787956,
+      "error": 1.4432899320127035e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 11",
+      "kind": "numerical",
+      "actual": -0.824165878143799,
+      "expected": -0.8241658781437993,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 12",
+      "kind": "numerical",
+      "actual": -0.5235697811561852,
+      "expected": -0.5235697811561855,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 13",
+      "kind": "numerical",
+      "actual": 1.2934345178758078,
+      "expected": 1.2934345178758075,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 14",
+      "kind": "numerical",
+      "actual": 1.3770138580547449,
+      "expected": 1.3770138580547449,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 15",
+      "kind": "numerical",
+      "actual": 1.0579619954586172,
+      "expected": 1.057961995458617,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A likelihood term 16",
+      "kind": "numerical",
+      "actual": 0.8278175131122344,
+      "expected": 0.8278175131122341,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_A log likelihood",
+      "kind": "numerical",
+      "actual": 12.16825559811679,
+      "expected": 12.168255598116783,
+      "error": 7.105427357601002e-15,
+      "tolerance": 1e-8,
+      "passed": true
+    },
+    {
+      "name": "theta_A log prior",
+      "kind": "numerical",
+      "actual": -9.41396284893184,
+      "expected": -9.413962848931842,
+      "error": 1.7763568394002505e-15,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "theta_A log joint",
+      "kind": "numerical",
+      "actual": 2.754292749184941,
+      "expected": 2.754292749184941,
+      "error": 0,
+      "tolerance": 1e-8,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 0",
+      "kind": "numerical",
+      "actual": -250.64902334649713,
+      "expected": -250.64902334649716,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 1",
+      "kind": "numerical",
+      "actual": -248.02261128749234,
+      "expected": -248.02261128749237,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 2",
+      "kind": "numerical",
+      "actual": -221.10229855625343,
+      "expected": -221.10229855625346,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 3",
+      "kind": "numerical",
+      "actual": -185.73918049121667,
+      "expected": -185.7391804912167,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 4",
+      "kind": "numerical",
+      "actual": -179.7222286931745,
+      "expected": -179.72222869317451,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 5",
+      "kind": "numerical",
+      "actual": -159.65774659851448,
+      "expected": -159.6577465985145,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 6",
+      "kind": "numerical",
+      "actual": -210.73502788208384,
+      "expected": -210.73502788208387,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 7",
+      "kind": "numerical",
+      "actual": -151.45327004749527,
+      "expected": -151.4532700474953,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 8",
+      "kind": "numerical",
+      "actual": -163.41730971887316,
+      "expected": -163.41730971887318,
+      "error": 2.842170943040401e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 9",
+      "kind": "numerical",
+      "actual": 0.4660248662817551,
+      "expected": 0.46602486628175477,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 10",
+      "kind": "numerical",
+      "actual": -14.905690429240916,
+      "expected": -14.905690429240916,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 11",
+      "kind": "numerical",
+      "actual": -11.368479379353339,
+      "expected": -11.368479379353339,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 12",
+      "kind": "numerical",
+      "actual": -61.18145386478556,
+      "expected": -61.18145386478557,
+      "error": 7.105427357601002e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 13",
+      "kind": "numerical",
+      "actual": -53.02140524011833,
+      "expected": -53.021405240118334,
+      "error": 7.105427357601002e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 14",
+      "kind": "numerical",
+      "actual": -70.60637565313736,
+      "expected": -70.60637565313735,
+      "error": 1.4210854715202004e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 15",
+      "kind": "numerical",
+      "actual": -95.34882616914884,
+      "expected": -95.34882616914882,
+      "error": 1.4210854715202004e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B likelihood term 16",
+      "kind": "numerical",
+      "actual": -81.05493966864077,
+      "expected": -81.05493966864076,
+      "error": 1.4210854715202004e-14,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "theta_B log likelihood",
+      "kind": "numerical",
+      "actual": -2157.519842159744,
+      "expected": -2157.5198421597447,
+      "error": 9.094947017729282e-13,
+      "tolerance": 1e-8,
+      "passed": true
+    },
+    {
+      "name": "theta_B log prior",
+      "kind": "numerical",
+      "actual": -9.888976778859535,
+      "expected": -9.888976778859533,
+      "error": 1.7763568394002505e-15,
+      "tolerance": 1e-10,
+      "passed": true
+    },
+    {
+      "name": "theta_B log joint",
+      "kind": "numerical",
+      "actual": -2167.4088189386043,
+      "expected": -2167.4088189386043,
+      "error": 0,
+      "tolerance": 1e-8,
+      "passed": true
+    },
+    {
+      "name": "theta_A explains the data far better than theta_B",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 0",
+      "kind": "numerical",
+      "actual": -1.3688267148782867,
+      "expected": -1.3688267148782867,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 0",
+      "kind": "numerical",
+      "actual": 1.0227640780437321,
+      "expected": 1.0227640780437321,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 1",
+      "kind": "numerical",
+      "actual": -1.3622734286074385,
+      "expected": -1.3622734286074385,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 1",
+      "kind": "numerical",
+      "actual": 1.0223668617262547,
+      "expected": 1.0223668617262547,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 2",
+      "kind": "numerical",
+      "actual": -1.3555771224285897,
+      "expected": -1.3555771224285897,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 2",
+      "kind": "numerical",
+      "actual": 1.021944754274524,
+      "expected": 1.021944754274524,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 3",
+      "kind": "numerical",
+      "actual": -1.3487385186281413,
+      "expected": -1.348738518628141,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 3",
+      "kind": "numerical",
+      "actual": 1.0214962131722636,
+      "expected": 1.0214962131722636,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 4",
+      "kind": "numerical",
+      "actual": -1.341758574355228,
+      "expected": -1.341758574355228,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 4",
+      "kind": "numerical",
+      "actual": 1.0210196022885372,
+      "expected": 1.0210196022885372,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 5",
+      "kind": "numerical",
+      "actual": -1.334638482748201,
+      "expected": -1.334638482748201,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 5",
+      "kind": "numerical",
+      "actual": 1.0205131864043258,
+      "expected": 1.0205131864043258,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 6",
+      "kind": "numerical",
+      "actual": -1.3273796719583422,
+      "expected": -1.3273796719583422,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 6",
+      "kind": "numerical",
+      "actual": 1.019975125437111,
+      "expected": 1.019975125437111,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 7",
+      "kind": "numerical",
+      "actual": -1.3199838017513235,
+      "expected": -1.3199838017513235,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 7",
+      "kind": "numerical",
+      "actual": 1.019403468347421,
+      "expected": 1.019403468347421,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 8",
+      "kind": "numerical",
+      "actual": -1.312452757328167,
+      "expected": -1.312452757328167,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 8",
+      "kind": "numerical",
+      "actual": 1.0187961467101856,
+      "expected": 1.0187961467101856,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 9",
+      "kind": "numerical",
+      "actual": -1.3047886399625537,
+      "expected": -1.3047886399625537,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 9",
+      "kind": "numerical",
+      "actual": 1.0181509679324652,
+      "expected": 1.0181509679324652,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 10",
+      "kind": "numerical",
+      "actual": -1.2969937539989755,
+      "expected": -1.2969937539989755,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 10",
+      "kind": "numerical",
+      "actual": 1.017465608097608,
+      "expected": 1.017465608097608,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 11",
+      "kind": "numerical",
+      "actual": -1.289070589694975,
+      "expected": -1.289070589694975,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 11",
+      "kind": "numerical",
+      "actual": 1.016737604414138,
+      "expected": 1.016737604414138,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 12",
+      "kind": "numerical",
+      "actual": -1.281021801318736,
+      "expected": -1.281021801318736,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 12",
+      "kind": "numerical",
+      "actual": 1.0159643472455764,
+      "expected": 1.0159643472455764,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 13",
+      "kind": "numerical",
+      "actual": -1.2728501798285643,
+      "expected": -1.2728501798285643,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 13",
+      "kind": "numerical",
+      "actual": 1.015143071694924,
+      "expected": 1.015143071694924,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 14",
+      "kind": "numerical",
+      "actual": -1.2645586193608083,
+      "expected": -1.2645586193608083,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 14",
+      "kind": "numerical",
+      "actual": 1.0142708487145498,
+      "expected": 1.0142708487145498,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 15",
+      "kind": "numerical",
+      "actual": -1.2561500766346725,
+      "expected": -1.2561500766346725,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 15",
+      "kind": "numerical",
+      "actual": 1.013344575708659,
+      "expected": 1.013344575708659,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 16",
+      "kind": "numerical",
+      "actual": -1.247627522242838,
+      "expected": -1.247627522242838,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 16",
+      "kind": "numerical",
+      "actual": 1.0123609665912174,
+      "expected": 1.0123609665912174,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 17",
+      "kind": "numerical",
+      "actual": -1.2389938826319415,
+      "expected": -1.2389938826319415,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 17",
+      "kind": "numerical",
+      "actual": 1.0113165412570098,
+      "expected": 1.0113165412570098,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 18",
+      "kind": "numerical",
+      "actual": -1.2302519713823474,
+      "expected": -1.2302519713823474,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 18",
+      "kind": "numerical",
+      "actual": 1.0102076144172383,
+      "expected": 1.0102076144172383,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 19",
+      "kind": "numerical",
+      "actual": -1.2214044081672144,
+      "expected": -1.2214044081672144,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 19",
+      "kind": "numerical",
+      "actual": 1.009030283743486,
+      "expected": 1.009030283743486,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 20",
+      "kind": "numerical",
+      "actual": -1.2124535235008875,
+      "expected": -1.2124535235008875,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 20",
+      "kind": "numerical",
+      "actual": 1.0077804172546911,
+      "expected": 1.0077804172546911,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 21",
+      "kind": "numerical",
+      "actual": -1.2034012470697149,
+      "expected": -1.2034012470697149,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 21",
+      "kind": "numerical",
+      "actual": 1.0064536398706925,
+      "expected": 1.0064536398706925,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 22",
+      "kind": "numerical",
+      "actual": -1.1942489770674733,
+      "expected": -1.1942489770674733,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 22",
+      "kind": "numerical",
+      "actual": 1.0050453190425115,
+      "expected": 1.0050453190425115,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 23",
+      "kind": "numerical",
+      "actual": -1.184997427525022,
+      "expected": -1.184997427525022,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 23",
+      "kind": "numerical",
+      "actual": 1.0035505493533732,
+      "expected": 1.0035505493533732,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 24",
+      "kind": "numerical",
+      "actual": -1.1756464501215522,
+      "expected": -1.1756464501215522,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 24",
+      "kind": "numerical",
+      "actual": 1.0019641359649853,
+      "expected": 1.0019641359649853,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 25",
+      "kind": "numerical",
+      "actual": -1.1661948263846826,
+      "expected": -1.1661948263846826,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 25",
+      "kind": "numerical",
+      "actual": 1.0002805767601728,
+      "expected": 1.0002805767601728,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 26",
+      "kind": "numerical",
+      "actual": -1.156640025520834,
+      "expected": -1.156640025520834,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 26",
+      "kind": "numerical",
+      "actual": 0.9984940430048123,
+      "expected": 0.9984940430048123,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 27",
+      "kind": "numerical",
+      "actual": -1.1469779223590924,
+      "expected": -1.1469779223590924,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 27",
+      "kind": "numerical",
+      "actual": 0.9965983583183154,
+      "expected": 0.9965983583183154,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 28",
+      "kind": "numerical",
+      "actual": -1.137202469036643,
+      "expected": -1.137202469036643,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 28",
+      "kind": "numerical",
+      "actual": 0.9945869757016075,
+      "expected": 0.9945869757016075,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 29",
+      "kind": "numerical",
+      "actual": -1.127305313101269,
+      "expected": -1.127305313101269,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 29",
+      "kind": "numerical",
+      "actual": 0.9924529523235343,
+      "expected": 0.9924529523235343,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 30",
+      "kind": "numerical",
+      "actual": -1.1172753536621174,
+      "expected": -1.1172753536621174,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 30",
+      "kind": "numerical",
+      "actual": 0.9901889217095756,
+      "expected": 0.9901889217095756,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 31",
+      "kind": "numerical",
+      "actual": -1.1070982260995201,
+      "expected": -1.1070982260995201,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 31",
+      "kind": "numerical",
+      "actual": 0.9877870629091898,
+      "expected": 0.9877870629091899,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 32",
+      "kind": "numerical",
+      "actual": -1.0967557046783147,
+      "expected": -1.0967557046783147,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 32",
+      "kind": "numerical",
+      "actual": 0.9852390661384637,
+      "expected": 0.9852390661384637,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 33",
+      "kind": "numerical",
+      "actual": -1.0862250112484382,
+      "expected": -1.0862250112484382,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 33",
+      "kind": "numerical",
+      "actual": 0.9825360943012289,
+      "expected": 0.9825360943012289,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 34",
+      "kind": "numerical",
+      "actual": -1.0754780171436464,
+      "expected": -1.0754780171436464,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 34",
+      "kind": "numerical",
+      "actual": 0.9796687396826289,
+      "expected": 0.9796687396826289,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 35",
+      "kind": "numerical",
+      "actual": -1.0644803245290562,
+      "expected": -1.0644803245290562,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 35",
+      "kind": "numerical",
+      "actual": 0.976626974982413,
+      "expected": 0.976626974982413,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 36",
+      "kind": "numerical",
+      "actual": -1.053190212984868,
+      "expected": -1.053190212984868,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 36",
+      "kind": "numerical",
+      "actual": 0.9734000977092837,
+      "expected": 0.9734000977092837,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 37",
+      "kind": "numerical",
+      "actual": -1.041557437311467,
+      "expected": -1.041557437311467,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 37",
+      "kind": "numerical",
+      "actual": 0.9699766667909778,
+      "expected": 0.9699766667909779,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 38",
+      "kind": "numerical",
+      "actual": -1.0295218637711971,
+      "expected": -1.0295218637711971,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 38",
+      "kind": "numerical",
+      "actual": 0.9663444300665631,
+      "expected": 0.9663444300665631,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 39",
+      "kind": "numerical",
+      "actual": -1.0170119347546844,
+      "expected": -1.0170119347546844,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 39",
+      "kind": "numerical",
+      "actual": 0.9624902411177783,
+      "expected": 0.9624902411177783,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 40",
+      "kind": "numerical",
+      "actual": -1.0039429568615716,
+      "expected": -1.0039429568615716,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 40",
+      "kind": "numerical",
+      "actual": 0.9583999636668241,
+      "expected": 0.9583999636668241,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 41",
+      "kind": "numerical",
+      "actual": -0.9902152155207937,
+      "expected": -0.9902152155207937,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 41",
+      "kind": "numerical",
+      "actual": 0.9540583615228313,
+      "expected": 0.9540583615228313,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 42",
+      "kind": "numerical",
+      "actual": -0.9757119317024786,
+      "expected": -0.9757119317024786,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 42",
+      "kind": "numerical",
+      "actual": 0.9494489718058561,
+      "expected": 0.9494489718058561,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 43",
+      "kind": "numerical",
+      "actual": -0.960297094429343,
+      "expected": -0.960297094429343,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 43",
+      "kind": "numerical",
+      "actual": 0.9445539589282385,
+      "expected": 0.9445539589282385,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 44",
+      "kind": "numerical",
+      "actual": -0.9438132283883317,
+      "expected": -0.9438132283883317,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 44",
+      "kind": "numerical",
+      "actual": 0.9393539465882057,
+      "expected": 0.9393539465882057,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 45",
+      "kind": "numerical",
+      "actual": -0.9260791908831713,
+      "expected": -0.9260791908831713,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 45",
+      "kind": "numerical",
+      "actual": 0.9338278248592659,
+      "expected": 0.9338278248592659,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 46",
+      "kind": "numerical",
+      "actual": -0.9068881385908064,
+      "expected": -0.9068881385908065,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 46",
+      "kind": "numerical",
+      "actual": 0.9279525293842337,
+      "expected": 0.9279525293842337,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 47",
+      "kind": "numerical",
+      "actual": -0.8860058637032276,
+      "expected": -0.8860058637032276,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 47",
+      "kind": "numerical",
+      "actual": 0.9217027897656793,
+      "expected": 0.9217027897656793,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 48",
+      "kind": "numerical",
+      "actual": -0.8631697717447372,
+      "expected": -0.8631697717447372,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 48",
+      "kind": "numerical",
+      "actual": 0.9150508445698986,
+      "expected": 0.9150508445698986,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 49",
+      "kind": "numerical",
+      "actual": -0.8380888584864168,
+      "expected": -0.8380888584864168,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 49",
+      "kind": "numerical",
+      "actual": 0.9079661210443384,
+      "expected": 0.9079661210443384,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 50",
+      "kind": "numerical",
+      "actual": -0.8104451365512336,
+      "expected": -0.8104451365512336,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 50",
+      "kind": "numerical",
+      "actual": 0.9004148788420963,
+      "expected": 0.9004148788420963,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 51",
+      "kind": "numerical",
+      "actual": -0.7798970541399859,
+      "expected": -0.7798970541399859,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 51",
+      "kind": "numerical",
+      "actual": 0.8923598189511571,
+      "expected": 0.892359818951157,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 52",
+      "kind": "numerical",
+      "actual": -0.7460855224048533,
+      "expected": -0.7460855224048533,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 52",
+      "kind": "numerical",
+      "actual": 0.8837596618933469,
+      "expected": 0.8837596618933469,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 53",
+      "kind": "numerical",
+      "actual": -0.708643199063795,
+      "expected": -0.708643199063795,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 53",
+      "kind": "numerical",
+      "actual": 0.8745687033989092,
+      "expected": 0.8745687033989092,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 54",
+      "kind": "numerical",
+      "actual": -0.6672076289347993,
+      "expected": -0.6672076289347993,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 54",
+      "kind": "numerical",
+      "actual": 0.8647363615421126,
+      "expected": 0.8647363615421126,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 55",
+      "kind": "numerical",
+      "actual": -0.6214386743066086,
+      "expected": -0.6214386743066086,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 55",
+      "kind": "numerical",
+      "actual": 0.8542067371452624,
+      "expected": 0.8542067371452625,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 56",
+      "kind": "numerical",
+      "actual": -0.5710403348326106,
+      "expected": -0.5710403348326106,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 56",
+      "kind": "numerical",
+      "actual": 0.8429182195282795,
+      "expected": 0.8429182195282795,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 57",
+      "kind": "numerical",
+      "actual": -0.5157865240027282,
+      "expected": -0.5157865240027281,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 57",
+      "kind": "numerical",
+      "actual": 0.8308031827340597,
+      "expected": 0.8308031827340598,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 58",
+      "kind": "numerical",
+      "actual": -0.45554963333229415,
+      "expected": -0.45554963333229426,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 58",
+      "kind": "numerical",
+      "actual": 0.8177878333408791,
+      "expected": 0.8177878333408792,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 59",
+      "kind": "numerical",
+      "actual": -0.3903298263440322,
+      "expected": -0.39032982634403224,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 59",
+      "kind": "numerical",
+      "actual": 0.8037922896490173,
+      "expected": 0.8037922896490173,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 60",
+      "kind": "numerical",
+      "actual": -0.3202820877247063,
+      "expected": -0.32028208772470634,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 60",
+      "kind": "numerical",
+      "actual": 0.788730992521341,
+      "expected": 0.788730992521341,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 61",
+      "kind": "numerical",
+      "actual": -0.24573731571558452,
+      "expected": -0.24573731571558452,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 61",
+      "kind": "numerical",
+      "actual": 0.7725135685946181,
+      "expected": 0.7725135685946182,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 62",
+      "kind": "numerical",
+      "actual": -0.16721345198875773,
+      "expected": -0.16721345198875767,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 62",
+      "kind": "numerical",
+      "actual": 0.7550462836901947,
+      "expected": 0.7550462836901947,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 63",
+      "kind": "numerical",
+      "actual": -0.08541304943183597,
+      "expected": -0.08541304943183597,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 63",
+      "kind": "numerical",
+      "actual": 0.736234232992361,
+      "expected": 0.736234232992361,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 64",
+      "kind": "numerical",
+      "actual": -0.0012049342392790041,
+      "expected": -0.0012049342392790596,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 64",
+      "kind": "numerical",
+      "actual": 0.7159844079064359,
+      "expected": 0.7159844079064359,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 65",
+      "kind": "numerical",
+      "actual": 0.08441033456927402,
+      "expected": 0.08441033456927402,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 65",
+      "kind": "numerical",
+      "actual": 0.6942097486933356,
+      "expected": 0.6942097486933356,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 66",
+      "kind": "numerical",
+      "actual": 0.17034899025337194,
+      "expected": 0.170348990253372,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 66",
+      "kind": "numerical",
+      "actual": 0.670834227522698,
+      "expected": 0.6708342275226978,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 67",
+      "kind": "numerical",
+      "actual": 0.25550191236490927,
+      "expected": 0.25550191236490927,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 67",
+      "kind": "numerical",
+      "actual": 0.6457989004649148,
+      "expected": 0.6457989004649148,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 68",
+      "kind": "numerical",
+      "actual": 0.3387954120468255,
+      "expected": 0.3387954120468255,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 68",
+      "kind": "numerical",
+      "actual": 0.6190687161010116,
+      "expected": 0.6190687161010116,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 69",
+      "kind": "numerical",
+      "actual": 0.4192479862795778,
+      "expected": 0.4192479862795778,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 69",
+      "kind": "numerical",
+      "actual": 0.5906396794078083,
+      "expected": 0.5906396794078083,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 70",
+      "kind": "numerical",
+      "actual": 0.4960168531424086,
+      "expected": 0.4960168531424086,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 70",
+      "kind": "numerical",
+      "actual": 0.5605457631521441,
+      "expected": 0.5605457631521441,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 71",
+      "kind": "numerical",
+      "actual": 0.5684299723243346,
+      "expected": 0.5684299723243347,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 71",
+      "kind": "numerical",
+      "actual": 0.5288647728073054,
+      "expected": 0.5288647728073054,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 72",
+      "kind": "numerical",
+      "actual": 0.636001747409288,
+      "expected": 0.636001747409288,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 72",
+      "kind": "numerical",
+      "actual": 0.4957222571234242,
+      "expected": 0.4957222571234242,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 73",
+      "kind": "numerical",
+      "actual": 0.6984330783539322,
+      "expected": 0.698433078353932,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 73",
+      "kind": "numerical",
+      "actual": 0.461292571935497,
+      "expected": 0.461292571935497,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 74",
+      "kind": "numerical",
+      "actual": 0.7555983671619696,
+      "expected": 0.7555983671619696,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 74",
+      "kind": "numerical",
+      "actual": 0.42579639408612546,
+      "expected": 0.42579639408612546,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 75",
+      "kind": "numerical",
+      "actual": 0.8075231968407873,
+      "expected": 0.8075231968407873,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 75",
+      "kind": "numerical",
+      "actual": 0.38949435626975853,
+      "expected": 0.38949435626975853,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 76",
+      "kind": "numerical",
+      "actual": 0.8543566833638433,
+      "expected": 0.8543566833638433,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 76",
+      "kind": "numerical",
+      "actual": 0.3526769923863383,
+      "expected": 0.3526769923863383,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 77",
+      "kind": "numerical",
+      "actual": 0.8963421168400173,
+      "expected": 0.8963421168400173,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 77",
+      "kind": "numerical",
+      "actual": 0.31565175388479705,
+      "expected": 0.31565175388479705,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 78",
+      "kind": "numerical",
+      "actual": 0.9337887251153806,
+      "expected": 0.9337887251153808,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 78",
+      "kind": "numerical",
+      "actual": 0.2787283535573998,
+      "expected": 0.2787283535573998,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 79",
+      "kind": "numerical",
+      "actual": 0.9670464688517891,
+      "expected": 0.9670464688517891,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 79",
+      "kind": "numerical",
+      "actual": 0.24220399011147503,
+      "expected": 0.24220399011147503,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 80",
+      "kind": "numerical",
+      "actual": 0.9964849063403897,
+      "expected": 0.9964849063403897,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 80",
+      "kind": "numerical",
+      "actual": 0.20635002551369824,
+      "expected": 0.20635002551369824,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 81",
+      "kind": "numerical",
+      "actual": 1.022476461343341,
+      "expected": 1.022476461343341,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 81",
+      "kind": "numerical",
+      "actual": 0.17140142260071498,
+      "expected": 0.17140142260071498,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 82",
+      "kind": "numerical",
+      "actual": 1.0453839279491728,
+      "expected": 1.0453839279491728,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 82",
+      "kind": "numerical",
+      "actual": 0.13754977377613187,
+      "expected": 0.13754977377613187,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 83",
+      "kind": "numerical",
+      "actual": 1.06555174251923,
+      "expected": 1.06555174251923,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 83",
+      "kind": "numerical",
+      "actual": 0.10494018356122622,
+      "expected": 0.10494018356122622,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 84",
+      "kind": "numerical",
+      "actual": 1.0833004075138886,
+      "expected": 1.0833004075138886,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 84",
+      "kind": "numerical",
+      "actual": 0.07367173726128262,
+      "expected": 0.07367173726128262,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 85",
+      "kind": "numerical",
+      "actual": 1.0989234203228204,
+      "expected": 1.0989234203228204,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 85",
+      "kind": "numerical",
+      "actual": 0.043800893462710044,
+      "expected": 0.04380089346270999,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 86",
+      "kind": "numerical",
+      "actual": 1.1126861003109616,
+      "expected": 1.1126861003109616,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 86",
+      "kind": "numerical",
+      "actual": 0.015346926066374833,
+      "expected": 0.015346926066374833,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 87",
+      "kind": "numerical",
+      "actual": 1.1248257856998864,
+      "expected": 1.1248257856998864,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 87",
+      "kind": "numerical",
+      "actual": -0.011701493175916566,
+      "expected": -0.01170149317591651,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 88",
+      "kind": "numerical",
+      "actual": 1.1355529648636107,
+      "expected": 1.1355529648636107,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 88",
+      "kind": "numerical",
+      "actual": -0.03737937962112747,
+      "expected": -0.03737937962112747,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 89",
+      "kind": "numerical",
+      "actual": 1.1450529989889964,
+      "expected": 1.1450529989889964,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 89",
+      "kind": "numerical",
+      "actual": -0.061738815904574806,
+      "expected": -0.061738815904574806,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 90",
+      "kind": "numerical",
+      "actual": 1.1534881763939524,
+      "expected": 1.1534881763939524,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 90",
+      "kind": "numerical",
+      "actual": -0.08484304891230443,
+      "expected": -0.08484304891230443,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 91",
+      "kind": "numerical",
+      "actual": 1.1609999093536698,
+      "expected": 1.1609999093536698,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 91",
+      "kind": "numerical",
+      "actual": -0.10676153283452888,
+      "expected": -0.10676153283452894,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 92",
+      "kind": "numerical",
+      "actual": 1.1677109412677062,
+      "expected": 1.1677109412677062,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 92",
+      "kind": "numerical",
+      "actual": -0.12756599183877138,
+      "expected": -0.12756599183877138,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 93",
+      "kind": "numerical",
+      "actual": 1.1737274763034269,
+      "expected": 1.1737274763034269,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 93",
+      "kind": "numerical",
+      "actual": -0.14732746478014014,
+      "expected": -0.14732746478014014,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 94",
+      "kind": "numerical",
+      "actual": 1.179141176972001,
+      "expected": 1.179141176972001,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 94",
+      "kind": "numerical",
+      "actual": -0.1661142257074646,
+      "expected": -0.1661142257074646,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 95",
+      "kind": "numerical",
+      "actual": 1.184030999380922,
+      "expected": 1.184030999380922,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 95",
+      "kind": "numerical",
+      "actual": -0.18399044007271825,
+      "expected": -0.18399044007271836,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 96",
+      "kind": "numerical",
+      "actual": 1.1884648530476305,
+      "expected": 1.1884648530476305,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 96",
+      "kind": "numerical",
+      "actual": -0.20101540803844142,
+      "expected": -0.20101540803844142,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 97",
+      "kind": "numerical",
+      "actual": 1.1925010838193928,
+      "expected": 1.1925010838193928,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 97",
+      "kind": "numerical",
+      "actual": -0.21724325415468215,
+      "expected": -0.21724325415468215,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 98",
+      "kind": "numerical",
+      "actual": 1.1961897860167154,
+      "expected": 1.1961897860167154,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 98",
+      "kind": "numerical",
+      "actual": -0.2327229396600009,
+      "expected": -0.2327229396600009,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 99",
+      "kind": "numerical",
+      "actual": 1.1995739545164812,
+      "expected": 1.1995739545164812,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 99",
+      "kind": "numerical",
+      "actual": -0.24749849444747152,
+      "expected": -0.24749849444747152,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 100",
+      "kind": "numerical",
+      "actual": 1.2026904899828141,
+      "expected": 1.2026904899828141,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 100",
+      "kind": "numerical",
+      "actual": -0.2616093868430722,
+      "expected": -0.2616093868430722,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 101",
+      "kind": "numerical",
+      "actual": 1.2055710714941918,
+      "expected": 1.2055710714941918,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 101",
+      "kind": "numerical",
+      "actual": -0.2750909687387426,
+      "expected": -0.2750909687387426,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 102",
+      "kind": "numerical",
+      "actual": 1.2082429108898263,
+      "expected": 1.2082429108898263,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 102",
+      "kind": "numerical",
+      "actual": -0.2879749503194031,
+      "expected": -0.2879749503194031,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 103",
+      "kind": "numerical",
+      "actual": 1.2107294026187383,
+      "expected": 1.2107294026187383,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 103",
+      "kind": "numerical",
+      "actual": -0.30028987232348414,
+      "expected": -0.30028987232348414,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 104",
+      "kind": "numerical",
+      "actual": 1.2130506819709275,
+      "expected": 1.2130506819709275,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 104",
+      "kind": "numerical",
+      "actual": -0.3120615545902825,
+      "expected": -0.3120615545902825,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 105",
+      "kind": "numerical",
+      "actual": 1.2152241034749671,
+      "expected": 1.2152241034749671,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 105",
+      "kind": "numerical",
+      "actual": -0.3233135078975289,
+      "expected": -0.3233135078975289,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 106",
+      "kind": "numerical",
+      "actual": 1.2172646500773137,
+      "expected": 1.2172646500773137,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 106",
+      "kind": "numerical",
+      "actual": -0.33406730218540615,
+      "expected": -0.33406730218540615,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 107",
+      "kind": "numerical",
+      "actual": 1.2191852825521277,
+      "expected": 1.2191852825521277,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 107",
+      "kind": "numerical",
+      "actual": -0.344342888612166,
+      "expected": -0.344342888612166,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 108",
+      "kind": "numerical",
+      "actual": 1.220997237474196,
+      "expected": 1.220997237474196,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 108",
+      "kind": "numerical",
+      "actual": -0.3541588758699161,
+      "expected": -0.3541588758699161,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 109",
+      "kind": "numerical",
+      "actual": 1.2227102810491284,
+      "expected": 1.2227102810491284,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 109",
+      "kind": "numerical",
+      "actual": -0.3635327631325541,
+      "expected": -0.363532763132554,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 110",
+      "kind": "numerical",
+      "actual": 1.224332925148298,
+      "expected": 1.224332925148298,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 110",
+      "kind": "numerical",
+      "actual": -0.3724811331792365,
+      "expected": -0.3724811331792365,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 111",
+      "kind": "numerical",
+      "actual": 1.2258726110456792,
+      "expected": 1.2258726110456792,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 111",
+      "kind": "numerical",
+      "actual": -0.38101980984978545,
+      "expected": -0.38101980984978545,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 112",
+      "kind": "numerical",
+      "actual": 1.2273358655986655,
+      "expected": 1.2273358655986655,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 112",
+      "kind": "numerical",
+      "actual": -0.3891639842090999,
+      "expected": -0.3891639842090999,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 113",
+      "kind": "numerical",
+      "actual": 1.228728433950415,
+      "expected": 1.228728433950415,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 113",
+      "kind": "numerical",
+      "actual": -0.3969283137520554,
+      "expected": -0.3969283137520554,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 114",
+      "kind": "numerical",
+      "actual": 1.2300553922504889,
+      "expected": 1.2300553922504889,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 114",
+      "kind": "numerical",
+      "actual": -0.4043269987625596,
+      "expected": -0.4043269987625595,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 115",
+      "kind": "numerical",
+      "actual": 1.231321243385838,
+      "expected": 1.231321243385838,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 115",
+      "kind": "numerical",
+      "actual": -0.41137383961901364,
+      "expected": -0.41137383961901364,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 116",
+      "kind": "numerical",
+      "actual": 1.2325299982776012,
+      "expected": 1.2325299982776012,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 116",
+      "kind": "numerical",
+      "actual": -0.41808227846251755,
+      "expected": -0.41808227846251755,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 117",
+      "kind": "numerical",
+      "actual": 1.2336852449228888,
+      "expected": 1.2336852449228888,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 117",
+      "kind": "numerical",
+      "actual": -0.4244654282480438,
+      "expected": -0.4244654282480438,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 118",
+      "kind": "numerical",
+      "actual": 1.2347902070374444,
+      "expected": 1.2347902070374444,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 118",
+      "kind": "numerical",
+      "actual": -0.43053609180569796,
+      "expected": -0.43053609180569796,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 119",
+      "kind": "numerical",
+      "actual": 1.235847793877999,
+      "expected": 1.235847793877999,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 119",
+      "kind": "numerical",
+      "actual": -0.4363067731641467,
+      "expected": -0.4363067731641467,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_A at grid point 120",
+      "kind": "numerical",
+      "actual": 1.236860642586189,
+      "expected": 1.236860642586189,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "f_B at grid point 120",
+      "kind": "numerical",
+      "actual": -0.44178968304050037,
+      "expected": -0.44178968304050037,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Evidence estimate is the mean of four seeds",
+      "kind": "numerical",
+      "actual": -1.4287460082684516,
+      "expected": -1.4287460082684516,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Four 10-million-draw evidence estimates agree within 0.3",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Ten prior draws are off by over 100 nats",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Fewer than 1,000 effective draws out of 10 million",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "HMC acceptance between 0.6 and 0.99",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 0 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.21530692186881734,
+      "expected": 0.21530692186881736,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 1 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.21023389284797492,
+      "expected": 0.21023389284797492,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 2 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.20518156498856768,
+      "expected": 0.20518156498856768,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 3 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.20015728587136508,
+      "expected": 0.20015728587136508,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 4 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.19516883533803134,
+      "expected": 0.19516883533803134,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 5 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1902244312969336,
+      "expected": 0.1902244312969336,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 6 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.18533273264262184,
+      "expected": 0.18533273264262187,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 7 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.18050283824094623,
+      "expected": 0.1805028382409462,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 8 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1757442805725999,
+      "expected": 0.1757442805725999,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 9 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1710670122044533,
+      "expected": 0.1710670122044533,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 10 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1664813827924397,
+      "expected": 0.1664813827924397,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 11 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1619981038569903,
+      "expected": 0.1619981038569903,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 12 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.15762819818427015,
+      "expected": 0.15762819818427018,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 13 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.15338293049031393,
+      "expected": 0.15338293049031393,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 14 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1492737160501003,
+      "expected": 0.14927371605010034,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 15 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.14531200444046383,
+      "expected": 0.14531200444046383,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 16 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1415091364399095,
+      "expected": 0.1415091364399095,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 17 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.13787617347500408,
+      "expected": 0.13787617347500408,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 18 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1344237007349412,
+      "expected": 0.1344237007349412,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 19 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1311616070610155,
+      "expected": 0.1311616070610155,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 20 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12809884678565472,
+      "expected": 0.12809884678565472,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 21 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12524319067379974,
+      "expected": 0.12524319067379971,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 22 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12260097486378488,
+      "expected": 0.12260097486378488,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 23 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12017685811207392,
+      "expected": 0.1201768581120739,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 24 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11797359864563312,
+      "expected": 0.11797359864563312,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 25 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11599186246437138,
+      "expected": 0.11599186246437138,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 26 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.114230074978022,
+      "expected": 0.11423007497802201,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 27 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11268432741985852,
+      "expected": 0.11268432741985852,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 28 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11134834867739729,
+      "expected": 0.11134834867739729,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 29 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11021355231706967,
+      "expected": 0.11021355231706967,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 30 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10926916814731043,
+      "expected": 0.10926916814731043,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 31 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10850246825728121,
+      "expected": 0.10850246825728121,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 32 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10789909954395074,
+      "expected": 0.10789909954395074,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 33 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10744353821461419,
+      "expected": 0.10744353821461419,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 34 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10711968547933945,
+      "expected": 0.10711968547933944,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 35 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10691162494968724,
+      "expected": 0.10691162494968726,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 36 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10680455689028029,
+      "expected": 0.10680455689028029,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 37 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10678590768618598,
+      "expected": 0.106785907686186,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 38 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10684658232900777,
+      "expected": 0.10684658232900777,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 39 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10698228782982261,
+      "expected": 0.10698228782982261,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 40 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10719482064549025,
+      "expected": 0.10719482064549024,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 41 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10749320198571233,
+      "expected": 0.10749320198571233,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 42 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10789457274531136,
+      "expected": 0.10789457274531136,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 43 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10842480725993435,
+      "expected": 0.10842480725993436,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 44 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10911882183161935,
+      "expected": 0.10911882183161935,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 45 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1100204876606661,
+      "expected": 0.11002048766066608,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 46 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11118190444504512,
+      "expected": 0.11118190444504512,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 47 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1126616182143465,
+      "expected": 0.1126616182143465,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 48 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1145212830640389,
+      "expected": 0.11452128306403889,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 49 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11682036162802514,
+      "expected": 0.11682036162802512,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 50 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11960876450828982,
+      "expected": 0.11960876450828982,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 51 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12291779761693894,
+      "expected": 0.12291779761693894,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 52 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12675029018283324,
+      "expected": 0.12675029018283324,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 53 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.13107114390019997,
+      "expected": 0.13107114390019997,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 54 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.13579965940907596,
+      "expected": 0.13579965940907596,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 55 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.14080488997909169,
+      "expected": 0.14080488997909169,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 56 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.14590509276756206,
+      "expected": 0.14590509276756208,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 57 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.15087221358914543,
+      "expected": 0.15087221358914543,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 58 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1554422325790865,
+      "expected": 0.15544223257908646,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 59 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.15933199724569888,
+      "expected": 0.1593319972456989,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 60 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.16226266916417903,
+      "expected": 0.16226266916417903,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 61 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.16398881483000644,
+      "expected": 0.16398881483000644,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 62 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.16433042956730073,
+      "expected": 0.16433042956730073,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 63 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1632033107169963,
+      "expected": 0.16320331071699629,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 64 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1606418972224764,
+      "expected": 0.1606418972224764,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 65 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.15680830774434296,
+      "expected": 0.15680830774434298,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 66 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1519820562090644,
+      "expected": 0.1519820562090644,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 67 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1465275789570681,
+      "expected": 0.1465275789570681,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 68 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.14084224037971932,
+      "expected": 0.14084224037971932,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 69 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1352952071136924,
+      "expected": 0.13529520711369242,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 70 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.13017379384342967,
+      "expected": 0.13017379384342967,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 71 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12565349809390958,
+      "expected": 0.12565349809390958,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 72 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12179897397816107,
+      "expected": 0.12179897397816107,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 73 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11859013035926433,
+      "expected": 0.11859013035926431,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 74 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11595868925321912,
+      "expected": 0.11595868925321912,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 75 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11382072406166349,
+      "expected": 0.11382072406166349,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 76 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11209746234253208,
+      "expected": 0.11209746234253207,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 77 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11072401905835363,
+      "expected": 0.11072401905835363,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 78 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10964985633333618,
+      "expected": 0.10964985633333618,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 79 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10883542011763973,
+      "expected": 0.10883542011763972,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 80 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10824817594032159,
+      "expected": 0.10824817594032157,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 81 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10785966170480293,
+      "expected": 0.10785966170480293,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 82 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10764395887447925,
+      "expected": 0.10764395887447925,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 83 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10757732220381853,
+      "expected": 0.10757732220381853,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 84 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10763848719937753,
+      "expected": 0.10763848719937752,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 85 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10780921054791451,
+      "expected": 0.10780921054791451,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 86 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1080747390652284,
+      "expected": 0.10807473906522838,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 87 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10842405198378313,
+      "expected": 0.10842405198378312,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 88 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10884983556683143,
+      "expected": 0.10884983556683143,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 89 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10934821823924118,
+      "expected": 0.10934821823924118,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 90 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.10991832613616632,
+      "expected": 0.10991832613616632,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 91 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11056172600951467,
+      "expected": 0.11056172600951467,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 92 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11128181639626986,
+      "expected": 0.11128181639626987,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 93 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11208321681232426,
+      "expected": 0.11208321681232425,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 94 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11297119285191672,
+      "expected": 0.1129711928519167,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 95 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11395114422519846,
+      "expected": 0.11395114422519846,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 96 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11502817331696549,
+      "expected": 0.11502817331696549,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 97 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11620674364009731,
+      "expected": 0.11620674364009731,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 98 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1174904304268372,
+      "expected": 0.11749043042683721,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 99 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.11888175956991155,
+      "expected": 0.11888175956991154,
+      "error": 1.3877787807814457e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 100 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12038212635931983,
+      "expected": 0.12038212635931983,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 101 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12199178214159204,
+      "expected": 0.12199178214159204,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 102 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12370987523281575,
+      "expected": 0.12370987523281572,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 103 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.12553453205440082,
+      "expected": 0.12553453205440085,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 104 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1274629652828858,
+      "expected": 0.1274629652828858,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 105 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1294915974626937,
+      "expected": 0.1294915974626937,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 106 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1316161906473275,
+      "expected": 0.1316161906473275,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 107 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1338319748722715,
+      "expected": 0.1338319748722715,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 108 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.13613377036475577,
+      "expected": 0.13613377036475574,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 109 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1385161002010914,
+      "expected": 0.1385161002010914,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 110 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.14097329156172003,
+      "expected": 0.14097329156172003,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 111 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1434995648079956,
+      "expected": 0.1434995648079956,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 112 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1460891103584566,
+      "expected": 0.1460891103584566,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 113 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.14873615384146963,
+      "expected": 0.14873615384146963,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 114 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1514350103126879,
+      "expected": 0.1514350103126879,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 115 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1541801285066253,
+      "expected": 0.1541801285066253,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 116 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.1569661261837687,
+      "expected": 0.1569661261837687,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 117 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.15978781766540098,
+      "expected": 0.159787817665401,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 118 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.16264023463383878,
+      "expected": 0.16264023463383878,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 119 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.16551864122529378,
+      "expected": 0.16551864122529378,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC predictive sd 120 = spread and noise combined",
+      "kind": "numerical",
+      "actual": 0.16841854436258585,
+      "expected": 0.16841854436258585,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "HMC bands widen beyond the data",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "VI KL to the prior, closed form",
+      "kind": "numerical",
+      "actual": 15.27754383340384,
+      "expected": 15.27754383340384,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "VI ELBO = expected log likelihood − KL to the prior",
+      "kind": "numerical",
+      "actual": -7.18087541608047,
+      "expected": -7.18087541608047,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "VI gap to the evidence estimate",
+      "kind": "numerical",
+      "actual": 5.752129407812019,
+      "expected": 5.752129407812019,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "VI ELBO below the evidence estimate",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "VI kept the best of five restarts",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "VI bands narrower than the reference beyond the data",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "VI switched the first hidden unit off",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "VI frames start far below and end near the final ELBO",
       "kind": "assertion",
       "passed": true
     },

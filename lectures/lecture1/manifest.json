@@ -2,49 +2,34 @@
   "id": "lecture1",
   "number": 1,
   "title": "KL and variational inference",
-  "subtitle": "Push a simple distribution onto a posterior nobody can write down",
-  "minutes": 70,
+  "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
+  "minutes": 75,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
-      "id": "wall",
-      "title": "Act 0 · The wall",
-      "minutes": 8
+      "id": "bayes",
+      "title": "Part 1 · Bayes’ rule for a neural network",
+      "minutes": 16
     },
     {
-      "id": "close",
-      "title": "Act 1 · Closer how?",
-      "minutes": 15
+      "id": "kl",
+      "title": "Part 2 · How far apart are two distributions?",
+      "minutes": 20
     },
     {
-      "id": "move",
-      "title": "Act 2 · Make q move",
-      "minutes": 7
-    },
-    {
-      "id": "nofo",
-      "title": "Act 3 · No formula",
-      "minutes": 7
-    },
-    {
-      "id": "grad",
-      "title": "Act 4 · Gradients through a draw",
-      "minutes": 10
+      "id": "fit",
+      "title": "Part 3 · Find the closest q",
+      "minutes": 22
     },
     {
       "id": "elbo",
-      "title": "Act 5 · The real target",
-      "minutes": 10
+      "title": "Part 4 · Back to Bayes: the ELBO",
+      "minutes": 9
     },
     {
-      "id": "back",
-      "title": "Act 6 · Back to the wall",
-      "minutes": 10
-    },
-    {
-      "id": "exit",
-      "title": "Exit",
-      "minutes": 3
+      "id": "impl",
+      "title": "Part 5 · Implement it",
+      "minutes": 8
     },
     {
       "id": "optional",
@@ -52,201 +37,285 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 39,
-  "optionalSlides": 14,
+  "coreSlides": 49,
+  "optionalSlides": 15,
   "slides": [
     {
-      "id": "coin-question",
-      "title": "Is this coin fair?",
-      "section": "wall",
+      "id": "bayes-rule",
+      "title": "Bayes’ rule: update what you believe, using data",
+      "section": "bayes",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "conjugate-luck",
-      "title": "With a Beta prior, Bayes’ rule has a formula",
-      "section": "wall",
+      "id": "bayes-ml",
+      "title": "In machine learning, the unknown is the parameters",
+      "section": "bayes",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "no-formula",
-      "title": "Change the prior, and the formula disappears",
-      "section": "wall",
+      "id": "tiny-net",
+      "title": "A tiny network: one input, two hidden units, one output",
+      "section": "bayes",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "grid-explodes",
-      "title": "A grid works for one unknown, not for a million",
-      "section": "wall",
+      "id": "priors",
+      "title": "A prior on every parameter",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "data-likelihood",
+      "title": "The data, and how well one θ explains them",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "rhs-by-hand",
+      "title": "The right-hand side, term by term, for one θ",
+      "section": "bayes",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "two-thetas",
+      "title": "Two settings of θ, side by side",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "evidence-integral",
+      "title": "The evidence needs every θ, and has no formula",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "evidence-mc",
+      "title": "Sampling from the prior: a few lucky draws carry everything",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "predictive",
+      "title": "What we want in the end: predictions with error bars",
+      "section": "bayes",
       "builds": 2,
       "optional": false
     },
     {
       "id": "three-ways",
-      "title": "Three ways around an integral nobody can do",
-      "section": "wall",
+      "title": "Three ways to approximate a posterior",
+      "section": "bayes",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "plan",
-      "title": "The plan: push a simple q towards the posterior",
-      "section": "wall",
+      "id": "vi-idea",
+      "title": "Variational inference: choose q, make it close to the posterior",
+      "section": "bayes",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "distance-ideas",
+      "title": "How far apart are two distributions?",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "fruit",
       "title": "Two surveys: how different are they?",
-      "section": "close",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "ratios-logs",
       "title": "Ratios say “how many times”; logs make up and down cancel",
-      "section": "close",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "weight",
       "title": "Weight by how common each fruit is now: that is KL",
-      "section": "close",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "bits",
       "title": "KL is the extra message length of using the wrong code",
-      "section": "close",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "used-before",
       "title": "You have minimised KL before: in every cross-entropy loss",
-      "section": "close",
+      "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
       "id": "coin-evidence",
       "title": "A KL value is how fast evidence piles up",
-      "section": "close",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "densities",
       "title": "For densities, sums become integrals, and KL ≥ 0",
-      "section": "close",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "compare",
-      "title": "Which Gaussian is closer to p?",
-      "section": "close",
+      "id": "kl-formulas",
+      "title": "Closed forms for simple distributions",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "gaussian-derivation",
+      "title": "Deriving the Gaussian formula",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "compare-formula",
+      "title": "Use the formula: which Gaussian is closer to p?",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "kl-area",
       "title": "KL is an area you can watch",
-      "section": "close",
+      "section": "kl",
       "builds": 1,
       "optional": false
     },
     {
-      "id": "why-reverse",
-      "title": "VI uses KL(q‖p) because it needs only what we have",
-      "section": "close",
+      "id": "kl-sampling",
+      "title": "No formula needed: estimate KL by sampling",
+      "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "fwdrev",
-      "title": "The price: reverse KL picks one bump",
-      "section": "close",
+      "id": "mc-live",
+      "title": "Watch the estimate settle",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "six-candidates",
+      "title": "Six candidates: which q is closest to p?",
+      "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "score-to-search",
-      "title": "A score picks a winner. Can it improve a loser?",
-      "section": "move",
+      "id": "grid-search",
+      "title": "Search a grid of means and widths",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "walk-downhill",
+      "title": "Instead of a grid, walk downhill",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "fit-code",
+      "title": "The same search in code",
+      "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
       "id": "olive",
       "title": "Press play: q slides onto p",
-      "section": "move",
+      "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
       "id": "two-d",
       "title": "In 2-D, a q that cannot tilt shrinks instead",
-      "section": "move",
+      "section": "fit",
       "builds": 3,
       "optional": false
     },
     {
       "id": "mixture-no-formula",
       "title": "PyTorch has no formula for this KL. The definition still works.",
-      "section": "nofo",
+      "section": "fit",
       "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mc-estimate",
-      "title": "Draw from q, average the log ratio",
-      "section": "nofo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mc-variability",
-      "title": "More samples, tighter estimates",
-      "section": "nofo",
-      "builds": 1,
       "optional": false
     },
     {
       "id": "now-optimise",
       "title": "Now optimise it: the code runs, and q does not move",
-      "section": "grad",
+      "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
       "id": "missing-path",
       "title": "The gradient that would move q never reaches it",
-      "section": "grad",
+      "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
       "id": "reparam",
       "title": "Move the randomness outside: u = μ + σε",
-      "section": "grad",
+      "section": "fit",
       "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "reparam-picture",
+      "title": "What a fixed ε does when μ or σ changes",
+      "section": "fit",
+      "builds": 2,
       "optional": false
     },
     {
       "id": "rsample-fit",
       "title": "Change one word: rsample() fits the mixture",
-      "section": "grad",
+      "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "posterior-target",
-      "title": "The real target is a posterior we cannot evaluate",
+      "id": "fwdrev",
+      "title": "The price: reverse KL picks one bump",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "can-we",
+      "title": "Back to Bayes: minimise KL to the posterior directly?",
       "section": "elbo",
       "builds": 2,
       "optional": false
@@ -259,85 +328,85 @@
       "optional": false
     },
     {
-      "id": "no-evidence-needed",
-      "title": "Maximise the ELBO; the evidence never appears",
+      "id": "elbo-two-terms",
+      "title": "The ELBO for our network: fit the data, stay near the prior",
       "section": "elbo",
       "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "elbo-meaning",
-      "title": "Two forces: sit where the joint is high, stay spread out",
-      "section": "elbo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "identity",
-      "title": "One fixed total: raising the ELBO lowers the KL",
-      "section": "elbo",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "logit-vi",
-      "title": "Back to the coin with no formula",
-      "section": "back",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "coin-fair",
-      "title": "So, is the coin fair?",
-      "section": "back",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "answer-key",
-      "title": "A check with an answer key: the Beta coin",
-      "section": "back",
-      "builds": 3,
       "optional": false
     },
     {
       "id": "elbo-slider",
-      "title": "Move q yourself: ELBO + KL never changes",
-      "section": "back",
+      "title": "Check the identity where p(𝒟) is known: a coin",
+      "section": "elbo",
       "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "bnn-elbo-code",
+      "title": "The ELBO for our network, in code",
+      "section": "impl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "bnn-vi",
+      "title": "Press play: q learns the network",
+      "section": "impl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "bnn-q",
+      "title": "What q learned: one hidden unit switched off",
+      "section": "impl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "bnn-vs-ref",
+      "title": "VI against the reference: the right curve, too-narrow bands",
+      "section": "impl",
+      "builds": 2,
       "optional": false
     },
     {
       "id": "five-tools",
-      "title": "Five obstacles, five tools",
-      "section": "exit",
+      "title": "Six obstacles, six tools",
+      "section": "impl",
       "builds": 1,
-      "optional": false
-    },
-    {
-      "id": "exit-transfer",
-      "title": "A sensor has an unknown constant bias",
-      "section": "exit",
-      "builds": 3,
       "optional": false
     },
     {
       "id": "next-lecture",
       "title": "Generative models create this inference problem again",
-      "section": "exit",
+      "section": "impl",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "optional-one-step",
-      "title": "One literal update of the mean",
+      "id": "exit-transfer",
+      "title": "A sensor has an unknown constant bias",
       "section": "optional",
       "builds": 3,
       "optional": true
     },
     {
-      "id": "optional-normal-algebra",
-      "title": "Where does the Gaussian KL formula come from?",
+      "id": "mc-variability",
+      "title": "More samples, tighter estimates",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "answer-key",
+      "title": "A check with an answer key: the Beta coin",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "optional-one-step",
+      "title": "One literal update of the mean",
       "section": "optional",
       "builds": 3,
       "optional": true
@@ -399,13 +468,6 @@
       "optional": true
     },
     {
-      "id": "optional-mean-field-nets",
-      "title": "One Gaussian per weight: Bayesian neural networks",
-      "section": "optional",
-      "builds": 2,
-      "optional": true
-    },
-    {
       "id": "optional-reductions",
       "title": "A mean must say which dimension it averages",
       "section": "optional",
@@ -427,5 +489,5 @@
       "optional": true
     }
   ],
-  "totalStates": 114
+  "totalStates": 137
 }

@@ -1,19 +1,16 @@
 # Lecture 1: KL and variational inference
 
-A 70-minute main route of 39 slides in seven acts plus an exit, with 14 optional slides after it. The lecture follows `plan/2026-10-20-review/STORY-REVIEW.md`: each act opens with an obstacle the previous act exposed and ends on a picture. The bottom bar carries the story line; questions and answers live in the speaker notes, apart from ten marked pauses (PML moments where students predict before the reveal).
+A 75-minute main route of 49 slides in five parts, with 15 optional slides after it. The running example is a tiny Bayesian neural network: one input, two tanh hidden units and one output, so θ is seven numbers, each with a N(0, 1) prior, fitted to 17 points with a gap. The bottom bar carries the story line; questions and answers live in the speaker notes, apart from the marked pauses where students predict before the reveal.
 
-| Act | Opens with | Ends with |
-|---|---|---|
-| 0 · The wall | Is this coin fair? With a Beta prior Bayes has a formula; with a Normal prior on the log-odds it does not. A grid needs 100^d points. | Laplace, MCMC and VI on one two-bump target; the plan and its five obstacles |
-| 1 · Closer how? | Two fruit surveys: ratios, then logs, then weighting give KL (0.42 nats) | KL as message length, as cross-entropy minus entropy, as the rate evidence piles up (325× after 30 tosses), as an area (live), and why VI uses KL(q‖p): the reverse fit picks one bump (animation) |
-| 2 · Make q move | A score picks a winner. Can it improve a loser? | q sliding onto p (animation); a diagonal q shrinking to widths 0.44 inside a correlated target |
-| 3 · No formula | `kl_divergence(q, mixture)` raises NotImplementedError | Monte Carlo, checked on a solvable pair and tightening as S grows |
-| 4 · Gradients through a draw | The `sample()` loop runs and q does not move (animation) | Reparameterisation with a pause for ∂u/∂μ and ∂u/∂σ, then `rsample()` fitting the mixture (animation) |
-| 5 · The real target | KL to a posterior needs the evidence | Students substitute Bayes' rule; the ELBO's two forces; log p(𝒟) = ELBO + KL as one fixed total |
-| 6 · Back to the wall | VI on the coin with no formula (animation), from the prior to within 0.0006 nats of the grid evidence | Is the coin fair? P(r > 0.5) ≈ 0.75; the Beta coin as an answer key; a live ELBO + KL slider |
-| Exit | Five obstacles, five tools, and where each reappears in the VAE | A transfer question and the bridge to Lecture 2 |
+| Part | What it covers |
+|---|---|
+| 1 · Bayes’ rule for a neural network | Bayes’ rule, then for parameters and data; the network and all seven parameters with their priors; the likelihood and prior computed term by term for one θ, against a random θ; the evidence as a 7-dimensional integral (a grid needs 10¹⁴ points, prior sampling needs millions of draws for about 100 useful ones); the posterior predictive band from an MCMC reference; Laplace, MCMC and VI; the VI idea, one Gaussian per parameter |
+| 2 · How far apart are two distributions? | Same mean and variance, different shapes; the KL ladder (fruit surveys, ratios, logs, weighting, message length, cross-entropy, how fast evidence piles up, KL ≥ 0); closed forms (Bernoulli, categorical, Gaussian, derived); the PML vote; KL as an area (live); Monte Carlo with code, and a live estimator |
+| 3 · Find the closest q | Six candidates; a grid search over (μ, σ); the same search as gradient descent, in code and animated; a diagonal q in 2-D; the mixture with no formula, the `sample()` loop that does not move, the reparameterisation trick over five slides, and the `rsample()` fit; forward vs reverse KL |
+| 4 · Back to Bayes: the ELBO | Why KL(q ‖ posterior) needs p(𝒟); substituting Bayes’ rule step by step; the ELBO as fit-the-data minus KL to the prior; the identity checked live on a coin with a known p(𝒟) |
+| 5 · Implement it | The network’s ELBO in seven lines; VI animated from random start to fit; what q learned (one hidden unit switched off); VI against the MCMC reference: the right curve with too-narrow bands, and a 5.8-nat gap to log p(𝒟) |
 
-Six slides carry live figures (`widgets.js`): KL as a net area, forward vs reverse fits, q sliding onto p, the `sample()` and `rsample()` mixture fits, VI on the logit coin, and the Beta ELBO slider. Each animation replays a recorded optimisation from `data/science.json`: frame 0 until you advance, then it plays. Print and PDF show the start and end frames as separate builds.
+Eight slides carry live figures (`widgets.js`): KL as a net area, a Monte Carlo estimator, forward vs reverse fits, q sliding onto p, the `sample()` and `rsample()` mixture fits, the coin’s ELBO + KL slider and VI on the network. Each animation replays a recorded run from `data/science.json`: frame 0 until you advance, then it plays. Print and PDF show the start and end frames as separate builds.
 
 ## Use
 

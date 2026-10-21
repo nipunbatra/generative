@@ -96,15 +96,8 @@ for(const alpha of [0,-1,Infinity,NaN]){try{betaPdf(.5,{alpha,beta:2});}catch{re
 check('Invalid Beta shapes rejected',rejects===4);
 // Story fixtures added for the rebuilt lecture: every value checked independently.
 const st=d.story;
-near('Conjugate evidence on the wall slide',st.wall.conj_log_evidence,coinLogEvidence(prior,data),5e-11);
 const trap=(xs,f)=>{let a=0;for(let i=1;i<xs.length;i++)a+=(xs[i]-xs[i-1])*(f(xs[i])+f(xs[i-1]))/2;return a;};
 const grid=(a,b,n)=>Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));
-const logSig=w=>w>=0?-Math.log1p(Math.exp(-w)):w-Math.log1p(Math.exp(w));
-const logitJoint=w=>Math.log(normalPdf(w,{mu:0,sigma:1}))+17*logSig(w)+13*logSig(-w);
-const wGrid=grid(-10,10,40001),wMax=Math.max(...wGrid.map(logitJoint));
-const logitEvidence=wMax+Math.log(trap(wGrid,w=>Math.exp(logitJoint(w)-wMax)));
-near('Logit-prior coin evidence (independent quadrature)',st.wall.logit_log_evidence_grid,logitEvidence,1e-6);
-check('Logit-prior MC evidence close to the grid',Math.abs(st.wall.logit_log_evidence_mc-logitEvidence)<.02);
 const fr=st.fruit;
 near('Fruit KL',fr.kl,fr.p.reduce((a,p,i)=>a+p*Math.log(p/fr.q[i]),0),1e-12);
 fr.ratio.forEach((r,i)=>near(`Fruit ratio${i}`,r,fr.p[i]/fr.q[i],1e-12));
@@ -139,10 +132,36 @@ for(const run of ['rsample','sample']){
 }
 check('rsample fit reaches the best Gaussian (KL 0.0562)',Math.abs(st.mixfit.rsample.at(-1)[4]-.0562)<.002);
 check('sample() run stays far from the mixture',st.mixfit.sample.at(-1)[4]>40);
-const lv=st.logitvi.final,qLogit={mu:lv.m,sigma:lv.s};
-const elboLogit=trap(grid(lv.m-12*lv.s,lv.m+12*lv.s,20001),w=>{const q=normalPdf(w,qLogit);return q*(logitJoint(w)-Math.log(q));});
-near('Logit VI exact ELBO (independent quadrature)',lv.exact_elbo,elboLogit,1e-6);
-check('Logit VI ELBO sits below the evidence',lv.gap>0&&lv.gap<.01);
+// The tiny Bayesian network: every displayed number recomputed with an independent forward pass.
+const bn=st.bnn,lnN=(y,mu,sd)=>-.5*Math.log(2*Math.PI*sd*sd)-(y-mu)**2/(2*sd*sd);
+const net=(th,x)=>th[4]*Math.tanh(th[0]*x+th[2])+th[5]*Math.tanh(th[1]*x+th[3])+th[6];
+for(const key of ['theta_A','theta_B']){
+ const t=bn[key],th=t.theta,pts=bn.x.map((x,i)=>lnN(bn.y[i],net(th,x),bn.noise_sd));
+ pts.forEach((v,i)=>near(`${key} likelihood term ${i}`,v,t.log_lik_points[i],1e-9));
+ near(`${key} log likelihood`,pts.reduce((a,v)=>a+v,0),t.log_lik,1e-8);
+ near(`${key} log prior`,th.reduce((a,v)=>a+lnN(v,0,1),0),t.log_prior,1e-10);
+ near(`${key} log joint`,t.log_lik+t.log_prior,t.log_joint,1e-8);
+}
+check('theta_A explains the data far better than theta_B',bn.theta_A.log_lik-bn.theta_B.log_lik>1000);
+bn.grid.forEach((x,i)=>{near(`f_A at grid point ${i}`,net(bn.theta_A.theta,x),bn.f_A[i],1e-9);near(`f_B at grid point ${i}`,net(bn.theta_B.theta,x),bn.f_B[i],1e-9);});
+const ev=bn.evidence,finals=ev.runs.map(r=>r.estimates.at(-1));
+near('Evidence estimate is the mean of four seeds',finals.reduce((a,v)=>a+v,0)/finals.length,ev.estimate,1e-12);
+check('Four 10-million-draw evidence estimates agree within 0.3',Math.max(...finals)-Math.min(...finals)<.3);
+check('Ten prior draws are off by over 100 nats',ev.runs.every(r=>r.estimates[0]<ev.estimate-100));
+check('Fewer than 1,000 effective draws out of 10 million',ev.runs.every(r=>r.effective_draws<1000));
+const hm=bn.hmc;
+check('HMC acceptance between 0.6 and 0.99',hm.acceptance.every(a=>a>.6&&a<.99));
+hm.sd.forEach((v,i)=>near(`HMC predictive sd ${i} = spread and noise combined`,v,Math.hypot(hm.sd_f[i],bn.noise_sd),1e-9));
+check('HMC bands widen beyond the data',hm.sd[0]>1.5*Math.min(...hm.sd)&&hm.sd.at(-1)>1.3*Math.min(...hm.sd));
+const vq=bn.vi;
+near('VI KL to the prior, closed form',vq.mu.reduce((a,m,j)=>a+normalKL({mu:m,sigma:vq.sigma[j]},{mu:0,sigma:1}),0),vq.kl_prior,1e-9);
+near('VI ELBO = expected log likelihood − KL to the prior',vq.expected_log_lik-vq.kl_prior,vq.elbo,1e-9);
+near('VI gap to the evidence estimate',ev.estimate-vq.elbo,vq.gap,1e-9);
+check('VI ELBO below the evidence estimate',vq.elbo<ev.estimate);
+check('VI kept the best of five restarts',Math.abs(Math.max(...vq.restart_elbos)-vq.elbo)<1e-9);
+check('VI bands narrower than the reference beyond the data',vq.sd[0]<hm.sd[0]&&vq.sd.at(-1)<hm.sd.at(-1));
+check('VI switched the first hidden unit off',Math.abs(vq.mu[4])<.1&&vq.sigma[4]<.1&&vq.sigma[0]>.5&&vq.sigma[2]>.5);
+check('VI frames start far below and end near the final ELBO',vq.frames[0][1]<-500&&Math.abs(vq.frames.at(-1)[1]-vq.elbo)<.1);
 near('Three-ways target mean',st.three.true_mean,-.8,1e-12);
 check('Three-ways MCMC mean near the target mean',Math.abs(st.three.mcmc.mean+.8)<.1);
 check('Three-ways Laplace sits on the big bump',Math.abs(st.three.laplace[0]+2)<.01&&Math.abs(st.three.laplace[1]-1)<.01);
