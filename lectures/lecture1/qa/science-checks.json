@@ -1,8 +1,8 @@
 {
   "status": "passed",
-  "assertions": 6171,
-  "numericalComparisons": 5177,
-  "maximumAbsoluteError": 0.00014682216466876952,
+  "assertions": 6717,
+  "numericalComparisons": 5706,
+  "maximumAbsoluteError": 0.017600000000000005,
   "source": "Independent JavaScript formulae versus executed float64 PyTorch notebook; no new training in this check.",
   "tolerances": {
     "normal": 2e-12,
@@ -21933,7 +21933,7 @@
       "passed": true
     },
     {
-      "name": "Fruit KL",
+      "name": "Grades KL",
       "kind": "numerical",
       "actual": 0.4158883083359671,
       "expected": 0.4158883083359671,
@@ -21942,16 +21942,25 @@
       "passed": true
     },
     {
-      "name": "Fruit ratio0",
+      "name": "Grades KL in bits",
       "kind": "numerical",
-      "actual": 1,
-      "expected": 1,
+      "actual": 0.6,
+      "expected": 0.6,
       "error": 0,
       "tolerance": 1e-12,
       "passed": true
     },
     {
-      "name": "Fruit ratio1",
+      "name": "Grades ratio0",
+      "kind": "numerical",
+      "actual": 4,
+      "expected": 4,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grades ratio1",
       "kind": "numerical",
       "actual": 0.25,
       "expected": 0.25,
@@ -21960,12 +21969,385 @@
       "passed": true
     },
     {
-      "name": "Fruit ratio2",
+      "name": "Grades ratio2",
       "kind": "numerical",
-      "actual": 4,
-      "expected": 4,
+      "actual": 1,
+      "expected": 1,
       "error": 0,
       "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Plain average of the log ratios",
+      "kind": "numerical",
+      "actual": 0,
+      "expected": 0,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grades e^KL",
+      "kind": "numerical",
+      "actual": 1.515716566510398,
+      "expected": 1.515716566510398,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Swapped grades KL(this||last)",
+      "kind": "numerical",
+      "actual": 0.6364828379064437,
+      "expected": 0.6364828379064437,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Swapped grades KL(last||this)",
+      "kind": "numerical",
+      "actual": 0.29755403364010663,
+      "expected": 0.29755403364010663,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Swapping the reference changes the KL",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Surprise of sun, bits",
+      "kind": "numerical",
+      "actual": 0.15200309344505006,
+      "expected": 0.15200309344504997,
+      "error": 8.326672684688674e-17,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Surprise of rain, bits",
+      "kind": "numerical",
+      "actual": 3.3219280948873626,
+      "expected": 3.321928094887362,
+      "error": 4.440892098500626e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Five sunny days: surprises add",
+      "kind": "numerical",
+      "actual": 0.7600154672252497,
+      "expected": 0.7600154672252499,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "One rainy day among five",
+      "kind": "numerical",
+      "actual": 3.9299404686675623,
+      "expected": 3.929940468667562,
+      "error": 4.440892098500626e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Forecast entropy",
+      "kind": "numerical",
+      "actual": 0.46899559358928133,
+      "expected": 0.4689955935892812,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Entropy of 87.5/12.5",
+      "kind": "numerical",
+      "actual": 0.5435644431995963,
+      "expected": 0.5435644431995964,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Entropy days: the running average approaches H",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Huffman codes for p and q",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "KL in bits from codes",
+      "kind": "numerical",
+      "actual": 0.25,
+      "expected": 0.25,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "1,000 simulated days: bits per day near H and H(p, q)",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Asymmetry: KL(p||sunny town)",
+      "kind": "numerical",
+      "actual": 1.8365012677171204,
+      "expected": 1.8365012677171204,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Asymmetry: KL(sunny town||p)",
+      "kind": "numerical",
+      "actual": 0.8585594574581794,
+      "expected": 0.8585594574581793,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Classification loss = -ln q(true class)",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659907,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "One-hot KL equals the loss",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659907,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Soft label: cross-entropy = entropy + KL",
+      "kind": "numerical",
+      "actual": 0.7737003923673798,
+      "expected": 0.7737003923673798,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Soft label entropy",
+      "kind": "numerical",
+      "actual": 0.7210863338538182,
+      "expected": 0.721086333853818,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Twenty days: 10 sunny, 5 cloudy, 5 rainy",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Average surprise under q = cross-entropy with the frequencies",
+      "kind": "numerical",
+      "actual": 1.75,
+      "expected": 1.75,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Average surprise under p-hat = entropy of the data",
+      "kind": "numerical",
+      "actual": 1.5,
+      "expected": 1.5,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Likelihood ratio 2^(20 KL)",
+      "kind": "numerical",
+      "actual": 32,
+      "expected": 32,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Gradient descent finds the frequency 0",
+      "kind": "numerical",
+      "actual": 0.5,
+      "expected": 0.5,
+      "error": 0,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Gradient descent finds the frequency 1",
+      "kind": "numerical",
+      "actual": 0.25,
+      "expected": 0.25,
+      "error": 0,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Gradient descent finds the frequency 2",
+      "kind": "numerical",
+      "actual": 0.25,
+      "expected": 0.25,
+      "error": 0,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Better estimator is never negative and has lower spread",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Weather sampling at 10,000 days is close to the KL in bits",
+      "kind": "numerical",
+      "actual": 0.2676,
+      "expected": 0.25,
+      "error": 0.017600000000000005,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "name": "Closed form: Bernoulli",
+      "kind": "numerical",
+      "actual": 0.1927447570217575,
+      "expected": 0.19274475702175745,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Closed form: Bernoulli against PyTorch",
+      "kind": "numerical",
+      "actual": 0.19274475702175747,
+      "expected": 0.1927447570217575,
+      "error": 2.7755575615628914e-17,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Closed form: categorical (grades)",
+      "kind": "numerical",
+      "actual": 0.4158883083359671,
+      "expected": 0.4158883083359671,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Closed form: Gaussian",
+      "kind": "numerical",
+      "actual": 0.3493971805599453,
+      "expected": 0.3493971805599453,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Closed form: diagonal Gaussian is the sum of 1-D KLs",
+      "kind": "numerical",
+      "actual": 4.782610522362368,
+      "expected": 4.782610522362368,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Closed form: diagonal Gaussian against PyTorch",
+      "kind": "numerical",
+      "actual": 4.782610522362368,
+      "expected": 4.782610522362368,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grid candidate N(0, 2^2)",
+      "kind": "numerical",
+      "actual": 0.3493971805599453,
+      "expected": 0.3493971805599453,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grid candidate N(1, 3^2)",
+      "kind": "numerical",
+      "actual": 0.0689320724517809,
+      "expected": 0.06893207245178079,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grid candidate N(4, 1^2)",
+      "kind": "numerical",
+      "actual": 1.1987943611198906,
+      "expected": 1.1987943611198906,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grid candidate N(-3, 4^2)",
+      "kind": "numerical",
+      "actual": 0.5,
+      "expected": 0.5,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grid candidate N(1, 8^2)",
+      "kind": "numerical",
+      "actual": 0.8068528194400547,
+      "expected": 0.8068528194400546,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grid candidate N(2, 5^2)",
+      "kind": "numerical",
+      "actual": 0.08935644868579024,
+      "expected": 0.08935644868579029,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Grid search finds q = p",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Grades sampling at 10,000 draws is close",
+      "kind": "numerical",
+      "actual": 0.4279490692776907,
+      "expected": 0.4158883083359671,
+      "error": 0.012060760941723592,
+      "tolerance": 0.03,
+      "passed": true
+    },
+    {
+      "name": "One-unknown evidence: 20 rectangles match a fine grid to 3 decimals",
+      "kind": "assertion",
       "passed": true
     },
     {
@@ -24860,39 +25242,3377 @@
       "passed": true
     },
     {
-      "name": "2-D diagonal width",
+      "name": "Diagonal width 1 is the conditional width",
       "kind": "numerical",
-      "actual": 0.4358898943540673,
-      "expected": 0.4358898943540673,
+      "actual": 0.8999999999999998,
+      "expected": 0.8999999999999998,
       "error": 0,
       "tolerance": 1e-12,
       "passed": true
     },
     {
-      "name": "2-D diagonal KL",
+      "name": "Diagonal width 2 is the conditional width",
       "kind": "numerical",
-      "actual": 0.8303656034108255,
-      "expected": 0.8303656034108255,
+      "actual": 0.4499999999999999,
+      "expected": 0.4499999999999999,
       "error": 0,
       "tolerance": 1e-12,
       "passed": true
     },
     {
-      "name": "2-D fitted width0",
+      "name": "Diagonal KL is -1/2 log(1 - rho^2)",
       "kind": "numerical",
-      "actual": 0.43588989435406733,
-      "expected": 0.4358898943540673,
+      "actual": 0.5108256237659908,
+      "expected": 0.5108256237659908,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Isotropic width: s^2 = d / tr(precision)",
+      "kind": "numerical",
+      "actual": 0.5692099788303082,
+      "expected": 0.5692099788303081,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Isotropic KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802009,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step0 KL",
+      "kind": "numerical",
+      "actual": 7.008238010369672,
+      "expected": 7.008238010369672,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step5 KL",
+      "kind": "numerical",
+      "actual": 4.223029723311681,
+      "expected": 4.223029723311681,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step10 KL",
+      "kind": "numerical",
+      "actual": 2.477511850949102,
+      "expected": 2.477511850949103,
+      "error": 8.881784197001252e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step15 KL",
+      "kind": "numerical",
+      "actual": 1.5020349873938579,
+      "expected": 1.5020349873938579,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step20 KL",
+      "kind": "numerical",
+      "actual": 1.0539741552328217,
+      "expected": 1.0539741552328215,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step25 KL",
+      "kind": "numerical",
+      "actual": 0.92303603122959,
+      "expected": 0.9230360312295903,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step30 KL",
+      "kind": "numerical",
+      "actual": 0.9286646135783572,
+      "expected": 0.9286646135783573,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step35 KL",
+      "kind": "numerical",
+      "actual": 0.9489106412654464,
+      "expected": 0.9489106412654463,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step40 KL",
+      "kind": "numerical",
+      "actual": 0.9338840188865616,
+      "expected": 0.9338840188865615,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step45 KL",
+      "kind": "numerical",
+      "actual": 0.8894047494592559,
+      "expected": 0.889404749459256,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step50 KL",
+      "kind": "numerical",
+      "actual": 0.8455324732024909,
+      "expected": 0.845532473202491,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step55 KL",
+      "kind": "numerical",
+      "actual": 0.8205363261587071,
+      "expected": 0.8205363261587072,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step60 KL",
+      "kind": "numerical",
+      "actual": 0.8099268388240624,
+      "expected": 0.8099268388240625,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step65 KL",
+      "kind": "numerical",
+      "actual": 0.8023854830652406,
+      "expected": 0.8023854830652405,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step70 KL",
+      "kind": "numerical",
+      "actual": 0.7931513922220492,
+      "expected": 0.7931513922220496,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step75 KL",
+      "kind": "numerical",
+      "actual": 0.7833504197367096,
+      "expected": 0.7833504197367097,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step80 KL",
+      "kind": "numerical",
+      "actual": 0.7747982057936975,
+      "expected": 0.7747982057936974,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step85 KL",
+      "kind": "numerical",
+      "actual": 0.7680200319670989,
+      "expected": 0.768020031967099,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step90 KL",
+      "kind": "numerical",
+      "actual": 0.7626098159961401,
+      "expected": 0.76260981599614,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step95 KL",
+      "kind": "numerical",
+      "actual": 0.7579369876156026,
+      "expected": 0.7579369876156022,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step100 KL",
+      "kind": "numerical",
+      "actual": 0.7537388858639658,
+      "expected": 0.7537388858639656,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step105 KL",
+      "kind": "numerical",
+      "actual": 0.7501138902832236,
+      "expected": 0.7501138902832237,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step110 KL",
+      "kind": "numerical",
+      "actual": 0.7471183076577315,
+      "expected": 0.7471183076577314,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step115 KL",
+      "kind": "numerical",
+      "actual": 0.7446465070628177,
+      "expected": 0.7446465070628178,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step120 KL",
+      "kind": "numerical",
+      "actual": 0.7425809054381272,
+      "expected": 0.7425809054381277,
+      "error": 5.551115123125783e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step125 KL",
+      "kind": "numerical",
+      "actual": 0.7408595898033887,
+      "expected": 0.7408595898033888,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step130 KL",
+      "kind": "numerical",
+      "actual": 0.7394439947421654,
+      "expected": 0.7394439947421655,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step135 KL",
+      "kind": "numerical",
+      "actual": 0.7382944398875113,
+      "expected": 0.738294439887511,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step140 KL",
+      "kind": "numerical",
+      "actual": 0.7373667772036145,
+      "expected": 0.7373667772036147,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step145 KL",
+      "kind": "numerical",
+      "actual": 0.7366199582490316,
+      "expected": 0.7366199582490315,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step150 KL",
+      "kind": "numerical",
+      "actual": 0.7360225562034473,
+      "expected": 0.7360225562034471,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step155 KL",
+      "kind": "numerical",
+      "actual": 0.7355493753891742,
+      "expected": 0.7355493753891743,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step160 KL",
+      "kind": "numerical",
+      "actual": 0.7351774648047076,
+      "expected": 0.7351774648047075,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step165 KL",
+      "kind": "numerical",
+      "actual": 0.7348868434303761,
+      "expected": 0.7348868434303762,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step170 KL",
+      "kind": "numerical",
+      "actual": 0.7346612328596072,
+      "expected": 0.7346612328596073,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step175 KL",
+      "kind": "numerical",
+      "actual": 0.7344874243816886,
+      "expected": 0.7344874243816887,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step180 KL",
+      "kind": "numerical",
+      "actual": 0.7343545699533278,
+      "expected": 0.7343545699533282,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step185 KL",
+      "kind": "numerical",
+      "actual": 0.7342537434021064,
+      "expected": 0.7342537434021065,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step190 KL",
+      "kind": "numerical",
+      "actual": 0.7341777515982455,
+      "expected": 0.7341777515982454,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step195 KL",
+      "kind": "numerical",
+      "actual": 0.7341209133853925,
+      "expected": 0.7341209133853924,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step200 KL",
+      "kind": "numerical",
+      "actual": 0.7340787353762295,
+      "expected": 0.7340787353762296,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step205 KL",
+      "kind": "numerical",
+      "actual": 0.734047674240323,
+      "expected": 0.7340476742403231,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step210 KL",
+      "kind": "numerical",
+      "actual": 0.7340249750363044,
+      "expected": 0.7340249750363043,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step215 KL",
+      "kind": "numerical",
+      "actual": 0.7340085187598213,
+      "expected": 0.7340085187598214,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step220 KL",
+      "kind": "numerical",
+      "actual": 0.7339966866469663,
+      "expected": 0.7339966866469664,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step225 KL",
+      "kind": "numerical",
+      "actual": 0.7339882498383337,
+      "expected": 0.7339882498383333,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step230 KL",
+      "kind": "numerical",
+      "actual": 0.7339822843962995,
+      "expected": 0.7339822843962999,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step235 KL",
+      "kind": "numerical",
+      "actual": 0.7339781031433661,
+      "expected": 0.7339781031433662,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step240 KL",
+      "kind": "numerical",
+      "actual": 0.7339751988278786,
+      "expected": 0.7339751988278788,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step245 KL",
+      "kind": "numerical",
+      "actual": 0.7339731999983494,
+      "expected": 0.7339731999983495,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step250 KL",
+      "kind": "numerical",
+      "actual": 0.7339718373563697,
+      "expected": 0.7339718373563698,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step255 KL",
+      "kind": "numerical",
+      "actual": 0.7339709175532669,
+      "expected": 0.7339709175532668,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step260 KL",
+      "kind": "numerical",
+      "actual": 0.7339703030311708,
+      "expected": 0.7339703030311712,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step265 KL",
+      "kind": "numerical",
+      "actual": 0.7339698968225044,
+      "expected": 0.7339698968225044,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step270 KL",
+      "kind": "numerical",
+      "actual": 0.7339696312838309,
+      "expected": 0.733969631283831,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step275 KL",
+      "kind": "numerical",
+      "actual": 0.7339694597258921,
+      "expected": 0.7339694597258922,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step280 KL",
+      "kind": "numerical",
+      "actual": 0.7339693502476294,
+      "expected": 0.7339693502476295,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step285 KL",
+      "kind": "numerical",
+      "actual": 0.7339692812907861,
+      "expected": 0.7339692812907862,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step290 KL",
+      "kind": "numerical",
+      "actual": 0.7339692384568586,
+      "expected": 0.7339692384568586,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step295 KL",
+      "kind": "numerical",
+      "actual": 0.7339692122442778,
+      "expected": 0.7339692122442777,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step300 KL",
+      "kind": "numerical",
+      "actual": 0.7339691964598318,
+      "expected": 0.7339691964598322,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step305 KL",
+      "kind": "numerical",
+      "actual": 0.733969187120064,
+      "expected": 0.7339691871200639,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step310 KL",
+      "kind": "numerical",
+      "actual": 0.7339691816994647,
+      "expected": 0.7339691816994649,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step315 KL",
+      "kind": "numerical",
+      "actual": 0.7339691786205762,
+      "expected": 0.7339691786205765,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step320 KL",
+      "kind": "numerical",
+      "actual": 0.7339691769138634,
+      "expected": 0.7339691769138638,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step325 KL",
+      "kind": "numerical",
+      "actual": 0.7339691759939713,
+      "expected": 0.7339691759939714,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step330 KL",
+      "kind": "numerical",
+      "actual": 0.7339691755143372,
+      "expected": 0.7339691755143374,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step335 KL",
+      "kind": "numerical",
+      "actual": 0.7339691752741444,
+      "expected": 0.7339691752741443,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step340 KL",
+      "kind": "numerical",
+      "actual": 0.733969175159846,
+      "expected": 0.733969175159846,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step345 KL",
+      "kind": "numerical",
+      "actual": 0.733969175109064,
+      "expected": 0.7339691751090641,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step350 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750886661,
+      "expected": 0.733969175088666,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step355 KL",
+      "kind": "numerical",
+      "actual": 0.733969175081771,
+      "expected": 0.7339691750817712,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step360 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802344,
+      "expected": 0.7339691750802346,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step365 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750804163,
+      "expected": 0.7339691750804164,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step370 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750808719,
+      "expected": 0.7339691750808718,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step375 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750811517,
+      "expected": 0.7339691750811518,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step380 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750812041,
+      "expected": 0.7339691750812041,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step385 KL",
+      "kind": "numerical",
+      "actual": 0.733969175081101,
+      "expected": 0.7339691750811009,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step390 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750809265,
+      "expected": 0.7339691750809266,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step395 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750807409,
+      "expected": 0.7339691750807406,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step400 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750805772,
+      "expected": 0.7339691750805775,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step405 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750804491,
+      "expected": 0.7339691750804492,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step410 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750803561,
+      "expected": 0.7339691750803562,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step415 KL",
+      "kind": "numerical",
+      "actual": 0.733969175080293,
+      "expected": 0.7339691750802931,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step420 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802528,
+      "expected": 0.7339691750802531,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step425 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802284,
+      "expected": 0.7339691750802285,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step430 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802146,
+      "expected": 0.7339691750802148,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step435 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802071,
+      "expected": 0.733969175080207,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step440 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802033,
+      "expected": 0.733969175080203,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step445 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802013,
+      "expected": 0.7339691750802015,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step450 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802009,
+      "expected": 0.7339691750802012,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step455 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802004,
+      "expected": 0.7339691750802008,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step460 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step465 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step470 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step475 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step480 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step485 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step490 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802009,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step495 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step500 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step505 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802009,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step510 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step515 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step520 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step525 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802007,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step530 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step535 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802004,
+      "expected": 0.7339691750802003,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step540 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step545 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step550 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step555 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step560 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step565 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step570 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step575 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step580 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802004,
+      "expected": 0.7339691750802005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step585 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step590 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.733969175080201,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step595 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit iso step600 KL",
+      "kind": "numerical",
+      "actual": 0.7339691750802007,
+      "expected": 0.7339691750802008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step0 KL",
+      "kind": "numerical",
+      "actual": 7.04642303567393,
+      "expected": 7.04642303567393,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step5 KL",
+      "kind": "numerical",
+      "actual": 4.186384770796541,
+      "expected": 4.186384770796542,
+      "error": 8.881784197001252e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step10 KL",
+      "kind": "numerical",
+      "actual": 2.321445124488016,
+      "expected": 2.3214451244880174,
+      "error": 1.3322676295501878e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step15 KL",
+      "kind": "numerical",
+      "actual": 1.2629696251640252,
+      "expected": 1.2629696251640254,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step20 KL",
+      "kind": "numerical",
+      "actual": 0.7969763584048593,
+      "expected": 0.7969763584048595,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step25 KL",
+      "kind": "numerical",
+      "actual": 0.6877804974880086,
+      "expected": 0.6877804974880087,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step30 KL",
+      "kind": "numerical",
+      "actual": 0.7162409780183141,
+      "expected": 0.716240978018314,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step35 KL",
+      "kind": "numerical",
+      "actual": 0.7400608875996966,
+      "expected": 0.7400608875996965,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step40 KL",
+      "kind": "numerical",
+      "actual": 0.7162703178008636,
+      "expected": 0.7162703178008635,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step45 KL",
+      "kind": "numerical",
+      "actual": 0.6660992259208862,
+      "expected": 0.6660992259208864,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step50 KL",
+      "kind": "numerical",
+      "actual": 0.6219947069108334,
+      "expected": 0.6219947069108336,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step55 KL",
+      "kind": "numerical",
+      "actual": 0.597404138420172,
+      "expected": 0.5974041384201719,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step60 KL",
+      "kind": "numerical",
+      "actual": 0.5867238646962263,
+      "expected": 0.5867238646962261,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step65 KL",
+      "kind": "numerical",
+      "actual": 0.5794168009102993,
+      "expected": 0.5794168009102995,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step70 KL",
+      "kind": "numerical",
+      "actual": 0.570357428249703,
+      "expected": 0.570357428249703,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step75 KL",
+      "kind": "numerical",
+      "actual": 0.5603257518415128,
+      "expected": 0.5603257518415127,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step80 KL",
+      "kind": "numerical",
+      "actual": 0.5515748433025007,
+      "expected": 0.5515748433025008,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step85 KL",
+      "kind": "numerical",
+      "actual": 0.5448469854887423,
+      "expected": 0.5448469854887421,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step90 KL",
+      "kind": "numerical",
+      "actual": 0.5395005575543768,
+      "expected": 0.5395005575543769,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step95 KL",
+      "kind": "numerical",
+      "actual": 0.5348125183188497,
+      "expected": 0.5348125183188497,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step100 KL",
+      "kind": "numerical",
+      "actual": 0.5305982978055015,
+      "expected": 0.5305982978055017,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step105 KL",
+      "kind": "numerical",
+      "actual": 0.5269716221300356,
+      "expected": 0.5269716221300356,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step110 KL",
+      "kind": "numerical",
+      "actual": 0.5239731708283253,
+      "expected": 0.5239731708283252,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step115 KL",
+      "kind": "numerical",
+      "actual": 0.5215027243504167,
+      "expected": 0.5215027243504167,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step120 KL",
+      "kind": "numerical",
+      "actual": 0.5194395700116616,
+      "expected": 0.5194395700116617,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step125 KL",
+      "kind": "numerical",
+      "actual": 0.5177167490575658,
+      "expected": 0.5177167490575659,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step130 KL",
+      "kind": "numerical",
+      "actual": 0.5162999596031155,
+      "expected": 0.5162999596031156,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step135 KL",
+      "kind": "numerical",
+      "actual": 0.5151508860208673,
+      "expected": 0.5151508860208671,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step140 KL",
+      "kind": "numerical",
+      "actual": 0.5142233915045535,
+      "expected": 0.5142233915045537,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step145 KL",
+      "kind": "numerical",
+      "actual": 0.5134764698149914,
+      "expected": 0.5134764698149914,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step150 KL",
+      "kind": "numerical",
+      "actual": 0.5128790445730178,
+      "expected": 0.5128790445730179,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step155 KL",
+      "kind": "numerical",
+      "actual": 0.5124058065785158,
+      "expected": 0.5124058065785159,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step160 KL",
+      "kind": "numerical",
+      "actual": 0.5120339042063642,
+      "expected": 0.512033904206364,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step165 KL",
+      "kind": "numerical",
+      "actual": 0.5117433138534262,
+      "expected": 0.5117433138534264,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step170 KL",
+      "kind": "numerical",
+      "actual": 0.5115176865953299,
+      "expected": 0.5115176865953299,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step175 KL",
+      "kind": "numerical",
+      "actual": 0.511343869442628,
+      "expected": 0.5113438694426279,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step180 KL",
+      "kind": "numerical",
+      "actual": 0.5112110194311987,
+      "expected": 0.5112110194311986,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step185 KL",
+      "kind": "numerical",
+      "actual": 0.5111101929441548,
+      "expected": 0.5111101929441547,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step190 KL",
+      "kind": "numerical",
+      "actual": 0.5110342012206457,
+      "expected": 0.5110342012206456,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step195 KL",
+      "kind": "numerical",
+      "actual": 0.5109773622409588,
+      "expected": 0.5109773622409588,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step200 KL",
+      "kind": "numerical",
+      "actual": 0.5109351837022558,
+      "expected": 0.5109351837022559,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step205 KL",
+      "kind": "numerical",
+      "actual": 0.5109041231420255,
+      "expected": 0.5109041231420256,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step210 KL",
+      "kind": "numerical",
+      "actual": 0.5108814238678019,
+      "expected": 0.510881423867802,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step215 KL",
+      "kind": "numerical",
+      "actual": 0.5108649674106296,
+      "expected": 0.5108649674106298,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step220 KL",
+      "kind": "numerical",
+      "actual": 0.5108531353355616,
+      "expected": 0.5108531353355618,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step225 KL",
+      "kind": "numerical",
+      "actual": 0.5108446985295152,
+      "expected": 0.5108446985295153,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step230 KL",
+      "kind": "numerical",
+      "actual": 0.5108387331002819,
+      "expected": 0.510838733100282,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step235 KL",
+      "kind": "numerical",
+      "actual": 0.5108345518316,
+      "expected": 0.5108345518315999,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step240 KL",
+      "kind": "numerical",
+      "actual": 0.510831647508053,
+      "expected": 0.5108316475080531,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step245 KL",
+      "kind": "numerical",
+      "actual": 0.5108296486881512,
+      "expected": 0.5108296486881513,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step250 KL",
+      "kind": "numerical",
+      "actual": 0.5108282860435647,
+      "expected": 0.510828286043565,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step255 KL",
+      "kind": "numerical",
+      "actual": 0.5108273662388558,
+      "expected": 0.5108273662388562,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step260 KL",
+      "kind": "numerical",
+      "actual": 0.5108267517169174,
+      "expected": 0.5108267517169177,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step265 KL",
+      "kind": "numerical",
+      "actual": 0.5108263455084308,
+      "expected": 0.5108263455084305,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step270 KL",
+      "kind": "numerical",
+      "actual": 0.5108260799699695,
+      "expected": 0.5108260799699698,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step275 KL",
+      "kind": "numerical",
+      "actual": 0.5108259084115709,
+      "expected": 0.5108259084115712,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step280 KL",
+      "kind": "numerical",
+      "actual": 0.5108257989334168,
+      "expected": 0.510825798933417,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step285 KL",
+      "kind": "numerical",
+      "actual": 0.5108257299766394,
+      "expected": 0.5108257299766393,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step290 KL",
+      "kind": "numerical",
+      "actual": 0.5108256871426531,
+      "expected": 0.5108256871426531,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step295 KL",
+      "kind": "numerical",
+      "actual": 0.5108256609300679,
+      "expected": 0.5108256609300682,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step300 KL",
+      "kind": "numerical",
+      "actual": 0.5108256451456192,
+      "expected": 0.5108256451456192,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step305 KL",
+      "kind": "numerical",
+      "actual": 0.5108256358058636,
+      "expected": 0.5108256358058638,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step310 KL",
+      "kind": "numerical",
+      "actual": 0.5108256303852545,
+      "expected": 0.5108256303852546,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step315 KL",
+      "kind": "numerical",
+      "actual": 0.5108256273063656,
+      "expected": 0.5108256273063654,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step320 KL",
+      "kind": "numerical",
+      "actual": 0.510825625599655,
+      "expected": 0.5108256255996553,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step325 KL",
+      "kind": "numerical",
+      "actual": 0.5108256246797618,
+      "expected": 0.5108256246797619,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step330 KL",
+      "kind": "numerical",
+      "actual": 0.5108256242001274,
+      "expected": 0.5108256242001278,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step335 KL",
+      "kind": "numerical",
+      "actual": 0.5108256239599342,
+      "expected": 0.5108256239599341,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step340 KL",
+      "kind": "numerical",
+      "actual": 0.5108256238456366,
+      "expected": 0.5108256238456365,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step345 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237948543,
+      "expected": 0.5108256237948544,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step350 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237744564,
+      "expected": 0.5108256237744562,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step355 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237675615,
+      "expected": 0.5108256237675617,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step360 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237660249,
+      "expected": 0.5108256237660248,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step365 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237662065,
+      "expected": 0.5108256237662065,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step370 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237666617,
+      "expected": 0.510825623766662,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step375 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237669417,
+      "expected": 0.5108256237669418,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step380 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237669944,
+      "expected": 0.5108256237669945,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step385 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237668911,
+      "expected": 0.510825623766891,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step390 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237667168,
+      "expected": 0.5108256237667169,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step395 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237665312,
+      "expected": 0.510825623766531,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step400 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237663678,
+      "expected": 0.5108256237663676,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step405 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237662392,
+      "expected": 0.5108256237662393,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step410 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237661462,
+      "expected": 0.5108256237661463,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step415 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237660833,
+      "expected": 0.5108256237660832,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step420 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237660431,
+      "expected": 0.5108256237660432,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step425 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237660189,
+      "expected": 0.5108256237660188,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step430 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237660049,
+      "expected": 0.510825623766005,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step435 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659972,
+      "expected": 0.5108256237659973,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step440 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659934,
+      "expected": 0.5108256237659936,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step445 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659918,
+      "expected": 0.5108256237659919,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step450 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659912,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step455 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659905,
+      "expected": 0.5108256237659909,
+      "error": 4.440892098500626e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step460 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step465 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step470 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step475 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step480 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659907,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step485 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659905,
+      "expected": 0.5108256237659908,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step490 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step495 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659909,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step500 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659909,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step505 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659909,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step510 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step515 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659909,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step520 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659909,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step525 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step530 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step535 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step540 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step545 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step550 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step555 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step560 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step565 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659908,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step570 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659909,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step575 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.5108256237659909,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step580 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659907,
+      "expected": 0.510825623765991,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step585 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step590 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step595 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit diag step600 KL",
+      "kind": "numerical",
+      "actual": 0.5108256237659909,
+      "expected": 0.5108256237659909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step0 KL",
+      "kind": "numerical",
+      "actual": 14.210707827395561,
+      "expected": 14.210707827395565,
+      "error": 3.552713678800501e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step5 KL",
+      "kind": "numerical",
+      "actual": 8.99001442802787,
+      "expected": 8.990014428027871,
+      "error": 1.7763568394002505e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step10 KL",
+      "kind": "numerical",
+      "actual": 5.449524759139003,
+      "expected": 5.449524759139004,
+      "error": 1.7763568394002505e-15,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step15 KL",
+      "kind": "numerical",
+      "actual": 3.2490996960838365,
+      "expected": 3.2490996960838374,
+      "error": 8.881784197001252e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step20 KL",
+      "kind": "numerical",
+      "actual": 2.0287863974364257,
+      "expected": 2.0287863974364257,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step25 KL",
+      "kind": "numerical",
+      "actual": 1.4307191605160379,
+      "expected": 1.4307191605160376,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step30 KL",
+      "kind": "numerical",
+      "actual": 1.139159366906992,
+      "expected": 1.1391593669069922,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step35 KL",
+      "kind": "numerical",
+      "actual": 0.9381712224355832,
+      "expected": 0.938171222435583,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step40 KL",
+      "kind": "numerical",
+      "actual": 0.7349431582295909,
+      "expected": 0.7349431582295909,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step45 KL",
+      "kind": "numerical",
+      "actual": 0.5268220703373268,
+      "expected": 0.5268220703373269,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step50 KL",
+      "kind": "numerical",
+      "actual": 0.34668214006616416,
+      "expected": 0.34668214006616416,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step55 KL",
+      "kind": "numerical",
+      "actual": 0.22275010345193436,
+      "expected": 0.22275010345193447,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step60 KL",
+      "kind": "numerical",
+      "actual": 0.1579414637568733,
+      "expected": 0.15794146375687335,
       "error": 5.551115123125783e-17,
-      "tolerance": 0.002,
+      "tolerance": 1e-9,
       "passed": true
     },
     {
-      "name": "2-D fitted width1",
+      "name": "Covariance fit full step65 KL",
       "kind": "numerical",
-      "actual": 0.4358898943540673,
-      "expected": 0.4358898943540673,
+      "actual": 0.125300421755562,
+      "expected": 0.12530042175556205,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step70 KL",
+      "kind": "numerical",
+      "actual": 0.09471699159611352,
+      "expected": 0.09471699159611385,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step75 KL",
+      "kind": "numerical",
+      "actual": 0.06559844998435538,
+      "expected": 0.06559844998435538,
       "error": 0,
-      "tolerance": 0.002,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step80 KL",
+      "kind": "numerical",
+      "actual": 0.047940386038950955,
+      "expected": 0.047940386038950844,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step85 KL",
+      "kind": "numerical",
+      "actual": 0.03837191140394253,
+      "expected": 0.03837191140394264,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step90 KL",
+      "kind": "numerical",
+      "actual": 0.030602148730978274,
+      "expected": 0.03060214873097833,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step95 KL",
+      "kind": "numerical",
+      "actual": 0.02431248406284081,
+      "expected": 0.024312484062840978,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step100 KL",
+      "kind": "numerical",
+      "actual": 0.019977929490216206,
+      "expected": 0.019977929490216317,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step105 KL",
+      "kind": "numerical",
+      "actual": 0.016366444895628884,
+      "expected": 0.016366444895628662,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step110 KL",
+      "kind": "numerical",
+      "actual": 0.013200503394639462,
+      "expected": 0.013200503394639351,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step115 KL",
+      "kind": "numerical",
+      "actual": 0.010752106196805056,
+      "expected": 0.010752106196804834,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step120 KL",
+      "kind": "numerical",
+      "actual": 0.008724637428394244,
+      "expected": 0.008724637428394466,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step125 KL",
+      "kind": "numerical",
+      "actual": 0.006956781936965806,
+      "expected": 0.006956781936965861,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step130 KL",
+      "kind": "numerical",
+      "actual": 0.005521284708471685,
+      "expected": 0.005521284708470964,
+      "error": 7.216449660063518e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step135 KL",
+      "kind": "numerical",
+      "actual": 0.004364429848011775,
+      "expected": 0.004364429848011997,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step140 KL",
+      "kind": "numerical",
+      "actual": 0.003416702419401507,
+      "expected": 0.0034167024194016182,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step145 KL",
+      "kind": "numerical",
+      "actual": 0.002660266096223496,
+      "expected": 0.002660266096223718,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step150 KL",
+      "kind": "numerical",
+      "actual": 0.0020592932773284556,
+      "expected": 0.002059293277328511,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step155 KL",
+      "kind": "numerical",
+      "actual": 0.0015817610302332197,
+      "expected": 0.0015817610302332197,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step160 KL",
+      "kind": "numerical",
+      "actual": 0.0012087634365744448,
+      "expected": 0.0012087634365744448,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step165 KL",
+      "kind": "numerical",
+      "actual": 0.0009181447243306051,
+      "expected": 0.0009181447243308827,
+      "error": 2.7755575615628914e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step170 KL",
+      "kind": "numerical",
+      "actual": 0.0006921254959139644,
+      "expected": 0.0006921254959137424,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step175 KL",
+      "kind": "numerical",
+      "actual": 0.0005184139145668065,
+      "expected": 0.0005184139145664735,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step180 KL",
+      "kind": "numerical",
+      "actual": 0.000385607886897843,
+      "expected": 0.0003856078868975654,
+      "error": 2.7755575615628914e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step185 KL",
+      "kind": "numerical",
+      "actual": 0.00028468786788121703,
+      "expected": 0.00028468786788121703,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step190 KL",
+      "kind": "numerical",
+      "actual": 0.0002086891667756885,
+      "expected": 0.00020868916677579952,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step195 KL",
+      "kind": "numerical",
+      "actual": 0.00015180599336805933,
+      "expected": 0.00015180599336811484,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step200 KL",
+      "kind": "numerical",
+      "actual": 0.00010958800464605511,
+      "expected": 0.00010958800464605511,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step205 KL",
+      "kind": "numerical",
+      "actual": 0.00007851744101439184,
+      "expected": 0.00007851744101411429,
+      "error": 2.7755575615628914e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step210 KL",
+      "kind": "numerical",
+      "actual": 0.000055804743702314585,
+      "expected": 0.000055804743702259074,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step215 KL",
+      "kind": "numerical",
+      "actual": 0.000039344846647859644,
+      "expected": 0.00003934484664819271,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step220 KL",
+      "kind": "numerical",
+      "actual": 0.00002751299378711547,
+      "expected": 0.000027512993786948936,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step225 KL",
+      "kind": "numerical",
+      "actual": 0.00001907509714843547,
+      "expected": 0.000019075097148213427,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step230 KL",
+      "kind": "numerical",
+      "actual": 0.000013110297266805127,
+      "expected": 0.000013110297266749615,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step235 KL",
+      "kind": "numerical",
+      "actual": 0.000008928841487731987,
+      "expected": 0.000008928841487731987,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step240 KL",
+      "kind": "numerical",
+      "actual": 0.000006024226004097688,
+      "expected": 0.000006024226004319733,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step245 KL",
+      "kind": "numerical",
+      "actual": 0.000004025314810585101,
+      "expected": 0.000004025314810640612,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step250 KL",
+      "kind": "numerical",
+      "actual": 0.0000026624220920146158,
+      "expected": 0.0000026624220921811492,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step255 KL",
+      "kind": "numerical",
+      "actual": 0.0000017425487024436137,
+      "expected": 0.0000017425487027211695,
+      "error": 2.7755575615628914e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step260 KL",
+      "kind": "numerical",
+      "actual": 0.0000011279771979233466,
+      "expected": 0.0000011279771982564135,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step265 KL",
+      "kind": "numerical",
+      "actual": 7.217441652662693e-7,
+      "expected": 7.21744165155247e-7,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step270 KL",
+      "kind": "numerical",
+      "actual": 4.562131929453095e-7,
+      "expected": 4.5621319288979834e-7,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step275 KL",
+      "kind": "numerical",
+      "actual": 2.846497257902314e-7,
+      "expected": 2.846497257902314e-7,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step280 KL",
+      "kind": "numerical",
+      "actual": 1.7517421113666387e-7,
+      "expected": 1.7517421108115272e-7,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step285 KL",
+      "kind": "numerical",
+      "actual": 1.0621558749202009e-7,
+      "expected": 1.0621558765855355e-7,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step290 KL",
+      "kind": "numerical",
+      "actual": 6.337940261502695e-8,
+      "expected": 6.33794026705381e-8,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step295 KL",
+      "kind": "numerical",
+      "actual": 3.716589391800085e-8,
+      "expected": 3.716589414004545e-8,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step300 KL",
+      "kind": "numerical",
+      "actual": 2.138006699459183e-8,
+      "expected": 2.1380066939080677e-8,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step305 KL",
+      "kind": "numerical",
+      "actual": 1.2040143937408487e-8,
+      "expected": 1.2040143770875034e-8,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step310 KL",
+      "kind": "numerical",
+      "actual": 6.619300052523869e-9,
+      "expected": 6.619300163546171e-9,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step315 KL",
+      "kind": "numerical",
+      "actual": 3.5404287834772674e-9,
+      "expected": 3.5404290055218723e-9,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step320 KL",
+      "kind": "numerical",
+      "actual": 1.8337428242531928e-9,
+      "expected": 1.8337426022085879e-9,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step325 KL",
+      "kind": "numerical",
+      "actual": 9.138236278793954e-10,
+      "expected": 9.138237389016979e-10,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step330 KL",
+      "kind": "numerical",
+      "actual": 4.341902393178998e-10,
+      "expected": 4.3418979522868995e-10,
+      "error": 4.440892098500626e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step335 KL",
+      "kind": "numerical",
+      "actual": 1.9396489969736308e-10,
+      "expected": 1.9396473316390939e-10,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step340 KL",
+      "kind": "numerical",
+      "actual": 7.965944570642591e-11,
+      "expected": 7.965894610606483e-11,
+      "error": 4.996003610813204e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step345 KL",
+      "kind": "numerical",
+      "actual": 2.8866353751766383e-11,
+      "expected": 2.886624272946392e-11,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step350 KL",
+      "kind": "numerical",
+      "actual": 8.466338741186519e-12,
+      "expected": 8.46639425233775e-12,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step355 KL",
+      "kind": "numerical",
+      "actual": 1.5712431356007528e-12,
+      "expected": 1.5714096690544466e-12,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step360 KL",
+      "kind": "numerical",
+      "actual": 3.480549182199866e-14,
+      "expected": 3.480549182199866e-14,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step365 KL",
+      "kind": "numerical",
+      "actual": 2.166600232555993e-13,
+      "expected": 2.166600232555993e-13,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step370 KL",
+      "kind": "numerical",
+      "actual": 6.714628852932947e-13,
+      "expected": 6.716294187469884e-13,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step375 KL",
+      "kind": "numerical",
+      "actual": 9.514611321037592e-13,
+      "expected": 9.514611321037592e-13,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step380 KL",
+      "kind": "numerical",
+      "actual": 1.0034750808074477e-12,
+      "expected": 1.0038081477148353e-12,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step385 KL",
+      "kind": "numerical",
+      "actual": 9.004463841222332e-13,
+      "expected": 9.002243395173082e-13,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step390 KL",
+      "kind": "numerical",
+      "actual": 7.256417688950023e-13,
+      "expected": 7.258083023486961e-13,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step395 KL",
+      "kind": "numerical",
+      "actual": 5.399569680264449e-13,
+      "expected": 5.399569680264449e-13,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step400 KL",
+      "kind": "numerical",
+      "actual": 3.7653213880162184e-13,
+      "expected": 3.7664316110408436e-13,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step405 KL",
+      "kind": "numerical",
+      "actual": 2.483568906086475e-13,
+      "expected": 2.4807933485249123e-13,
+      "error": 2.7755575615628914e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step410 KL",
+      "kind": "numerical",
+      "actual": 1.5537571229629066e-13,
+      "expected": 1.5537571229629066e-13,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step415 KL",
+      "kind": "numerical",
+      "actual": 9.214851104388799e-14,
+      "expected": 9.220402219511925e-14,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step420 KL",
+      "kind": "numerical",
+      "actual": 5.206945985491984e-14,
+      "expected": 5.21249710061511e-14,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step425 KL",
+      "kind": "numerical",
+      "actual": 2.8033131371785203e-14,
+      "expected": 2.781108676686017e-14,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step430 KL",
+      "kind": "numerical",
+      "actual": 1.3933298959045715e-14,
+      "expected": 1.3822276656583199e-14,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step435 KL",
+      "kind": "numerical",
+      "actual": 6.38378239159465e-15,
+      "expected": 6.38378239159465e-15,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step440 KL",
+      "kind": "numerical",
+      "actual": 2.7755575615628914e-15,
+      "expected": 2.609024107869118e-15,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step445 KL",
+      "kind": "numerical",
+      "actual": 9.43689570931383e-16,
+      "expected": 1.0547118733938987e-15,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step450 KL",
+      "kind": "numerical",
+      "actual": 1.6653345369377348e-16,
+      "expected": 2.7755575615628914e-16,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step455 KL",
+      "kind": "numerical",
+      "actual": 1.1102230246251565e-16,
+      "expected": 0,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step460 KL",
+      "kind": "numerical",
+      "actual": -1.6653345369377348e-16,
+      "expected": -5.551115123125783e-17,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step465 KL",
+      "kind": "numerical",
+      "actual": -4.996003610813204e-16,
+      "expected": -5.551115123125783e-17,
+      "error": 4.440892098500626e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step470 KL",
+      "kind": "numerical",
+      "actual": -2.7755575615628914e-16,
+      "expected": -1.1102230246251565e-16,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step475 KL",
+      "kind": "numerical",
+      "actual": -2.220446049250313e-16,
+      "expected": -2.7755575615628914e-16,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step480 KL",
+      "kind": "numerical",
+      "actual": -2.220446049250313e-16,
+      "expected": -1.1102230246251565e-16,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step485 KL",
+      "kind": "numerical",
+      "actual": -3.885780586188048e-16,
+      "expected": -1.6653345369377348e-16,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step490 KL",
+      "kind": "numerical",
+      "actual": 2.220446049250313e-16,
+      "expected": 0,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step495 KL",
+      "kind": "numerical",
+      "actual": 0,
+      "expected": 0,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step500 KL",
+      "kind": "numerical",
+      "actual": 3.3306690738754696e-16,
+      "expected": 0,
+      "error": 3.3306690738754696e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step505 KL",
+      "kind": "numerical",
+      "actual": -5.551115123125783e-17,
+      "expected": 0,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step510 KL",
+      "kind": "numerical",
+      "actual": 1.6653345369377348e-16,
+      "expected": 0,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step515 KL",
+      "kind": "numerical",
+      "actual": -5.551115123125783e-17,
+      "expected": 5.551115123125783e-17,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step520 KL",
+      "kind": "numerical",
+      "actual": 1.6653345369377348e-16,
+      "expected": -5.551115123125783e-17,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step525 KL",
+      "kind": "numerical",
+      "actual": -5.551115123125783e-17,
+      "expected": -5.551115123125783e-17,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step530 KL",
+      "kind": "numerical",
+      "actual": -5.551115123125783e-17,
+      "expected": -5.551115123125783e-17,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step535 KL",
+      "kind": "numerical",
+      "actual": 1.1102230246251565e-16,
+      "expected": -1.1102230246251565e-16,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step540 KL",
+      "kind": "numerical",
+      "actual": -1.6653345369377348e-16,
+      "expected": 0,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step545 KL",
+      "kind": "numerical",
+      "actual": -2.7755575615628914e-16,
+      "expected": -5.551115123125783e-17,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step550 KL",
+      "kind": "numerical",
+      "actual": 1.6653345369377348e-16,
+      "expected": 0,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step555 KL",
+      "kind": "numerical",
+      "actual": -5.551115123125783e-17,
+      "expected": -1.6653345369377348e-16,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step560 KL",
+      "kind": "numerical",
+      "actual": -2.220446049250313e-16,
+      "expected": -5.551115123125783e-17,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step565 KL",
+      "kind": "numerical",
+      "actual": 0,
+      "expected": -1.6653345369377348e-16,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step570 KL",
+      "kind": "numerical",
+      "actual": 5.551115123125783e-17,
+      "expected": 0,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step575 KL",
+      "kind": "numerical",
+      "actual": 5.551115123125783e-17,
+      "expected": 5.551115123125783e-17,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step580 KL",
+      "kind": "numerical",
+      "actual": -5.551115123125783e-17,
+      "expected": 0,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step585 KL",
+      "kind": "numerical",
+      "actual": 5.551115123125783e-17,
+      "expected": -5.551115123125783e-17,
+      "error": 1.1102230246251565e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step590 KL",
+      "kind": "numerical",
+      "actual": -1.6653345369377348e-16,
+      "expected": 5.551115123125783e-17,
+      "error": 2.220446049250313e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step595 KL",
+      "kind": "numerical",
+      "actual": -5.551115123125783e-17,
+      "expected": 0,
+      "error": 5.551115123125783e-17,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Covariance fit full step600 KL",
+      "kind": "numerical",
+      "actual": -1.6653345369377348e-16,
+      "expected": 0,
+      "error": 1.6653345369377348e-16,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Isotropic fit stays isotropic",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Diagonal fit never tilts",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Isotropic fit reaches the formula",
+      "kind": "numerical",
+      "actual": 0.5692099788303064,
+      "expected": 0.5692099788303082,
+      "error": 1.7763568394002505e-15,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Diagonal fit reaches the formula",
+      "kind": "numerical",
+      "actual": 0.9,
+      "expected": 0.8999999999999998,
+      "error": 2.220446049250313e-16,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "Full fit reaches KL 0",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "All three start from the same random q",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Mixture draws split roughly in half",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Full-covariance VI beats mean-field and stays below the evidence",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Full-covariance gap",
+      "kind": "numerical",
+      "actual": 4.892235095978611,
+      "expected": 4.892235095978611,
+      "error": 0,
+      "tolerance": 1e-12,
+      "passed": true
+    },
+    {
+      "name": "Full-covariance correlation matrix has a unit diagonal",
+      "kind": "assertion",
       "passed": true
     },
     {
@@ -50378,6 +54098,1132 @@
     },
     {
       "name": "The prior predictive is wider than the posterior predictive everywhere",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Training loss of θ_A, recomputed",
+      "kind": "numerical",
+      "actual": 14.335129034801687,
+      "expected": 14.335129034801687,
+      "error": 0,
+      "tolerance": 1e-9,
+      "passed": true
+    },
+    {
+      "name": "Training loss = −log joint without its constants",
+      "kind": "numerical",
+      "actual": 14.33512903480169,
+      "expected": 14.335129034801687,
+      "error": 3.552713678800501e-15,
+      "tolerance": 1e-8,
+      "passed": true
+    },
+    {
+      "name": "θ_A came from the start with the lowest final loss",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "The last training frame is θ_A",
+      "kind": "numerical",
+      "actual": 14.3351,
+      "expected": 14.335129034801687,
+      "error": 0.000029034801686478318,
+      "tolerance": 0.001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 0",
+      "kind": "numerical",
+      "actual": -1.3688,
+      "expected": -1.3688267148782867,
+      "error": 0.00002671487828664887,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 1",
+      "kind": "numerical",
+      "actual": -1.3623,
+      "expected": -1.3622734286074385,
+      "error": 0.000026571392561569596,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 2",
+      "kind": "numerical",
+      "actual": -1.3556,
+      "expected": -1.3555771224285897,
+      "error": 0.000022877571410173658,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 3",
+      "kind": "numerical",
+      "actual": -1.3487,
+      "expected": -1.348738518628141,
+      "error": 0.00003851862814108209,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 4",
+      "kind": "numerical",
+      "actual": -1.3418,
+      "expected": -1.341758574355228,
+      "error": 0.000041425644772052905,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 5",
+      "kind": "numerical",
+      "actual": -1.3346,
+      "expected": -1.334638482748201,
+      "error": 0.00003848274820095199,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 6",
+      "kind": "numerical",
+      "actual": -1.3274,
+      "expected": -1.3273796719583422,
+      "error": 0.00002032804165774671,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 7",
+      "kind": "numerical",
+      "actual": -1.32,
+      "expected": -1.3199838017513235,
+      "error": 0.000016198248676602134,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 8",
+      "kind": "numerical",
+      "actual": -1.3125,
+      "expected": -1.312452757328167,
+      "error": 0.00004724267183298103,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 9",
+      "kind": "numerical",
+      "actual": -1.3048,
+      "expected": -1.3047886399625537,
+      "error": 0.00001136003744628411,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 10",
+      "kind": "numerical",
+      "actual": -1.297,
+      "expected": -1.2969937539989755,
+      "error": 0.000006246001024390324,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 11",
+      "kind": "numerical",
+      "actual": -1.2891,
+      "expected": -1.289070589694975,
+      "error": 0.000029410305024901717,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 12",
+      "kind": "numerical",
+      "actual": -1.281,
+      "expected": -1.281021801318736,
+      "error": 0.000021801318736081043,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 13",
+      "kind": "numerical",
+      "actual": -1.2729,
+      "expected": -1.2728501798285643,
+      "error": 0.000049820171435621674,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 14",
+      "kind": "numerical",
+      "actual": -1.2646,
+      "expected": -1.2645586193608083,
+      "error": 0.000041380639191679336,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 15",
+      "kind": "numerical",
+      "actual": -1.2562,
+      "expected": -1.2561500766346725,
+      "error": 0.00004992336532749775,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 16",
+      "kind": "numerical",
+      "actual": -1.2476,
+      "expected": -1.247627522242838,
+      "error": 0.000027522242837862976,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 17",
+      "kind": "numerical",
+      "actual": -1.239,
+      "expected": -1.2389938826319415,
+      "error": 0.000006117368058555783,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 18",
+      "kind": "numerical",
+      "actual": -1.2303,
+      "expected": -1.2302519713823474,
+      "error": 0.00004802861765251798,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 19",
+      "kind": "numerical",
+      "actual": -1.2214,
+      "expected": -1.2214044081672144,
+      "error": 0.0000044081672143647666,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 20",
+      "kind": "numerical",
+      "actual": -1.2125,
+      "expected": -1.2124535235008875,
+      "error": 0.000046476499112380054,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 21",
+      "kind": "numerical",
+      "actual": -1.2034,
+      "expected": -1.2034012470697149,
+      "error": 0.0000012470697148270204,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 22",
+      "kind": "numerical",
+      "actual": -1.1942,
+      "expected": -1.1942489770674733,
+      "error": 0.00004897706747342134,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 23",
+      "kind": "numerical",
+      "actual": -1.185,
+      "expected": -1.184997427525022,
+      "error": 0.0000025724749781463885,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 24",
+      "kind": "numerical",
+      "actual": -1.1756,
+      "expected": -1.1756464501215522,
+      "error": 0.00004645012155224393,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 25",
+      "kind": "numerical",
+      "actual": -1.1662,
+      "expected": -1.1661948263846826,
+      "error": 0.000005173615317266567,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 26",
+      "kind": "numerical",
+      "actual": -1.1566,
+      "expected": -1.156640025520834,
+      "error": 0.00004002552083393063,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 27",
+      "kind": "numerical",
+      "actual": -1.147,
+      "expected": -1.1469779223590924,
+      "error": 0.000022077640907669505,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 28",
+      "kind": "numerical",
+      "actual": -1.1372,
+      "expected": -1.137202469036643,
+      "error": 0.0000024690366429158672,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 29",
+      "kind": "numerical",
+      "actual": -1.1273,
+      "expected": -1.127305313101269,
+      "error": 0.0000053131012689444646,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 30",
+      "kind": "numerical",
+      "actual": -1.1173,
+      "expected": -1.1172753536621174,
+      "error": 0.00002464633788257231,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 31",
+      "kind": "numerical",
+      "actual": -1.1071,
+      "expected": -1.1070982260995201,
+      "error": 0.0000017739004798400515,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 32",
+      "kind": "numerical",
+      "actual": -1.0968,
+      "expected": -1.0967557046783147,
+      "error": 0.00004429532168526151,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 33",
+      "kind": "numerical",
+      "actual": -1.0862,
+      "expected": -1.0862250112484382,
+      "error": 0.000025011248438122635,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 34",
+      "kind": "numerical",
+      "actual": -1.0755,
+      "expected": -1.0754780171436464,
+      "error": 0.000021982856353464086,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 35",
+      "kind": "numerical",
+      "actual": -1.0645,
+      "expected": -1.0644803245290562,
+      "error": 0.00001967547094383626,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 36",
+      "kind": "numerical",
+      "actual": -1.0532,
+      "expected": -1.053190212984868,
+      "error": 0.000009787015131879073,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 37",
+      "kind": "numerical",
+      "actual": -1.0416,
+      "expected": -1.041557437311467,
+      "error": 0.00004256268853297662,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 38",
+      "kind": "numerical",
+      "actual": -1.0295,
+      "expected": -1.0295218637711971,
+      "error": 0.00002186377119706151,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 39",
+      "kind": "numerical",
+      "actual": -1.017,
+      "expected": -1.0170119347546844,
+      "error": 0.000011934754684528315,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 40",
+      "kind": "numerical",
+      "actual": -1.0039,
+      "expected": -1.0039429568615716,
+      "error": 0.000042956861571630256,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 41",
+      "kind": "numerical",
+      "actual": -0.9902,
+      "expected": -0.9902152155207937,
+      "error": 0.000015215520793754322,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 42",
+      "kind": "numerical",
+      "actual": -0.9757,
+      "expected": -0.9757119317024786,
+      "error": 0.000011931702478595874,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 43",
+      "kind": "numerical",
+      "actual": -0.9603,
+      "expected": -0.960297094429343,
+      "error": 0.000002905570657074641,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 44",
+      "kind": "numerical",
+      "actual": -0.9438,
+      "expected": -0.9438132283883317,
+      "error": 0.0000132283883317319,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 45",
+      "kind": "numerical",
+      "actual": -0.9261,
+      "expected": -0.9260791908831713,
+      "error": 0.000020809116828779395,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 46",
+      "kind": "numerical",
+      "actual": -0.9069,
+      "expected": -0.9068881385908065,
+      "error": 0.000011861409193514305,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 47",
+      "kind": "numerical",
+      "actual": -0.886,
+      "expected": -0.8860058637032276,
+      "error": 0.000005863703227637629,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 48",
+      "kind": "numerical",
+      "actual": -0.8632,
+      "expected": -0.8631697717447372,
+      "error": 0.000030228255262776393,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 49",
+      "kind": "numerical",
+      "actual": -0.8381,
+      "expected": -0.8380888584864168,
+      "error": 0.000011141513583168283,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 50",
+      "kind": "numerical",
+      "actual": -0.8104,
+      "expected": -0.8104451365512336,
+      "error": 0.000045136551233615485,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 51",
+      "kind": "numerical",
+      "actual": -0.7799,
+      "expected": -0.7798970541399859,
+      "error": 0.000002945860014147428,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 52",
+      "kind": "numerical",
+      "actual": -0.7461,
+      "expected": -0.7460855224048533,
+      "error": 0.000014477595146722422,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 53",
+      "kind": "numerical",
+      "actual": -0.7086,
+      "expected": -0.708643199063795,
+      "error": 0.00004319906379501859,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 54",
+      "kind": "numerical",
+      "actual": -0.6672,
+      "expected": -0.6672076289347993,
+      "error": 0.0000076289347993308,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 55",
+      "kind": "numerical",
+      "actual": -0.6214,
+      "expected": -0.6214386743066086,
+      "error": 0.00003867430660864368,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 56",
+      "kind": "numerical",
+      "actual": -0.571,
+      "expected": -0.5710403348326106,
+      "error": 0.00004033483261067783,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 57",
+      "kind": "numerical",
+      "actual": -0.5158,
+      "expected": -0.5157865240027281,
+      "error": 0.00001347599727197224,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 58",
+      "kind": "numerical",
+      "actual": -0.4555,
+      "expected": -0.45554963333229426,
+      "error": 0.00004963333229424105,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 59",
+      "kind": "numerical",
+      "actual": -0.3903,
+      "expected": -0.39032982634403224,
+      "error": 0.0000298263440322577,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 60",
+      "kind": "numerical",
+      "actual": -0.3203,
+      "expected": -0.32028208772470634,
+      "error": 0.000017912275293630042,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 61",
+      "kind": "numerical",
+      "actual": -0.2457,
+      "expected": -0.24573731571558452,
+      "error": 0.000037315715584518294,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 62",
+      "kind": "numerical",
+      "actual": -0.1672,
+      "expected": -0.16721345198875767,
+      "error": 0.000013451988757684497,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 63",
+      "kind": "numerical",
+      "actual": -0.0854,
+      "expected": -0.08541304943183597,
+      "error": 0.000013049431835970848,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 64",
+      "kind": "numerical",
+      "actual": -0.0012,
+      "expected": -0.0012049342392790596,
+      "error": 0.000004934239279059732,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 65",
+      "kind": "numerical",
+      "actual": 0.0844,
+      "expected": 0.08441033456927402,
+      "error": 0.000010334569274017547,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 66",
+      "kind": "numerical",
+      "actual": 0.1703,
+      "expected": 0.170348990253372,
+      "error": 0.00004899025337198881,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 67",
+      "kind": "numerical",
+      "actual": 0.2555,
+      "expected": 0.25550191236490927,
+      "error": 0.0000019123649092622763,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 68",
+      "kind": "numerical",
+      "actual": 0.3388,
+      "expected": 0.3387954120468255,
+      "error": 0.000004587953174484127,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 69",
+      "kind": "numerical",
+      "actual": 0.4192,
+      "expected": 0.4192479862795778,
+      "error": 0.00004798627957780521,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 70",
+      "kind": "numerical",
+      "actual": 0.496,
+      "expected": 0.4960168531424086,
+      "error": 0.00001685314240862379,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 71",
+      "kind": "numerical",
+      "actual": 0.5684,
+      "expected": 0.5684299723243347,
+      "error": 0.00002997232433465946,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 72",
+      "kind": "numerical",
+      "actual": 0.636,
+      "expected": 0.636001747409288,
+      "error": 0.0000017474092880442882,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 73",
+      "kind": "numerical",
+      "actual": 0.6984,
+      "expected": 0.698433078353932,
+      "error": 0.000033078353931959015,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 74",
+      "kind": "numerical",
+      "actual": 0.7556,
+      "expected": 0.7555983671619696,
+      "error": 0.0000016328380304519996,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 75",
+      "kind": "numerical",
+      "actual": 0.8075,
+      "expected": 0.8075231968407873,
+      "error": 0.000023196840787331752,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 76",
+      "kind": "numerical",
+      "actual": 0.8544,
+      "expected": 0.8543566833638433,
+      "error": 0.00004331663615675385,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 77",
+      "kind": "numerical",
+      "actual": 0.8963,
+      "expected": 0.8963421168400173,
+      "error": 0.000042116840017314416,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 78",
+      "kind": "numerical",
+      "actual": 0.9338,
+      "expected": 0.9337887251153808,
+      "error": 0.000011274884619161263,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 79",
+      "kind": "numerical",
+      "actual": 0.967,
+      "expected": 0.9670464688517891,
+      "error": 0.000046468851789160937,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 80",
+      "kind": "numerical",
+      "actual": 0.9965,
+      "expected": 0.9964849063403897,
+      "error": 0.000015093659610387888,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 81",
+      "kind": "numerical",
+      "actual": 1.0225,
+      "expected": 1.022476461343341,
+      "error": 0.00002353865665893906,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 82",
+      "kind": "numerical",
+      "actual": 1.0454,
+      "expected": 1.0453839279491728,
+      "error": 0.00001607205082732044,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 83",
+      "kind": "numerical",
+      "actual": 1.0656,
+      "expected": 1.06555174251923,
+      "error": 0.0000482574807700864,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 84",
+      "kind": "numerical",
+      "actual": 1.0833,
+      "expected": 1.0833004075138886,
+      "error": 4.075138886339147e-7,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 85",
+      "kind": "numerical",
+      "actual": 1.0989,
+      "expected": 1.0989234203228204,
+      "error": 0.00002342032282043327,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 86",
+      "kind": "numerical",
+      "actual": 1.1127,
+      "expected": 1.1126861003109616,
+      "error": 0.000013899689038421315,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 87",
+      "kind": "numerical",
+      "actual": 1.1248,
+      "expected": 1.1248257856998864,
+      "error": 0.000025785699886426983,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 88",
+      "kind": "numerical",
+      "actual": 1.1356,
+      "expected": 1.1355529648636107,
+      "error": 0.00004703513638926182,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 89",
+      "kind": "numerical",
+      "actual": 1.1451,
+      "expected": 1.1450529989889964,
+      "error": 0.00004700101100363341,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 90",
+      "kind": "numerical",
+      "actual": 1.1535,
+      "expected": 1.1534881763939524,
+      "error": 0.000011823606047567381,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 91",
+      "kind": "numerical",
+      "actual": 1.161,
+      "expected": 1.1609999093536698,
+      "error": 9.064633021971247e-8,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 92",
+      "kind": "numerical",
+      "actual": 1.1677,
+      "expected": 1.1677109412677062,
+      "error": 0.000010941267706288116,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 93",
+      "kind": "numerical",
+      "actual": 1.1737,
+      "expected": 1.1737274763034269,
+      "error": 0.000027476303426920978,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 94",
+      "kind": "numerical",
+      "actual": 1.1791,
+      "expected": 1.179141176972001,
+      "error": 0.000041176972001011336,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 95",
+      "kind": "numerical",
+      "actual": 1.184,
+      "expected": 1.184030999380922,
+      "error": 0.00003099938092199217,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 96",
+      "kind": "numerical",
+      "actual": 1.1885,
+      "expected": 1.1884648530476305,
+      "error": 0.00003514695236939147,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 97",
+      "kind": "numerical",
+      "actual": 1.1925,
+      "expected": 1.1925010838193928,
+      "error": 0.0000010838193928996986,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 98",
+      "kind": "numerical",
+      "actual": 1.1962,
+      "expected": 1.1961897860167154,
+      "error": 0.000010213983284490524,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 99",
+      "kind": "numerical",
+      "actual": 1.1996,
+      "expected": 1.1995739545164812,
+      "error": 0.00002604548351881064,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 100",
+      "kind": "numerical",
+      "actual": 1.2027,
+      "expected": 1.2026904899828141,
+      "error": 0.000009510017185965225,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 101",
+      "kind": "numerical",
+      "actual": 1.2056,
+      "expected": 1.2055710714941918,
+      "error": 0.000028928505808156757,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 102",
+      "kind": "numerical",
+      "actual": 1.2082,
+      "expected": 1.2082429108898263,
+      "error": 0.000042910889826330845,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 103",
+      "kind": "numerical",
+      "actual": 1.2107,
+      "expected": 1.2107294026187383,
+      "error": 0.000029402618738183506,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 104",
+      "kind": "numerical",
+      "actual": 1.2131,
+      "expected": 1.2130506819709275,
+      "error": 0.00004931802907259808,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 105",
+      "kind": "numerical",
+      "actual": 1.2152,
+      "expected": 1.2152241034749671,
+      "error": 0.00002410347496706322,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 106",
+      "kind": "numerical",
+      "actual": 1.2173,
+      "expected": 1.2172646500773137,
+      "error": 0.00003534992268638959,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 107",
+      "kind": "numerical",
+      "actual": 1.2192,
+      "expected": 1.2191852825521277,
+      "error": 0.000014717447872403255,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 108",
+      "kind": "numerical",
+      "actual": 1.221,
+      "expected": 1.220997237474196,
+      "error": 0.0000027625258041119594,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 109",
+      "kind": "numerical",
+      "actual": 1.2227,
+      "expected": 1.2227102810491284,
+      "error": 0.000010281049128479935,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 110",
+      "kind": "numerical",
+      "actual": 1.2243,
+      "expected": 1.224332925148298,
+      "error": 0.00003292514829800197,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 111",
+      "kind": "numerical",
+      "actual": 1.2259,
+      "expected": 1.2258726110456792,
+      "error": 0.000027388954320750614,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 112",
+      "kind": "numerical",
+      "actual": 1.2273,
+      "expected": 1.2273358655986655,
+      "error": 0.00003586559866541883,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 113",
+      "kind": "numerical",
+      "actual": 1.2287,
+      "expected": 1.228728433950415,
+      "error": 0.00002843395041507435,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 114",
+      "kind": "numerical",
+      "actual": 1.2301,
+      "expected": 1.2300553922504889,
+      "error": 0.00004460774951109414,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 115",
+      "kind": "numerical",
+      "actual": 1.2313,
+      "expected": 1.231321243385838,
+      "error": 0.000021243385837976803,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 116",
+      "kind": "numerical",
+      "actual": 1.2325,
+      "expected": 1.2325299982776012,
+      "error": 0.000029998277601306356,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 117",
+      "kind": "numerical",
+      "actual": 1.2337,
+      "expected": 1.2336852449228888,
+      "error": 0.000014755077111239245,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 118",
+      "kind": "numerical",
+      "actual": 1.2348,
+      "expected": 1.2347902070374444,
+      "error": 0.000009792962555543738,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 119",
+      "kind": "numerical",
+      "actual": 1.2358,
+      "expected": 1.235847793877999,
+      "error": 0.000047793877999025014,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "last training frame curve 120",
+      "kind": "numerical",
+      "actual": 1.2369,
+      "expected": 1.236860642586189,
+      "error": 0.00003935741381111413,
+      "tolerance": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "Training starts far from the data and ends near it",
       "kind": "assertion",
       "passed": true
     },

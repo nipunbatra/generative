@@ -1,5 +1,5 @@
 import {m,eq,at,only,cols,code,image,table,flow,plot,palette} from '../shared/author.js';
-const F=await fetch(new URL('./data/fixtures.json',import.meta.url)).then(r=>r.json());
+const F=await fetch(new URL('./data/fixtures.json',import.meta.url),{cache:'no-cache'}).then(r=>r.json());
 const n=(x,d=3)=>Number(x).toFixed(d);const tex=String.raw;
 const p=s=>`<p class="lead">${s}</p>`;const small=s=>`<p class="caption">${s}</p>`;
 const im=(f,caption='')=>image(`figures/${f}`,f.replaceAll('-',' '),caption);

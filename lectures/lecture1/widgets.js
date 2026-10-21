@@ -109,8 +109,8 @@ function klarea(el,ctx){
   const fwd=s.dir==='pq',f=xs.map((u,i)=>fwd?py[i]*(lp[i]-lq[i]):qy[i]*(lq[i]-lp[i]));
   const value=fwd?normalKL(P,q):normalKL(q,P),hi=Math.max(...f),lo=Math.min(...f);
   const top=Math.max(hi*1.12,.012),bottom=Math.min(lo*1.12,-top*.16);
-  const A=panel({W:560,H,L:16,R:14,T:76,B:56,xMin:-15,xMax:17,yMax:.3,ticksX:[-10,0,10],yAxis:false,xLabel:'u'});
-  const Bp=panel({ox:590,W:560,H,L:16,R:14,T:76,B:56,xMin:-15,xMax:17,yMin:bottom,yMax:top,ticksX:[-10,0,10],yAxis:false,xLabel:'u'});
+  const A=panel({W:560,H,L:16,R:14,T:76,B:56,xMin:-15,xMax:17,yMax:.3,ticksX:[-10,0,10],yAxis:false,xLabel:'θ'});
+  const Bp=panel({ox:590,W:560,H,L:16,R:14,T:76,B:56,xMin:-15,xMax:17,yMin:bottom,yMax:top,ticksX:[-10,0,10],yAxis:false,xLabel:'θ'});
   const name=fwd?'KL(p‖q)':'KL(q‖p)',w=fwd?'p':'q',o=fwd?'q':'p';
   return svg(W,H,A.axes+A.area(xs,py,TINT.p)+A.line(xs,py,palette.p)+A.line(xs,qy,palette.q)+
    legend(16,30,[['p = N(1, 4²)',palette.p],[`q = N(${num(s.mu)}, ${num(s.sigma)}²)`,palette.q]])+
@@ -152,13 +152,14 @@ function fwdrev(el,ctx,d){
 function olive(el,ctx,d){
  const fr=d.story.olive.frames,xs=lin(-11,13,241),py=xs.map(u=>normalPdf(u,{mu:1,sigma:4})),W=1150,H=320;
  const render=i=>{const [step,m,s,v]=fr[i],tr=fr.slice(0,i+1);
-  const A=panel({W:700,H,L:58,R:14,T:62,B:56,xMin:-11,xMax:13,yMax:.25,ticksX:[-10,-5,0,5,10],ticksY:[0,.1,.2],xLabel:'u'});
+  const A=panel({W:700,H,L:58,R:14,T:62,B:56,xMin:-11,xMax:13,yMax:.25,ticksX:[-10,-5,0,5,10],ticksY:[0,.1,.2],xLabel:'θ'});
   const K=panel({ox:740,W:410,H,L:52,R:26,T:62,B:56,xMin:0,xMax:200,yMax:2,ticksX:[0,100,200],ticksY:[0,1,2],xLabel:'step'});
-  return svg(W,H,A.axes+A.area(xs,py,TINT.p)+A.line(xs,py,palette.p)+A.line(xs,xs.map(u=>normalPdf(u,{mu:m,sigma:s})),palette.q)+
+  const ghosts=[0,10,25,50,100].filter(k=>k<step).map(k=>A.line(xs,xs.map(u=>normalPdf(u,{mu:fr[k][1],sigma:fr[k][2]})),palette.q,'style="stroke-width:2;stroke-opacity:.22"')).join('');
+  return svg(W,H,A.axes+A.area(xs,py,TINT.p)+A.line(xs,py,palette.p)+ghosts+A.line(xs,xs.map(u=>normalPdf(u,{mu:m,sigma:s})),palette.q)+
    legend(58,30,[['p = N(1, 4²)',palette.p],[`q = N(${num(m)}, ${num(s)}²)`,palette.q]])+
-   K.axes+K.line(tr.map(r=>r[0]),tr.map(r=>r[3]),palette.loss)+K.dot(step,v,palette.loss)+
-   label(792,30,`KL(q‖p) ${kl(v)}`,{fill:palette.loss,size:22}),
-   'The Gaussian q (purple) moving onto the fixed target p (teal), with the KL falling.');
+   K.axes+K.line(fr.map(r=>r[0]),fr.map(r=>r[3]),'#D1D5DB','style="stroke-width:2"')+K.line(tr.map(r=>r[0]),tr.map(r=>r[3]),palette.loss)+K.dot(step,v,palette.loss)+
+   label(792,30,`loss = KL(q‖p) ${kl(v)}`,{fill:palette.loss,size:22}),
+   'The Gaussian q (purple) moving onto the fixed target p (teal), with faint earlier positions, and the loss falling.');
  };
  animated(el,ctx,{count:fr.length,render,step:i=>`step ${fr[i][0]}`,alt:'q moving onto p'});
 }
@@ -167,7 +168,7 @@ function olive(el,ctx,d){
 function mixfit(el,ctx,d,run){
  const st=d.story.mixfit,fr=st[run],xs=st.x,py=st.p,W=600,H=330;
  const render=i=>{const [,m,s,,v]=fr[i];
-  const A=panel({W,H,L:16,R:14,T:62,B:56,xMin:-4,xMax:8,yMax:1.25,ticksX:[-4,-2,0,2,4,6,8],yAxis:false,xLabel:'u'});
+  const A=panel({W,H,L:16,R:14,T:62,B:56,xMin:-4,xMax:8,yMax:1.25,ticksX:[-4,-2,0,2,4,6,8],yAxis:false,xLabel:'θ'});
   return svg(W,H,A.axes+A.area(xs,py,TINT.p)+A.line(xs,py,palette.p)+A.line(xs,xs.map(u=>normalPdf(u,{mu:m,sigma:s})),palette.q)+
    label(A.x(-.2),A.y(.62),'p',{fill:palette.p,anchor:'middle'})+
    label(16,30,`q = N(${num(m)}, ${num(s)}²)`,{fill:palette.q,size:23})+label(W-14,30,`KL ${kl(v)}`,{fill:palette.loss,size:23,anchor:'end'}),
@@ -242,6 +243,23 @@ function priorfuncs(el,ctx,d){
  draw();
 }
 
+// ---- Part 1: training the network to find θ_A (ten random starts, the best one animated) --------
+function mapfit(el,ctx,d){
+ const b=d.story.bnn,m=b.map,fr=m.frames,xs=b.grid,W=1150,H=280,lg=Math.log10;
+ const steps=m.objectives[0].map((_,k)=>k*m.record_every),best=m.objectives[m.best_seed];
+ const render=i=>{const [step,obj,fy]=fr[i],upto=Math.round(step/m.record_every);
+  const A=panel({W:600,H,L:52,R:14,T:50,B:52,xMin:-2.5,xMax:2.5,yMin:-2.6,yMax:2.6,ticksX:[-2,-1,0,1,2],ticksY:[-2,0,2],xLabel:'x'});
+  const K=panel({ox:640,W:510,H,L:76,R:26,T:50,B:52,xMin:0,xMax:2000,yMin:1,yMax:4,ticksX:[0,1000,2000],ticksY:[1,2,3,4],fmtY:v=>['','10','100','1,000','10,000'][v],xLabel:'step'});
+  let s=A.axes+A.line(xs,fy,palette.q)+b.x.map((x,k)=>`<circle cx="${A.x(x).toFixed(1)}" cy="${A.y(b.y[k]).toFixed(1)}" r="5" fill="${palette.data}"/>`).join('')+
+   label(52,26,'the network during training',{fill:palette.q,size:20})+K.axes;
+  m.objectives.forEach((o,r)=>{if(r!==m.best_seed)s+=K.line(steps,o.map(lg),'#9CA3AF','style="stroke-width:1.5;stroke-opacity:.8"');});
+  s+=K.line(steps.slice(0,upto+1),best.slice(0,upto+1).map(lg),palette.q)+K.dot(step,lg(obj),palette.q)+
+   label(716,26,`loss ${obj>=100?Math.round(obj).toLocaleString('en'):num(obj,1)} · grey: the other nine starts`,{fill:palette.q,size:20});
+  return svg(W,H,s,'The network’s curve during training from a random start, and the loss of all ten starts.');
+ };
+ animated(el,ctx,{count:fr.length,render,step:i=>`step ${fr[i][0]}`,alt:'Training the network',duration:5000});
+}
+
 // ---- Part 2: a Monte Carlo KL estimate, one draw at a time ---------------------------------
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 const gauss=r=>{let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());};
@@ -253,7 +271,7 @@ function mclive(el,ctx){
   const S=draws.length;if(S<=100||Math.floor(Math.log10(S)*80)!==Math.floor(Math.log10(S-1)*80))trace.push([Math.log10(S),sum/S]);}}
  const render=()=>{
   const S=draws.length,est=S?sum/S:NaN;
-  const A=panel({W:560,H,L:16,R:14,T:62,B:56,xMin:-15,xMax:17,yMax:.3,ticksX:[-10,0,10],yAxis:false,xLabel:'u'});
+  const A=panel({W:560,H,L:16,R:14,T:62,B:56,xMin:-15,xMax:17,yMax:.3,ticksX:[-10,0,10],yAxis:false,xLabel:'θ'});
   const K=panel({ox:600,W:550,H,L:62,R:26,T:62,B:56,xMin:0,xMax:4.3,yMin:-.6,yMax:1.4,ticksX:[0,1,2,3,4],fmtX:v=>['1','10','100','1,000','10,000'][v],ticksY:[-.5,0,.5,1],xLabel:'draws S (log scale)'});
   const rug=draws.slice(-300).map(u=>`<line x1="${A.x(u).toFixed(1)}" y1="${A.y(0)-1}" x2="${A.x(u).toFixed(1)}" y2="${A.y(0)-15}" stroke="${palette.q}" stroke-opacity=".45" stroke-width="1.5"/>`).join('');
   return svg(W,H,A.axes+A.area(xs,py,TINT.p)+A.line(xs,py,palette.p)+A.line(xs,qy,palette.q)+rug+
@@ -270,6 +288,278 @@ function mclive(el,ctx){
  const draw=interactive(el,ctx,{controls,render});
  el.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{if(draws.length<20000)add(Number(b.dataset.add));draw();}));
  el.querySelector('[data-reset]').addEventListener('click',()=>{reset(10);draw();});
+}
+
+// ---- Part 2: KL as an expectation, estimated by sampling grades -----------------------------------
+export const GRADE_COLORS=[palette.d,palette.loss,MUTED];
+function mcgrades(el,ctx,d){
+ const g=d.story.grades,p=g.p,lr=g.log_ratio,exact=g.kl,W=1150,H=320;
+ let rng,draws,sum,trace;
+ const reset=start=>{rng=mulberry32(11);draws=[];sum=0;trace=[];add(start);};
+ function add(k){for(let i=0;i<k;i++){const u=rng(),j=u<p[0]?0:u<p[0]+p[1]?1:2;draws.push(j);sum+=lr[j];
+  const S=draws.length;if(S<=100||Math.floor(Math.log10(S)*80)!==Math.floor(Math.log10(S-1)*80))trace.push([Math.log10(S),sum/S]);}}
+ const render=()=>{
+  const S=draws.length,est=S?sum/S:NaN,counts=[0,0,0];draws.forEach(j=>counts[j]++);
+  let s=label(0,26,'grades drawn from this year’s p (latest 30)',{fill:palette.p,size:21});
+  draws.slice(-30).forEach((j,k)=>{const x=6+(k%10)*52,y=46+Math.floor(k/10)*52;
+   s+=`<rect x="${x}" y="${y}" width="44" height="44" rx="7" fill="${GRADE_COLORS[j]}" fill-opacity=".14" stroke="${GRADE_COLORS[j]}" stroke-width="2"/>`+label(x+22,y+31,g.names[j],{fill:GRADE_COLORS[j],size:23,anchor:'middle',weight:600});});
+  g.names.forEach((nm,j)=>{const y=232+j*30;
+   s+=label(0,y,`${nm}: log ratio ${lr[j]>=0?'+':''}${num(lr[j])}`,{fill:GRADE_COLORS[j],size:20})+label(330,y,`${counts[j].toLocaleString('en')} draws, ${S?Math.round(100*counts[j]/S):0}%`,{fill:GRADE_COLORS[j],size:20});});
+  const K=panel({ox:600,W:550,H,L:62,R:26,T:56,B:56,xMin:0,xMax:4.3,yMin:-.6,yMax:1.4,ticksX:[0,1,2,3,4],fmtX:v=>['1','10','100','1,000','10,000'][v],ticksY:[-.5,0,.5,1],xLabel:'draws S (log scale)'});
+  s+=K.axes+`<line x1="${K.x(0)}" y1="${K.y(exact).toFixed(1)}" x2="${K.x(4.3)}" y2="${K.y(exact).toFixed(1)}" stroke="${palette.p}" stroke-width="2.5" stroke-dasharray="8 6"/>`+
+   label(K.x(4.3),K.y(exact)-10,`exact KL ${num(exact,3)}`,{fill:palette.p,size:20,anchor:'end'})+
+   (trace.length>1?K.line(trace.map(t=>t[0]),trace.map(t=>t[1]),palette.q):'')+(S?K.dot(Math.log10(S),est,palette.q):'')+
+   label(662,26,S?`average of ${S.toLocaleString('en')} log ratios: ${num(est,3)}`:'No draws yet',{fill:palette.q,size:21});
+  return svg(W,H,s,'Grades drawn from this year’s distribution, their counts, and the running average of their log ratios approaching the KL.');
+ };
+ if(ctx.printing){reset(1000);el.innerHTML=render();return;}
+ reset(10);
+ const controls=[1,10,100,1000].map(k=>`<button type="button" data-add="${k}">+${k.toLocaleString('en')} grade${k>1?'s':''}</button>`).join('')+`<button type="button" data-reset>Reset</button>`;
+ const draw=interactive(el,ctx,{controls,render});
+ el.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{if(draws.length<20000)add(Number(b.dataset.add));draw();}));
+ el.querySelector('[data-reset]').addEventListener('click',()=>{reset(10);draw();});
+}
+
+// ---- Part 3: the KL over a grid of (μ, σ); hover a cell to see that q against p ----------------------
+const KL_CUTS=[.01,.03,.1,.2,.4,.7,1,1.5,2],KL_RAMP=['#F7F3FF','#EBDFFD','#DBC6FA','#C7A5F4','#AE7FEA','#9258D8','#7537BE','#5A2299','#421473','#2E0C52'];
+export const klColor=v=>{const k=KL_CUTS.findIndex(t=>v<t);return KL_RAMP[k<0?KL_CUTS.length:k];};
+function klgrid(el,ctx){
+ const P0={mu:1,sigma:4},W=1150,H=340,L=66,R=16,T=44,B=56,GW=600,nx=51,ny=40,mu0=-4.1,mu1=6.1,dl=Math.log(25)/ny,ls0=Math.log(4)-28.5*dl,ls1=ls0+ny*dl;
+ const X=v=>L+(v-mu0)/(mu1-mu0)*(GW-L-R),Y=ls=>H-B-(ls-ls0)/(ls1-ls0)*(H-T-B),cw=(GW-L-R)/nx,chh=(H-T-B)/ny;
+ const cell=(i,j)=>({mu:mu0+(i+.5)*(mu1-mu0)/nx,sigma:Math.exp(ls0+(j+.5)*(ls1-ls0)/ny)});
+ let heat='',best={v:Infinity};
+ for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const c=cell(i,j),v=normalKL(c,P0);if(v<best.v)best={v,i,j};
+  heat+=`<rect x="${(L+i*cw).toFixed(1)}" y="${(H-B-(j+1)*chh).toFixed(1)}" width="${(cw+.5).toFixed(1)}" height="${(chh+.5).toFixed(1)}" fill="${klColor(v)}"/>`;}
+ heat+=`<line x1="${L}" y1="${H-B}" x2="${GW-R}" y2="${H-B}" stroke="${AX}"/><line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="${AX}"/>`;
+ for(const v of [-4,-2,0,2,4,6])heat+=label(X(v),H-B+24,num(v,0),{size:20,anchor:'middle'});
+ for(const v of [.5,1,2,4,8])heat+=label(L-9,Y(Math.log(v))+7,String(v),{size:20,anchor:'end'});
+ heat+=label(GW-R,H-9,'mean μ',{size:20,anchor:'end'})+label(L,T-16,'width σ, log scale',{size:20})+label(GW-R,T-16,'darker = larger KL',{size:20,anchor:'end'});
+ const bc=cell(best.i,best.j),bestMark=`<circle cx="${X(bc.mu).toFixed(1)}" cy="${Y(Math.log(bc.sigma)).toFixed(1)}" r="9" fill="none" stroke="${palette.loss}" stroke-width="3"/>`+
+  label(X(bc.mu)+14,Y(Math.log(bc.sigma))-12,`best: N(${num(bc.mu,1)}, ${num(bc.sigma,1)}²)`,{fill:palette.loss,size:20,weight:600});
+ const xs=lin(-15,17,321),py=xs.map(u=>normalPdf(u,P0));
+ const side=(i,j)=>{const c=cell(i,j),v=normalKL(c,P0),qy=xs.map(u=>normalPdf(u,c)),top=Math.max(.42,Math.max(...qy)*1.08);
+  const A=panel({ox:640,W:510,H,L:14,R:14,T:76,B:56,xMin:-15,xMax:17,yMax:top,ticksX:[-10,0,10],yAxis:false,xLabel:'θ'});
+  return A.axes+A.area(xs,py,TINT.p)+A.line(xs,py,palette.p)+A.line(xs,qy,palette.q)+legend(654,30,[['p = N(1, 4²)',palette.p],[`q = N(${num(c.mu,1)}, ${num(c.sigma,2)}²)`,palette.q]],20)+
+   label(654,62,`KL(q‖p) = ${klv(v)} nats`,{fill:palette.ink,size:22,weight:600});};
+ const cursor=(i,j)=>`<rect x="${(L+i*cw-1).toFixed(1)}" y="${(H-B-(j+1)*chh-1).toFixed(1)}" width="${(cw+2).toFixed(1)}" height="${(chh+2).toFixed(1)}" fill="none" stroke="${palette.ink}" stroke-width="2.5"/>`;
+ const start=[Math.round((4-mu0)/(mu1-mu0)*nx-.5),Math.round((Math.log(.5)-ls0)/(ls1-ls0)*ny-.5)];
+ const alt='KL from q = N(μ, σ²) to p = N(1, 4²) over a 51 by 40 grid; the panel on the right shows the selected q against p.';
+ const whole=(i,j,b)=>svg(W,H,`<g>${heat}</g><g data-cursor>${cursor(i,j)}</g><g data-best${b>=2?'':' style="display:none"'}>${bestMark}</g><g data-side>${side(i,j)}</g><rect data-hit x="${L}" y="${T}" width="${GW-L-R}" height="${H-T-B}" fill="transparent" style="cursor:crosshair"/>`,alt);
+ if(ctx.printing){el.innerHTML=`<div class="state-slot"><div data-only="1">${whole(...start,1)}</div><div data-only="2-99">${whole(best.i,best.j,2)}</div></div>`;return;}
+ el.innerHTML=`<div class="w-fig diagram-scroll"></div><div class="w-controls"><span class="w-readout">hover: one point, one q</span><button type="button" data-goto="start">q = N(4, 0.5²)</button><button type="button" data-goto="best">the best grid point</button></div>`;
+ const box=el.querySelector('.w-fig'),scene=el.closest('.scene');let cur=[...start],build=ctx.reading||!scene?2:Number(scene.dataset.build||1);
+ box.innerHTML=whole(...cur,build);
+ const svgEl=box.querySelector('svg'),gCur=svgEl.querySelector('[data-cursor]'),gSide=svgEl.querySelector('[data-side]'),gBest=svgEl.querySelector('[data-best]');
+ svgEl.setAttribute('tabindex','0');
+ const show=(i,j)=>{i=Math.max(0,Math.min(nx-1,i));j=Math.max(0,Math.min(ny-1,j));if(i===cur[0]&&j===cur[1])return;cur=[i,j];gCur.innerHTML=cursor(i,j);gSide.innerHTML=side(i,j);};
+ const pick=e=>{const pt=svgEl.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svgEl.getScreenCTM();if(!m)return;const v=pt.matrixTransform(m.inverse());
+  if(v.x<L||v.x>GW-R||v.y<T||v.y>H-B)return;show(Math.floor((v.x-L)/cw),Math.floor((H-B-v.y)/chh));};
+ svgEl.addEventListener('pointermove',pick);svgEl.addEventListener('pointerdown',pick);
+ svgEl.addEventListener('keydown',e=>{const k={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[e.key];if(!k)return;e.preventDefault();e.stopPropagation();show(cur[0]+k[0],cur[1]+k[1]);});
+ el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.goto==='best'?[best.i,best.j]:start;show(...t);}));
+ if(scene&&!ctx.reading)new MutationObserver(()=>{build=Number(scene.dataset.build||1);gBest.style.display=build>=2?'':'none';}).observe(scene,{attributes:true,attributeFilter:['data-build']});
+}
+
+// ---- Part 3: three covariance families fitted to one correlated target ----------------------------
+/** An ellipse at Mahalanobis radius r for a 2×2 covariance, in a panel with scale k pixels per unit. */
+export function covEllipse(cx,cy,S,k,r,color,extra=''){
+ const [a,b,c]=S,h=Math.sqrt(((a-c)/2)**2+b*b),l1=(a+c)/2+h,l2=Math.max((a+c)/2-h,1e-9),ang=.5*Math.atan2(2*b,a-c)*180/Math.PI;
+ return `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${(r*Math.sqrt(l1)*k).toFixed(1)}" ry="${(r*Math.sqrt(l2)*k).toFixed(1)}" transform="rotate(${(-ang).toFixed(2)} ${cx.toFixed(1)} ${cy.toFixed(1)})" fill="none" stroke="${color}" stroke-width="3" ${extra}/>`;
+}
+/** A 2×2 matrix in an SVG: "Σ =" and the four numbers between brackets. */
+export function matrix2(x,y,name,[a,b,c],color,size=20,digits=2,nameW=1.9){
+ const w=size*3.2,h=size*2.6,f=v=>num(v,digits);
+ const br=(bx,dir)=>`<path d="M${(bx+dir*7).toFixed(1)},${y-h/2} h${-dir*7} v${h} h${dir*7}" fill="none" stroke="${color}" stroke-width="2"/>`;
+ const x0=x+size*nameW;
+ return label(x,y+size*.35,name,{fill:color,size,weight:600})+br(x0,1)+br(x0+2*w+12,-1)+
+  label(x0+6+w/2,y-size*.3,f(a),{fill:color,size,anchor:'middle'})+label(x0+6+w*1.5,y-size*.3,f(b),{fill:color,size,anchor:'middle'})+
+  label(x0+6+w/2,y+size*1,f(b),{fill:color,size,anchor:'middle'})+label(x0+6+w*1.5,y+size*1,f(c),{fill:color,size,anchor:'middle'});
+}
+const COV_TITLES={iso:['isotropic','s²I · 1 number'],diag:['diagonal','diag(s₁², s₂²) · 2 numbers'],full:['full','LLᵀ · 3 numbers']};
+function cov3(el,ctx,d){
+ const c=d.story.cov3,runs=c.runs,count=runs.iso.length,W=1150,H=372,PW=370,G=20,k=35,Sp=[c.target.cov[0][0],c.target.cov[0][1],c.target.cov[1][1]];
+ const render=i=>{let s='';
+  ['iso','diag','full'].forEach((kind,j)=>{const ox=j*(PW+G),cx=ox+PW/2,cy=176,[,m1,m2,a,b,cc,v]=runs[kind][i];
+   const clip=`cclip-${kind}-${uid2++}`;
+   s+=`<defs><clipPath id="${clip}"><rect x="${ox}" y="58" width="${PW}" height="238"/></clipPath></defs><g clip-path="url(#${clip})">`+
+    `<line x1="${ox+8}" y1="${cy}" x2="${ox+PW-8}" y2="${cy}" stroke="${AX}"/><line x1="${cx}" y1="62" x2="${cx}" y2="292" stroke="${AX}"/>`+
+    [1,2].map(r=>covEllipse(cx,cy,Sp,k,r,palette.p)).join('')+[1,2].map(r=>covEllipse(cx+m1*k,cy-m2*k,[a,b,cc],k,r,palette.q)).join('')+
+    `<circle cx="${(cx+m1*k).toFixed(1)}" cy="${(cy-m2*k).toFixed(1)}" r="5" fill="${palette.q}"/></g>`+
+    label(ox+6,26,COV_TITLES[kind][0],{fill:palette.ink,size:23,weight:600})+label(ox+6,52,COV_TITLES[kind][1],{size:19})+
+    label(ox+PW-6,26,`KL ${klv(v)}`,{fill:palette.q,size:22,anchor:'end',weight:600})+
+    label(ox+PW-10,cy+22,'θ₁',{size:18,anchor:'end'})+label(cx+8,76,'θ₂',{size:18})+
+    matrix2(ox+30,336,'Σ<tspan baseline-shift="sub" font-size="70%">q</tspan><tspan dx="6">=</tspan>',[a,b,cc],palette.q,20,2,2.6);
+  });
+  return svg(W,H,s,'Three Gaussians with isotropic, diagonal and full covariance, each fitted to the same tilted target (teal ellipses), with the current covariance matrix of q.');
+ };
+ animated(el,ctx,{count,render,step:i=>`step ${runs.iso[i][0]}`,alt:'Three covariance families fitting the same target',duration:5000});
+}
+let uid2=0;
+
+// ---- Part 3: a mixture of Gaussians, drawn in two steps --------------------------------------------
+const COMP=[palette.d,palette.noise];
+function mixsample(el,ctx,d){
+ const mx=d.story.mixture_sampling,w=mx.weights,mu=mx.means,sd=mx.sds,W=1150,H=330,bins=lin(-2,3,51),bw=bins[1]-bins[0];
+ const xs=lin(-2,3,251),comp=k=>xs.map(t=>w[k]*normalPdf(t,{mu:mu[k],sigma:sd[k]})),c0=comp(0),c1=comp(1),dens=xs.map((_,i)=>c0[i]+c1[i]);
+ let rng,draws;
+ const reset=n=>{rng=mulberry32(31);draws=[];add(n);};
+ function add(n){for(let i=0;i<n;i++){const k=rng()<w[0]?0:1;draws.push([k,mu[k]+sd[k]*gauss(rng)]);}}
+ const render=()=>{
+  const S=draws.length,last=draws.at(-1),counts=[0,0],hist=bins.slice(1).map(()=>[0,0]);
+  for(const [kk,t] of draws){counts[kk]++;const b=Math.floor((t+2)/bw);if(b>=0&&b<hist.length)hist[b][kk]++;}
+  let s=label(0,26,'step 1: pick a bump',{fill:palette.ink,size:22,weight:600});
+  [0,1].forEach(kk=>{const y=44+kk*86,on=last&&last[0]===kk;
+   s+=`<rect x="0" y="${y}" width="370" height="70" rx="10" fill="${on?COMP[kk]+'22':palette.paper}" stroke="${COMP[kk]}" stroke-width="${on?3.5:2}"/>`+
+    label(14,y+30,`bump ${kk+1}: probability ½`,{fill:COMP[kk],size:21,weight:600})+label(14,y+57,`N(${num(mu[kk],1)}, ${num(sd[kk],1)}²) · picked ${counts[kk].toLocaleString('en')}×`,{fill:COMP[kk],size:19});});
+  s+=label(0,236,'step 2: draw θ from that bump',{fill:palette.ink,size:22,weight:600});
+  if(last)s+=label(0,272,`latest: bump ${last[0]+1}, θ = ${num(last[1])}`,{fill:COMP[last[0]],size:22});
+  s+=label(0,310,`${S.toLocaleString('en')} draws so far`,{size:19});
+  const P=panel({ox:420,W:730,H,L:16,R:14,T:62,B:56,xMin:-2,xMax:3,yMax:1.1,ticksX:[-2,-1,0,1,2,3],yAxis:false,xLabel:'θ'});
+  s+=P.axes;
+  if(S)hist.forEach(([h0,h1],b)=>{const x0=P.x(bins[b])+1,x1=P.x(bins[b+1])-1,d0=h0/(S*bw),d1=h1/(S*bw);
+   if(h0)s+=`<rect x="${x0.toFixed(1)}" y="${P.y(d0).toFixed(1)}" width="${(x1-x0).toFixed(1)}" height="${(P.y(0)-P.y(d0)).toFixed(1)}" fill="${COMP[0]}" fill-opacity=".45"/>`;
+   if(h1)s+=`<rect x="${x0.toFixed(1)}" y="${P.y(d0+d1).toFixed(1)}" width="${(x1-x0).toFixed(1)}" height="${(P.y(d0)-P.y(d0+d1)).toFixed(1)}" fill="${COMP[1]}" fill-opacity=".45"/>`;});
+  s+=P.line(xs,c0,COMP[0],'stroke-dasharray="7 5" stroke-width="2.5"')+P.line(xs,c1,COMP[1],'stroke-dasharray="7 5" stroke-width="2.5"')+P.line(xs,dens,palette.p);
+  if(last)s+=`<line x1="${P.x(last[1]).toFixed(1)}" y1="${P.y(0)}" x2="${P.x(last[1]).toFixed(1)}" y2="${P.y(0)-22}" stroke="${COMP[last[0]]}" stroke-width="4"/>`;
+  s+=legend(436,30,[['p(θ) = ½ N(−0.2, 0.4²) + ½ N(1, 0.5²)',palette.p]],20);
+  return svg(W,H,s,'Draws from a two-bump mixture: first a bump is picked, then θ is drawn from it; the histogram of draws approaches the mixture density.');
+ };
+ if(ctx.printing){reset(1000);el.innerHTML=render();return;}
+ reset(1);
+ const controls=[1,10,100,1000].map(n=>`<button type="button" data-add="${n}">+${n.toLocaleString('en')} draw${n>1?'s':''}</button>`).join('')+`<button type="button" data-reset>Reset</button>`;
+ const draw=interactive(el,ctx,{controls,render});
+ el.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{if(draws.length<50000)add(Number(b.dataset.add));draw();}));
+ el.querySelector('[data-reset]').addEventListener('click',()=>{reset(1);draw();});
+}
+
+// ---- Part 2: information theory -------------------------------------------------------------------
+/** Weather icons: sunny, cloudy and rainy, centred at (cx, cy), scaled by k. */
+export function weather(kind,cx,cy,k=1){
+ const cloud=(x,y)=>`<g fill="#9CA3AF"><circle cx="${x-12*k}" cy="${y+3*k}" r="${11*k}"/><circle cx="${x+2*k}" cy="${y-6*k}" r="${14*k}"/><circle cx="${x+15*k}" cy="${y+4*k}" r="${10*k}"/><rect x="${x-23*k}" y="${y+3*k}" width="${38*k}" height="${11*k}" rx="${5*k}"/></g>`;
+ if(kind==='sunny')return `<circle cx="${cx}" cy="${cy}" r="${12*k}" fill="#E8A317"/>`+[0,1,2,3,4,5,6,7].map(j=>{const a=j*Math.PI/4;return `<line x1="${(cx+17*k*Math.cos(a)).toFixed(1)}" y1="${(cy+17*k*Math.sin(a)).toFixed(1)}" x2="${(cx+24*k*Math.cos(a)).toFixed(1)}" y2="${(cy+24*k*Math.sin(a)).toFixed(1)}" stroke="#E8A317" stroke-width="${3*k}" stroke-linecap="round"/>`;}).join('');
+ if(kind==='cloudy')return cloud(cx,cy);
+ return cloud(cx,cy-6*k)+[-10,2,14].map(dx=>`<line x1="${cx+dx*k}" y1="${cy+14*k}" x2="${cx+(dx-4)*k}" y2="${cy+26*k}" stroke="${palette.data}" stroke-width="${3*k}" stroke-linecap="round"/>`).join('');
+}
+const log2=x=>Math.log(x)/Math.LN2,bitsOf=p=>-log2(p);
+/** Surprise in bits, log₂ 1/p, as a curve with a draggable probability. */
+function surprise(el,ctx){
+ const W=1150,H=330,s={p:.1},ps=lin(.008,1,400);
+ const render=()=>{
+  const P=panel({W:700,H,L:62,R:20,T:40,B:56,xMin:0,xMax:1,yMin:0,yMax:7.5,ticksX:[0,.25,.5,.75,1],ticksY:[0,1,2,3,4,5,6,7],xLabel:'probability p(x)'});
+  let g=P.axes+P.line(ps,ps.map(bitsOf),palette.loss)+label(62,24,'surprise, bits',{size:20});
+  for(const [pr,t] of [[1,'0'],[.5,'1'],[.25,'2'],[.125,'3']])g+=P.dot(pr,bitsOf(pr),'#F3A9B5',5)+label(P.x(pr)+8,P.y(bitsOf(pr))-8,`${t} bit${t==='1'?'':'s'}`,{size:17});
+  g+=`<line x1="${P.x(s.p).toFixed(1)}" y1="${P.y(0)}" x2="${P.x(s.p).toFixed(1)}" y2="${P.y(bitsOf(s.p)).toFixed(1)}" stroke="${palette.loss}" stroke-dasharray="5 5"/>`+P.dot(s.p,bitsOf(s.p),palette.loss,9);
+  const b=bitsOf(s.p),n=-Math.log(s.p);
+  g+=label(760,70,`p(x) = ${num(s.p,s.p<.1?3:2)}`,{fill:palette.ink,size:28,weight:600})+
+   label(760,130,`surprise = log₂ 1/p = ${num(b,2)} bits`,{fill:palette.loss,size:24})+
+   label(760,172,`= ln 1/p = ${num(n,2)} nats`,{fill:palette.loss,size:24})+
+   label(760,232,b<.05?'a certain outcome: no surprise':b<1.2?'a common outcome: little surprise':b<3.5?'a rare outcome: a real surprise':'a very rare outcome: a big surprise',{size:21})+
+   label(760,280,'one bit = the surprise of a fair coin flip',{size:19});
+  return svg(W,H,g,`The surprise log base 2 of 1 over p, with the selected probability ${num(s.p,2)} giving ${num(b,2)} bits.`);
+ };
+ const controls=slider('p','p(x)',.01,1,.01,.1)+[['1',1],['½',.5],['¼',.25],['⅛',.125],['0.9',.9],['0.1',.1]].map(([t,v])=>`<button type="button" data-p="${v}">p = ${t}</button>`).join('');
+ const draw=interactive(el,ctx,{controls,render});if(!draw)return;
+ bindSliders(el,s,draw);
+ el.querySelectorAll('[data-p]').forEach(bt=>bt.addEventListener('click',()=>{s.p=Number(bt.dataset.p);sync(el,s);draw();}));
+}
+/** Entropy of two kinds of weather: drag P(sunny) and watch the average surprise. */
+function entropy2(el,ctx){
+ const W=1150,H=330,s={a:.9},xs=lin(.001,.999,300),Hb=a=>a<=0||a>=1?0:a*bitsOf(a)+(1-a)*bitsOf(1-a);
+ const render=()=>{
+  const a=s.a,sv=[a>0?bitsOf(a):Infinity,a<1?bitsOf(1-a):Infinity];
+  let g='';
+  [['sunny',a],['rainy',1-a]].forEach(([kind,pr],k)=>{const cx=90+k*200,base=250,h=pr*150;
+   g+=weather(kind,cx,40,1.1)+`<rect x="${cx-34}" y="${(base-h).toFixed(1)}" width="68" height="${Math.max(1.5,h).toFixed(1)}" rx="4" fill="${palette.p}"/>`+
+    label(cx,base-h-10,num(pr,3),{fill:palette.p,size:21,anchor:'middle'})+
+    label(cx,base+30,Number.isFinite(sv[k])?`surprise ${num(sv[k],2)} bits`:'never happens',{fill:palette.loss,size:18,anchor:'middle'});});
+  g+=`<line x1="40" y1="250" x2="360" y2="250" stroke="${AX}"/>`;
+  const hv=Hb(a);
+  g+=label(420,110,'H = average surprise',{fill:palette.ink,size:23,weight:600})+
+   label(420,152,`= ${num(a,3)} × ${Number.isFinite(sv[0])?num(sv[0],2):'0'} + ${num(1-a,3)} × ${Number.isFinite(sv[1])?num(sv[1],2):'0'}`,{size:21})+
+   label(420,200,`= ${num(hv,3)} bits`,{fill:palette.p,size:30,weight:600});
+  const P=panel({ox:740,W:410,H,L:52,R:16,T:40,B:56,xMin:0,xMax:1,yMin:0,yMax:1.1,ticksX:[0,.5,1],ticksY:[0,.5,1],xLabel:'P(sunny)'});
+  g+=P.axes+P.line(xs,xs.map(Hb),palette.p)+P.dot(a,hv,palette.p,8)+label(792,24,'entropy, bits',{size:19});
+  return svg(W,H,g,`Two kinds of weather with P(sunny) = ${num(a,3)}: entropy ${num(hv,3)} bits.`);
+ };
+ const controls=slider('a','P(sunny)',0,1,.005,.9)+[['50/50',.5],['87.5/12.5',.875],['90/10',.9],['100/0',1]].map(([t,v])=>`<button type="button" data-a="${v}">${t}</button>`).join('');
+ const draw=interactive(el,ctx,{controls,render});if(!draw)return;
+ bindSliders(el,s,draw);
+ el.querySelectorAll('[data-a]').forEach(bt=>bt.addEventListener('click',()=>{s.a=Number(bt.dataset.a);sync(el,s);draw();}));
+}
+/**
+ * Days of weather, one at a time. mode 'entropy': two kinds of weather and each day's surprise;
+ * 'codes': three kinds, sent through the code for p and the code for q; 'logratio': each day's log₂ p/q.
+ */
+function days(el,ctx,d,mode){
+ const W=1150,H=330,info=d.story.info,wb=d.story.bits;
+ const kinds=mode==='entropy'?['sunny','rainy']:wb.names,probs=mode==='entropy'?info.forecast:wb.p;
+ const value=mode==='entropy'?probs.map(bitsOf):mode==='codes'?[wb.right_code.map(x=>x.length),wb.wrong_code.map(x=>x.length)]:probs.map((v,i)=>log2(v/wb.q[i]));
+ const exact=mode==='entropy'?info.entropy.forecast:mode==='codes'?[wb.entropy,wb.cross_entropy]:wb.kl;
+ let rng,drawn,sums,trace;
+ const reset=n=>{rng=mulberry32(mode==='codes'?7:mode==='entropy'?3:11);drawn=[];sums=[0,0];trace=[];add(n);};
+ function add(n){for(let i=0;i<n;i++){const u=rng();let k=0,c=probs[0];while(u>c&&k<probs.length-1){k++;c+=probs[k];}drawn.push(k);
+  if(mode==='codes'){sums[0]+=value[0][k];sums[1]+=value[1][k];}else sums[0]+=value[k];
+  const S=drawn.length;if(S<=100||Math.floor(Math.log10(S)*80)!==Math.floor(Math.log10(S-1)*80))trace.push([Math.log10(S),sums[0]/S,sums[1]/S]);}}
+ const render=()=>{
+  const S=drawn.length,last=drawn.slice(-(mode==='codes'?8:30));let g='';
+  if(mode==='codes'){
+   g+=label(0,24,'the latest days, and the bits each code sends',{size:20});
+   last.forEach((k,j)=>{const x=104+j*56;g+=weather(kinds[k],x+24,62,.62)+label(x+24,112,wb.right_code[k],{fill:palette.p,size:20,anchor:'middle',weight:600})+label(x+24,142,wb.wrong_code[k],{fill:palette.q,size:20,anchor:'middle',weight:600});});
+   g+=label(0,112,'code for p',{fill:palette.p,size:18})+label(0,142,'code for q',{fill:palette.q,size:18});
+   g+=label(0,200,`${S.toLocaleString('en')} days sent`,{size:20})+
+    label(0,236,`code for p: ${(sums[0]).toLocaleString('en')} bits, ${num(sums[0]/S,3)} per day`,{fill:palette.p,size:21})+
+    label(0,268,`code for q: ${(sums[1]).toLocaleString('en')} bits, ${num(sums[1]/S,3)} per day`,{fill:palette.q,size:21})+
+    label(0,304,`wasted: ${num((sums[1]-sums[0])/S,3)} bits per day`,{fill:palette.loss,size:22,weight:600});
+  }else{
+   g+=label(0,24,mode==='entropy'?'days drawn from the forecast (latest 30), with their surprise':'days drawn from p (latest 30), with log₂ p/q',{size:20});
+   last.forEach((k,j)=>{const x=6+(j%10)*56,y=46+Math.floor(j/10)*80;g+=weather(kinds[k],x+24,y+22,.6)+label(x+24,y+66,mode==='entropy'?num(value[k],2):(value[k]>0?'+':'')+num(value[k],0),{fill:palette.loss,size:16,anchor:'middle'});});
+   g+=label(0,300,`${S.toLocaleString('en')} days`,{size:20});
+  }
+  const lo=mode==='entropy'?0:mode==='codes'?1:-1,hi=mode==='entropy'?1.5:mode==='codes'?2.25:1.25;
+  const K=panel({ox:600,W:550,H,L:62,R:26,T:56,B:56,xMin:0,xMax:4.3,yMin:lo,yMax:hi,ticksX:[0,1,2,3,4],fmtX:v=>['1','10','100','1,000','10,000'][v],ticksY:mode==='entropy'?[0,.5,1,1.5]:mode==='codes'?[1,1.5,2]:[-1,0,.25,1],xLabel:'days (log scale)'});
+  g+=K.axes;
+  const hline=(v,color,text)=>`<line x1="${K.x(0)}" y1="${K.y(v).toFixed(1)}" x2="${K.x(4.3)}" y2="${K.y(v).toFixed(1)}" stroke="${color}" stroke-width="2" stroke-dasharray="8 6"/>`+label(K.x(4.3),K.y(v)-8,text,{fill:color,size:18,anchor:'end'});
+  if(mode==='codes'){g+=hline(exact[0],palette.p,`H(p) = ${num(exact[0],2)}`)+hline(exact[1],palette.q,`H(p, q) = ${num(exact[1],2)}`);
+   if(trace.length>1)g+=K.line(trace.map(t=>t[0]),trace.map(t=>t[1]),palette.p)+K.line(trace.map(t=>t[0]),trace.map(t=>t[2]),palette.q);
+   g+=label(662,30,'bits per day so far',{size:20});}
+  else{g+=hline(exact,palette.p,mode==='entropy'?`H = ${num(exact,3)} bits`:`KL = ${num(exact,2)} bits`);
+   if(trace.length>1)g+=K.line(trace.map(t=>t[0]),trace.map(t=>t[1]),palette.q);if(S)g+=K.dot(Math.log10(S),sums[0]/S,palette.q);
+   g+=label(662,30,S?`average so far: ${num(sums[0]/S,3)} bits`:'no days yet',{fill:palette.q,size:21});}
+  return svg(W,H,g,mode==='codes'?'Days of weather sent through two codes; the running bits per day approach the entropy and the cross-entropy.':'Days of weather drawn one at a time; the running average approaches the exact expectation.');
+ };
+ if(ctx.printing){reset(mode==='codes'?1000:1000);el.innerHTML=render();return;}
+ reset(mode==='codes'?10:10);
+ const controls=[1,10,100,1000].map(k=>`<button type="button" data-add="${k}">+${k.toLocaleString('en')} day${k>1?'s':''}</button>`).join('')+`<button type="button" data-reset>Reset</button>`;
+ const draw=interactive(el,ctx,{controls,render});
+ el.querySelectorAll('[data-add]').forEach(bt=>bt.addEventListener('click',()=>{if(drawn.length<20000)add(Number(bt.dataset.add));draw();}));
+ el.querySelector('[data-reset]').addEventListener('click',()=>{reset(10);draw();});
+}
+/** Maximum likelihood for twenty days: move q and watch the data's average surprise split into H(p̂) + KL. */
+function mlefit(el,ctx,d){
+ const m=d.story.mle,ph=m.p_hat,names=['sunny','cloudy','rainy'],N=m.data.length,W=1150,H=330,s={a:.25,b:.25};
+ const Hhat=ph.reduce((t,v)=>t+(v>0?v*bitsOf(v):0),0);
+ const render=()=>{
+  const q=[s.a,s.b,Math.max(1e-6,1-s.a-s.b)],avg=ph.reduce((t,v,i)=>t+v*bitsOf(q[i]),0),kl=avg-Hhat;
+  let g=label(0,24,'data frequencies p̂ and the model q',{size:20});
+  names.forEach((nm,i)=>{const cx=70+i*170,base=250,sc=v=>v*300;
+   g+=weather(nm,cx,46,.75);
+   for(const [v,color,dx] of [[ph[i],palette.p,-26],[q[i],palette.q,26]]){const h=sc(v);g+=`<rect x="${cx+dx-22}" y="${(base-h).toFixed(1)}" width="44" height="${Math.max(1.5,h).toFixed(1)}" rx="3" fill="${color}"/>`+label(cx+dx,base-h-8,num(v,2),{fill:color,size:18,anchor:'middle'});}});
+  g+=`<line x1="10" y1="250" x2="520" y2="250" stroke="${AX}"/>`+legend(10,290,[['p̂: 10, 5, 5 out of 20',palette.p],['q, the model',palette.q]],19);
+  const X=v=>620+v*190,y0=150;
+  g+=label(600,40,'the data’s average surprise under q',{fill:palette.ink,size:21,weight:600})+
+   `<rect x="${X(0)}" y="${y0}" width="${(X(Hhat)-X(0)).toFixed(1)}" height="54" fill="${TINT.p}" stroke="${palette.p}" stroke-width="2"/>`+
+   `<rect x="${X(Hhat).toFixed(1)}" y="${y0}" width="${Math.max(0,X(avg)-X(Hhat)).toFixed(1)}" height="54" fill="${TINT.loss}" stroke="${palette.loss}" stroke-width="2"/>`+
+   label(X(Hhat/2),y0+34,`H(p̂) = ${num(Hhat,2)}`,{fill:palette.p,size:19,anchor:'middle'})+(X(avg)-X(Hhat)>80?label((X(Hhat)+X(avg))/2,y0+34,`KL ${num(kl,2)}`,{fill:palette.loss,size:19,anchor:'middle'}):'')+
+   label(600,100,`= ${num(avg,3)} bits per day`,{fill:palette.ink,size:26,weight:600})+
+   label(600,250,`KL(p̂ ‖ q) = ${num(kl,3)} bits`,{fill:palette.loss,size:21})+
+   label(600,284,`log₂ p(𝒟 | q) = ${num(-N*avg,1)}: ${kl<5e-4?'the most probable q':`${(2**(N*kl)).toLocaleString('en',{maximumFractionDigits:0})}× less probable than under p̂`}`,{size:19});
+  return svg(W,H,g,`The data frequencies and the model q; the data’s average surprise ${num(avg,3)} bits splits into the entropy of the data and KL ${num(kl,3)}.`);
+ };
+ const controls=slider('a','q(sunny)',.02,.96,.01,.25)+slider('b','q(cloudy)',.02,.96,.01,.25)+
+  [['(¼, ¼, ½)',[.25,.25]],['(⅓, ⅓, ⅓)',[1/3,1/3]],['p̂ = (½, ¼, ¼)',[.5,.25]]].map(([t,v])=>`<button type="button" data-q="${v.join(',')}">q = ${t}</button>`).join('');
+ const draw=interactive(el,ctx,{controls,render});if(!draw)return;
+ bindSliders(el,s,draw,()=>{if(s.a+s.b>.98){const k=Object.keys(s).find(x=>x!==document.activeElement?.dataset?.k)||'b';s[k]=Math.max(.02,.98-(k==='a'?s.b:s.a));sync(el,s);}});
+ el.querySelectorAll('[data-q]').forEach(bt=>bt.addEventListener('click',()=>{[s.a,s.b]=bt.dataset.q.split(',').map(Number);sync(el,s);draw();}));
 }
 
 // ---- Part 5: variational inference for the tiny network -----------------------------------------
@@ -291,7 +581,7 @@ function bnnvi(el,ctx,d){
 }
 
 export function mount(stage,ctx,d){
- const make={klarea,fwdrev,olive,elboslider,mclive,bnnvi,priorfuncs,'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
+ const make={klarea,fwdrev,olive,elboslider,mclive,bnnvi,priorfuncs,mapfit,mcgrades,klgrid,cov3,mixsample,surprise,entropy2,mlefit,'days-entropy':(e,c)=>days(e,c,d,'entropy'),'days-codes':(e,c)=>days(e,c,d,'codes'),'days-logratio':(e,c)=>days(e,c,d,'logratio'),'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
  for(const el of stage.querySelectorAll('[data-widget]')){
   const f=make[el.dataset.widget];if(!f)throw new Error('Unknown widget '+el.dataset.widget);f(el,ctx,d);
  }

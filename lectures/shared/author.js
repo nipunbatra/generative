@@ -5,7 +5,21 @@ export const eq=tex=>`<div class="formula-scroll"><div class="math display" data
 export const at=(build,html)=>`<div data-at="${build}">${html}</div>`;
 export const only=(builds,html)=>`<div data-only="${builds}">${html}</div>`;
 export const cols=(left,right,ratio='1fr 1fr')=>`<div class="columns" style="grid-template-columns:${esc(ratio)}"><div>${left}</div><div>${right}</div></div>`;
-export const code=text=>`<pre class="code"><code>${esc(text)}</code></pre>`;
+const PY_KEYWORDS=new Set('False None True and as assert break class continue def del elif else except finally for from global if import in is lambda not or pass raise return try while with yield'.split(' '));
+const PY_TOKEN=/(#[^\n]*)|("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')|(@[A-Za-z_][\w.]*)|(\b\d+(?:\.\d*)?(?:[eE][-+]?\d+)?\b)|([A-Za-z_]\w*)(?=\s*\()|([A-Za-z_]\w*)/g;
+/** Python syntax colouring: comments, strings, decorators, numbers, keywords and called names. */
+export function highlight(text){
+ let out='',last=0;
+ for(const t of String(text).matchAll(PY_TOKEN)){
+  out+=esc(text.slice(last,t.index));last=t.index+t[0].length;
+  const [tok,comment,string,decorator,number,call,word]=t;
+  const kind=comment?'c':string?'s':decorator?'d':number?'n':call?(PY_KEYWORDS.has(call)?'k':'f'):PY_KEYWORDS.has(word)?'k':'';
+  out+=kind?`<span class="tok-${kind}">${esc(tok)}</span>`:esc(tok);
+ }
+ return out+esc(String(text).slice(last));
+}
+/** A code block, coloured as Python unless lang is 'text'. */
+export const code=(text,lang='python')=>`<pre class="code"><code>${lang==='python'?highlight(text):esc(text)}</code></pre>`;
 export const image=(src,alt,caption='')=>`<figure class="evidence"><img src="${esc(src)}" alt="${esc(alt)}" loading="eager">${caption?`<figcaption>${caption}</figcaption>`:''}</figure>`;
 export const table=(headers,rows)=>`<div class="table-scroll"><table><thead><tr>${headers.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(row=>`<tr>${row.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 let figureId=0;
