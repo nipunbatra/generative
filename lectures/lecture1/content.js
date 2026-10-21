@@ -758,7 +758,7 @@ S('core-problem','bayes','The core problem of probabilistic machine learning',{b
   at(2,small('Bayesian neural networks, VAEs, mixture models and topic models all meet this same question.'))),
  lines:['The likelihood and the prior are easy to evaluate for any θ. The evidence, which turns them into the posterior, is not.','So the central question of probabilistic machine learning: how do we compute, or approximate, the posterior?'],
  ask:['Which of the three pieces can we compute for one θ?','Where else will you meet this problem?'],
- expected:['The likelihood and the prior, as we did for θ<sub>A</sub>. Not the evidence.','In every Bayesian model with many unknowns, including the VAE in Lecture 3.'],
+ expected:['The likelihood and the prior, as we did for θ<sub>A</sub>. Not the evidence.','In every Bayesian model with many unknowns, including the VAE in Lecture 2.'],
  transition:'Three ways to approach it.'});
 S('three-ways','bayes','Three ways to approximate the posterior; we take the third',{nb:'cell-three-ways',builds:3,
  body:grid3(stack(threeWay('laplace'),small(`A Gaussian at the highest peak: N(${num(st.three.laplace[0],1)}, ${num(st.three.laplace[1],1)}²). It never sees the second bump.`)),
@@ -1325,7 +1325,7 @@ S('mixture-what','fit','A mixture of Gaussians: first pick a bump, then draw fro
  lines:['A mixture of Gaussians makes θ in two steps. First pick a bump, like tossing a fair coin: z = 1 or 2. Then draw θ from that bump’s Gaussian.','Each bump contributes its own bell, scaled by how often it is picked: ½ N(−0.2, 0.4²) and ½ N(1, 0.5²).','We see θ but not the bump that made it, so the density adds both bells: p(θ) = Σₖ πₖ N(θ; μₖ, σₖ²). Two bumps, one distribution.'],
  ask:['If bump 1 is picked, where does θ land?','Why multiply each bell by ½?','Does p(θ) integrate to 1?'],
  expected:['Near −0.2: within about ±0.8, two widths.','Each bump makes only half of the draws, so it contributes half of its bell.','Yes: each bell integrates to 1 and the weights add to 1.'],
- point:'The PML 2023 mixture. z is a latent variable: part of how the data are made, never observed. Lecture 3’s VAE has the same structure, with a continuous z.',
+ point:'The PML 2023 mixture. z is a latent variable: part of how the data are made, never observed. Lecture 2’s VAE has the same structure, with a continuous z.',
  transition:'Draw from it yourself.'});
 S('mixture-sample','fit','Draw from the mixture yourself',{nb:'cell-mixture-sampling',
  body:widget('mixsample','Two-step draws from a mixture of two Gaussians, building up a histogram'),
@@ -1382,7 +1382,7 @@ S('reparam-compare','fit','Side by side: where the randomness lives',{builds:2,
  lines:['With sample(), the random node sits between the parameters and the loss, and the gradient cannot cross it.','With rsample(), the randomness enters as a parameter-free input ε and θ = μ + σε is deterministic: the gradient flows from the loss to μ and σ. Same distribution, different graph.'],
  ask:['Where is the stochastic node in each graph?','What does the reparameterisation trick change: the distribution of θ, or the graph?'],
  expected:['Top: θ itself. Bottom: ε, which has no parameters.','Only the graph. θ is N(μ, σ²) either way.'],
- point:'This is the reparameterisation trick of Kingma and Welling (2014), the step that makes VAEs trainable (Lecture 3).',
+ point:'This is the reparameterisation trick of Kingma and Welling (2014), the step that makes VAEs trainable (Lecture 2).',
  source:'Graph conventions after <a href="https://lilianweng.github.io/posts/2018-08-12-vae/">Lilian Weng, “From Autoencoder to Beta-VAE”</a>',
  transition:'Change one word in the code.'});
 S('rsample-fit','fit','Change one word: rsample() fits the mixture',{builds:2,nb:'cell-rsample-fit',
@@ -1555,13 +1555,13 @@ S('five-tools','impl','Six obstacles, six tools',{
   ['no formula for the average','Monte Carlo','2.5, 3.4'],
   ['no gradient through a draw','θ = μ + σε, rsample()','3.5'],
   ['KL to the posterior needs p(𝒟)','maximise the ELBO','4.1']]),
- lines:['Every obstacle today earned a tool, and our network used them all. In Lecture 3 a VAE does the same with one q per image.'],
+ lines:['Every obstacle today earned a tool, and our network used them all. In Lecture 2 a VAE does the same with one q per image.'],
  ask:['Cover the middle column. Which tool removed which obstacle?'],
  expected:['Students reconstruct it row by row.'],
  transition:'Next lecture.'});
 S('next-lecture','impl','Generative models create this inference problem again',{builds:2,
  body:stack(p('A hidden description can generate an observation.'),at(2,p('Next: learn representations for images, then ask whether they can generate new ones.'))),
- lines:['In an image model, a hidden code z can generate an observed image x, just as the mixture’s bump z generated θ in 3.4.','Lecture 2 builds autoencoders; Lecture 3 returns to VI with an encoder that outputs q for each image.'],
+ lines:['In an image model, a hidden code z can generate an observed image x, just as the mixture’s bump z generated θ in 3.4.','Lecture 2 builds autoencoders, then returns to VI with an encoder that outputs q for each image: the VAE.'],
  ask:['Where might a new unknown appear in an image model?','What should we ask of a good reconstruction?'],
  expected:['A latent description z can explain an observed image x.','Whether reconstructing observations also gives a useful way to generate new ones.'],
  transition:'Close the main route. Optional depth follows.'});

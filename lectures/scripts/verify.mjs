@@ -3,7 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {browser,base} from './browser.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const chosen=process.argv.slice(2).filter(x=>/^[1-5]$/.test(x));const lectures=chosen.length?chosen:[1,2,3,4,5];
+const chosen=process.argv.slice(2).filter(x=>/^[1-4]$/.test(x));const lectures=chosen.length?chosen:[1,2,3,4];
 const b=await browser();let allPassed=true;
 try{
  for(const n of lectures){

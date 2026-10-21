@@ -1,741 +1,800 @@
-# Variational autoencoders: speaker notes
+# Generative adversarial networks: speaker notes
 
-Planned main route: 70 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 60 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
-| Reopen the sampling question | 6 |
-| Specify the generative story | 10 |
-| Infer this image’s code | 10 |
-| Reuse the ELBO | 12 |
-| Make the training path differentiable | 11 |
-| One step, then model evidence | 13 |
-| What did we gain? | 8 |
+| A learning signal | 6 |
+| One discriminator update | 10 |
+| One generator update | 12 |
+| Alternate the players | 11 |
+| Samples, coverage and failure | 11 |
+| MNIST and retrieval | 10 |
 
-## same-failure: This is exactly where the autoencoder left us
+## start: Where could a generator get feedback?
 
-**Build 1, ask:** What did the amber crosses test?
+**Build 1, ask:** What training signal could produce these samples?
 
-**Expected:** Where standard-normal draws land relative to learned AE codes.
+**Expected:** A learned discriminator can supply differentiable feedback.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Remember what happened when we decoded them.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** First separate producing an image from scoring it.
 
-## same-samples: The same decoder, an unsupported choice of codes
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Could fitting a density to AE codes be a valid alternative?
+## generator-is-sampler: A generator turns a draw into a sample
 
-**Expected:** Yes. Here we explore learning a probabilistic generative model directly.
+**Build 1, ask:** Which part introduces randomness?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** The sampled z; G is deterministic once z and θ are fixed.
 
-**Transition:** State that model before designing an encoder.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## what-we-want: Start with a sampling procedure we can name
+**Transition:** Sampling does not automatically give us a convenient density.
 
-**Build 1, ask:** Which part produces a new latent value?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** The prior p(z), without an input image.
+## likelihood-question: Sampling is easier than evaluating a density
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Can this network readily report the probability of an image?
 
-**Transition:** Bring back the same observed 3.
+**Expected:** The usual GAN supplies an implicit sampler; its training signal comes from a classifier.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## same-three: And explain this observed 3
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** What are we uncertain about once x is observed?
+**Transition:** Make that classifier’s job concrete.
 
-**Expected:** Which latent values could have produced this x.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## toy-vote: Which distribution is missing something?
 
-**Transition:** Separate model weights from this image’s unknown.
+**Build 1, ask:** Where should generated samples move?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** They need to cover both observed regions, not merely one plausible point.
 
-## owners: Weights and latent values have different jobs
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** Does every image have its own decoder θ?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** No. θ is shared across images.
+**Transition:** A discriminator can learn where the two sources differ.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Build the generative direction.
+## two-players: One network proposes; one distinguishes
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** Must we keep D to generate after training?
 
-## route: The model tells us what inference must solve
+**Expected:** No. Draw z and run G.
 
-**Build 1, ask:** Why not begin with “add noise to an AE”?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** That would hide the probability model and the reason for the objective.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Transition:** Now hold G still and train the classifier.
 
-**Transition:** Choose the simplest useful latent prior.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+## data-labels: Fix the samples and label their source
 
-## prior: Choose a fixed prior for latent vectors
+**Build 1, ask:** Does label 1 mean “a perfect digit”?
 
-**Build 1, ask:** What does I mean here?
+**Expected:** It means the example came from the observed-data source in this classification task.
 
-**Expected:** Unit variance and zero covariance across latent coordinates.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Transition:** Map a drawn z to likelihood parameters.
+**Transition:** Use a scalar classifier so every number is visible.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## decoder-logits: The decoder outputs 784 logits
+## chosen-networks: Choose networks small enough to inspect
 
-**Build 1, ask:** Are the logits already a sampled binary image?
+**Build 1, ask:** What are the trainable quantities?
 
-**Expected:** No. They parameterise probabilities.
+**Expected:** a,b belong to G; w,c belong to D. x and z are fixed for this calculation.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Turn those parameters into a likelihood.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** Evaluate the generator first.
 
-## likelihood: Conditioned on z, specify a Bernoulli likelihood
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Can pixels be dependent after we average over z?
+## fake-arithmetic: First compute the fake
 
-**Expected:** Yes. The shared latent can coordinate their probabilities.
+**Build 1, ask:** What sample does this z produce?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** Zero. The observed example is at x = 2.
 
-**Transition:** Visualise the two kinds of arrows separately.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## prob-model: A probabilistic graph says who depends on whom
+**Transition:** Feed each example into the same discriminator.
 
-**Build 1, ask:** What does the solid arrow represent in this view?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** A conditional dependency pθ(x|z), not a layer-by-layer network.
+## d-logits: A score comes before a probability
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Why keep raw logits in the implementation?
 
-**Transition:** Return to computation and inspect one sampled observation.
+**Expected:** Stable binary cross-entropy can operate directly on logits.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## probability-versus-draw: A probability image and a sampled observation differ
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** Why can the same z produce different binary images?
+**Transition:** Translate the labels into a loss.
 
-**Expected:** Bernoulli pixel sampling adds observation randomness.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## d-real-term: Reward a high score on real data
 
-**Transition:** Write the complete sampling code.
+**Build 1, ask:** Would D(real) closer to one increase this loss?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** No, it reduces the negative log probability of the correct label.
 
-## sampling-code: Two random draws belong to different levels
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** Which line changes the handwriting-level latent choice?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** The z draw; the final Bernoulli draw samples pixels given that choice.
+**Transition:** The fake example requires the opposite label.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Ask how this model assigns probability to a real image.
+## d-fake-term: Reward a low score on generated data
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** Which direction should D(fake) move?
 
-## image-probability: Every possible z can contribute to pθ(x)
+**Expected:** Towards zero during the discriminator phase.
 
-**Build 1, ask:** Why is evaluating one decoder output insufficient?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** The marginal likelihood sums or integrates all latent explanations.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Transition:** Combine the two contributions with a declared reduction.
 
-**Transition:** The inverse question will involve this same integral.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+## d-loss: Add the two classification losses
 
-## sampling-without-encoder: Generation does not require the encoder
+**Build 1, ask:** Is this an average over the combined two-example batch?
 
-**Build 1, ask:** Then why will we train an encoder at all?
+**Expected:** Our convention sums the two source means; a combined mean differs by a factor of two.
 
-**Expected:** To make inference tractable when learning from observed images.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Transition:** Invert the question for our 3.
+**Transition:** Now take a derivative while holding G fixed.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## posterior-three: Which latent values explain this image?
+## d-gradient: Which derivative changes the classifier?
 
-**Build 1, ask:** What is hard even if likelihood and prior are easy to evaluate?
+**Build 1, ask:** Which term contributes to the weight derivative when fake x is zero?
 
-**Expected:** Normalising over all z.
+**Expected:** Only the real term contributes to ∂L/∂w; both contribute to the bias derivative.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Reuse the variational strategy.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** Make one literal parameter update.
 
-## free-q: Fit a tractable distribution for this one image
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Which variables would a per-image optimiser update?
+## d-update: One D update, with G unchanged
 
-**Expected:** Its μ and log variance, not the fixed decoder weights.
+**Build 1, ask:** Which row must remain identical?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** The generator parameters. This phase updates only ω.
 
-**Transition:** Run that actual small inference problem.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## per-image-fit: Per-image VI is a real optimisation loop
+**Transition:** Re-evaluate rather than assuming improvement.
 
-**Build 1, ask:** Which curve would be constant if we changed only the check random seed?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** The true objective; its Monte Carlo estimate can vary.
+## d-recompute: Check the same examples after the update
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Did the discriminator improve on these two examples?
 
-**Notebook demonstration:** Notebook §3: fit_one_q on held3 with decoder weights frozen. Uses 64 fresh draws per update and 256 fixed check draws.
+**Expected:** Yes: real score rises, fake score falls, and the same-batch loss falls.
 
-**Transition:** Inspect where the mean travelled.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## per-image-path: One fit moves its own variational parameters
+**Transition:** The code must prevent this update from reaching G.
 
-**Build 1, ask:** What must we repeat for the next image if we keep this approach?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** A new optimisation of that image’s q parameters.
+## detach: Stop this phase at the fake sample
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Why detach fake rather than remove D from the graph?
 
-**Transition:** Make that repeated work concrete.
+**Expected:** D needs gradients; G should not receive this phase’s gradients.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## many-images: Do we run a new optimiser for every image?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** What repeated structure could a network learn?
+**Transition:** A test should check actual parameter changes.
 
-**Expected:** A mapping from an image to useful variational parameters.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## detach-code: Detach only the generated sample
 
-**Transition:** Replace repeated fitting with a shared prediction.
+**Build 1, ask:** Which part of this computation must still be differentiable?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** The discriminator forward pass; only the path back into G is cut.
 
-## amortisation: Learn to predict the variational parameters
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** What is shared across all images now?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** The network weights φ; its output parameters depend on x.
+**Transition:** Test that only the intended parameters actually change.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Name the computational tradeoff.
+## d-check: Check ownership of the update
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** Does a nonzero stale .grad prove this phase updated a parameter?
 
-## amortisation-tradeoff: Amortisation trades repeated solving for a shared map
+**Expected:** No. Clear gradients and compare parameter values before and after the actual optimiser step.
 
-**Build 1, ask:** Does a fast encoder guarantee exact inference?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** No. It is a learned approximation.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Transition:** See what repeated D-only updates do.
 
-**Transition:** Show its direction alongside the model.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+## d-only: What happens if only D learns?
 
-## two-directions: The model and inference answer opposite questions
+**Build 1, ask:** Predict the score near the real modes and the fake region.
 
-**Build 1, ask:** Is the dashed arrow another generative edge?
+**Expected:** D learns to distinguish these fixed sources; the generator itself has not improved.
 
-**Expected:** No. It labels the approximate-inference relationship.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Transition:** Map Lecture 1’s identity onto these roles.
+**Transition:** We need a signal that can move G’s samples.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## recall-identity: Reuse the identity, with x fixed
+## g-goal: Now let the generator ask for label 1
 
-**Build 1, ask:** What changes when we later update θ too?
+**Build 1, ask:** Are we relabelling generated data for the next D update?
 
-**Expected:** The model and its evidence change; the total is no longer fixed across updates.
+**Expected:** No. Label 1 defines G’s objective; D still trains fake examples with label 0.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Write the computable ELBO before simplifying it.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** Keep D fixed and trace the derivative through it.
 
-## joint-elbo: The joint-density form remains the starting point
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Which equality comes from the generative story?
+## freeze-not-detach: Frozen weights can still transmit a gradient
 
-**Expected:** The factorisation into likelihood and prior.
+**Build 1, ask:** What does “freeze D” mean here?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** Do not update ω. Preserve the differentiable path from loss through D to G.
 
-**Transition:** Substitute that factorisation into the same expectation.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## expand-elbo: Split likelihood from the prior-to-q comparison
+**Transition:** Separate the derivative chain into its local pieces.
 
-**Build 1, ask:** Why does the second expectation become minus KL?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** Its log ratio is the negative of log q minus log p.
+## g-chain: Follow the chain rule into the generator
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Can a fixed w appear in a derivative?
 
-**Transition:** Distinguish the two KL quantities explicitly.
+**Expected:** Yes. It multiplies the input derivative even though we do not optimise w in this phase.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## two-kls: These two KL terms compare different distributions
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** If the prior KL is zero, is inference necessarily exact?
+**Transition:** Insert the values from the updated discriminator.
 
-**Expected:** No. q then equals the prior, which need not be this image’s posterior.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## g-gradient: The generator receives a nonzero derivative
 
-**Transition:** Interpret the likelihood term on one image.
+**Build 1, ask:** Will gradient descent move a up or down?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** Up: subtracting a negative derivative increases a.
 
-## reconstruction-term: A sampled z should explain the observed pixels
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** Where does the target image enter this loss?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** It selects the observed Bernoulli outcomes for all pixels.
+**Transition:** Perform that update on both generator parameters.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Compute the other contribution.
+## g-update: One G update, with D unchanged
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** Which object moved even though the random draw stayed fixed?
 
-## gaussian-prior-kl: The diagonal-Gaussian prior KL is available exactly
+**Expected:** The generated sample moved because G’s parameters changed.
 
-**Build 1, ask:** Which q makes this KL exactly zero?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** μ=0 and σ²=1 in every coordinate.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Transition:** Recompute G’s objective against the same fixed D.
 
-**Transition:** Interpret what mean and scale each contribute.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+## g-recompute: Check the updated sample and loss
 
-## kl-geometry: The formula penalises shifted or mismatched uncertainty
+**Build 1, ask:** Does this one improvement establish coverage of both modes?
 
-**Build 1, ask:** Would shrinking σ towards zero minimise the prior KL?
+**Expected:** No. It checks the local learning signal for one fixed draw.
 
-**Expected:** No. The −log σ² term grows without bound.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Transition:** Use the actual encoder outputs for our 3.
+**Transition:** Implement the same ownership in a neural network.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## held-loss: For this 3, the two contributions are measured
+## g-code: Keep the path; freeze the owner
 
-**Build 1, ask:** Which number would change if we changed only ε?
+**Build 1, ask:** What would G(z).detach() do in this code?
 
-**Expected:** The reconstruction term and total estimate; the analytic KL stays fixed.
+**Expected:** It would sever the very path needed to update G.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Set the optimisation sign clearly.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** CPU replay of vae2, official test90, stated chosen ε; fixture full precision, displayed rounding.
+**Transition:** Compare the two operations side by side.
 
-## objective-sign: Maximise the bound, or minimise its negative
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Does minimising this loss require knowing pθ(x)?
+## freeze-vs-detach: Two operations with different effects
 
-**Expected:** No. It uses the likelihood, q and the prior.
+**Build 1, ask:** Which operation is correct during the G phase?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** Freeze D parameters, keep ordinary autograd through its forward computation.
 
-**Transition:** Extend from one image to a batch.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## batch-objective: The reduction is part of the model implementation
+**Transition:** Inspect the assertions rather than trust the diagram.
 
-**Build 1, ask:** Would averaging pixels but summing KL preserve the same weighting?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** No. It would change their relative scale by 784.
+## g-check: Verify the actual parameter changes
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Why compare parameters as well as gradients?
 
-**Transition:** Now differentiate through the sampled latent.
+**Expected:** The optimiser decides what actually changes; a gradient alone is insufficient evidence.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## two-heads: The encoder predicts two vectors
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** Which objects are network outputs here?
+**Transition:** What if D remains frozen for hundreds of updates?
 
-**Expected:** Both μ and log variance.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## g-only: A fixed critic can be exploited
 
-**Transition:** Convert log variance to standard deviation.
+**Build 1, ask:** Would optimising against one fixed D guarantee the data distribution?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** No. G can exploit that particular critic; alternating training changes the task.
 
-## std-conversion: Half the log variance before exponentiating
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** What would exp(v) give instead?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** The variance, not the standard deviation.
+**Transition:** Join the two verified phases.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Substitute the measured values.
+## alternating: The training loop alternates two objectives
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** Are both players minimising one fixed function of their own weights?
 
-## encoder-numbers: Our 3 produces a narrow Gaussian
+**Expected:** Each player sees a changing opponent. The practical update uses two stated objectives.
 
-**Build 1, ask:** Is this q centred at the origin with unit spread?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** No. It is the approximation for this particular image.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Transition:** Write the batch losses with their sampling distributions.
 
-**Transition:** Expose the separate source of randomness.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+## batch-d: The discriminator has two expectations
 
-## noise-source: Draw noise that does not depend on φ
+**Build 1, ask:** Where does each expectation get its samples?
 
-**Build 1, ask:** Where do the encoder parameters enter this expression?
+**Expected:** Real examples come from the dataset; latent draws come from the chosen noise distribution.
 
-**Expected:** Through μ and σ, while ε is an independent base draw.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Transition:** Carry out the vector calculation.
+**Transition:** The generator needs only latent draws and D’s response.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## latent-calculation: Calculate this particular latent draw
+## batch-g: The practical generator loss
 
-**Build 1, ask:** Which coordinate moves further in absolute distance from μ?
+**Build 1, ask:** Why is there no paired target image for each z?
 
-**Expected:** Compare σjεj; the second displacement has larger magnitude here.
+**Expected:** G is judged by the discriminator, not by reconstruction of a paired observation.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Draw the differentiable computation.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** Distinguish this from the original minimax generator term.
 
-## pathwise-graph: Randomness enters through one explicit input
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Which arrow would be missing with a detached sample?
+## minimax: The original game uses a different G term
 
-**Expected:** The dependence of sampled z on the encoder outputs.
+**Build 1, ask:** Is −log D(fake) identical to log(1−D(fake))?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** No. They encourage the same desired direction but have different gradients.
 
-**Transition:** Recall the scalar derivatives.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## scalar-path: Follow one coordinate by hand
+**Transition:** Compare their logit derivatives.
 
-**Build 1, ask:** Why is there a factor one half in the log-variance derivative?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** Differentiating exp(v/2) supplies it.
+## saturation-derivative: A confident discriminator can weaken one signal
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Which derivative is stronger when D rejects fake samples confidently?
 
-**Transition:** Test the gradient rather than trusting its existence.
+**Expected:** The non-saturating objective’s logit derivative is near −1.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## gradient-check: A gradient check keeps the same noise
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** What would fresh noise at each side contaminate?
+**Transition:** Plot the derivatives over the same logit range.
 
-**Expected:** The finite difference would mix parameter change with sampling noise.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## saturation-plot: The difference is visible before any training
 
-**Notebook demonstration:** Notebook §4: compare the scalar autograd derivatives with analytic derivatives and a centred finite difference.
+**Build 1, ask:** Does a stronger logit derivative guarantee stable GAN training?
 
-**Transition:** Distinguish this method from a universal claim about randomness.
+**Expected:** No. The rest of the network Jacobian and the moving opponent still matter.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## gradient-scope: Reparameterisation supplies the pathwise gradient
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** Is a nonempty gradient tensor proof of the right objective gradient?
+**Transition:** Assemble the two stable BCE losses in code.
 
-**Expected:** No. Inspect which paths the computation graph includes.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## alternating-code-d: The first half of one neural update
 
-**Transition:** Assemble the loss from the pieces already derived.
+**Build 1, ask:** Why detach only in this half?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** This loss trains the discriminator while keeping G fixed.
 
-## forward-code: The forward pass has one source of latent noise
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** Which tensors have shape B×d?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** μ, logvar, std, ε and z. Logits have shape B×784.
+**Transition:** Now rebuild fresh fakes for the second half.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Compute the per-image reconstruction contribution.
+## alternating-code-g: The second half of one neural update
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** What changed between the two forward passes?
 
-## recon-code: Keep the event sum visible
+**Expected:** D’s parameters changed. G needs feedback from the updated discriminator.
 
-**Build 1, ask:** What is the shape after summing pixels?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** B values, one reconstruction NLL per image.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Transition:** Test the full loop on the simple distribution.
 
-**Transition:** Compute one prior KL per image.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+## toy-progress: Can alternating updates cover both regions?
 
-## kl-code: The analytic KL has the same outer shape
+**Build 1, ask:** What would count as success in this simple test?
 
-**Build 1, ask:** Why is the second sum over latent dimensions?
+**Expected:** Samples near both modes, reasonable spread, and limited mass between them.
 
-**Expected:** The diagonal-Gaussian KL adds coordinate contributions.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Transition:** Average the combined per-image loss.
+**Transition:** Quantify coverage, with the metric’s limits visible.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## update-code: One complete optimisation step
+## coverage: Count mass near each known mode
 
-**Build 1, ask:** Which parameters should change?
+**Build 1, ask:** What does a near-zero entry tell us?
 
-**Expected:** Both decoder θ and encoder φ, including both encoder heads.
+**Expected:** The generator misses one observed region under this diagnostic.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Inspect those changes directly.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** Look directly at the failing sample distribution.
 
-## actual-step: Check a real update, not only a loss formula
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Why compare with the same ε after the step?
+## collapse: Plausible samples can omit a whole mode
 
-**Expected:** It isolates the parameter update from sampling variation.
+**Build 1, ask:** Why is looking at a single generated sample insufficient?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** It cannot reveal missing modes or the frequency of different outputs.
 
-**Notebook demonstration:** Notebook §5: inspected_step copies the existing checkpoint, performs one float64 update on train images and reports each parameter-group delta.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Load the recorded trained model for a broader inspection.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Actual copied-checkpoint SGD execution; fixed-noise diagnostic, not a claim every stochastic training step must decrease loss.
+**Transition:** Compare loss curves for the stable and collapsed runs.
 
-## trained-recon: Inspect the existing trained model on held-out images
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Why is decoding μ different from averaging over q draws?
+## losses-not-quality: A loss curve is not a coverage certificate
 
-**Expected:** A nonlinear decoder generally maps the mean differently from the mean of its outputs.
+**Build 1, ask:** Can the lower displayed G loss alone identify the better distribution?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** No. D changes during training, so the numerical loss is not a fixed external quality measure.
 
-**Transition:** Now use the generation path that needs no image.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## prior-probs: Draw z from the prior and decode
+**Transition:** Explain why the opponent changes the landscape.
 
-**Build 1, ask:** Which trained weights are needed for this figure?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** Only the decoder θ; the prior is fixed.
+## moving-objective: The target of optimisation keeps moving
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Must both plotted losses fall on every iteration?
 
-**Transition:** Turn the same probability images into observations.
+**Expected:** No. The opponent changes the function being evaluated.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## prior-binary: Sample observations from those same likelihoods
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** What randomness changed relative to the previous figure?
+**Transition:** Choose diagnostics that answer concrete questions.
 
-**Expected:** Only the Bernoulli observation draws; z stayed fixed.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## diagnostic-grid: Ask separate questions about the samples
 
-**Transition:** Inspect the latent geometry on the old axes.
+**Build 1, ask:** What does fixed z control in a training film?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** It separates changes in G from changes in the sampled latent inputs.
 
-## vae-geometry: Reuse the AE axes for the VAE comparison
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** Does a normal-looking mean cloud prove q(z)=p(z)?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** No. Each q also has a covariance; this plot alone cannot establish equality.
+**Transition:** Transfer the same two-phase algorithm to images.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Check whether a wider code improves the reconstruction picture.
+## image-representation: Keep the data convention visible
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** Can we compare GAN loss numbers to the VAE reconstruction loss?
 
-## dimension-16: A larger latent changes capacity, not the objective’s meaning
+**Expected:** No. Their objectives, observation representations and reductions differ.
 
-**Build 1, ask:** Can you compare their raw loss to a different likelihood or reduction?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** No. Comparisons need the same observations and reduction convention.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Transition:** Expand the generator’s tensor shapes.
 
-**Transition:** Summarise what this construction actually bought us.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+## image-g-shapes: The generator expands a noise vector
 
-## what-gained: We now have both a generative model and fast inference
+**Build 1, ask:** Why use tanh at the output here?
 
-**Build 1, ask:** What is the cleanest difference from an ordinary AE?
+**Expected:** It matches the chosen [−1,1] image representation.
 
-**Expected:** A specified probabilistic generative model and a variational training objective.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Transition:** Keep the prior KL’s meaning bounded.
+**Transition:** The discriminator performs the opposite spatial reduction.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## prior-no-guarantee: A chosen prior is not a guarantee of perfect samples
+## image-d-shapes: The discriminator returns one logit per image
 
-**Build 1, ask:** Does every z from the prior have to produce a convincing digit?
+**Build 1, ask:** Does D predict one target per pixel?
 
-**Expected:** No such guarantee follows from the objective.
+**Expected:** No. This discriminator produces one source-classification logit for each whole image.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Consider the limits of the inference approximation.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** Inspect the same fixed draws over training.
 
-## posterior-gap: A stable ELBO does not certify exact inference
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Which reference would we need to directly compute this gap?
+## image-training-early: The same z before and after early learning
 
-**Expected:** The exact posterior KL or exact log evidence, generally unavailable here.
+**Build 1, ask:** What is changing between these grids?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** Generator weights; the latent vectors are held fixed.
 
-**Transition:** Do not confuse zero KL weighting with a deterministic encoder.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-## beta-zero: Setting the KL weight to zero does not remove sampling
+**Transition:** Compare later checkpoints without changing the selection.
 
-**Build 1, ask:** Is βKL=0 automatically the ordinary deterministic AE?
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Expected:** No. The stochastic encoder and likelihood computation can remain.
+## image-training-later: Structure emerges, but quality varies
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Build 1, ask:** Which limitations remain visible?
 
-**Transition:** Retrieve the training and sampling paths.
+**Expected:** Some samples are ambiguous; a fixed grid alone does not establish distributional fidelity.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Point here:** Follow the labelled computation or data on this frame.
 
-## exit-paths: Explain what each path needs
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Build 1, ask:** Which path uses the image as a target in a loss?
+**Transition:** Separate reproduced evidence from newly executed updates.
 
-**Expected:** Training; prior generation does not have a reconstruction target.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+## replay-evidence: What did we reproduce today?
 
-**Transition:** Bridge to a different learning signal.
+**Build 1, ask:** Does successful replay mean we retrained the image GAN?
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Expected:** No. It verifies the checkpoint and sample-generation path.
 
-## next-gan: Could a learned critic supply the training signal?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Build 1, ask:** Which checks should carry into the next model family?
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Expected:** Explicit sampling path, parameter owners, gradient path and honest sample-quality claims.
+**Transition:** Run the notebook’s short inspected training step.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Transition:** Lecture 4: GANs.
+## demo: Live: inspect who changes
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Build 1, ask:** Which two parameter-change checks must be exactly zero?
 
-## optional-beta: Optional: a controlled change in KL weighting (optional)
+**Expected:** G during the D phase and D during the G phase.
 
-**Build 1, ask:** What tradeoff changed in these particular runs?
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Expected:** Compare the measured reconstruction and KL values; do not claim a universal monotone sample-quality trend.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Notebook demonstration:** lecture3.ipynb: “Two neural updates with parameter ownership checks”.
 
-**Transition:** Read training metadata before generalising.
+**Transition:** Retrieve the central gradient-path distinction.
 
-**Source / evidence:** Existing d2 β1/β8 checkpoints: same architecture, seed and 40-epoch schedule; held-out one-draw replay seed673. Different objectives.
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-## optional-aggregate: Optional: mean clouds omit posterior spread (optional)
+## exit-detach: Exit check: where should detach go?
 
-**Build 1, ask:** What extra information is missing from the centre plot?
+**Build 1, ask:** How does the answer change between the two phases?
 
-**Expected:** The covariance and probability mass around each centre.
+**Expected:** The same forward topology serves different parameter owners and targets.
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Transition:** Distinguish aggregate geometry from per-image KL.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Transition:** Connect the training signal to the other generative models.
 
-## optional-constant: Optional: when is log evidence a fixed total? (optional)
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
-**Build 1, ask:** Why can the same identity support two different visual explanations?
+## compare-vae: Two ways to train a sampler
 
-**Expected:** The quantities held fixed differ across the two optimisation problems.
+**Build 1, ask:** What did the discriminator replace in the training story?
 
-**Point here:** Track the same image, latent coordinate and parameter owner across the reveal.
+**Expected:** It supplies feedback without evaluating a decoder likelihood or an ELBO.
 
-**Transition:** Return to the owner of each parameter.
+**Point here:** Follow the labelled computation or data on this frame.
 
-**Source / evidence:** Original teaching construction; exact formula or measured checkpoint replay. See data/provenance.json and fixtures.json.
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
+
+**Transition:** Diffusion will build a supervised target by corrupting real data.
+
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+
+## next-question: Can we create the training target ourselves?
+
+**Build 1, ask:** What information becomes available when we create the corruption?
+
+**Expected:** The clean example, timestep and injected noise are all known during training.
+
+**Point here:** Follow the labelled computation or data on this frame.
+
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
+
+**Transition:** Begin diffusion with a concrete corrupted image.
+
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+
+## optional-optimal-d: Optional: the ideal classifier at fixed G (optional)
+
+**Build 1, ask:** Under what assumptions is this ideal discriminator statement meaningful?
+
+**Expected:** Unlimited classifier capacity and exact optimisation at fixed distributions; finite neural training need not reach it.
+
+**Point here:** Follow the labelled computation or data on this frame.
+
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
+
+**Transition:** Return to measured diagnostics rather than treating the ideal as a guarantee.
+
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+
+## optional-batchnorm: Optional: frozen parameters are not all model state (optional)
+
+**Build 1, ask:** Does requires_grad_(False) switch a network to evaluation mode?
+
+**Expected:** No. Parameter gradients and train/eval mode are separate controls.
+
+**Point here:** Follow the labelled computation or data on this frame.
+
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
+
+**Transition:** Make the intended training-state convention explicit in implementations.
+
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+
+## optional-controls: Optional: changes to the game are experiments (optional)
+
+**Build 1, ask:** Does one stabilised run prove a remedy always works?
+
+**Expected:** No. It supports the measured configuration only.
+
+**Point here:** Follow the labelled computation or data on this frame.
+
+**Common misconception:** A plausible sample alone does not establish the learned distribution.
+
+**Transition:** Use the companion notebook for controlled extensions.
+
+**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661

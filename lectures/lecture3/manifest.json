@@ -1,470 +1,437 @@
 {
   "id": "lecture3",
   "number": 3,
-  "title": "Variational autoencoders",
-  "subtitle": "Learn a sampling model and an inference network together",
-  "minutes": 70,
+  "title": "Generative adversarial networks",
+  "subtitle": "A learned critic supplies the learning signal",
+  "minutes": 60,
   "notebook": "lecture3.ipynb",
   "sections": [
     {
-      "id": "return",
-      "title": "Reopen the sampling question",
+      "id": "signal",
+      "title": "A learning signal",
       "minutes": 6
     },
     {
-      "id": "generate",
-      "title": "Specify the generative story",
+      "id": "discriminator",
+      "title": "One discriminator update",
       "minutes": 10
     },
     {
-      "id": "infer",
-      "title": "Infer this image’s code",
-      "minutes": 10
-    },
-    {
-      "id": "elbo",
-      "title": "Reuse the ELBO",
+      "id": "generator",
+      "title": "One generator update",
       "minutes": 12
     },
     {
-      "id": "path",
-      "title": "Make the training path differentiable",
+      "id": "game",
+      "title": "Alternate the players",
       "minutes": 11
     },
     {
-      "id": "train",
-      "title": "One step, then model evidence",
-      "minutes": 13
+      "id": "failure",
+      "title": "Samples, coverage and failure",
+      "minutes": 11
     },
     {
-      "id": "limits",
-      "title": "What did we gain?",
-      "minutes": 8
+      "id": "images",
+      "title": "MNIST and retrieval",
+      "minutes": 10
     }
   ],
-  "coreSlides": 57,
+  "coreSlides": 53,
   "optionalSlides": 3,
   "slides": [
     {
-      "id": "same-failure",
-      "title": "This is exactly where the autoencoder left us",
-      "section": "return",
+      "id": "start",
+      "title": "Where could a generator get feedback?",
+      "section": "signal",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "same-samples",
-      "title": "The same decoder, an unsupported choice of codes",
-      "section": "return",
+      "id": "generator-is-sampler",
+      "title": "A generator turns a draw into a sample",
+      "section": "signal",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "what-we-want",
-      "title": "Start with a sampling procedure we can name",
-      "section": "return",
+      "id": "likelihood-question",
+      "title": "Sampling is easier than evaluating a density",
+      "section": "signal",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "same-three",
-      "title": "And explain this observed 3",
-      "section": "return",
+      "id": "toy-vote",
+      "title": "Which distribution is missing something?",
+      "section": "signal",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "owners",
-      "title": "Weights and latent values have different jobs",
-      "section": "return",
+      "id": "two-players",
+      "title": "One network proposes; one distinguishes",
+      "section": "signal",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "route",
-      "title": "The model tells us what inference must solve",
-      "section": "return",
+      "id": "data-labels",
+      "title": "Fix the samples and label their source",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "prior",
-      "title": "Choose a fixed prior for latent vectors",
-      "section": "generate",
+      "id": "chosen-networks",
+      "title": "Choose networks small enough to inspect",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "decoder-logits",
-      "title": "The decoder outputs 784 logits",
-      "section": "generate",
+      "id": "fake-arithmetic",
+      "title": "First compute the fake",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "likelihood",
-      "title": "Conditioned on z, specify a Bernoulli likelihood",
-      "section": "generate",
+      "id": "d-logits",
+      "title": "A score comes before a probability",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "prob-model",
-      "title": "A probabilistic graph says who depends on whom",
-      "section": "generate",
+      "id": "d-real-term",
+      "title": "Reward a high score on real data",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "probability-versus-draw",
-      "title": "A probability image and a sampled observation differ",
-      "section": "generate",
+      "id": "d-fake-term",
+      "title": "Reward a low score on generated data",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "sampling-code",
-      "title": "Two random draws belong to different levels",
-      "section": "generate",
+      "id": "d-loss",
+      "title": "Add the two classification losses",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "image-probability",
-      "title": "Every possible z can contribute to pθ(x)",
-      "section": "generate",
+      "id": "d-gradient",
+      "title": "Which derivative changes the classifier?",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "sampling-without-encoder",
-      "title": "Generation does not require the encoder",
-      "section": "generate",
+      "id": "d-update",
+      "title": "One D update, with G unchanged",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "posterior-three",
-      "title": "Which latent values explain this image?",
-      "section": "infer",
+      "id": "d-recompute",
+      "title": "Check the same examples after the update",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "free-q",
-      "title": "Fit a tractable distribution for this one image",
-      "section": "infer",
+      "id": "detach",
+      "title": "Stop this phase at the fake sample",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "per-image-fit",
-      "title": "Per-image VI is a real optimisation loop",
-      "section": "infer",
+      "id": "detach-code",
+      "title": "Detach only the generated sample",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "per-image-path",
-      "title": "One fit moves its own variational parameters",
-      "section": "infer",
+      "id": "d-check",
+      "title": "Check ownership of the update",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "many-images",
-      "title": "Do we run a new optimiser for every image?",
-      "section": "infer",
+      "id": "d-only",
+      "title": "What happens if only D learns?",
+      "section": "discriminator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "amortisation",
-      "title": "Learn to predict the variational parameters",
-      "section": "infer",
+      "id": "g-goal",
+      "title": "Now let the generator ask for label 1",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "amortisation-tradeoff",
-      "title": "Amortisation trades repeated solving for a shared map",
-      "section": "infer",
+      "id": "freeze-not-detach",
+      "title": "Frozen weights can still transmit a gradient",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "two-directions",
-      "title": "The model and inference answer opposite questions",
-      "section": "infer",
+      "id": "g-chain",
+      "title": "Follow the chain rule into the generator",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "recall-identity",
-      "title": "Reuse the identity, with x fixed",
-      "section": "elbo",
+      "id": "g-gradient",
+      "title": "The generator receives a nonzero derivative",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "joint-elbo",
-      "title": "The joint-density form remains the starting point",
-      "section": "elbo",
+      "id": "g-update",
+      "title": "One G update, with D unchanged",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "expand-elbo",
-      "title": "Split likelihood from the prior-to-q comparison",
-      "section": "elbo",
+      "id": "g-recompute",
+      "title": "Check the updated sample and loss",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "two-kls",
-      "title": "These two KL terms compare different distributions",
-      "section": "elbo",
+      "id": "g-code",
+      "title": "Keep the path; freeze the owner",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "reconstruction-term",
-      "title": "A sampled z should explain the observed pixels",
-      "section": "elbo",
+      "id": "freeze-vs-detach",
+      "title": "Two operations with different effects",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "gaussian-prior-kl",
-      "title": "The diagonal-Gaussian prior KL is available exactly",
-      "section": "elbo",
+      "id": "g-check",
+      "title": "Verify the actual parameter changes",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "kl-geometry",
-      "title": "The formula penalises shifted or mismatched uncertainty",
-      "section": "elbo",
+      "id": "g-only",
+      "title": "A fixed critic can be exploited",
+      "section": "generator",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "held-loss",
-      "title": "For this 3, the two contributions are measured",
-      "section": "elbo",
+      "id": "alternating",
+      "title": "The training loop alternates two objectives",
+      "section": "game",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "batch-d",
+      "title": "The discriminator has two expectations",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "objective-sign",
-      "title": "Maximise the bound, or minimise its negative",
-      "section": "elbo",
+      "id": "batch-g",
+      "title": "The practical generator loss",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "batch-objective",
-      "title": "The reduction is part of the model implementation",
-      "section": "elbo",
+      "id": "minimax",
+      "title": "The original game uses a different G term",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "two-heads",
-      "title": "The encoder predicts two vectors",
-      "section": "path",
+      "id": "saturation-derivative",
+      "title": "A confident discriminator can weaken one signal",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "std-conversion",
-      "title": "Half the log variance before exponentiating",
-      "section": "path",
+      "id": "saturation-plot",
+      "title": "The difference is visible before any training",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "encoder-numbers",
-      "title": "Our 3 produces a narrow Gaussian",
-      "section": "path",
+      "id": "alternating-code-d",
+      "title": "The first half of one neural update",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "noise-source",
-      "title": "Draw noise that does not depend on φ",
-      "section": "path",
+      "id": "alternating-code-g",
+      "title": "The second half of one neural update",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "latent-calculation",
-      "title": "Calculate this particular latent draw",
-      "section": "path",
+      "id": "toy-progress",
+      "title": "Can alternating updates cover both regions?",
+      "section": "game",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "pathwise-graph",
-      "title": "Randomness enters through one explicit input",
-      "section": "path",
+      "id": "coverage",
+      "title": "Count mass near each known mode",
+      "section": "failure",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-path",
-      "title": "Follow one coordinate by hand",
-      "section": "path",
+      "id": "collapse",
+      "title": "Plausible samples can omit a whole mode",
+      "section": "failure",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "gradient-check",
-      "title": "A gradient check keeps the same noise",
-      "section": "path",
+      "id": "losses-not-quality",
+      "title": "A loss curve is not a coverage certificate",
+      "section": "failure",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "gradient-scope",
-      "title": "Reparameterisation supplies the pathwise gradient",
-      "section": "path",
+      "id": "moving-objective",
+      "title": "The target of optimisation keeps moving",
+      "section": "failure",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "forward-code",
-      "title": "The forward pass has one source of latent noise",
-      "section": "train",
+      "id": "diagnostic-grid",
+      "title": "Ask separate questions about the samples",
+      "section": "failure",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "recon-code",
-      "title": "Keep the event sum visible",
-      "section": "train",
+      "id": "image-representation",
+      "title": "Keep the data convention visible",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "kl-code",
-      "title": "The analytic KL has the same outer shape",
-      "section": "train",
+      "id": "image-g-shapes",
+      "title": "The generator expands a noise vector",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "update-code",
-      "title": "One complete optimisation step",
-      "section": "train",
+      "id": "image-d-shapes",
+      "title": "The discriminator returns one logit per image",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "actual-step",
-      "title": "Check a real update, not only a loss formula",
-      "section": "train",
+      "id": "image-training-early",
+      "title": "The same z before and after early learning",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "trained-recon",
-      "title": "Inspect the existing trained model on held-out images",
-      "section": "train",
+      "id": "image-training-later",
+      "title": "Structure emerges, but quality varies",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "prior-probs",
-      "title": "Draw z from the prior and decode",
-      "section": "train",
+      "id": "replay-evidence",
+      "title": "What did we reproduce today?",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "prior-binary",
-      "title": "Sample observations from those same likelihoods",
-      "section": "train",
+      "id": "demo",
+      "title": "Live: inspect who changes",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "vae-geometry",
-      "title": "Reuse the AE axes for the VAE comparison",
-      "section": "train",
+      "id": "exit-detach",
+      "title": "Exit check: where should detach go?",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "dimension-16",
-      "title": "A larger latent changes capacity, not the objective’s meaning",
-      "section": "train",
+      "id": "compare-vae",
+      "title": "Two ways to train a sampler",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "what-gained",
-      "title": "We now have both a generative model and fast inference",
-      "section": "limits",
+      "id": "next-question",
+      "title": "Can we create the training target ourselves?",
+      "section": "images",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "prior-no-guarantee",
-      "title": "A chosen prior is not a guarantee of perfect samples",
-      "section": "limits",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "posterior-gap",
-      "title": "A stable ELBO does not certify exact inference",
-      "section": "limits",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "beta-zero",
-      "title": "Setting the KL weight to zero does not remove sampling",
-      "section": "limits",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "exit-paths",
-      "title": "Explain what each path needs",
-      "section": "limits",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "next-gan",
-      "title": "Could a learned critic supply the training signal?",
-      "section": "limits",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "optional-beta",
-      "title": "Optional: a controlled change in KL weighting",
-      "section": "limits",
+      "id": "optional-optimal-d",
+      "title": "Optional: the ideal classifier at fixed G",
+      "section": "failure",
       "builds": 2,
       "optional": true
     },
     {
-      "id": "optional-aggregate",
-      "title": "Optional: mean clouds omit posterior spread",
-      "section": "limits",
+      "id": "optional-batchnorm",
+      "title": "Optional: frozen parameters are not all model state",
+      "section": "images",
       "builds": 2,
       "optional": true
     },
     {
-      "id": "optional-constant",
-      "title": "Optional: when is log evidence a fixed total?",
-      "section": "elbo",
+      "id": "optional-controls",
+      "title": "Optional: changes to the game are experiments",
+      "section": "failure",
       "builds": 2,
       "optional": true
     }
   ],
-  "totalStates": 120
+  "totalStates": 113
 }

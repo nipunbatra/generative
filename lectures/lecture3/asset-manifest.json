@@ -1,195 +1,13 @@
 {
-  "lecture": 5,
+  "lecture": 4,
   "generated": "2026-10-20",
   "conceptualReferences": [
-    "https://arxiv.org/abs/2006.11239",
-    "https://arxiv.org/abs/2112.10752",
-    "https://arxiv.org/abs/2207.12598"
+    "https://arxiv.org/abs/1406.2661"
   ],
   "figures": [
     {
-      "path": "figures/clean-estimate.png",
-      "sha256": "f8ff0999a8dc642f5eda363d58c028bac313e8daea78d95e15d5ec416adb20d8",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/forward-1.png",
-      "sha256": "ab9cd27fe07e4f5431985ad9dfa83129c2271fb74d25fe2248bc22ed874b5390",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/forward-100.png",
-      "sha256": "60180ca346b93f860ee86c4dc9546cb87c0dadde7cf7a3889d5df5c245f8cfd3",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/forward-1000.png",
-      "sha256": "ca2b32f126ce6cf115dc02161d7d7cef530eb974ca4fcbe01a8c1ac0d6526bd5",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/forward-350.png",
-      "sha256": "56a8b20dcea7c12ae6c9ed5b840836dcb730f29c30a7376ce6d23b0aadd9ba6f",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/forward-600.png",
-      "sha256": "67012a953335a0934f5c72c6dce1b4adaff71b30d18580a3653624d529cc74fa",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/forward-7.png",
-      "sha256": "b9ff748f146e2c65245713270d83d32f8568310abe574b9f3b436bb31eac597c",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/forward-920.png",
-      "sha256": "f696027baab66c2528cc70c2456b8e3fa94a551e6055014930aa32bf673dd5d3",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/held-seven.png",
-      "sha256": "d7a66b8f20c4408a2dcf3531bf2a5e889b2bd38016e4d73c2e50b3458bd2f668",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/injected-noise.png",
-      "sha256": "a761af4c3126cbaf221386a3e6e707f4f03d935d92811e9ef2afd264187e96a7",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/predicted-noise.png",
-      "sha256": "6cb212ea2bb32880708141de6e0d88ac27a69deed1b82117a9a6ee7023bd8830",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-0.png",
-      "sha256": "6bdbe4a1942e19ae2909bcd634fafa15410b52dac5a8a924463e4535f3a512bb",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-1.png",
-      "sha256": "6c59922b9d5b4d557eba7368e9cc7b181a9179830933e9d879e9928330d07667",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-1000.png",
-      "sha256": "beef8ce657a0fb811dbce9a9ec635184d8ff25ac173fd9d528eacab77d5e7aed",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-200.png",
-      "sha256": "2b3f3903c4ac8b993035e516c85f92f91d26967e837aac8a194c46ba6e21d977",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-400.png",
-      "sha256": "75136c2d1d2d428c56cda48be39541675346784f4da9748f2924028f952dd4aa",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-50.png",
-      "sha256": "ef5bc095a18b463d352f212fdae30f54b9aa4ec2ffd08adb698e85adff7a103f",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-600.png",
-      "sha256": "cdf05cfed650d9085bc4667e51eb2e6970a4c934c07e3834c0f0907ba3d38193",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/reverse-800.png",
-      "sha256": "4938e305fc37dcc749aae655d4c185fa3307b9a4505331bd3ebb17e10e785c54",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/samples-replayed.png",
-      "sha256": "3a6012557c06407f6abd0ae2da97ca0b4fe06d23cb67ca9820c8c20531456a65",
-      "kind": "rendered local data or measured model output",
-      "producer": "scripts/prepare.py",
-      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
-      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
-      "thirdPartyFigureReproduction": false
-    },
-    {
-      "path": "figures/schedule.svg",
-      "sha256": "d5ce145c00989c2fc8a5dfefe73b2c0c379601b4af478d536f1c829985f1a458",
+      "path": "figures/d_only-0.svg",
+      "sha256": "2e0832c0fbc8f73ef9bfe33bc21cdcf3c3b9386453344e218e4aeecb1210ff7e",
       "kind": "computed vector plot",
       "producer": "scripts/prepare.py",
       "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
@@ -197,8 +15,161 @@
       "thirdPartyFigureReproduction": false
     },
     {
-      "path": "figures/training-history.svg",
-      "sha256": "44866316babb5a1a248c513283a9d73a1aea4b11bf4418be784d236aa866cd75",
+      "path": "figures/d_only-200.svg",
+      "sha256": "3a70942bc9e826437ac1bbb8c7a7e772b923eb43e7349debabcd39c0f73c5257",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/d_only-samples-0.svg",
+      "sha256": "11f98d1b4b314dd387446d3991eb446ca36eb3875dcafe455adca9887a8f01b9",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/d_only-samples-200.svg",
+      "sha256": "cdfa1266ff526481a94f3715e57de72d49e16dd549d614338cc5b8fa0c52cb79",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/g_only-0.svg",
+      "sha256": "40e2741b8d7f30a7a6e5262806db9012f9a2ff2c9ea9aa5516918a3bebd7c7e6",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/g_only-300.svg",
+      "sha256": "ba83d1cc6866ca0e197707a4f66df89f57f49370c938f63648fb64ea0506739d",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/g_only-samples-0.svg",
+      "sha256": "0a226a181c51d225197e4f1f40805ac38086d6a32cdea2ed48300c76b8d3a97f",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/g_only-samples-300.svg",
+      "sha256": "e4d02ca75947fff4aad25b1c684a19a7af4de32f27739437d941355c31d3a552",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/held-digit3.png",
+      "sha256": "a80b87da660cefdd56c5497b1eeff478758d47b01b1e12f1b33e42213d66e87d",
+      "kind": "rendered local data or measured model output",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/loss-vs-coverage.svg",
+      "sha256": "364458d02e0e9e233004a7d661a2dcfb23ff920cf1f496de44be801493f6a4a7",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/mnist-epoch-0.png",
+      "sha256": "4bd92e1a9b484d7ff559550150c0994f5d46eef5d508b9e9c86a234cb66d63a8",
+      "kind": "rendered local data or measured model output",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/mnist-epoch-1.png",
+      "sha256": "d3bb0da4dbcc7cd1c4e2724bb5955bf2be77db59052bfc934062485dc81f3b02",
+      "kind": "rendered local data or measured model output",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/mnist-epoch-30.png",
+      "sha256": "32acebf9d3f1369f19efb6afc4931984602a8d0da0065c343061c6a000c6e0f9",
+      "kind": "rendered local data or measured model output",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/mnist-epoch-5.png",
+      "sha256": "c9125e2c4162dc14559d3b742a5d62edcd13102a06a27a1db52106e6d1235732",
+      "kind": "rendered local data or measured model output",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/mnist-replayed.png",
+      "sha256": "32acebf9d3f1369f19efb6afc4931984602a8d0da0065c343061c6a000c6e0f9",
+      "kind": "rendered local data or measured model output",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/saturation.svg",
+      "sha256": "9054a50aedcc267545baaca5f7c552a141258c919c1898599fd91f36bb2904e6",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/toy-collapse.svg",
+      "sha256": "6be1e48409dc0452dcf1df1cb60b056efb16f8c441f24c18bb8abf49dfe9f085",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/toy-initial.svg",
+      "sha256": "1bdd5383e751aa5b2122fd09168390b7727a999cf98f711ba6341cbb45b1d021",
+      "kind": "computed vector plot",
+      "producer": "scripts/prepare.py",
+      "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",
+      "attribution": "Original teaching figure computed for this lecture; MNIST source acknowledged in data provenance",
+      "thirdPartyFigureReproduction": false
+    },
+    {
+      "path": "figures/toy-stable.svg",
+      "sha256": "56230867f03a9e77ed0ba948755332ca5259ee44269efbdc01140161daffb590",
       "kind": "computed vector plot",
       "producer": "scripts/prepare.py",
       "sourceData": "data/fixtures.json; bundled data/checkpoints and reuse-manifest.json",

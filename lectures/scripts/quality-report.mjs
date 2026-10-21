@@ -3,7 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const rows=[],notebooks=[];
-for(let n=1;n<=5;n++){
+for(let n=1;n<=4;n++){
  const dir=path.join(root,`lecture${n}`),read=f=>JSON.parse(fs.readFileSync(path.join(dir,f)));
  const m=read('manifest.json'),browser=read('qa/browser-checks.json'),pdf=read('qa/pdf-checks.json'),science=read('qa/science-checks.json');
  if(!browser.passed||!pdf.passed||!(science.passed||science.status==='passed'))throw new Error(`Lecture ${n} checks failed`);

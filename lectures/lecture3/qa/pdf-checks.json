@@ -1,11 +1,11 @@
 {
-  "lecture": 3,
+  "lecture": 4,
   "checks": [
     {
       "name": "completed page count",
       "passed": true,
-      "actual": 60,
-      "expected": 60
+      "actual": 56,
+      "expected": 56
     },
     {
       "name": "completed page geometry",
@@ -22,8 +22,8 @@
     {
       "name": "all-builds page count",
       "passed": true,
-      "actual": 120,
-      "expected": 120
+      "actual": 113,
+      "expected": 113
     },
     {
       "name": "all-builds page geometry",
@@ -47,48 +47,48 @@
       "passed": true,
       "worst": [
         {
-          "id": "same-failure",
-          "meanAbsolutePixelDifference": 3.655494113760064,
-          "unregisteredDifference": 3.917612781954887,
+          "id": "image-training-early",
+          "meanAbsolutePixelDifference": 4.5686588352089945,
+          "unregisteredDifference": 5.339106359649123,
           "registrationPixels": [
             0,
             1
           ]
         },
         {
-          "id": "per-image-fit",
-          "meanAbsolutePixelDifference": 3.650380507037088,
-          "unregisteredDifference": 3.620124921679198,
+          "id": "start",
+          "meanAbsolutePixelDifference": 4.358269032860822,
+          "unregisteredDifference": 5.443850642230577,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "image-training-later",
+          "meanAbsolutePixelDifference": 4.150195154107721,
+          "unregisteredDifference": 5.104451754385965,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "losses-not-quality",
+          "meanAbsolutePixelDifference": 3.451323712370194,
+          "unregisteredDifference": 3.474828477443609,
+          "registrationPixels": [
+            0,
+            1
+          ]
+        },
+        {
+          "id": "saturation-plot",
+          "meanAbsolutePixelDifference": 3.1177939602609643,
+          "unregisteredDifference": 3.0923962249373433,
           "registrationPixels": [
             0,
             0
-          ]
-        },
-        {
-          "id": "per-image-path",
-          "meanAbsolutePixelDifference": 3.2971768654250786,
-          "unregisteredDifference": 3.5596596961152884,
-          "registrationPixels": [
-            0,
-            1
-          ]
-        },
-        {
-          "id": "pathwise-graph",
-          "meanAbsolutePixelDifference": 3.2605449613248663,
-          "unregisteredDifference": 3.233845159774436,
-          "registrationPixels": [
-            0,
-            0
-          ]
-        },
-        {
-          "id": "vae-geometry",
-          "meanAbsolutePixelDifference": 3.1429478150486028,
-          "unregisteredDifference": 3.7329605263157895,
-          "registrationPixels": [
-            0,
-            1
           ]
         }
       ],

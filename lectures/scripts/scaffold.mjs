@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-for(let n=1;n<=5;n++){
+for(let n=1;n<=4;n++){
  const dir=path.join(root,`lecture${n}`);fs.mkdirSync(dir,{recursive:true});
  fs.writeFileSync(path.join(dir,'index.html'),`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#FAFAFB"><link rel="icon" href="data:,"><title>Lecture ${n} · Generative modelling</title><link rel="stylesheet" href="../shared/katex/katex.min.css"><link rel="stylesheet" href="../shared/deck.css"><script src="../shared/katex/katex.min.js"></script><script type="module" src="../shared/deck.js"></script></head>

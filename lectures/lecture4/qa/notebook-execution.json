@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "seconds": 3.5258829593658447,
+  "seconds": 7.10901403427124,
   "interpreter": "/Users/nipun/git/clip-lab/.venv/bin/python",
-  "codeCells": 9,
-  "figures": 3,
+  "codeCells": 14,
+  "figures": 4,
   "errors": 0
 }

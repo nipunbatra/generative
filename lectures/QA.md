@@ -20,7 +20,7 @@ Every authored state was rendered and captured at the 1280 × 720 logical slide 
 
 The primary author inspected all Lecture 1 state contact sheets, followed up on full-resolution frames and inspected PDF output. Independent cross-review covered every AE/VAE and GAN/DDPM state. It identified and resolved equations with rounded values presented as exact, decoder-logit/probability inconsistencies, arrow/label crossings, misleading GAN update labels, clipped density axes, the U-Net skip destination, the latent-diffusion sampling start and the attention matrix convention. Corrected states were inspected again.
 
-The reports are [AE/VAE cross-review](lecture1/qa/cross-review-l2-l3.md) and [GAN/DDPM cross-review](lecture2/qa/cross-review-l4-l5.md). Browser reports are published under each lecture's `qa/`. The larger state screenshots and contact sheets are retained locally and can be regenerated with the QA scripts. Automated geometry checks support this inspection; they do not establish teaching effectiveness.
+The reports are [AE/VAE cross-review](lecture1/qa/cross-review-l2-l3.md), of the earlier Lectures 2 and 3 that the new Lecture 2 replaces, and [GAN/DDPM cross-review](lecture2/qa/cross-review-l4-l5.md), of what are now Lectures 3 and 4. Browser reports are published under each lecture's `qa/`. The larger state screenshots and contact sheets are retained locally and can be regenerated with the QA scripts. Automated geometry checks support this inspection; they do not establish teaching effectiveness.
 
 ## PDF checks
 
@@ -49,4 +49,4 @@ Per-lecture numerical fixtures, science reports, seeds and provenance record the
 
 ## Practical limits
 
-The 60–70 minute main routes are planned budgets, not classroom-rehearsed timings. Forty-five-minute alternatives reduce scope. Rendering and mathematical verification do not establish generalisation, sample quality or optimal pedagogy. Hosted-delivery checks, larger model training and classroom rehearsal are separate from this build verification.
+The main routes (60 to 145 minutes) are planned budgets, not classroom-rehearsed timings. Forty-five-minute alternatives reduce scope. Rendering and mathematical verification do not establish generalisation, sample quality or optimal pedagogy. Hosted-delivery checks, larger model training and classroom rehearsal are separate from this build verification.

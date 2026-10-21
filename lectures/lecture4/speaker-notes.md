@@ -1,800 +1,899 @@
-# Generative adversarial networks: speaker notes
+# Denoising diffusion probabilistic models: speaker notes
 
-Planned main route: 60 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 70 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
-| A learning signal | 6 |
-| One discriminator update | 10 |
-| One generator update | 12 |
-| Alternate the players | 11 |
-| Samples, coverage and failure | 11 |
-| MNIST and retrieval | 10 |
+| From noise to images | 6 |
+| The known forward process | 11 |
+| One supervised example | 12 |
+| One loss and one update | 11 |
+| One reverse step | 14 |
+| Run the small DDPM | 8 |
+| Text conditioning and retrieval | 8 |
 
-## start: Where could a generator get feedback?
+## noise-to-image: How could this become an image?
 
-**Build 1, ask:** What training signal could produce these samples?
+**Build 1, ask:** What computation could connect these two states?
 
-**Expected:** A learned discriminator can supply differentiable feedback.
+**Expected:** A sequence of learned reverse transitions, starting from noise.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** First separate producing an image from scoring it.
+**Transition:** Before learning to reverse anything, define a process we can run exactly.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## generator-is-sampler: A generator turns a draw into a sample
+## show-trajectory: Many small decisions make one sample
 
-**Build 1, ask:** Which part introduces randomness?
+**Build 1, ask:** Which clean training image is this sampler trying to reconstruct?
 
-**Expected:** The sampled z; G is deterministic once z and θ are fixed.
+**Expected:** None. It starts from new noise and generates a new sample.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Sampling does not automatically give us a convenient density.
+**Transition:** Use a real image to construct the training task.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## likelihood-question: Sampling is easier than evaluating a density
+## held-example: For this lecture, follow one handwritten 7
 
-**Build 1, ask:** Can this network readily report the probability of an image?
+**Build 1, ask:** Why keep one image visible through the calculations?
 
-**Expected:** The usual GAN supplies an implicit sampler; its training signal comes from a classifier.
+**Expected:** It lets us connect each symbol to a concrete state rather than swap examples silently.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Make that classifier’s job concrete.
+**Transition:** Corrupt this same image at different noise levels.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## toy-vote: Which distribution is missing something?
+## forward-film: The easy direction destroys information
 
-**Build 1, ask:** Where should generated samples move?
+**Build 1, ask:** Is this particular display a sequential Markov-chain path?
 
-**Expected:** They need to cover both observed regions, not merely one plausible point.
+**Expected:** No. It uses one fixed noise draw to compare direct marginals at different t.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** A discriminator can learn where the two sources differ.
+**Transition:** Now define the actual one-step forward transition.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## two-players: One network proposes; one distinguishes
+## two-directions: Known corruption; learned reverse transitions
 
-**Build 1, ask:** Must we keep D to generate after training?
+**Build 1, ask:** Which direction requires training?
 
-**Expected:** No. Draw z and run G.
+**Expected:** The reverse distribution. The forward corruption schedule is chosen and fixed.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Now hold G still and train the classifier.
+**Transition:** Start with one pixel so the coefficients have meaning.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## data-labels: Fix the samples and label their source
+## one-step-pixel: One pixel, one small corruption
 
-**Build 1, ask:** Does label 1 mean “a perfect digit”?
+**Build 1, ask:** Why not multiply noise by β₁ directly?
 
-**Expected:** It means the example came from the observed-data source in this classification task.
+**Expected:** A standard-normal noise term multiplied by √β₁ has variance β₁.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Use a scalar classifier so every number is visible.
+**Transition:** Write the same operation as a conditional distribution.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## chosen-networks: Choose networks small enough to inspect
+## forward-kernel: The forward step is a Gaussian conditional
 
-**Build 1, ask:** What are the trainable quantities?
+**Build 1, ask:** Does q contain a learned encoder in this lecture?
 
-**Expected:** a,b belong to G; w,c belong to D. x and z are fixed for this calculation.
+**Expected:** No. The symbol q names a fixed, declared noising distribution.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Evaluate the generator first.
+**Transition:** Separate one-step retention from cumulative retention.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## fake-arithmetic: First compute the fake
+## alpha-vs-alphabar: One step and many steps need different symbols
 
-**Build 1, ask:** What sample does this z produce?
+**Build 1, ask:** Is ᾱₜ the same as αₜ?
 
-**Expected:** Zero. The observed example is at x = 2.
+**Expected:** Only at the first step. The bar denotes a product over the preceding steps.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Feed each example into the same discriminator.
+**Transition:** Expand two steps to see why the product appears.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-logits: A score comes before a probability
+## two-step-expansion: Expand two corruption steps
 
-**Build 1, ask:** Why keep raw logits in the implementation?
+**Build 1, ask:** Why can we combine the two noise terms?
 
-**Expected:** Stable binary cross-entropy can operate directly on logits.
+**Expected:** Independent Gaussian terms sum to a Gaussian; their variances add after scaling.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Translate the labels into a loss.
+**Transition:** The same argument gives a direct marginal at any time.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-real-term: Reward a high score on real data
+## direct-marginal: Jump directly to any chosen timestep
 
-**Build 1, ask:** Would D(real) closer to one increase this loss?
+**Build 1, ask:** Must training simulate all earlier corruption steps?
 
-**Expected:** No, it reduces the negative log probability of the correct label.
+**Expected:** No. This direct construction draws the correct marginal at the selected t.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** The fake example requires the opposite label.
+**Transition:** Give the symbolic coefficients a concrete schedule.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-fake-term: Reward a low score on generated data
+## schedule: Choose a schedule whose endpoint is near noise
 
-**Build 1, ask:** Which direction should D(fake) move?
+**Build 1, ask:** Why is setting T = 20 with the same endpoints a different model?
 
-**Expected:** Towards zero during the discriminator phase.
+**Expected:** It changes the accumulated product and may leave substantial signal at the endpoint.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Combine the two contributions with a declared reduction.
+**Transition:** Read a few schedule values rather than hide them in code.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-loss: Add the two classification losses
+## schedule-values: The bar carries the cumulative effect
 
-**Build 1, ask:** Is this an average over the combined two-example batch?
+**Build 1, ask:** Which coefficient belongs in the direct xₜ formula?
 
-**Expected:** Our convention sums the two source means; a combined mean differs by a factor of two.
+**Expected:** ᾱₜ, not αₜ.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Now take a derivative while holding G fixed.
+**Transition:** Calculate one scalar instance using that exact schedule.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-gradient: Which derivative changes the classifier?
+## scalar-inputs: Choose one scalar training example
 
-**Build 1, ask:** Which term contributes to the weight derivative when fake x is zero?
+**Build 1, ask:** Which of these three quantities is learned?
 
-**Expected:** Only the real term contributes to ∂L/∂w; both contribute to the bias derivative.
+**Expected:** None. They define one training example; model weights are learned later.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Make one literal parameter update.
+**Transition:** Combine the signal and noise contributions.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-update: One D update, with G unchanged
+## scalar-forward: Compute the noisy pixel
 
-**Build 1, ask:** Which row must remain identical?
+**Build 1, ask:** Is the result required to stay in [−1,1]?
 
-**Expected:** The generator parameters. This phase updates only ω.
+**Expected:** No. Gaussian corruption has unbounded support. Do not clip training states.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Re-evaluate rather than assuming improvement.
+**Transition:** Move from one scalar to a full image without changing the rule.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-recompute: Check the same examples after the update
+## image-forward: Apply the same construction to every pixel
 
-**Build 1, ask:** Did the discriminator improve on these two examples?
+**Build 1, ask:** Are noise values shared across pixels?
 
-**Expected:** Yes: real score rises, fake score falls, and the same-batch loss falls.
+**Expected:** No. Each pixel receives a Gaussian draw; the same scalar coefficients apply to the full tensor.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** The code must prevent this update from reaching G.
+**Transition:** A supervised learning tuple is now available.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## detach: Stop this phase at the fake sample
+## tuple: What does one training example contain?
 
-**Build 1, ask:** Why detach fake rather than remove D from the graph?
+**Build 1, ask:** Does the denoiser see x₀ during its forward call?
 
-**Expected:** D needs gradients; G should not receive this phase’s gradients.
+**Expected:** No. It receives xₜ and t; ε is supplied to the loss as the target.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** A test should check actual parameter changes.
+**Transition:** Make the availability of each variable explicit.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## detach-code: Detach only the generated sample
+## known-training: Training knows how the input was made
 
-**Build 1, ask:** Which part of this computation must still be differentiable?
+**Build 1, ask:** Why can this be supervised without manual noise labels?
 
-**Expected:** The discriminator forward pass; only the path back into G is cut.
+**Expected:** We sampled ε and used it to construct xₜ, so the label is already known.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Test that only the intended parameters actually change.
+**Transition:** Time must be part of the prediction problem.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-check: Check ownership of the update
+## time-needed: The same value can mean different things at different t
 
-**Build 1, ask:** Does a nonzero stale .grad prove this phase updated a parameter?
+**Build 1, ask:** Could a denoiser ignore the noise level?
 
-**Expected:** No. Clear gradients and compare parameter values before and after the actual optimiser step.
+**Expected:** It would mix prediction tasks with different signal/noise proportions. t identifies the task.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** See what repeated D-only updates do.
+**Transition:** Inspect one image across clearly different timesteps.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## d-only: What happens if only D learns?
+## noise-levels: The prediction problem changes with noise level
 
-**Build 1, ask:** Predict the score near the real modes and the fake region.
+**Build 1, ask:** At which stage is the original image least identifiable?
 
-**Expected:** D learns to distinguish these fixed sources; the generator itself has not improved.
+**Expected:** At high t, where the remaining signal coefficient is very small.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** We need a signal that can move G’s samples.
+**Transition:** Known training targets do not make the inverse unique.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-goal: Now let the generator ask for label 1
+## ambiguity: One noisy input can have several explanations
 
-**Build 1, ask:** Are we relabelling generated data for the next D update?
+**Build 1, ask:** Can the network always recover the exact injected ε from xₜ alone?
 
-**Expected:** No. Label 1 defines G’s objective; D still trains fake examples with label 0.
+**Expected:** No. The inverse problem is ambiguous; training minimises an expected prediction error.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Keep D fixed and trace the derivative through it.
+**Transition:** What does squared error prefer in an ambiguous problem?
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## freeze-not-detach: Frozen weights can still transmit a gradient
+## conditional-mean: Squared error learns a conditional average
 
-**Build 1, ask:** What does “freeze D” mean here?
+**Build 1, ask:** Is an imperfect match to a particular ε necessarily a bug?
 
-**Expected:** Do not update ω. Preserve the differentiable path from loss through D to G.
+**Expected:** No. Some uncertainty is irreducible from the available input.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Separate the derivative chain into its local pieces.
+**Transition:** Keep this prediction separate from a cleaned image.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-chain: Follow the chain rule into the generator
+## noise-not-image: The network predicts a noise tensor
 
-**Build 1, ask:** Can a fixed w appear in a derivative?
+**Build 1, ask:** Why does the network output look like noise?
 
-**Expected:** Yes. It multiplies the input derivative even though we do not optimise w in this phase.
+**Expected:** That is the declared target. A clean estimate is computed from it in a later step.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Insert the values from the updated discriminator.
+**Transition:** Specify the shape before the loss.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-gradient: The generator receives a nonzero derivative
+## shapes: The output shape matches the noise target
 
-**Build 1, ask:** Will gradient descent move a up or down?
+**Build 1, ask:** What shape mistake could silently corrupt the construction?
 
-**Expected:** Up: subtracting a negative derivative increases a.
+**Expected:** Mixing batch coefficients with channel or spatial positions. Assert tensor shapes.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Perform that update on both generator parameters.
+**Transition:** Write the data construction in a few lines.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-update: One G update, with D unchanged
+## tuple-code: Construct inputs and labels in one short block
 
-**Build 1, ask:** Which object moved even though the random draw stayed fixed?
+**Build 1, ask:** Where is the label tensor created?
 
-**Expected:** The generated sample moved because G’s parameters changed.
+**Expected:** eps is the label as well as the known random input to corruption.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Recompute G’s objective against the same fixed D.
+**Transition:** Compute a loss before showing a full network.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-recompute: Check the updated sample and loss
+## scalar-predictor: Begin with a predictor we can differentiate by hand
 
-**Build 1, ask:** Does this one improvement establish coverage of both modes?
+**Build 1, ask:** What is the single trainable quantity?
 
-**Expected:** No. It checks the local learning signal for one fixed draw.
+**Expected:** θ. The selected x₀, t and ε remain fixed for this inspected update.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Implement the same ownership in a neural network.
+**Transition:** Subtract the known noise target.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-code: Keep the path; freeze the owner
+## scalar-residual: Compare prediction with the injected noise
 
-**Build 1, ask:** What would G(z).detach() do in this code?
+**Build 1, ask:** Which tensor is the target in this subtraction?
 
-**Expected:** It would sever the very path needed to update G.
+**Expected:** The sampled ε, not x₀ or xₜ.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Compare the two operations side by side.
+**Transition:** Square the residual to obtain the objective.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## freeze-vs-detach: Two operations with different effects
+## scalar-loss: A squared residual gives one scalar loss
 
-**Build 1, ask:** Which operation is correct during the G phase?
+**Build 1, ask:** Is this already the batch mean?
 
-**Expected:** Freeze D parameters, keep ordinary autograd through its forward computation.
+**Expected:** It is one scalar example. Image and batch reductions come next.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Inspect the assertions rather than trust the diagram.
+**Transition:** Take the derivative with the random choices held fixed.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-check: Verify the actual parameter changes
+## scalar-gradient: Differentiate through the prediction
 
-**Build 1, ask:** Why compare parameters as well as gradients?
+**Build 1, ask:** Why hold ε fixed during a finite-difference check?
 
-**Expected:** The optimiser decides what actually changes; a gradient alone is insufficient evidence.
+**Expected:** Otherwise changes in the random draw contaminate the comparison between perturbed parameters.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** What if D remains frozen for hundreds of updates?
+**Transition:** Perform one literal SGD step.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## g-only: A fixed critic can be exploited
+## scalar-update: One update, then recompute the same loss
 
-**Build 1, ask:** Would optimising against one fixed D guarantee the data distribution?
+**Build 1, ask:** Does this same-example decrease prove a good image model?
 
-**Expected:** No. G can exploit that particular critic; alternating training changes the task.
+**Expected:** No. It verifies the direction and arithmetic of a local update.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Join the two verified phases.
+**Transition:** Extend the loss to pixels and a batch.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## alternating: The training loop alternates two objectives
+## loss-reduction: State exactly what “mean squared error” averages
 
-**Build 1, ask:** Are both players minimising one fixed function of their own weights?
+**Build 1, ask:** How does an event sum followed by batch mean differ?
 
-**Expected:** Each player sees a changing opponent. The practical update uses two stated objectives.
+**Expected:** For fixed image size it differs by the factor CHW, changing the scale and effective learning rate.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Write the batch losses with their sampling distributions.
+**Transition:** Use the same reduction in the code and the reported values.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## batch-d: The discriminator has two expectations
+## update-code: A complete training update is short
 
-**Build 1, ask:** Where does each expectation get its samples?
+**Build 1, ask:** Which variables does the optimiser update?
 
-**Expected:** Real examples come from the dataset; latent draws come from the chosen noise distribution.
+**Expected:** Only the denoiser parameters θ. The forward schedule stays fixed.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** The generator needs only latent draws and D’s response.
+**Transition:** Replace the scalar predictor with a small image network.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## batch-g: The practical generator loss
+## unet-shape: A small U-Net keeps context and detail
 
-**Build 1, ask:** Why is there no paired target image for each z?
+**Build 1, ask:** Why retain high-resolution features?
 
-**Expected:** G is judged by the discriminator, not by reconstruction of a paired observation.
+**Expected:** They help localise details while the coarse path supplies wider spatial context.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Distinguish this from the original minimax generator term.
+**Transition:** Time conditions those feature computations.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## minimax: The original game uses a different G term
+## time-conditioning: The timestep enters the network explicitly
 
-**Build 1, ask:** Is −log D(fake) identical to log(1−D(fake))?
+**Build 1, ask:** Do we train a separate network at each timestep?
 
-**Expected:** No. They encourage the same desired direction but have different gradients.
+**Expected:** No. One set of weights is conditioned on t.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Compare their logit derivatives.
+**Transition:** Check one real update on training images.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## saturation-derivative: A confident discriminator can weaken one signal
+## neural-update: Inspect a real image-model update
 
-**Build 1, ask:** Which derivative is stronger when D rejects fake samples confidently?
+**Build 1, ask:** Did we train on the held image shown earlier?
 
-**Expected:** The non-saturating objective’s logit derivative is near −1.
+**Expected:** No. This update uses the official training split.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Plot the derivatives over the same logit range.
+**Transition:** Training learned a predictor. Sampling now needs a transition.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## saturation-plot: The difference is visible before any training
+## training-vs-sampling: Training and sampling start with different information
 
-**Build 1, ask:** Does a stronger logit derivative guarantee stable GAN training?
+**Build 1, ask:** Can the sampler subtract the true injected noise?
 
-**Expected:** No. The rest of the network Jacobian and the moving opponent still matter.
+**Expected:** No. A newly generated state has no known training corruption label.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Assemble the two stable BCE losses in code.
+**Transition:** First see what a predicted noise value implies about x₀.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## alternating-code-d: The first half of one neural update
+## clean-estimate: Solve the forward equation for a clean estimate
 
-**Build 1, ask:** Why detach only in this half?
+**Build 1, ask:** Is this already the next noisy state xₜ₋₁?
 
-**Expected:** This loss trains the discriminator while keeping G fixed.
+**Expected:** No. It estimates x₀, while the sampler needs a distribution for the previous noisy state.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Now rebuild fresh fakes for the second half.
+**Transition:** Compare the estimate to the actual reverse mean.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## alternating-code-g: The second half of one neural update
+## estimate-image: A clean estimate is useful, but is not a reverse step
 
-**Build 1, ask:** What changed between the two forward passes?
+**Build 1, ask:** Would jumping straight to this estimate reproduce the DDPM sampler?
 
-**Expected:** D’s parameters changed. G needs feedback from the updated discriminator.
+**Expected:** No. The declared sampler takes successive reverse transitions.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Test the full loop on the simple distribution.
+**Transition:** Define that learned conditional distribution.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## toy-progress: Can alternating updates cover both regions?
+## reverse-kernel: Model the previous state with a Gaussian
 
-**Build 1, ask:** What would count as success in this simple test?
+**Build 1, ask:** Which part of this distribution is learned here?
 
-**Expected:** Samples near both modes, reasonable spread, and limited mass between them.
+**Expected:** The mean through εθ. The variance is an explicit, fixed choice.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Quantify coverage, with the metric’s limits visible.
+**Transition:** Express the mean in the noise-prediction parameterisation.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## coverage: Count mass near each known mode
+## reverse-mean: The predicted noise determines the reverse mean
 
-**Build 1, ask:** What does a near-zero entry tell us?
+**Build 1, ask:** Why are both αₜ and ᾱₜ present?
 
-**Expected:** The generator misses one observed region under this diagnostic.
+**Expected:** One describes the local transition; the other describes cumulative corruption relative to x₀.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Look directly at the failing sample distribution.
+**Transition:** Verify a numerical reverse mean independently.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## collapse: Plausible samples can omit a whole mode
+## reverse-numbers: One scalar reverse step has explicit inputs
 
-**Build 1, ask:** Why is looking at a single generated sample insufficient?
+**Build 1, ask:** Do we know the clean image during this calculation?
 
-**Expected:** It cannot reveal missing modes or the frequency of different outputs.
+**Expected:** The reverse formula uses xₜ, t and the predicted noise, not a known x₀.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Compare loss curves for the stable and collapsed runs.
+**Transition:** Compute both derived quantities and keep them separate.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## losses-not-quality: A loss curve is not a coverage certificate
+## mean-vs-estimate: The clean estimate and reverse mean are different
 
-**Build 1, ask:** Can the lower displayed G loss alone identify the better distribution?
+**Build 1, ask:** Why is the previous-state mean closer to xₜ than x̂₀ is?
 
-**Expected:** No. D changes during training, so the numerical loss is not a fixed external quality measure.
+**Expected:** It is one small reverse transition, not the endpoint of the full denoising chain.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Explain why the opponent changes the landscape.
+**Transition:** State the variance before drawing the previous state.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## moving-objective: The target of optimisation keeps moving
+## posterior-variance: Choose the reverse variance explicitly
 
-**Build 1, ask:** Must both plotted losses fall on every iteration?
+**Build 1, ask:** Why does the t = 1 boundary need special attention?
 
-**Expected:** No. The opponent changes the function being evaluated.
+**Expected:** ᾱ₀ = 1 makes this added variance zero at the last step.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Choose diagnostics that answer concrete questions.
+**Transition:** Add a sampled stochastic term at non-final steps.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## diagnostic-grid: Ask separate questions about the samples
+## sample-previous: Draw around the reverse mean
 
-**Build 1, ask:** What does fixed z control in a training film?
+**Build 1, ask:** If ξ were positive instead, would this be the same sample?
 
-**Expected:** It separates changes in G from changes in the sampled latent inputs.
+**Expected:** No. It would be another draw from the specified reverse Gaussian.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Transfer the same two-phase algorithm to images.
+**Transition:** Handle the final boundary without adding fresh noise.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## image-representation: Keep the data convention visible
+## final-boundary: At the final step, do not add noise
 
-**Build 1, ask:** Can we compare GAN loss numbers to the VAE reconstruction loss?
+**Build 1, ask:** What happens if we add ordinary noise again at t = 1?
 
-**Expected:** No. Their objectives, observation representations and reductions differ.
+**Expected:** We corrupt the final sample instead of following the declared sampler.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Expand the generator’s tensor shapes.
+**Transition:** Now repeat the verified transition in a loop.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## image-g-shapes: The generator expands a noise vector
+## reverse-code: The complete sampling loop uses the model repeatedly
 
-**Build 1, ask:** Why use tanh at the output here?
+**Build 1, ask:** Where does the sampler obtain its first state?
 
-**Expected:** It matches the chosen [−1,1] image representation.
+**Expected:** A new standard-normal tensor, justified by the near-noise endpoint of the forward schedule.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** The discriminator performs the opposite spatial reduction.
+**Transition:** Check the resulting trajectory rather than only the final frame.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## image-d-shapes: The discriminator returns one logit per image
+## reverse-replay: Inspect successive states on one trajectory
 
-**Build 1, ask:** Does D predict one target per pixel?
+**Build 1, ask:** Are all intermediate states expected to look like clean images?
 
-**Expected:** No. This discriminator produces one source-classification logit for each whole image.
+**Expected:** No. They represent progressively less corrupted states, not independent final samples.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Inspect the same fixed draws over training.
+**Transition:** Connect this construction to the latent-variable framework.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## image-training-early: The same z before and after early learning
+## latent-chain: The noisy states form a latent-variable model
 
-**Build 1, ask:** What is changing between these grids?
+**Build 1, ask:** Which states are observed in the training data?
 
-**Expected:** Generator weights; the latent vectors are held fixed.
+**Expected:** Only x₀. The forward process constructs auxiliary noisy states for training.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Compare later checkpoints without changing the selection.
+**Transition:** The known forward chain supports a variational bound.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## image-training-later: Structure emerges, but quality varies
+## vi-connection: The forward process supplies a tractable training distribution
 
-**Build 1, ask:** Which limitations remain visible?
+**Build 1, ask:** Is this q trained as an amortised encoder like the VAE?
 
-**Expected:** Some samples are ambiguous; a fixed grid alone does not establish distributional fidelity.
+**Expected:** Not in this DDPM: it is a fixed corruption chain.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Separate reproduced evidence from newly executed updates.
+**Transition:** For Gaussian transitions, the comparison connects to a squared error.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## replay-evidence: What did we reproduce today?
+## weighted-vs-simple: The common noise loss simplifies the variational objective
 
-**Build 1, ask:** Does successful replay mean we retrained the image GAN?
+**Build 1, ask:** Does any noise MSE value directly equal a log likelihood?
 
-**Expected:** No. It verifies the checkpoint and sample-generation path.
+**Expected:** No. The weighting and boundary terms matter for the variational objective.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Run the notebook’s short inspected training step.
+**Transition:** Inspect exactly what our small model was trained to minimise.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## demo: Live: inspect who changes
+## training-record: What was actually trained?
 
-**Build 1, ask:** Which two parameter-change checks must be exactly zero?
+**Build 1, ask:** Does this package claim state-of-the-art image quality?
 
-**Expected:** G during the D phase and D during the G phase.
+**Expected:** No. It is a small teaching model with explicit training and sampling evidence.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Notebook demonstration:** lecture4.ipynb: “Two neural updates with parameter ownership checks”.
+**Transition:** Look at training loss and samples with their proper scope.
 
-**Transition:** Retrieve the central gradient-path distinction.
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+## history: A falling training loss is useful but incomplete evidence
 
-## exit-detach: Exit check: where should detach go?
+**Build 1, ask:** Why should successive batch values fluctuate?
 
-**Build 1, ask:** How does the answer change between the two phases?
+**Expected:** They reflect different sampled training problems as well as changing parameters.
 
-**Expected:** The same forward topology serves different parameter owners and targets.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Transition:** Check the generated outputs too.
 
-**Transition:** Connect the training signal to the other generative models.
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+## sample-gallery: Inspect several fresh-noise samples
 
-## compare-vae: Two ways to train a sampler
+**Build 1, ask:** What can and cannot this grid establish?
 
-**Build 1, ask:** What did the discriminator replace in the training story?
+**Expected:** It reveals visible sample behaviour; it does not prove generalisation or distributional equality.
 
-**Expected:** It supplies feedback without evaluating a decoder likelihood or an ELBO.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Transition:** Run one real update and a small sampler in the notebook.
 
-**Transition:** Diffusion will build a supervised target by corrupting real data.
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+## notebook-demo: Live: one update, then use the saved sampler
 
-## next-question: Can we create the training target ourselves?
+**Build 1, ask:** Which work is reduced in quick mode?
 
-**Build 1, ask:** What information becomes available when we create the corruption?
+**Expected:** Training iterations and number of generated samples, not the validated schedule.
 
-**Expected:** The clean example, timestep and injected noise are all known during training.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Notebook demonstration:** lecture4.ipynb: inspected update and quick checkpoint sampling. Full-training cell defaults to disabled.
 
-**Transition:** Begin diffusion with a concrete corrupted image.
+**Transition:** Connect the same denoiser idea to text-conditioned images.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
 
-## optional-optimal-d: Optional: the ideal classifier at fixed G (optional)
+## text-conditioning: Text adds a condition to the denoiser
 
-**Build 1, ask:** Under what assumptions is this ideal discriminator statement meaningful?
+**Build 1, ask:** Where should the text information enter the computation?
 
-**Expected:** Unlimited classifier capacity and exact optimisation at fixed distributions; finite neural training need not reach it.
+**Expected:** Into the denoiser’s prediction, rather than as a replacement for the random starting state.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Return to measured diagnostics rather than treating the ideal as a guarantee.
+**Transition:** Relate this to the course’s cross-attention machinery.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original schematic · Rombach et al. (2022), arxiv.org/abs/2112.10752
 
-## optional-batchnorm: Optional: frozen parameters are not all model state (optional)
+## cross-attention: Cross-attention lets image features consult text
 
-**Build 1, ask:** Does requires_grad_(False) switch a network to evaluation mode?
+**Build 1, ask:** Which side asks the questions in this diagram?
 
-**Expected:** No. Parameter gradients and train/eval mode are separate controls.
+**Expected:** The current image/latent features supply queries; text embeddings supply keys and values.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Make the intended training-state convention explicit in implementations.
+**Transition:** Compression can make the denoising computation cheaper.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original schematic · Rombach et al. (2022), arxiv.org/abs/2112.10752
 
-## optional-controls: Optional: changes to the game are experiments (optional)
+## latent-diffusion: The same idea can operate in a compressed space
 
-**Build 1, ask:** Does one stabilised run prove a remedy always works?
+**Build 1, ask:** Is the final image decoder the denoiser itself?
 
-**Expected:** No. It supports the measured configuration only.
+**Expected:** No. Denoising occurs in latent space; a separate decoder maps the final latent to pixels.
 
-**Point here:** Follow the labelled computation or data on this frame.
+**Point here:** Follow the labelled state, known target or computation on the frame.
 
-**Common misconception:** A plausible sample alone does not establish the learned distribution.
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
 
-**Transition:** Use the companion notebook for controlled extensions.
+**Transition:** Guidance changes how conditional predictions are combined.
 
-**Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+**Source / evidence:** Original teaching redraw · Rombach et al. (2022), arxiv.org/abs/2112.10752
+
+## guidance: Guidance combines two predictions
+
+**Build 1, ask:** Does larger guidance simply make every aspect of a sample better?
+
+**Expected:** No. It changes the sampling trade-off and can reduce diversity or create artefacts.
+
+**Point here:** Follow the labelled state, known target or computation on the frame.
+
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
+
+**Transition:** Return to the basic algorithm students should now reconstruct.
+
+**Source / evidence:** Original notation · Ho & Salimans (2022), arxiv.org/abs/2207.12598
+
+## exit-training: Exit check: what is known during training?
+
+**Build 1, ask:** Which quantities disappear when generating from new noise?
+
+**Expected:** There is no clean target image or true injected ε for the current generated state.
+
+**Point here:** Follow the labelled state, known target or computation on the frame.
+
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
+
+**Transition:** Retrieve one reverse step.
+
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
+
+## exit-reverse: Exit check: reconstruct one reverse step
+
+**Build 1, ask:** What special action happens at the final boundary?
+
+**Expected:** No extra noise is added at t = 1.
+
+**Point here:** Follow the labelled state, known target or computation on the frame.
+
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
+
+**Transition:** Connect the five lecture questions.
+
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
+
+## five-model-questions: Four lectures, four connected questions
+
+**Build 1, ask:** What common habit prevents confusion across all these models?
+
+**Expected:** Name what is observed, sampled, predicted, fixed and updated.
+
+**Point here:** Follow the labelled state, known target or computation on the frame.
+
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
+
+**Transition:** Use the notebooks to reproduce the calculations.
+
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
+
+## optional-posterior: Optional: the tractable training posterior (optional)
+
+**Build 1, ask:** Why is this posterior available during training but not ordinary generation?
+
+**Expected:** Training starts from a known x₀; generation does not.
+
+**Point here:** Follow the labelled state, known target or computation on the frame.
+
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
+
+**Transition:** Replace x₀ with the network-derived estimate when interpreting the reverse mean.
+
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
+
+## optional-mean-check: Optional: two forms of the same reverse mean (optional)
+
+**Build 1, ask:** What substitution links this to the ε-prediction formula?
+
+**Expected:** Insert x̂₀ = (xₜ−√(1−ᾱₜ)εθ)/√ᾱₜ and simplify.
+
+**Point here:** Follow the labelled state, known target or computation on the frame.
+
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
+
+**Transition:** The notebook independently checks the two implementations.
+
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239
+
+## optional-display: Optional: image display is not model arithmetic (optional)
+
+**Build 1, ask:** Why can identical-looking grey pixels represent different model values?
+
+**Expected:** The display clips extreme values; the numerical tensor retains them.
+
+**Point here:** Follow the labelled state, known target or computation on the frame.
+
+**Common misconception:** A noisy state, a noise prediction, a clean estimate and a reverse mean are different quantities.
+
+**Transition:** Inspect raw tensor ranges alongside pictures.
+
+**Source / evidence:** Original teaching construction · Ho, Jain & Abbeel (2020), arxiv.org/abs/2006.11239

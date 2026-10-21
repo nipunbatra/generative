@@ -1,43 +1,22 @@
 [
   {
-    "path": "models/gan_mnist.pt",
-    "source": "/Users/nipun/git/dl-teaching/generative-modelling-i-gans/assets/models/gan_mnist.pt",
-    "sha256": "7066dd6cba027c3a9ad1d432c4f6fb67c96a2cf52a1bafc3f7a3c2c6e09a7f87",
-    "kind": "existing measured training/checkpoint",
-    "adaptation": "copied unchanged"
-  },
-  {
-    "path": "data/gan_mnist_snapshots.npz",
-    "source": "/Users/nipun/git/dl-teaching/generative-modelling-i-gans/assets/models/gan_mnist_snapshots.npz",
-    "sha256": "80e3184a9375e74397b081b9ef3a4f59e32a36ae26f3d647d1b8de43070afa66",
+    "path": "models/ddpm.pt",
+    "source": "/Users/nipun/git/dl-teaching/generative-modelling-ii/models/model.pt",
+    "sha256": "9dc135888ec05bceebc35fcf6b7c6b5ee1823f2cea7c0b2ec32906368b793585",
     "kind": "existing measured training/checkpoint",
     "adaptation": "copied unchanged"
   },
   {
     "path": "data/original-training.json",
-    "source": "/Users/nipun/git/dl-teaching/generative-modelling-i-gans/assets/models/training.json",
-    "sha256": "a19b41f17e5690cc58bb4d7a89642b2a8cc6a20c930ff92e3fd3784170c7901a",
+    "source": "/Users/nipun/git/dl-teaching/generative-modelling-ii/models/train-log.json",
+    "sha256": "0b44c662a69cc52ab4299ce8bb5edc39ce8dba7e313cdce82c3f86f6abdd11e4",
     "kind": "existing measured training/checkpoint",
     "adaptation": "copied unchanged"
   },
   {
-    "path": "data/toy_one_player.json",
-    "source": "/Users/nipun/git/dl-teaching/generative-modelling-i-gans/assets/models/toy_one_player.json",
-    "sha256": "13d2914fa5c12508e65779054c3776db31cbf86135f8ebb6c0ab5dfe4ae3e5cf",
-    "kind": "existing measured training/checkpoint",
-    "adaptation": "copied unchanged"
-  },
-  {
-    "path": "data/toy_gan_runs.json",
-    "source": "/Users/nipun/git/dl-teaching/generative-modelling-i-gans/assets/models/toy_gan_runs.json",
-    "sha256": "947b72fc38e7c9a97731d05ef966da45c9484accad4111a5ff097a711218d8d8",
-    "kind": "existing measured training/checkpoint",
-    "adaptation": "copied unchanged"
-  },
-  {
-    "path": "data/toy_gan_collapse.json",
-    "source": "/Users/nipun/git/dl-teaching/generative-modelling-i-gans/assets/models/toy_gan_collapse.json",
-    "sha256": "28e280a5d44b838adb8703c6a498de0f21635ac1a912d487f6bb6b4f39d12270",
+    "path": "data/original-trajectory.npz",
+    "source": "/Users/nipun/git/dl-teaching/generative-modelling-ii/models/trajectory.npz",
+    "sha256": "5bd544bafe769db78c84ffb166c694d3524d06c2436b20a9e39d52915a2f1bf7",
     "kind": "existing measured training/checkpoint",
     "adaptation": "copied unchanged"
   }

@@ -1712,7 +1712,7 @@ Before revealing the answers, answer these in your own words:
 
 **Answers.** Draw from q. In the fixed-model inference problem, update ψ; data, model and exact posterior stay fixed. The evidence is constant in ψ. A finite-sample estimate is not the exact expectation. Improvement is not an exact-recovery certificate.
 
-**Transfer:** for an image model $p_\theta(x,z)$ with fixed θ, specify $q_\psi(z)$ and maximise $\mathbb E_q[\log p_\theta(x,z)-\log q_\psi(z)]$. Lecture 3 will learn model parameters and share an encoder across observations.
+**Transfer:** for an image model $p_\theta(x,z)$ with fixed θ, specify $q_\psi(z)$ and maximise $\mathbb E_q[\log p_\theta(x,z)-\log q_\psi(z)]$. Lecture 2 will learn model parameters and share an encoder across observations.
 """, anchor="sec-5-2")
 md(r"""
 ## Appendix · KL by hand: grades in two runs of a course

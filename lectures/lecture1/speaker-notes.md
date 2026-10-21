@@ -243,7 +243,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** Where else will you meet this problem?
 
-**Expected:** In every Bayesian model with many unknowns, including the VAE in Lecture 3.
+**Expected:** In every Bayesian model with many unknowns, including the VAE in Lecture 2.
 
 **Transition:** Three ways to approach it.
 
@@ -1313,7 +1313,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** Yes: each bell integrates to 1 and the weights add to 1.
 
-**Point here:** The PML 2023 mixture. z is a latent variable: part of how the data are made, never observed. Lecture 3’s VAE has the same structure, with a continuous z.
+**Point here:** The PML 2023 mixture. z is a latent variable: part of how the data are made, never observed. Lecture 2’s VAE has the same structure, with a continuous z.
 
 **Transition:** Draw from it yourself.
 
@@ -1419,7 +1419,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** Only the graph. θ is N(μ, σ²) either way.
 
-**Point here:** This is the reparameterisation trick of Kingma and Welling (2014), the step that makes VAEs trainable (Lecture 3).
+**Point here:** This is the reparameterisation trick of Kingma and Welling (2014), the step that makes VAEs trainable (Lecture 2).
 
 **Transition:** Change one word in the code.
 

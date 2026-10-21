@@ -1,27 +1,26 @@
-# Lecture 4: generative adversarial networks
+# Lecture 4: denoising diffusion probabilistic models
 
-A 60-minute slide-led lecture: **53 core scenes + 3 optional scenes**, with 113 authored presentation states. The route makes one discriminator update and one generator update visible before introducing the alternating game. Speaker notes and PDFs are generated from `content.js` by the series build.
+A 70-minute slide-led lecture: **60 core scenes + 3 optional scenes**, with 126 presentation states. It progresses from one noisy pixel to one supervised tuple, an inspected update, one reverse mean/variance calculation, a full small DDPM sampler and a brief text-conditioning connection.
 
-Open `index.html` through the local series server. Use the same reading, notes, keyboard and print controls as the other lectures. No external scripts or services are needed.
+Speaker notes and PDFs are generated from `content.js` by the shared series build. Open `index.html` through the local series server; everything needed for the slides is local.
 
 ## Teaching route
 
 | Minutes | Episode | Notebook action |
 |---|---|---|
-| 0–6 | A generator needs feedback | Predict the missing distributional coverage |
-| 6–16 | D loss, gradient, update, recomputation | Inspect scalar D parameter changes |
-| 16–28 | G loss and gradient through frozen D | Inspect G update and freeze/detach checks |
-| 28–39 | Alternation and non-saturating loss | Run the short neural ownership test |
-| 39–50 | Collapse, coverage and changing opponents | Compare saved runs; fresh quick toy run |
-| 50–60 | MNIST transfer and retrieval | Replay saved image generator |
+| 0–6 | Noise-to-image problem and one held 7 | Inspect the recorded reverse trajectory |
+| 6–17 | Fixed forward process, schedule and one pixel | Verify ᾱ, forward mean/variance and scalar arithmetic |
+| 17–29 | Input/target tuple, time and ambiguity | Construct a real MNIST noisy input |
+| 29–40 | Noise loss, scalar update and small U-Net | Run one update on training images |
+| 40–54 | Clean estimate, reverse mean, variance and final boundary | Independently check one reverse step |
+| 54–62 | VI connection and small DDPM | Replay the local checkpoint sampler |
+| 62–70 | Text conditioning, latent space, guidance and retrieval | Retrieve the training/sampling distinctions |
 
-Timings are planned, not classroom rehearsed. The optional ideal-discriminator, mutable-state and experimental-controls scenes sit outside the main route. A 45-minute version protects the two explicit updates and one collapse example, while shortening the image and objective discussions.
+Budgets are planned, not rehearsed. Optional posterior algebra and display semantics are outside the main route. The 45-minute route uses prepared schedule/VI results while protecting the tuple, literal update and reverse-step calculation.
 
 ## Run the notebook
 
-`lecture4.ipynb` is saved with outputs from a complete CPU execution. It includes a fresh 400-update toy run, actual scalar and neural updates, and checkpoint replay. It does not claim that the image GAN was freshly retrained.
-
-The tested environment uses Python 3.12 with PyTorch 2.13.0, NumPy, Matplotlib, Pillow, nbformat, nbclient and ipykernel already installed. No dependency was added.
+`lecture4.ipynb` contains actual outputs from a complete CPU run. Its quick path generates two samples while retaining all 1,000 reverse steps. The default does not run full training.
 
 ```sh
 # From the lectures/ directory, with the Python environment activated:
@@ -29,27 +28,43 @@ cd lecture4
 python scripts/execute_notebook.py
 ```
 
-Execute from the lecture directory in Jupyter, or use the series repository root supported by the initial cell. To regenerate a clean notebook from its authored cells, run `scripts/make_notebook.py`, then execute it; regeneration clears saved outputs deliberately.
+Tested environment: Python 3.12, PyTorch 2.13.0, NumPy, Matplotlib, Pillow, nbformat, nbclient and ipykernel. No dependencies were installed. The notebook records actual sampling runtime; hardware/software differences affect it.
 
-## Evidence and reproducibility
+`make_notebook.py` regenerates the authored cells and clears outputs; execute afterwards. The companion model code is deliberately small and inspectable: `scripts/ddpm.py` contains schedule, U-Net, loss and ancestral sampler; `scripts/train.py` provides local-data quick and full training.
 
-- `data/fixtures.json`: full-precision scalar update, gradient checks, measured coverage and replay facts. All displayed arithmetic reads this file.
-- `scripts/prepare.py`: regenerates computed figures and checks from bundled local data, recorded runs and checkpoint.
-- `models/gan_mnist.pt`: unchanged original 30-epoch checkpoint; SHA-256 and source in `data/reuse-manifest.json`.
-- `data/gan_mnist_snapshots.npz`: original fixed-noise training film, epochs 0–30.
-- `data/mnist-subset.npz`: official training indices 0–511 and test indices 0–127, with labels. The held 3 is test index 90. Images remain uint8 until explicitly transformed.
-- `qa/science-checks.json` and `qa/notebook-execution.json`: measured execution checks. `qa/notebook-figures/` contains rendered notebook outputs for inspection.
+## The numerical contract
 
-The image convention is greyscale `uint8/127.5−1`, unlike the binary Bernoulli VAE. The source-normalised D loss is the sum of real and fake batch means; G uses the non-saturating mean BCE. Raw GAN/VAE loss values are not comparable.
+- One-based `t = 1,…,1000`, with `alpha_bar[0] = 1`.
+- Linear β from 0.0001 to 0.02. The endpoint has ᾱ ≈ 0.00004036.
+- Epsilon prediction; mean squared error averaged over all batch/channel/pixel elements.
+- Reverse variance β̃ₜ = βₜ(1−ᾱₜ₋₁)/(1−ᾱₜ). No added random noise at t = 1.
+- No clipping of training or sampler states. Display copies use declared finite ranges.
+- Greyscale MNIST becomes `uint8/127.5−1`. This differs from the earlier binary Bernoulli VAE convention. No unlike raw loss comparison is made.
+- The held image is official **test index 0, a 7**, explicitly introduced as a change from the earlier held 3. Actual updates use the training split.
 
-The stable and collapsed illustrative runs differ in generator width **and seed**. Their contrast demonstrates the observed failure, not a causal isolation of width. Coverage counts the fraction of 2,000 generated samples within one unit of each true mode; that is a limited diagnostic, not a full quality metric. KDE smoothing is labelled.
+The scalar denoiser ε̂ = θxₜ is a chosen arithmetic example, not the image network. Noise prediction, clean estimate x̂₀, reverse mean μθ and sampled previous state have separate scenes and values.
 
-## Full training
+## Measured evidence
 
-Optional full image-model training additionally needs `torchvision`, compatible with the installed PyTorch version (`python -m pip install torchvision`). It is not required for the default notebook demonstrations or checkpoint replay.
+`models/ddpm.pt` is the unchanged 814,145-parameter checkpoint from the validated local diffusion lecture: 2,000 training updates, batch 64, seed 667, original MPS run. The current work executes fresh mathematical/gradient checks, a fresh training update on a copy, and a full 8-sample CPU replay. It does not claim a new full training run.
 
-The final notebook cell has `RUN_FULL=False`. To run it, set `MNIST_ROOT` to a local directory containing `MNIST/raw` and enable the cell. The script never downloads data. It uses the full training split, 30 epochs, batch size 128, Adam learning rate 0.0002, seed 1 and latent dimension 100. CPU works; optional `gan.DEVICE="mps"` uses an available Apple GPU. The new result goes to `models/full-retrain/`, preserving the supplied checkpoint.
+- `data/fixtures.json`: full-precision scalar, reverse and neural-update numbers.
+- `data/replayed-trajectory.npz`: current full 1,000-step replay, including intermediate states.
+- `data/original-trajectory.npz`, `data/original-training.json`: retained original measurements.
+- `data/reuse-manifest.json`: source paths and hashes.
+- `data/mnist-subset.npz`: official train indices 0–511 and test indices 0–127, with original labels.
+- `qa/science-checks.json`, `qa/notebook-execution.json`: exact check scope and measured runtime; notebook figures are saved for visual inspection.
 
-BatchNorm running statistics and dropout modes are distinct from parameter freezing. The explicit ownership checks use MLPs without mutable buffers. The image D has dropout but no BatchNorm; the supplied training implementation retains its documented training-mode behaviour.
+No image-quality metric or complete coverage claim is made for this small teaching model. Differences between CPU and original-device arithmetic are measured rather than hidden.
 
-Original conceptual reference: [Goodfellow et al., 2014](https://arxiv.org/abs/1406.2661). Figures here are new computed plots or local measured outputs; no published third-party figure is reproduced.
+## Optional fresh full training
+
+Set `MNIST_ROOT` to the local folder containing `train-images-idx3-ubyte.gz`. No download is attempted. Full mode uses all training examples and preserves the supplied checkpoint:
+
+```sh
+python scripts/train.py --mode full --steps 2000 --device cpu --mnist-root /path/to/local/MNIST/raw
+```
+
+The result is `models/full-training.pt` plus a measured log. Use `--device mps` only on a supported machine. Quick training uses the bundled subset and 20 updates, and is explicitly an execution check rather than an image-quality demonstration. Reducing the schedule to 20 steps is intentionally unsupported.
+
+References: [Ho, Jain & Abbeel, 2020](https://arxiv.org/abs/2006.11239), [Rombach et al., 2022](https://arxiv.org/abs/2112.10752), [Ho & Salimans, 2022](https://arxiv.org/abs/2207.12598). All diagrams are original teaching constructions; no paper figure is reproduced.

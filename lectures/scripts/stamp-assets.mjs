@@ -9,7 +9,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const hash=file=>crypto.createHash('sha1').update(fs.readFileSync(file)).digest('hex').slice(0,10);
 const shared=['deck.js','author.js'].map(f=>[`../shared/${f}`,hash(path.join(root,'shared',f))]);
 const css=hash(path.join(root,'shared','deck.css'));
-for(let n=1;n<=5;n++){
+for(let n=1;n<=4;n++){
  const dir=path.join(root,`lecture${n}`),page=path.join(dir,'index.html');
  const local=fs.readdirSync(dir).filter(f=>/\.(m?js)$/.test(f)).map(f=>[`./${f}`,hash(path.join(dir,f))]);
  const imports=Object.fromEntries([...shared,...local].map(([k,h])=>[k,`${k}?v=${h}`]));

@@ -1,8 +1,8 @@
 {
-  "status": "passed",
-  "executed_code_cells": 10,
-  "output_count": 15,
-  "errors": 0,
+  "passed": true,
+  "seconds": 3.5258829593658447,
   "interpreter": "/Users/nipun/git/clip-lab/.venv/bin/python",
-  "notebook": "lecture3.ipynb"
+  "codeCells": 9,
+  "figures": 3,
+  "errors": 0
 }

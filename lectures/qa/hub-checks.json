@@ -74,7 +74,7 @@
       "status": 200
     },
     {
-      "label": "Variational autoencoders",
+      "label": "Generative adversarial networks",
       "href": "http://127.0.0.1:8791/lecture3/",
       "status": 200
     },
@@ -109,7 +109,7 @@
       "status": 200
     },
     {
-      "label": "Generative adversarial networks",
+      "label": "Denoising diffusion probabilistic models",
       "href": "http://127.0.0.1:8791/lecture4/",
       "status": 200
     },
@@ -141,41 +141,6 @@
     {
       "label": "All reveals PDF",
       "href": "http://127.0.0.1:8791/lecture4/exports/all-builds.pdf",
-      "status": 200
-    },
-    {
-      "label": "Denoising diffusion probabilistic models",
-      "href": "http://127.0.0.1:8791/lecture5/",
-      "status": 200
-    },
-    {
-      "label": "Present →",
-      "href": "http://127.0.0.1:8791/lecture5/",
-      "status": 200
-    },
-    {
-      "label": "Read with notes",
-      "href": "http://127.0.0.1:8791/lecture5/?reading",
-      "status": 200
-    },
-    {
-      "label": "Notebook",
-      "href": "http://127.0.0.1:8791/lecture5/lecture5.ipynb",
-      "status": 200
-    },
-    {
-      "label": "Speaker notes",
-      "href": "http://127.0.0.1:8791/lecture5/speaker-notes.md",
-      "status": 200
-    },
-    {
-      "label": "Completed PDF",
-      "href": "http://127.0.0.1:8791/lecture5/exports/completed.pdf",
-      "status": 200
-    },
-    {
-      "label": "All reveals PDF",
-      "href": "http://127.0.0.1:8791/lecture5/exports/all-builds.pdf",
       "status": 200
     },
     {

@@ -1,47 +1,55 @@
-# Lecture 3: variational autoencoders
+# Lecture 3: generative adversarial networks
 
-A 70-minute main route with **57 core scenes and 3 optional scenes**, each with two authored states. The lecture starts with Lecture 2's exact AE failure cloud and the same binary handwritten 3. The narrative derives the inference network from a specified generative model.
+A 60-minute slide-led lecture: **53 core scenes + 3 optional scenes**, with 113 authored presentation states. The route makes one discriminator update and one generator update visible before introducing the alternating game. Speaker notes and PDFs are generated from `content.js` by the series build.
 
-| Episode | Minutes |
-|---|---:|
-| Reopen the sampling question | 6 |
-| Specify the generative story | 10 |
-| Infer this image's code | 10 |
-| Reuse the ELBO | 12 |
-| Make the training path differentiable | 11 |
-| One training step, then recorded model evidence | 13 |
-| What did we gain? | 8 |
+Open `index.html` through the local series server. Use the same reading, notes, keyboard and print controls as the other lectures. No external scripts or services are needed.
 
-This includes per-image variational fitting with a frozen decoder, amortisation, the two distinct KL terms, numerical likelihood/KL contributions, explicit μ/log-variance/ε computation, independent pathwise gradient checks, an actual joint update, probability images versus observation draws and measured latent geometry. Timing is planned, not rehearsed.
+## Teaching route
 
-## Open and run
+| Minutes | Episode | Notebook action |
+|---|---|---|
+| 0–6 | A generator needs feedback | Predict the missing distributional coverage |
+| 6–16 | D loss, gradient, update, recomputation | Inspect scalar D parameter changes |
+| 16–28 | G loss and gradient through frozen D | Inspect G update and freeze/detach checks |
+| 28–39 | Alternation and non-saturating loss | Run the short neural ownership test |
+| 39–50 | Collapse, coverage and changing opponents | Compare saved runs; fresh quick toy run |
+| 50–60 | MNIST transfer and retrieval | Replay saved image generator |
 
-Serve the shared series directory locally and open `/lecture3/`. The shared runtime generates the HTML, reading view, notes and PDFs from `content.js`. The existing lectures remain separate and nothing is published.
+Timings are planned, not classroom rehearsed. The optional ideal-discriminator, mutable-state and experimental-controls scenes sit outside the main route. A 45-minute version protects the two explicit updates and one collapse example, while shortening the image and objective discussions.
 
-Run `lecture3.ipynb` with this lecture directory as its working directory. Data, checkpoints and `notebooks/lab.py` are bundled. No network, new packages or original repository access are needed. Requirements are Torch, NumPy and Matplotlib; the verified environment uses Python 3.12 and PyTorch 2.13.0. See the series README for installation.
+## Run the notebook
 
-The series-level notebook writer/executor at `../lecture2/scripts/make_notebooks.py` can reproduce both notebooks and their saved outputs. The individual notebook itself has no dependency on Lecture 2's Python files. Full visual reconstruction of the shared boundary figures belongs to the two-lecture evidence build; the shipped boundary SVG is already byte-identical to Lecture 2.
+`lecture3.ipynb` is saved with outputs from a complete CPU execution. It includes a fresh 400-update toy run, actual scalar and neural updates, and checkpoint replay. It does not claim that the image GAN was freshly retrained.
 
-## Scientific conventions
+The tested environment uses Python 3.12 with PyTorch 2.13.0, NumPy, Matplotlib, Pillow, nbformat, nbclient and ipykernel already installed. No dependency was added.
 
-- Observations are fixed thresholded binary MNIST. The same training and test snapshot as Lecture 2 is bundled. Held example: official test index90; it is illustrative and deliberately inherited.
-- Prior: `N(0,I)`. Decoder: Bernoulli logits for 784 pixels. The displayed decoder probability image is different from a Bernoulli observation draw. Generation bypasses the encoder.
-- Encoder: diagonal-Gaussian approximate posterior. `logvar=log σ²`; `std=exp(0.5*logvar)`. μ and logvar are computed per-image activations, while φ are shared weights.
-- The posterior gap `KL(qφ(z|x)||pθ(z|x))` is distinct from the computable prior KL `KL(qφ(z|x)||p(z))`.
-- Sum pixel contributions and latent-dimension KL contributions inside each image, then average examples. A one-draw reconstruction term is explicitly an estimate, while the diagonal-Gaussian prior KL is analytic.
-- The held 3's chosen ε=(0.62,−1.15) gives approximately 122.262 nats reconstruction NLL plus 6.966 nats prior KL. Full-precision source values are in the fixture; presentation numbers are rounded.
-- Per-image VI freezes a copied decoder and fits one free μ/logvar pair for 80 updates. It uses fresh 64-draw training estimates and a separate fixed 256-draw diagnostic. It is not claimed to find an exact posterior or to equal the amortised solution.
-- The actual joint update copies the existing `vae2` checkpoint, uses eight training images and float64 SGD with η=0.000001. A fixed ε before/after diagnostic changes from about 126.017 to125.918 nats/image. Both encoder heads and decoder weights receive nonzero gradients and change. Ordinary training uses fresh noise.
-- Reconstruction figures decode encoder means for visual inspection. This is not the expected reconstruction term under q. The latent scatter likewise plots means, not samples from the aggregate posterior.
-- Recorded βKL=1 and βKL=8 d=2 checkpoints have the same architecture, seed and 40-epoch schedule. Their objectives differ. The optional comparison is a bounded observation of these runs, not a universal claim about sample quality.
-- All model weights are existing recorded training results, replayed here. Only the stated inference/update computations are newly executed.
+```sh
+# From the lectures/ directory, with the Python environment activated:
+cd lecture3
+python scripts/execute_notebook.py
+```
 
-## Reproduction and evidence
+Execute from the lecture directory in Jupyter, or use the series repository root supported by the initial cell. To regenerate a clean notebook from its authored cells, run `scripts/make_notebook.py`, then execute it; regeneration clears saved outputs deliberately.
 
-`notebooks/lab.py` contains the full model class, loss conventions, inspected update, per-image fitting loop and independent scalar checks. The notebook includes actual outputs and figures. Optional tiny-subset fresh training is disabled by default and clearly labelled; it would not reproduce the recorded full-dataset quality.
+## Evidence and reproducibility
 
-`data/provenance.json` and `data/original-training.json` record sources, hashes and original training histories. `data/figure-manifest.json` hashes all figures. `data/fixtures.json` is the full-precision calculation source for the slides. `qa/science-checks.json` and `qa/notebook-execution.json` record executed checks. Shared browser/PDF QA is separate.
+- `data/fixtures.json`: full-precision scalar update, gradient checks, measured coverage and replay facts. All displayed arithmetic reads this file.
+- `scripts/prepare.py`: regenerates computed figures and checks from bundled local data, recorded runs and checkpoint.
+- `models/gan_mnist.pt`: unchanged original 30-epoch checkpoint; SHA-256 and source in `data/reuse-manifest.json`.
+- `data/gan_mnist_snapshots.npz`: original fixed-noise training film, epochs 0–30.
+- `data/mnist-subset.npz`: official training indices 0–511 and test indices 0–127, with labels. The held 3 is test index 90. Images remain uint8 until explicitly transformed.
+- `qa/science-checks.json` and `qa/notebook-execution.json`: measured execution checks. `qa/notebook-figures/` contains rendered notebook outputs for inspection.
 
-## Teaching sources
+The image convention is greyscale `uint8/127.5−1`, unlike the binary Bernoulli VAE. The source-normalised D loss is the sum of real and fake batch means; G uses the non-saturating mean BCE. Raw GAN/VAE loss values are not comparable.
 
-The sequence adapts Nipun Batra's [PML 2023 VAE notebook](https://github.com/nipunbatra/pml-teaching/blob/master/notebooks/vae.ipynb), with the inference-first derivation made explicit. Mathematical reference: Kingma and Welling, [Auto-Encoding Variational Bayes](https://arxiv.org/abs/1312.6114). The compact diagram conventions were informed by inspection of [Lilian Weng's VAE article](https://lilianweng.github.io/posts/2018-08-12-vae/). All in-lecture topology diagrams are original redraws with the shared semantic palette; no blog raster figure is copied. The staged teaching style follows the [attention lectures](https://nipunbatra.github.io/attention/).
+The stable and collapsed illustrative runs differ in generator width **and seed**. Their contrast demonstrates the observed failure, not a causal isolation of width. Coverage counts the fraction of 2,000 generated samples within one unit of each true mode; that is a limited diagnostic, not a full quality metric. KDE smoothing is labelled.
+
+## Full training
+
+Optional full image-model training additionally needs `torchvision`, compatible with the installed PyTorch version (`python -m pip install torchvision`). It is not required for the default notebook demonstrations or checkpoint replay.
+
+The final notebook cell has `RUN_FULL=False`. To run it, set `MNIST_ROOT` to a local directory containing `MNIST/raw` and enable the cell. The script never downloads data. It uses the full training split, 30 epochs, batch size 128, Adam learning rate 0.0002, seed 1 and latent dimension 100. CPU works; optional `gan.DEVICE="mps"` uses an available Apple GPU. The new result goes to `models/full-retrain/`, preserving the supplied checkpoint.
+
+BatchNorm running statistics and dropout modes are distinct from parameter freezing. The explicit ownership checks use MLPs without mutable buffers. The image D has dropout but no BatchNorm; the supplied training implementation retains its documented training-mode behaviour.
+
+Original conceptual reference: [Goodfellow et al., 2014](https://arxiv.org/abs/1406.2661). Figures here are new computed plots or local measured outputs; no published third-party figure is reproduced.
