@@ -993,7 +993,26 @@ S('road1-penalty','vae','Road 1: keep the clouds near N(0, I) with a KL penalty'
  ask:['What is the KL for a cloud with μ = 0, σ = 1?','What does the KL do to a code with μ = 5?','What does the −log σ² term do as σ → 0?'],
  expected:['Zero: the cloud is exactly N(0, I).','About 12.5 per number: a strong pull back towards the origin.','It grows without limit: tiny clouds are penalised.'],
  point:'Road 1 looks like a hand-made penalty, like ridge regression (squared error + λ‖w‖²). Road 2 shows that this exact sum comes out of maximum likelihood, with a weight fixed by σ.',
- transition:'Road 2: start from the generative model.'});
+ transition:'Two forces on the clouds.'});
+function tugFig(){
+ const W=1100,H=300,PW=340,R=70;
+ const frame=(ox,title,col)=>`<rect x="${ox}" y="40" width="${PW}" height="210" rx="8" fill="#fff" stroke="${LINE}"/>`+label(ox,26,title,{fill:col,size:19,weight:650})+`<circle cx="${ox+PW/2}" cy="145" r="${R}" fill="none" stroke="${MUTED}" stroke-width="1.8" stroke-dasharray="6 5"/>`+label(ox+PW/2+R*.72+4,145-R*.72-4,'N(0, I)',{size:14});
+ const cloud=(ox,dx,dy,rx,ry,k)=>`<ellipse cx="${ox+PW/2+dx}" cy="${145+dy}" rx="${rx}" ry="${ry}" fill="${CLASS[k]}2E" stroke="${CLASS[k]}" stroke-width="2"/>`+`<circle cx="${ox+PW/2+dx}" cy="${145+dy}" r="3.5" fill="${CLASS[k]}"/>`;
+ let g='';
+ g+=frame(0,'reconstruction alone',palette.loss)+cloud(0,-120,-70,4,4,0)+cloud(0,125,-60,4,4,1)+cloud(0,95,75,4,4,3)+cloud(0,-110,70,4,4,0)+
+  label(0,276,'tiny clouds, far apart:',{size:16})+label(0,296,'an autoencoder again',{size:16});
+ g+=`<g data-at="2">${frame(380,'KL alone',palette.q)+cloud(380,0,0,R,R,0)+cloud(380,3,-2,R,R,1)+cloud(380,-3,2,R,R,3)+label(380,276,'every image gets the same cloud N(0, I):',{size:16})+label(380,296,'z says nothing about the image',{size:16})}</g>`;
+ g+=`<g data-at="3">${frame(760,'both together',palette.p)+cloud(760,-34,22,24,16,0)+cloud(760,36,14,22,16,1)+cloud(760,2,-34,24,15,3)+
+  `<path d="M${760+PW/2+14},${145-10} l3,8 9,0 -7,5 3,9 -8,-6 -8,6 3,-9 -7,-5 9,0z" fill="${palette.loss}" stroke="#fff"/>`+label(760,276,'clouds near the centre, still apart:',{size:16})+label(760,296,'a random z lands near some cloud',{size:16})}</g>`;
+ return fig(W,H+10,g,'Sketch: reconstruction alone gives tiny separated clouds; KL alone gives identical N(0, I) clouds; together, clouds sit near the centre but remain distinct.');
+}
+S('road1-tug','vae','Road 1: two terms pull in opposite directions',{builds:4,
+ body:act(6,tugFig(),at(4,takeaway('Road 1 in one line: an autoencoder whose codes are noisy clouds held near N(0, I). To generate, draw z ~ N(0, I) and decode.'))),
+ lines:['With only the reconstruction term, the best clouds are tiny and far apart: each image keeps a private, exact code. That is the autoencoder of Part 5.','With only the KL term, every cloud becomes N(0, I) itself: all images share one cloud, the code says nothing, and the decoder can only draw the average digit.','Together they balance: clouds sit near the centre and overlap a little, yet stay distinct enough to rebuild each image.','So a random draw from N(0, I) usually lands on or near some cloud, and the decoder has been trained to draw something sensible there.'],
+ ask:['What does the reconstruction term want the clouds to do?','What does the KL term want?','Where does the balance land?','Why does sampling now work?'],
+ expected:['Shrink (less noise in z) and spread apart (no confusion between images).','Move to the centre and widen to σ = 1.','Clouds near the centre, small but not tiny, slightly overlapping.','The codes fill the region N(0, I) samples from, and the decoder was trained across it.'],
+ point:'A sketch, not data. The β slides (6.6) show the real version: β = 0 is panel one, β = 256 is panel two.',
+ transition:'Road 2: start from the generative model instead.'});
 chap('6.3');
 function vaePgm(stage){
  const W=1100,H=300;let g=`<rect x="60" y="16" width="560" height="250" rx="10" fill="none" stroke="${MUTED}" stroke-width="2"/>`+label(608,254,'60,000 images',{size:17,anchor:'end'});
@@ -1060,22 +1079,43 @@ S('vae-infer','vae','The variational part: an encoder that approximates the post
  ask:['Why do we need the posterior at all?','What is “variational” about the VAE?','Why is one encoder for all images a good idea?'],
  expected:['Training needs log p(x), and the ELBO replaces it using a q close to the posterior.','We approximate the posterior with a member of a simple family (diagonal Gaussians) fitted by optimisation: Lecture 1’s variational inference.','One forward pass gives q for any image, instead of a separate optimisation per image (this is called amortised inference).'],
  point:'Kingma and Welling (2014), figure 1: solid = generative model p_θ, dashed = variational approximation q_φ.',
- transition:'Check the encoder against the true posterior of our 3.'});
+ transition:'Where the KL to the prior comes from.'});
+S('elbo-derive','vae','Road 2: where the KL comes from, for one image',{builds:3,
+ body:act(6,`<div class="eq-sm">${stack(eq(R`\KL\big(q_\phi(z\mid x)\,\|\,p(z\mid x)\big)=\E_{q}\big[\log q_\phi(z\mid x)-\log p(z\mid x)\big]`),
+  at(2,eq(R`=\E_{q}\big[\log q_\phi(z\mid x)-\log p_\theta(x\mid z)-\log p(z)\big]+\log p_\theta(x)`)),
+  at(3,eq(R`\log p_\theta(x)=\underbrace{\E_{q}\big[\log p_\theta(x\mid z)\big]-\KL\big(q_\phi(z\mid x)\,\|\,p(z)\big)}_{\ELBO}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,p(z\mid x)\big)}_{\ge\,0}`)))}</div>`),
+ lines:['Road 2 chose to approximate the posterior with q. Measure how far q is from it: the KL from q to the true posterior.','Bayes’ rule: log p(z | x) = log p(x | z) + log p(z) − log p(x). The evidence log p(x) is the same for every z, so it comes out of the average.',`Rearrange: log p(x) = ELBO + a gap that is never negative. Inside the ELBO, a KL to the prior has appeared on its own: nobody added it by hand. ${l1('elbo-step1','4.1','the same derivation')}`],
+ ask:['Which distribution does the expectation use?','Why can log p(x) leave the expectation?','Which KL can we compute, and which can we not?'],
+ expected:['q_φ(z | x), the encoder’s Gaussian.','It does not depend on z; it is a constant inside the average over z.','KL(q ‖ p(z)) between two Gaussians has a formula; KL(q ‖ p(z | x)) needs the intractable posterior. Maximising the ELBO shrinks it anyway.'],
+ point:'This is Lecture 1, section 4.1, with θ → z and 𝒟 → one image x.',
+ transition:'Write the ELBO in terms of the network.'});
+S('elbo-meets','vae','The ELBO for one image is Road 1’s loss',{builds:3,
+ body:act(6,stack(`<div class="eq-sm">${eq(R`\ELBO=\underbrace{\E_{q_\phi(z\mid x)}\big[\log p_\theta(x\mid z)\big]}_{\text{reconstruct }x}\;-\;\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,p(z)\big)}_{\text{stay near the prior}}`)}</div>`,
+  at(2,`<div class="eq-sm">${eq(R`\log p_\theta(x\mid z)=-\frac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2+\text{const}`)}</div>`),
+  at(3,`<div class="eq-sm">${eq(R`-\ELBO=\E_{q}\Big[\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2\Big]+\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,I)\big)+\text{const}`)}</div>`),
+  at(3,takeaway('Road 2 gives Road 1’s loss: squared error plus the KL to N(0, I). The weight on the squared error is 1 / 2σ², set by the pixel noise.')),at(3,`<div>${l1('elbo-two-terms','4.1','the ELBO in two terms')}</div>`))),
+ lines:['The ELBO we just derived: an expected log-likelihood of the image, minus a KL from q to the prior.','With Gaussian pixel noise, the log-likelihood is minus a scaled squared error (section 6.3).','Flip the sign: squared error plus KL. The two roads meet; the penalty of Road 1 was maximum likelihood all along.'],
+ ask:['Which term rewards reconstruction?','Where does 1 / 2σ² come from?','What happens to the loss if σ is small?'],
+ expected:['The expected log-likelihood (the first term).','The Gaussian density of each pixel around the decoder’s output.','The squared error dominates: the model is pushed to reconstruct precisely, and the KL matters less.'],
+ transition:'Check the encoder on our 3.'});
 S('q3','vae','Check the encoder: its q for our 3, against the true posterior',{builds:2,
  body:act(6,cols(fig(420,420,posteriorSVG({S:420,view:'zoom',enc:true,q:[V.vi3.final_mu[0],V.vi3.final_mu[1],V.vi3.final_sd[0],V.vi3.final_sd[1]]}).s,'The posterior, the per-image q and the encoder’s q, zoomed.'),
   stack(`<div class="tsm">${table(['','ELBO'],[['log p(x), the exact target',f(V.grid.log_px,2)],['q fitted to this image alone',f(V.vi3.final_elbo,2)],['q from the encoder (one pass)',f(V.q3.elbo,2)]])}</div>`,at(2,p(`Encoder: μ = (${f(V.q3.mu[0],3)}, ${f(V.q3.mu[1],3)}), σ = (${f(V.q3.sd[0],3)}, ${f(V.q3.sd[1],3)}).`)),at(2,small('Dashed: the encoder’s q. Shaded: the per-image fit. Both 2 standard deviations.'))),'1fr 1.1fr')),
  lines:[`The per-image fit gets within ${f(V.grid.log_px-V.vi3.final_elbo,2)} of log p(x); the encoder, in one pass, within ${f(V.q3.gap,2)}.`,'The encoder’s q sits slightly off-centre and a little too narrow. That small loss is the price of amortisation.'],
  ask:['Which q is better, and by how much?','Why is the encoder’s q not perfect?'],
  expected:[`The per-image fit, by ${f(V.vi3.final_elbo-V.q3.elbo,2)} nats.`,'One network must serve all 60,000 images; it cannot be exactly right for each.'],
- transition:'The loss, term by term.',source:OURS});
-S('elbo-meets','vae','The ELBO for one image is Road 1’s loss',{builds:3,
- body:act(6,stack(`<div class="eq-sm">${eq(R`\ELBO=\underbrace{\E_{q_\phi(z\mid x)}\big[\log p_\theta(x\mid z)\big]}_{\text{reconstruct }x}\;-\;\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,p(z)\big)}_{\text{stay near the prior}}`)}</div>`,
-  at(2,`<div class="eq-sm">${eq(R`\log p_\theta(x\mid z)=-\frac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2+\text{const}`)}</div>`),
-  at(3,`<div class="eq-sm">${eq(R`-\ELBO=\E_{q}\Big[\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2\Big]+\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,I)\big)+\text{const}`)}</div>`),
-  at(3,takeaway('Road 2 gives Road 1’s loss: squared error plus the KL to N(0, I). The weight on the squared error is 1 / 2σ², set by the pixel noise.')),at(3,`<div>${l1('elbo-two-terms','4.1','the ELBO in two terms')}</div>`))),
- lines:['Lecture 1’s ELBO, with today’s roles: an expected log-likelihood of the image, minus a KL from q to the prior.','With Gaussian pixel noise, the log-likelihood is minus a scaled squared error (section 6.3).','Flip the sign: squared error plus KL. The two roads meet; the penalty of Road 1 was maximum likelihood all along.'],
- ask:['Which term rewards reconstruction?','Where does 1 / 2σ² come from?','What happens to the loss if σ is small?'],
- expected:['The expected log-likelihood (the first term).','The Gaussian density of each pixel around the decoder’s output.','The squared error dominates: the model is pushed to reconstruct precisely, and the KL matters less.'],
+ transition:'Put the two roads side by side.',source:OURS});
+S('roads-compare','vae','Two roads, one VAE',{builds:2,
+ body:act(6,`<div class="tsm">${table(['','Road 1 · from the autoencoder','Road 2 · from a generative model'],[
+  ['start with','an autoencoder; replace its code with a cloud','a prior p(z) = N(0, I) and a decoder p<sub>θ</sub>(x | z)'],
+  ['the encoder is','a network that outputs a cloud N(μ, σ²)','the approximate posterior q<sub>φ</sub>(z | x)'],
+  ['the KL term is','a penalty we add, to keep clouds near N(0, I)','part of the ELBO: it comes out of Bayes’ rule'],
+  ['the squared error is','reconstruction error','−log p<sub>θ</sub>(x | z): Gaussian pixels of size σ'],
+  ['its weight 1/2σ²','a knob to tune (β, section 6.6)','set by the pixel noise σ'],
+  ['to generate','z ~ N(0, I), then decode','the same: sample the prior, follow the arrow']])}</div>`,at(2,takeaway('Same network, same loss. Road 1 says what the VAE does; Road 2 says why that loss is the right one.'))),
+ lines:['Line up the two stories. They name each piece differently, but every row describes the same object.','Road 1 is the quick intuition; Road 2 is the reason. Both give the network we now train.'],
+ ask:['Which road tells you how to choose the weight between the two terms?','Which road would you use to explain the VAE to a friend in one minute?'],
+ expected:['Road 2: the weight 1/2σ² comes from the assumed pixel noise.','Road 1: an autoencoder with noisy codes pulled towards N(0, I).'],
  transition:'Train it: the loss, term by term, with numbers.'});
 chap('6.4');
 S('vae-loss','vae','The loss for one image is the negative ELBO',{builds:3,

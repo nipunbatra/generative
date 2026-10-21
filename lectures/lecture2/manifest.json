@@ -47,7 +47,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 100,
+  "coreSlides": 103,
   "optionalSlides": 13,
   "slides": [
     {
@@ -597,6 +597,13 @@
       "optional": false
     },
     {
+      "id": "road1-tug",
+      "title": "Road 1: two terms pull in opposite directions",
+      "section": "vae",
+      "builds": 4,
+      "optional": false
+    },
+    {
       "id": "vae-pgm",
       "title": "Road 2: the VAE as a generative model",
       "section": "vae",
@@ -639,10 +646,10 @@
       "optional": false
     },
     {
-      "id": "q3",
-      "title": "Check the encoder: its q for our 3, against the true posterior",
+      "id": "elbo-derive",
+      "title": "Road 2: where the KL comes from, for one image",
       "section": "vae",
-      "builds": 2,
+      "builds": 3,
       "optional": false
     },
     {
@@ -650,6 +657,20 @@
       "title": "The ELBO for one image is Road 1’s loss",
       "section": "vae",
       "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "q3",
+      "title": "Check the encoder: its q for our 3, against the true posterior",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "roads-compare",
+      "title": "Two roads, one VAE",
+      "section": "vae",
+      "builds": 2,
       "optional": false
     },
     {
@@ -842,5 +863,5 @@
       "optional": true
     }
   ],
-  "totalStates": 258
+  "totalStates": 267
 }

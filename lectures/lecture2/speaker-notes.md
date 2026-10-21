@@ -1178,7 +1178,29 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Point here:** Road 1 looks like a hand-made penalty, like ridge regression (squared error + λ‖w‖²). Road 2 shows that this exact sum comes out of maximum likelihood, with a weight fixed by σ.
 
-**Transition:** Road 2: start from the generative model.
+**Transition:** Two forces on the clouds.
+
+## road1-tug: Road 1: two terms pull in opposite directions
+
+**Build 1, ask:** What does the reconstruction term want the clouds to do?
+
+**Expected:** Shrink (less noise in z) and spread apart (no confusion between images).
+
+**Build 2, ask:** What does the KL term want?
+
+**Expected:** Move to the centre and widen to σ = 1.
+
+**Build 3, ask:** Where does the balance land?
+
+**Expected:** Clouds near the centre, small but not tiny, slightly overlapping.
+
+**Build 4, ask:** Why does sampling now work?
+
+**Expected:** The codes fill the region N(0, I) samples from, and the decoder was trained across it.
+
+**Point here:** A sketch, not data. The β slides (6.6) show the real version: β = 0 is panel one, β = 256 is panel two.
+
+**Transition:** Road 2: start from the generative model instead.
 
 ## vae-pgm: Road 2: the VAE as a generative model
 
@@ -1278,21 +1300,25 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Point here:** Kingma and Welling (2014), figure 1: solid = generative model p_θ, dashed = variational approximation q_φ.
 
-**Transition:** Check the encoder against the true posterior of our 3.
+**Transition:** Where the KL to the prior comes from.
 
-## q3: Check the encoder: its q for our 3, against the true posterior
+## elbo-derive: Road 2: where the KL comes from, for one image
 
-**Build 1, ask:** Which q is better, and by how much?
+**Build 1, ask:** Which distribution does the expectation use?
 
-**Expected:** The per-image fit, by 0.68 nats.
+**Expected:** q_φ(z | x), the encoder’s Gaussian.
 
-**Build 2, ask:** Why is the encoder’s q not perfect?
+**Build 2, ask:** Why can log p(x) leave the expectation?
 
-**Expected:** One network must serve all 60,000 images; it cannot be exactly right for each.
+**Expected:** It does not depend on z; it is a constant inside the average over z.
 
-**Transition:** The loss, term by term.
+**Build 3, ask:** Which KL can we compute, and which can we not?
 
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+**Expected:** KL(q ‖ p(z)) between two Gaussians has a formula; KL(q ‖ p(z | x)) needs the intractable posterior. Maximising the ELBO shrinks it anyway.
+
+**Point here:** This is Lecture 1, section 4.1, with θ → z and 𝒟 → one image x.
+
+**Transition:** Write the ELBO in terms of the network.
 
 ## elbo-meets: The ELBO for one image is Road 1’s loss
 
@@ -1307,6 +1333,32 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 **Build 3, ask:** What happens to the loss if σ is small?
 
 **Expected:** The squared error dominates: the model is pushed to reconstruct precisely, and the KL matters less.
+
+**Transition:** Check the encoder on our 3.
+
+## q3: Check the encoder: its q for our 3, against the true posterior
+
+**Build 1, ask:** Which q is better, and by how much?
+
+**Expected:** The per-image fit, by 0.68 nats.
+
+**Build 2, ask:** Why is the encoder’s q not perfect?
+
+**Expected:** One network must serve all 60,000 images; it cannot be exactly right for each.
+
+**Transition:** Put the two roads side by side.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## roads-compare: Two roads, one VAE
+
+**Build 1, ask:** Which road tells you how to choose the weight between the two terms?
+
+**Expected:** Road 2: the weight 1/2σ² comes from the assumed pixel noise.
+
+**Build 2, ask:** Which road would you use to explain the VAE to a friend in one minute?
+
+**Expected:** Road 1: an autoencoder with noisy codes pulled towards N(0, I).
 
 **Transition:** Train it: the loss, term by term, with numbers.
 
