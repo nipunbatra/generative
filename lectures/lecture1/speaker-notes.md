@@ -1,16 +1,27 @@
 # KL and variational inference: speaker notes
 
-Planned main route: 80 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 140 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
-| Part 1 · Bayes’ rule for a neural network | 21 |
-| Part 2 · How far apart are two distributions? | 20 |
+| Lecture map | 1 |
+| Part 1 · Bayes’ rule for a neural network | 22 |
+| Part 2 · How far apart are two distributions? | 74 |
 | Part 3 · Find the closest q | 22 |
-| Part 4 · Back to Bayes: the ELBO | 9 |
+| Part 4 · Back to Bayes: the ELBO | 13 |
 | Part 5 · Implement it | 8 |
+
+## contents: Lecture 1 at a glance: five parts, twenty-four sections
+
+**Build 1, ask:** Which part do you expect to be hardest?
+
+**Expected:** Usually Part 4, the ELBO derivation, so we take it one rule per line.
+
+**Point here:** Click a section to jump to its first slide; ▶ notebook opens the matching notebook section in Colab. Run the notebook top to bottom once before class.
+
+**Transition:** Part 1: Bayes’ rule for a neural network.
 
 ## bayes-rule: Bayes’ rule: update what you believe, using data
 
@@ -88,7 +99,9 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** Not at all: the band is about ±2.7 wide everywhere.
 
-**Point here:** Prior over functions: the individual curves. Prior predictive: their average with the noise added, the band (4,000 draws). Slide 14 shows the same picture after the data: the posterior predictive.
+**Point here:** Prior over functions: the individual curves. Prior predictive: their average with the noise added, the band (4,000 draws). Section 1.5 shows the same picture after the data: the posterior predictive.
+
+**Notebook demonstration:** Notebook 1.2: the prior-draws cell prints θ⁽¹⁾ and draws the twenty functions with the prior predictive band; change the seed for new draws.
 
 **Transition:** Now the data, and how well each θ explains them.
 
@@ -106,51 +119,63 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** Compute the right-hand side of Bayes’ rule for one θ.
 
-## theta-a: Meet θ<sub>A</sub>: one good setting of the seven numbers
+## map-train: Finding a good θ: train the network
 
-**Build 1, ask:** Which parameter is largest in size?
+**Build 1, ask:** What is the loss here, in words?
 
-**Expected:** w₂ = −2.00: a sharp step from the second hidden unit.
+**Expected:** The squared error between the curve and the points, divided by 2 · 0.1², plus half the sum of squared parameters: the prior acts as weight decay.
+
+**Build 2, ask:** Why try ten starts?
+
+**Expected:** Training can stop in different places. Here most starts reach 14.34; two stop a little higher.
+
+**Point here:** Loss = Σᵢ (yᵢ − f(xᵢ))² / (2 · 0.1²) + ½ Σⱼ θⱼ², which is −log p(𝒟 | θ) − log p(θ) without its constants. Adam, learning rate 0.05, 2,000 steps per start. θ<sub>A</sub> is the MAP estimate.
+
+**Notebook demonstration:** Switch to notebook 1.3 and run the training cell: it prints the final loss of all ten starts, then the log likelihood and log prior of θ_A and θ_B.
+
+**Transition:** Meet θ<sub>A</sub>.
+
+## theta-a: Meet θ<sub>A</sub>: the network with its trained numbers
+
+**Build 1, ask:** Which weight is largest?
+
+**Expected:** w₂ = −2.00: the second hidden unit makes the sharp step.
 
 **Build 2, ask:** Does this curve explain the data well?
 
-**Expected:** Yes: it passes close to every point. The next two slides put numbers on that.
+**Expected:** Yes: it passes close to every point.
 
-**Point here:** θ<sub>A</sub> maximises log p(𝒟 | θ) + log p(θ): it is the MAP estimate. It plays no special role later; it is a convenient, good θ to compute with.
+**Transition:** The likelihood of θ<sub>A</sub>.
 
-**Transition:** The likelihood, one data point at a time.
+## likelihood-formula: The likelihood of θ<sub>A</sub>: formula, then value
 
-## likelihood-by-hand: The likelihood of θ<sub>A</sub>, one data point at a time
+**Build 1, ask:** Why a product?
 
-**Build 1, ask:** What is f at x₁ before any noise?
+**Expected:** Given θ, the noise on different points is independent.
 
-**Expected:** About −1.18: mostly from the second unit, v₂ tanh(·) ≈ −0.96.
+**Build 2, ask:** Which part depends on θ?
 
-**Build 2, ask:** Why is the best possible score 1.38?
+**Expected:** Only the squared errors; the constant is the same for every θ.
 
-**Expected:** A point exactly on the curve has zero residual, so only −½ log(2π · 0.1²) = 1.38 remains.
+**Build 3, ask:** Is a larger log likelihood better?
 
-**Build 3, ask:** Which points score worst, and why?
+**Expected:** Yes: the curve passes closer to the points.
 
-**Expected:** Points 12 and 13, near the steepest part of the step: the curve misses them by more than 0.17.
+**Transition:** The prior of θ<sub>A</sub>.
 
-**Point here:** Rounded to three decimals at every step; the exact first term is 1.156.
+## prior-formula: The prior of θ<sub>A</sub>, then the evidence
 
-**Transition:** The prior of θ<sub>A</sub>, one parameter at a time.
+**Build 1, ask:** Which parameters make the prior small?
 
-## prior-by-hand: The prior of θ<sub>A</sub>, then the evidence
+**Expected:** Large ones, positive or negative.
 
-**Build 1, ask:** What does a parameter at exactly 0 score?
+**Build 2, ask:** What is ½ Σ θⱼ² for θ<sub>A</sub>?
 
-**Expected:** −0.919: the top of the bell.
+**Expected:** About 2.98: the weight-decay term from training.
 
-**Build 2, ask:** Which parameter costs most, and why?
+**Build 3, ask:** How could we compute the evidence?
 
-**Expected:** w₂ = −2.00: its square, halved, is 2.01.
-
-**Build 3, ask:** How would you compute the evidence?
-
-**Expected:** Students suggest a grid, or sampling. Both are coming.
+**Expected:** Add up p(𝒟 | θ) p(θ) over all θ. Next slide.
 
 **Transition:** Compare θ<sub>A</sub> with a random θ from the prior.
 
@@ -166,29 +191,33 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** Normalising is the hard part.
 
-## evidence-integral: The evidence needs every θ, and has no formula
+## evidence-area: The evidence is an area: add up thin rectangles
 
-**Build 1, ask:** Why is there no formula?
+**Build 1, ask:** What is the height of each rectangle?
 
-**Expected:** The integrand is not a Gaussian or any other form we can integrate: θ passes through tanh.
+**Expected:** p(𝒟 | w₂) p(w₂) at its centre: the likelihood times the prior.
 
-**Build 2, ask:** Could a faster computer rescue the grid?
+**Build 2, ask:** How many rectangles would two unknowns need?
 
-**Expected:** No: the count grows exponentially with the number of parameters.
+**Expected:** A grid of squares: 20 × 20 = 400, or 100 × 100 if each axis needs 100.
 
-**Transition:** Sampling instead of a grid?
+**Point here:** A one-dimensional slice of our network’s evidence, for illustration only: the curve is computed in the browser from θ<sub>A</sub> and the data.
 
-## evidence-mc: Sampling from the prior: a few lucky draws carry everything
+**Notebook demonstration:** Notebook 1.4: the first cell computes this one-unknown evidence with 20 rectangles and with 200,000; their logs agree to three decimals.
 
-**Build 1, ask:** Why are the small-S estimates so low?
+**Transition:** And with all seven unknowns?
 
-**Expected:** Prior draws almost never land where the likelihood is high, like θ<sub>B</sub>; the rare good draws dominate the average.
+## intractable: Intractable: why the rectangles do not scale
 
-**Build 2, ask:** What happens with a million parameters?
+**Build 1, ask:** How long would 10¹⁴ evaluations take at a billion a second?
 
-**Expected:** The chance that a prior draw lands near the posterior shrinks exponentially; no feasible S is enough.
+**Expected:** About 28 hours: possible, just. For 10^2,000,000: never.
 
-**Point here:** Effective number of draws, out of 10⁷: 77, 93, 134, 108. The largest single draw carries 8%, 4%, 4%, 4% of the total.
+**Build 2, ask:** So what does intractable mean?
+
+**Expected:** No closed form, and no feasible numerical computation: the cost explodes with the number of unknowns.
+
+**Point here:** Sampling θ from the prior and averaging p(𝒟 | θ) does not rescue it: almost every draw explains the data terribly. The optional slide on prior sampling shows the numbers: with ten draws the estimate is off by about 1,000 nats, and of ten million draws only about 100 matter.
 
 **Transition:** Why do we want the posterior at all?
 
@@ -206,7 +235,19 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** How else could we approximate the posterior?
 
-## three-ways: Three ways to approximate a posterior
+## core-problem: The core problem of probabilistic machine learning
+
+**Build 1, ask:** Which of the three pieces can we compute for one θ?
+
+**Expected:** The likelihood and the prior, as we did for θ<sub>A</sub>. Not the evidence.
+
+**Build 2, ask:** Where else will you meet this problem?
+
+**Expected:** In every Bayesian model with many unknowns, including the VAE in Lecture 3.
+
+**Transition:** Three ways to approach it.
+
+## three-ways: Three ways to approximate the posterior; we take the third
 
 **Build 1, ask:** What does Laplace miss here?
 
@@ -222,7 +263,7 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Point here:** Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 0.
 
-**Transition:** Today: variational inference.
+**Transition:** Variational inference, in one slide.
 
 ## vi-idea: Variational inference: choose q, make it close to the posterior
 
@@ -240,145 +281,817 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** Part 2: how far apart are two distributions?
 
-## distance-ideas: How far apart are two distributions?
+## pretend-posterior: For now, pretend we know the posterior
 
-**Build 1, ask:** Are p and q the same distribution?
+**Build 1, ask:** What do we gain by pretending we know p?
 
-**Expected:** No: one bump against two.
+**Expected:** We can check every tool against the right answer before facing a real posterior.
 
-**Build 2, ask:** What would you compare instead?
+**Build 2, ask:** What can we change about q?
 
-**Expected:** The densities at every point: how many times more likely each u is under one than under the other, averaged. That leads to KL.
+**Expected:** Its mean μ and its width σ.
 
-**Point here:** q = ½·N(−0.8, 0.6²) + ½·N(0.8, 0.6²): mean 0 and variance 0.6² + 0.8² = 1.
+**Build 3, ask:** What would you compare: means, widths, something else?
 
-**Transition:** Build that number from a familiar example.
+**Expected:** Students suggest means and widths. The KL divergence compares the whole densities, and works for any shapes.
 
-## fruit: Two surveys: how different are they?
+**Point here:** From here to the end of Part 3, p is a known stand-in for the posterior. Part 4 returns to the real one.
 
-**Build 1, ask:** How would you score the difference between these two surveys?
+**Transition:** Start with the surprise of one outcome.
 
-**Expected:** Students propose differences of percentages. Note that apples, 50% both years, should contribute nothing.
+## surprise-forecast: How surprised would you be? A forecast of 90% sun
 
-**Build 2, ask:** Bananas ÷4, clementines ×4: same size of change?
+**Build 1, ask:** Tomorrow it rains. How surprised are you, compared with a sunny day?
 
-**Expected:** By ratio, yes: both are a factor of 4. That suggests comparing ratios.
+**Expected:** Much more: rain had only a 10% chance.
 
-**Point here:** p is the survey we weight by (this year); q is the reference (last year).
+**Build 2, ask:** Should a 100% certain outcome surprise you at all?
 
-**Transition:** Compare by ratios.
+**Expected:** No: zero surprise. That is our first requirement.
 
-## ratios-logs: Ratios say “how many times”; logs make up and down cancel
+**Transition:** What should the surprise function be?
 
-**Build 1, ask:** On the ratio scale, which change looks bigger?
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-**Expected:** The rise: +3 against −0.75, though both are fourfold.
+## surprise-candidates: What should surprise be? Three requirements
 
-**Build 2, ask:** After taking logs?
+**Build 1, ask:** Why should surprises add for independent days?
 
-**Expected:** Equal and opposite, ±1.39. Logs turn “times” into “plus”.
+**Expected:** Independent days share nothing, so the information should simply add, just as the probabilities multiply.
 
-**Transition:** Now combine the three log ratios into one number.
+**Build 2, ask:** Which requirement does 1/p fail?
 
-## weight: Weight by how common each fruit is now: that is KL
+**Expected:** The first, and the third: it multiplies instead of adding.
 
-**Build 1, ask:** Why weight by p rather than q?
+**Build 3, ask:** Is the log the only choice?
 
-**Expected:** That choice defines KL(p‖q): the first argument does the weighting. Swapping gives a different number.
+**Expected:** Up to the base, yes: any continuous f with f(ab) = f(a) + f(b) is a logarithm. The base sets the unit.
 
-**Build 2, ask:** What is the KL if the surveys agree?
+**Transition:** Check it on five days.
 
-**Expected:** Zero: every ratio is 1, every log is 0.
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-**Point here:** Natural log gives nats. Base 2 gives bits, which the next slide uses.
+## surprise-five: Five days: probabilities multiply, surprises add
 
-**Transition:** The same number has a second meaning, in bits.
+**Build 1, ask:** Is log₂ 1/0.59 equal to 5 × 0.152?
 
-## bits: KL is the extra message length of using the wrong code
+**Expected:** Yes: both are 0.76 bits. The log turns the product into a sum.
 
-**Build 1, ask:** Why does sunny get the shortest code?
+**Build 2, ask:** Which day is the most informative?
 
-**Expected:** Sunny is the most common, so a short code for it saves the most bits on average.
+**Expected:** The rainy one: 3.32 of the 3.93 bits.
 
-**Build 2, ask:** Where do the extra 0.25 bits come from?
+**Transition:** The surprise curve, and its unit.
 
-**Expected:** Sunny is half of all days, and the wrong code spends 2 bits on it. KL measures that waste.
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-**Transition:** Cross-entropy is this “wrong code” length, and you have minimised it many times.
+## surprise-curve: Surprise in bits: I(x) = log₂ 1/p(x)
 
-## used-before: You have minimised KL before: in every cross-entropy loss
+**Build 1, ask:** How many bits for p = ⅛?
 
-**Build 1, ask:** Which term of the split depends on q?
+**Expected:** 3 bits: ⅛ = ½ × ½ × ½, three halvings.
 
-**Expected:** Only the KL. H(p) is fixed by p.
+**Build 2, ask:** What is one bit, in words?
 
-**Build 2, ask:** What does your classifier’s loss minimise?
+**Expected:** The surprise of a fair coin flip: one yes/no answer you could not predict.
 
-**Expected:** KL(labels ‖ predictions), plus a constant.
+**Transition:** One outcome is surprising or not. What about a whole distribution?
 
-**Build 3, ask:** So what is new in VI?
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-**Expected:** The direction. VI puts the approximation first, KL(q‖p). Act 1 ends with why.
+## entropy-average: Entropy: how surprised are you, on average?
 
-**Transition:** What does a KL of 0.19 actually feel like?
+**Build 1, ask:** Which outcome is more surprising? Which happens more often?
 
-## coin-evidence: A KL value is how fast evidence piles up
+**Expected:** Rain is far more surprising; sun far more common.
 
-**Build 1, ask:** Predict: after 30 tosses, how many times more likely are the data under 0.8 than under 0.5?
+**Build 2, ask:** Why weight by 0.9 and 0.1?
 
-**Expected:** Most guess far too low. It is about 325×.
+**Expected:** They are how often each surprise happens. Next slide: the long-run average over days.
 
-**Build 2, ask:** Why does a small KL eventually matter so much?
+**Build 3, ask:** Is entropy about one outcome, or the whole distribution?
 
-**Expected:** Log evidence adds up toss by toss, so the ratio grows exponentially with n.
+**Expected:** The whole distribution: one number for how uncertain it is.
 
-**Point here:** PAUSE. A simulation of 20,000 sequences gives a mean log ratio after 30 tosses of 5.780, against 30 × KL = 5.782.
+**Transition:** Why an expectation? Let days go by.
 
-**Transition:** Sums become integrals for continuous unknowns.
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-## densities: For densities, sums become integrals, and KL ≥ 0
+## entropy-days: Why an expectation? It is the average over many days
 
-**Build 1, ask:** Which distribution supplies the weights in KL(q‖p)?
+**Build 1, ask:** After 10 days, is the average close to 0.47?
 
-**Expected:** q, the first argument.
+**Expected:** Only by luck: one rainy day in ten gives 0.47, two give 0.8. It settles as days accumulate, because sun comes on 90% of them and rain on 10%.
 
-**Build 2, ask:** Why can’t KL be negative?
+**Point here:** The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.9).
 
-**Expected:** log t ≤ t − 1 for every ratio t = p/q, and the average of p/q under q is ∫p = 1.
+**Notebook demonstration:** Notebook 2.2: the entropy cell simulates 10,000 days and prints the running average at 10, 100, 1,000 and 10,000 days.
 
-**Point here:** Individual log ratios can be negative; only the weighted average is guaranteed nonnegative. That returns with sampling in Act 3.
+**Transition:** How does entropy change with the forecast?
 
-**Transition:** Closed forms for the distributions we will meet.
+## entropy-explorer: From certain to fully uncertain: between 0 and 1 bit
 
-## kl-formulas: Closed forms for simple distributions
+**Build 1, ask:** Where is the entropy largest, and why?
 
-**Build 1, ask:** Which row will our network’s ELBO use?
+**Expected:** At 50/50: the weather is least predictable, so each day surprises you most on average.
 
-**Expected:** The diagonal-Gaussian row: KL from q(θ) to the N(0, 1) prior, summed over the seven parameters.
+**Transition:** Three kinds of weather.
 
-**Build 2, ask:** Which of these did we already compute by hand?
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-**Expected:** Bernoulli (the coin, 0.19) and categorical (the fruit, 0.42).
+## entropy-three: Three kinds of weather: 1.5 bits
 
-**Point here:** The Gaussian row is KL(N(μ₁, σ₁²) ‖ N(μ₂, σ₂²)).
+**Build 1, ask:** Why is cloudy worth 2 bits?
 
-**Transition:** Derive the Gaussian row.
+**Expected:** ¼ = ½ × ½: two halvings, two bits.
 
-## gaussian-derivation: Deriving the Gaussian formula
+**Build 2, ask:** Is 1.5 bits more or less than a fair coin?
 
-**Build 1, ask:** Which constants cancel?
+**Expected:** More: three outcomes leave more to learn each day than two equally likely ones.
 
-**Expected:** The common log √(2π) terms, leaving the log ratio of the widths.
+**Transition:** What does 1.5 bits mean in practice?
 
-**Build 2, ask:** Why is E<sub>q</sub>[(u − m)²] = σ² + (μ − m)²?
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-**Expected:** Write u − m = (u − μ) + (μ − m); the cross term averages to zero under q.
+## entropy-questions: Entropy counts yes/no questions
 
-**Build 3, ask:** When is the KL zero?
+**Build 1, ask:** How many questions on a sunny day? On a rainy day?
+
+**Expected:** One; two.
+
+**Build 2, ask:** Can any strategy average fewer than 1.5 questions?
+
+**Expected:** No: entropy is the least possible average. This strategy reaches it because every probability is a power of ½.
+
+**Build 3, ask:** What is the code for rainy?
+
+**Expected:** 11: no to “sunny?”, then no to “cloudy?”.
+
+**Point here:** Each question here is 50/50 given the earlier answers, so each answer carries exactly 1 bit.
+
+**Transition:** Section 2.3: send the weather as bits.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## channel: Way 2: send the weather, in bits
+
+**Build 1, ask:** What does the receiver need to recover?
+
+**Expected:** Which kind of day it was, exactly.
+
+**Build 2, ask:** What do we want to minimise?
+
+**Expected:** The average number of bits sent per day.
+
+**Transition:** First, what is a code?
+
+**Source / evidence:** Coding story after <a href="https://www.youtube.com/watch?v=ErfnhcEV1O8">Aurélien Géron, “A Short Introduction to Entropy, Cross-Entropy and KL-Divergence”</a> (YouTube)
+
+## uniform-code: A code: a string of bits for each kind of day
+
+**Build 1, ask:** How many bits does the uniform code send per day?
+
+**Expected:** 2, every day.
+
+**Build 2, ask:** Where is it wasteful?
+
+**Expected:** On the common sunny days.
+
+**Transition:** Shorter strings need care.
+
+**Source / evidence:** Coding story after <a href="https://www.youtube.com/watch?v=ErfnhcEV1O8">Aurélien Géron, “A Short Introduction to Entropy, Cross-Entropy and KL-Divergence”</a> (YouTube)
+
+## prefix-code: Prefix codes: the bits split up without separators
+
+**Build 1, ask:** Decode 0 10 11 0 10.
+
+**Expected:** Sunny, cloudy, rainy, sunny, cloudy.
+
+**Build 2, ask:** Why is 0, 01, 1 a bad code?
+
+**Expected:** 0 is the start of 01, so the receiver cannot tell where one day ends.
+
+**Transition:** Which prefix code is the most efficient?
+
+**Source / evidence:** Coding story after <a href="https://www.youtube.com/watch?v=ErfnhcEV1O8">Aurélien Géron, “A Short Introduction to Entropy, Cross-Entropy and KL-Divergence”</a> (YouTube)
+
+## huffman: Huffman’s recipe: merge the two rarest, repeat
+
+**Build 1, ask:** Which two do we merge first?
+
+**Expected:** The two least likely: cloudy and rainy.
+
+**Build 2, ask:** What is the merged node’s probability?
+
+**Expected:** ½.
+
+**Build 3, ask:** How many merges for K outcomes?
+
+**Expected:** K − 1: each merge removes one node.
+
+**Build 4, ask:** Why does the likeliest outcome get the shortest codeword?
+
+**Expected:** It is merged last, so it sits closest to the root.
+
+**Point here:** The notebook implements Huffman’s algorithm in ten lines with a heap, and recovers 0, 10, 11 for p and 10, 11, 0 for q.
+
+**Transition:** How good is this code?
+
+## efficient-code: Each codeword is exactly as long as its surprise
+
+**Build 1, ask:** How long is the codeword for an outcome with probability ⅛?
+
+**Expected:** 3 bits: log₂ 8.
+
+**Build 2, ask:** Can any code average fewer than 1.5 bits here?
+
+**Expected:** No: by Shannon’s source coding theorem, H(p) is the minimum.
+
+**Transition:** What if the code was built for the wrong weather?
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## wrong-belief: A code built on a wrong belief
+
+**Build 1, ask:** Which of our days does their code make expensive?
+
+**Expected:** Sunny days: half of our days now cost 2 bits instead of 1.
+
+**Build 2, ask:** Whose probabilities set the code lengths?
+
+**Expected:** q’s: a code built for q spends log₂ 1/q(x) bits on x.
+
+**Transition:** Average the cost over our weather.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## cross-entropy: Cross-entropy: the average cost when the code expects q
+
+**Build 1, ask:** Which distribution supplies the weights?
+
+**Expected:** p, the real weather.
+
+**Build 2, ask:** Compute it.
+
+**Expected:** ½(2) + ¼(2) + ¼(1) = 1.75.
+
+**Build 3, ask:** What is H(p, p)?
+
+**Expected:** H(p): the right code, 1.5 bits.
+
+**Transition:** Watch it happen, day by day.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## bits-days: Watch it happen: our weather through both codes
+
+**Build 1, ask:** After 1,000 days, how many bits did the wrong code waste?
+
+**Expected:** About 250, 0.25 per day. The notebook’s run: 1,747 bits against 1,498.
+
+**Notebook demonstration:** Notebook 2.3: the Huffman cell sends 1,000 days through both codes and prints the bit counts and the start of each bit stream.
+
+**Transition:** Name the wasted bits.
+
+## kl-extra-bits: KL divergence: the extra bits we waste
+
+**Build 1, ask:** What would the waste be if q = p?
+
+**Expected:** Zero: the right code wastes nothing.
+
+**Build 2, ask:** Why can the two sums be combined?
+
+**Expected:** Same outcomes, same weights p(x).
+
+**Build 3, ask:** Which outcome saves bits? Does the total still lose?
+
+**Expected:** Rainy: its codeword got shorter (−1 bit, on a quarter of days). Sunny loses a bit on half the days, so the total is +0.25.
+
+**Transition:** Two facts about KL.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## kl-properties: Never negative, and zero only for the right code
+
+**Build 1, ask:** Can KL be negative?
+
+**Expected:** No: that would beat the best possible code.
+
+**Build 2, ask:** If KL(p‖q) = 0, what do we know?
+
+**Expected:** q = p: the belief is right.
+
+**Transition:** Does it matter which one is the truth?
+
+## kl-asymmetry: Which one is the truth? KL is not symmetric
+
+**Build 1, ask:** Why is their code so costly for us?
+
+**Expected:** It spends 6.6 bits on our cloudy and rainy days, which are half of all days.
+
+**Build 2, ask:** Is KL a distance in the everyday sense? Which direction will VI use?
+
+**Expected:** No: a distance is the same both ways; KL is a divergence. VI uses KL(q ‖ posterior), q first; Section 3.6 shows what that does to a fitted q.
+
+**Point here:** Sunny town q = (0.98, 0.01, 0.01): codeword lengths log₂ 1/q = 0.03, 6.64, 6.64 bits.
+
+**Transition:** Section 2.5: where you have already met all this.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## classifier: A classifier outputs a distribution
+
+**Build 1, ask:** What does the classifier output?
+
+**Expected:** A probability for each label, from a softmax.
+
+**Build 2, ask:** How can a label be a distribution?
+
+**Expected:** One-hot: probability 1 on the true class, 0 on the others.
+
+**Transition:** How surprised is the model by the truth?
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## ce-surprise: The loss is the model’s surprise at the true label
+
+**Build 1, ask:** Which terms survive?
+
+**Expected:** Only the true class.
+
+**Build 2, ask:** In words, what is the loss?
+
+**Expected:** How surprised the model is by the right answer.
+
+**Build 3, ask:** What loss would q(cat) = 1 give?
+
+**Expected:** 0: no surprise.
+
+**Transition:** And where is the KL?
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## ce-is-kl: With a one-hot label, cross-entropy is exactly KL
+
+**Build 1, ask:** What is H(p) for a one-hot label?
+
+**Expected:** 0.
+
+**Build 2, ask:** So what does training minimise?
+
+**Expected:** KL(label ‖ prediction): the bits the prediction wastes on the true labels.
+
+**Build 3, ask:** Why does PyTorch compute cross-entropy rather than KL?
+
+**Expected:** They are equal here, and in general differ by H(p), which training cannot change. Cross-entropy avoids the log of the labels.
+
+**Notebook demonstration:** Notebook 2.5: F.cross_entropy prints 0.511 nats, −log 0.6, the same number as KL(one-hot ‖ q).
+
+**Transition:** What the loss looks like as the prediction changes.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## loss-curve: The loss curve is the surprise curve
+
+**Build 1, ask:** Where is the curve steepest?
+
+**Expected:** Near 0: almost-impossible true labels cost the most.
+
+**Build 2, ask:** Why might a model learn to be confident?
+
+**Expected:** Each step towards q(true) = 1 lowers the loss; with no other pressure it heads there.
+
+**Transition:** Soft labels.
+
+## soft-labels: Soft labels: cross-entropy = entropy + KL
+
+**Build 1, ask:** Which part can training change?
+
+**Expected:** Only the KL; H(p) is fixed by the teacher.
+
+**Build 2, ask:** Can the cross-entropy reach 0 here?
+
+**Expected:** No: its minimum is H(p) = 0.72 nats, reached when the student copies the teacher.
+
+**Transition:** Section 2.6: real data.
+
+## mle-data: The data: twenty days of weather
+
+**Build 1, ask:** What would you guess for tomorrow?
+
+**Expected:** Sunny with probability ½: the frequency.
+
+**Build 2, ask:** What should “explains the data best” mean?
+
+**Expected:** Gives the data the highest probability: maximum likelihood. Let us see why that is the frequency.
+
+**Transition:** How probable are these twenty days under a model q?
+
+## mle-likelihood: How probable are these twenty days under q?
+
+**Build 1, ask:** Why a product?
+
+**Expected:** Independent days: probabilities multiply.
+
+**Build 2, ask:** Why is it so small?
+
+**Expected:** Any one particular sequence of 20 days is unlikely, even under the right model.
+
+**Build 3, ask:** Why work with the log?
+
+**Expected:** Products of many small numbers underflow; the log turns them into a sum.
+
+**Transition:** Per day, that is a familiar number.
+
+## mle-surprise: Per day: the data’s average surprise under q
+
+**Build 1, ask:** What is minus the log-likelihood per day, in words?
+
+**Expected:** The average surprise of a recorded day under q.
+
+**Build 2, ask:** Where have we seen 1.75?
+
+**Expected:** H(p, q): the wrong code on our weather.
+
+**Build 3, ask:** Coincidence?
+
+**Expected:** No. Next slide: group the days by weather.
+
+**Transition:** Group the days by weather.
+
+## mle-group: Why: group the days by weather
+
+**Build 1, ask:** How many sunny terms are there?
+
+**Expected:** Ten, all equal to log₂ 1/q(sunny).
+
+**Build 2, ask:** What do 10/20, 5/20 and 5/20 form?
+
+**Expected:** The data’s frequencies p̂ = (½, ¼, ¼): the empirical distribution.
+
+**Build 3, ask:** So what is maximum likelihood minimising?
+
+**Expected:** The cross-entropy H(p̂, q).
+
+**Transition:** Split it, as in 2.4.
+
+## mle-split: The data’s surprise = entropy of the data + KL
+
+**Build 1, ask:** Which part can the model change?
+
+**Expected:** Only KL(p̂ ‖ q).
+
+**Build 2, ask:** What is the smallest possible average surprise?
+
+**Expected:** H(p̂) = 1.5 bits, when KL = 0, that is, q = p̂.
+
+**Transition:** Find the best q yourself.
+
+## mle-fit: Find the q that makes the data least surprising
+
+**Build 1, ask:** Start from (⅓, ⅓, ⅓). Which way should q(sunny) move?
+
+**Expected:** Up, to ½: the data have more sun than q expects. At q = p̂ the data are 32 times more probable than under (¼, ¼, ½).
+
+**Notebook demonstration:** Notebook 2.6: the second cell runs gradient descent on the data’s average surprise from equal logits and lands on (0.5, 0.25, 0.25) without being told.
+
+**Transition:** The general statement.
+
+## mle-kl: Maximum likelihood minimises KL(data ‖ model)
+
+**Build 1, ask:** Which distribution comes first in this KL?
+
+**Expected:** The data’s, p̂.
+
+**Build 2, ask:** What happens with more data?
+
+**Expected:** p̂ gets closer to the true distribution of the data.
+
+**Build 3, ask:** What is a training set’s cross-entropy loss?
+
+**Expected:** The average surprise at the true labels: minus the average log-likelihood.
+
+**Transition:** Collect the pattern.
+
+## kl-everywhere: KL at work: the same quantity in many losses
+
+**Build 1, ask:** Which distribution comes first in each row?
+
+**Expected:** The one that supplies the weights: labels, data, teacher, policy, q. Section 3.6 shows why the order matters for VI.
+
+**Point here:** The video opens with distillation, generative models and RLHF as motivation.
+
+**Transition:** Distillation: a big teacher and a small student.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## distill-why: Knowledge distillation: a big teacher, a small student
+
+**Build 1, ask:** Why not just deploy the teacher?
+
+**Expected:** Cost and speed: memory, latency and energy grow with the number of parameters.
+
+**Build 2, ask:** How could the small model learn to behave like the big one?
+
+**Expected:** Copy its outputs: make the student’s distribution over labels match the teacher’s, input by input.
+
+**Point here:** Hinton, Vinyals and Dean (2015), “Distilling the Knowledge in a Neural Network”. Smaller deployed models, such as DistilBERT, are trained this way.
+
+**Transition:** Make the two distributions the same.
+
+## distill-match: Make the student’s distribution match the teacher’s
+
+**Build 1, ask:** Why does the teacher come first in the KL?
+
+**Expected:** The teacher plays the truth: its distribution supplies the weights, exactly like the labels in 2.5.
+
+**Build 2, ask:** Does the student need the true labels?
+
+**Expected:** Not for this term: the teacher labels every input, even unlabelled ones. In practice a small label term is often added.
+
+**Transition:** The loss, term by term.
+
+## distill-loss: The distillation loss, term by term
+
+**Build 1, ask:** Which part can the student change?
+
+**Expected:** Only q_S: H(p_T) is fixed by the frozen teacher.
+
+**Build 2, ask:** How is this related to the ordinary classification loss?
+
+**Expected:** It is the same cross-entropy loss, with the teacher’s soft distribution in place of the one-hot label.
+
+**Build 3, ask:** What does a temperature τ > 1 do?
+
+**Expected:** It flattens the teacher’s distribution so its small probabilities, which carry the extra information, count for more.
+
+**Transition:** What do soft labels teach that a one-hot label cannot?
+
+## distill-soft: What soft labels teach: a cat looks a bit like a dog
+
+**Build 1, ask:** What does the student learn from the 0.20 on dog?
+
+**Expected:** That cats and dogs look alike to the teacher, so confusing them is a small error, unlike cat versus ape.
+
+**Build 2, ask:** Why would τ = 1 hide that information?
+
+**Expected:** The 0.02 and 0.03 barely change the loss; dividing the logits by τ evens the distribution out.
+
+**Transition:** Watch a real student learn.
+
+## distill-demo: Press play: a tiny student learns a big teacher
+
+**Build 1, ask:** Predict: can a 27-parameter network copy a 4,547-parameter one?
+
+**Expected:** On this problem, nearly: the classes need only gently curved boundaries.
+
+**Build 2, ask:** Why do the boundaries stay blurred?
+
+**Expected:** The student copies the teacher’s uncertainty too: where classes overlap, the teacher is unsure, and so is the student.
+
+**Notebook demonstration:** Notebook 2.7: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.
+
+**Transition:** Second application: RLHF.
+
+## rlhf-setup: RLHF: reward a chatbot, but keep it close to where it started
+
+**Build 1, ask:** What does the reward model reward?
+
+**Expected:** Replies people preferred, as learned from human comparisons.
+
+**Build 2, ask:** Why keep a frozen copy?
+
+**Expected:** To measure how far the policy has drifted from a model that writes fluent, sensible text.
+
+**Build 3, ask:** What does β control?
+
+**Expected:** The trade-off: small β chases reward, large β stays near the reference.
+
+**Point here:** This KL penalty is part of InstructGPT/ChatGPT-style RLHF (PPO) and of GRPO; DPO optimises the same KL-regularised objective without a separate reward model.
+
+**Transition:** What goes wrong without the leash?
+
+## rlhf-hacking: Without the KL: the policy fools the reward model
+
+**Build 1, ask:** Which reply does the reward model prefer?
+
+**Expected:** The shouting one, +2.0: a flaw in the learned reward.
+
+**Build 2, ask:** Why is the KL term a defence?
+
+**Expected:** A reply the reference almost never writes has a large log ratio <span class="pi">π</span>/<span class="pi">π</span><sub>ref</sub>, so piling probability on it costs a lot of KL.
+
+**Transition:** Slide the leash.
+
+## rlhf-beta: Slide the leash: the best policy for each β
+
+**Build 1, ask:** At β = 1, which reply gains most?
+
+**Expected:** “Yes, it is hot. Careful!”: probable under the reference and well rewarded.
+
+**Build 2, ask:** What happens as β → 0? As β → ∞?
+
+**Expected:** β → 0: all mass on the highest reward, the hacked reply. β → ∞: <span class="pi">π</span>* = <span class="pi">π</span><sub>ref</sub>, no change.
+
+**Point here:** Derivation: maximise Σ <span class="pi">π</span> r − β Σ <span class="pi">π</span> log(<span class="pi">π</span>/<span class="pi">π</span><sub>ref</sub>) subject to Σ <span class="pi">π</span> = 1; setting the derivative to zero gives log <span class="pi">π</span> = log <span class="pi">π</span><sub>ref</sub> + r/β − const. The notebook checks it by gradient ascent.
+
+**Notebook demonstration:** Notebook 2.7: the RLHF cell prints <span class="pi">π</span>* for eight values of β and checks the closed form at β = 1 by gradient ascent.
+
+**Transition:** How is that KL computed for real text?
+
+## rlhf-tokens: In practice: the KL is estimated token by token, from samples
+
+**Build 1, ask:** Why not compute the KL exactly?
+
+**Expected:** Vocabulary^length possible replies: astronomically many.
+
+**Build 2, ask:** Which estimator can never be negative?
+
+**Expected:** r − 1 − log r with r = <span class="pi">π</span><sub>ref</sub>/<span class="pi">π</span>: optional slide in the appendix; DeepSeek’s GRPO uses it.
+
+**Transition:** Back to continuous distributions: closed forms.
+
+## densities: From sums to integrals
+
+**Build 1, ask:** What plays the role of the weights now?
+
+**Expected:** The density p(θ), times dθ.
+
+**Build 2, ask:** Can a density be bigger than 1?
+
+**Expected:** Yes; but the KL is still a weighted average of log ratios, and is still never negative.
+
+**Transition:** Closed forms for the distributions we will use.
+
+## bern-pmf: Bernoulli: a coin with P(x = 1) = a
+
+**Build 1, ask:** What is p(0) for Bernoulli(0.8)?
+
+**Expected:** 0.2.
+
+**Build 2, ask:** Write the KL.
+
+**Expected:** Two terms: one for x = 1 and one for x = 0. Next slide.
+
+**Transition:** The answer, step by step.
+
+## bern-kl: KL between two Bernoullis, step by step
+
+**Build 1, ask:** How many terms does the sum have?
+
+**Expected:** Two, one per value of x.
+
+**Build 2, ask:** Which term is negative here, and why?
+
+**Expected:** The x = 0 term: p(0) = 0.2 is smaller than q(0) = 0.5, so its log ratio is negative.
+
+**Build 3, ask:** What is the KL if a = b?
+
+**Expected:** 0: both log ratios are 0.
+
+**Build 4, ask:** Is 0.19 the same as KL(q‖p)?
+
+**Expected:** No: KL(Bernoulli(0.5) ‖ Bernoulli(0.8)) = 0.22.
+
+**Transition:** More than two outcomes.
+
+## cat-pmf: Categorical: K outcomes with probabilities π₁, …, π<sub>K</sub>
+
+**Build 1, ask:** What is π for this year’s grades?
+
+**Expected:** (0.4, 0.1, 0.5).
+
+**Build 2, ask:** Write the KL.
+
+**Expected:** A sum of K terms, πₖ log(πₖ/ρₖ). Next slide.
+
+**Transition:** The answer, step by step.
+
+## cat-kl: KL between two categoricals, step by step
+
+**Build 1, ask:** How many terms for K outcomes?
+
+**Expected:** K.
+
+**Build 2, ask:** Why does K = 2 give the Bernoulli formula?
+
+**Expected:** A Bernoulli is a categorical over {1, 0} with π = (a, 1 − a).
+
+**Build 3, ask:** Which term is largest for the grades?
+
+**Expected:** A: 0.4 log 4 ≈ 0.55.
+
+**Transition:** Continuous: the Gaussian.
+
+## gauss-pdf: The Gaussian: a bell with mean μ and width σ
+
+**Build 1, ask:** What does σ control?
+
+**Expected:** The width: about 68% of the mass lies within σ of μ.
+
+**Build 2, ask:** What is log N(θ; μ, σ²)?
+
+**Expected:** −½ log(2πσ²) − (θ − μ)²/(2σ²).
+
+**Transition:** Step 1: the log ratio.
+
+## gauss-log-ratio: Gaussian KL, step 1: the log ratio
+
+**Build 1, ask:** Why take logs first?
+
+**Expected:** The densities are exponentials; logs turn them into simple squares.
+
+**Build 2, ask:** Where does log(s/σ) come from?
+
+**Expected:** −½ log(2πσ²) + ½ log(2πs²) = log s − log σ.
+
+**Build 3, ask:** Which terms still depend on θ?
+
+**Expected:** The two squared terms.
+
+**Transition:** Step 2: average over q.
+
+## gauss-expectation: Gaussian KL, step 2: average over q
+
+**Build 1, ask:** What is the average of a constant?
+
+**Expected:** The constant itself.
+
+**Build 2, ask:** What is E_q[(θ − μ)²] called?
+
+**Expected:** The variance of q, σ².
+
+**Build 3, ask:** Why does the cross term vanish?
+
+**Expected:** It is 2(μ − m)·E_q[θ − μ], and E_q[θ − μ] = 0.
+
+**Build 4, ask:** When is the KL zero?
 
 **Expected:** Only when μ = m and σ = s.
 
-**Transition:** Use the formula on the PML vote.
+**Transition:** Many dimensions at once.
+
+## diag-pdf: A diagonal Gaussian: one bell per coordinate
+
+**Build 1, ask:** Why are the contours axis-aligned?
+
+**Expected:** No correlation between coordinates: the covariance is diagonal.
+
+**Build 2, ask:** What is the log of a product?
+
+**Expected:** The sum of the logs.
+
+**Transition:** The answer, step by step.
+
+## diag-kl: KL between diagonal Gaussians, step by step
+
+**Build 1, ask:** Why can each term be averaged separately?
+
+**Expected:** Each term depends on θⱼ alone, and q makes the coordinates independent.
+
+**Build 2, ask:** How many one-dimensional KLs for our network?
+
+**Expected:** Seven, one per parameter.
+
+**Build 3, ask:** What does each term reward?
+
+**Expected:** μⱼ near 0 and σⱼ near 1: staying close to the prior.
+
+**Transition:** Is this really what PyTorch computes?
+
+## torch-discrete: The same formulas in PyTorch: Bernoulli and categorical
+
+**Build 1, ask:** Where is a log(a/b) in the Bernoulli code?
+
+**Expected:** t1: p.probs is a, and softplus(−q.logits) − softplus(−p.logits) = log a − log b.
+
+**Build 2, ask:** Why does PyTorch use logits and softplus?
+
+**Expected:** Numerical stability: no log of probabilities that round to 0.
+
+**Point here:** Shown as in PyTorch 2.13, with torch.nn.functional.softplus shortened to softplus and the lines handling probabilities of exactly 0 or 1 left out.
+
+**Transition:** And the Gaussian.
+
+**Source / evidence:** PyTorch source: <a href="https://github.com/pytorch/pytorch/blob/main/torch/distributions/kl.py">torch/distributions/kl.py</a>
+
+## torch-normal: The same formulas in PyTorch: Gaussian and diagonal
+
+**Build 1, ask:** What is var_ratio in our notation?
+
+**Expected:** σ²/s², with p the first argument (our q) and q the second (our p).
+
+**Build 2, ask:** Which line is the diagonal-Gaussian sum?
+
+**Expected:** _sum_rightmost: it adds the one-dimensional KLs over the coordinates.
+
+**Point here:** In PyTorch’s code p and q are just the first and second arguments; with our VI order, its p is our q. A NotImplementedError check is left out.
+
+**Notebook demonstration:** Switch to notebook 2.4 and run the closed-forms cell: it checks all four formulas against kl_divergence and prints PyTorch’s own source for the Normal and Independent cases.
+
+**Transition:** Use the formula: which Gaussian is closer?
+
+**Source / evidence:** PyTorch source: <a href="https://github.com/pytorch/pytorch/blob/main/torch/distributions/kl.py">torch/distributions/kl.py</a>
 
 ## compare-formula: Use the formula: which Gaussian is closer to p?
 
@@ -404,6 +1117,46 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** What if there is no formula at all?
 
+## kl-expectation: KL is an average: an expectation under p
+
+**Build 1, ask:** What do the weights p(x) add up to?
+
+**Expected:** 1: it is a weighted average.
+
+**Build 2, ask:** Which distribution do we draw x from?
+
+**Expected:** p, the first argument.
+
+**Transition:** Two ways to compute an expectation.
+
+## expectation-sampling: Two ways to compute an expectation
+
+**Build 1, ask:** What is the weighted sum for our weather, with f = log₂ p/q?
+
+**Expected:** ½(1) + ¼(0) + ¼(−1) = 0.25 bits.
+
+**Build 2, ask:** When would you need the integral?
+
+**Expected:** When θ is continuous, like a network weight.
+
+**Build 3, ask:** Why does a plain average over samples work?
+
+**Expected:** About half the draws are sunny, a quarter cloudy, a quarter rainy, so the plain average approaches the weighted sum.
+
+**Transition:** Try it with the weather.
+
+## mc-weather: Sample days and watch the average find the KL
+
+**Build 1, ask:** After 10 days, is the estimate close?
+
+**Expected:** Not necessarily: with few days the shares are off. It settles as they approach ½, ¼, ¼. This is a Monte Carlo estimate of KL.
+
+**Point here:** The bits-per-day demo of 2.4 was already a Monte Carlo estimate: the wasted bits per day, averaged over simulated days.
+
+**Notebook demonstration:** Notebook 2.8: the weather-sampling cell draws 10,000 days and prints the running average at 10, 100, 1,000 and 10,000 days.
+
+**Transition:** Back to our Gaussians, with the formula and with samples.
+
 ## kl-sampling: No formula needed: estimate KL by sampling
 
 **Build 1, ask:** Which distribution supplies the draws?
@@ -415,6 +1168,8 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 **Expected:** No: it is random. It is close, and gets closer with more draws.
 
 **Point here:** q₂ = N(1, 3²) against p = N(1, 4²), seed 1000.
+
+**Notebook demonstration:** Switch to notebook 2.5, “The code on the slide, run”: run it, then set S to 100 and to 1,000,000 and rerun. Come back for the live version.
 
 **Transition:** Watch the estimate settle as draws arrive.
 
@@ -438,19 +1193,21 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** Yes: N(1, 4²), which is p itself, has KL 0. We need a way to search.
 
-**Point here:** PAUSE. All six KLs come from the closed-form Gaussian formula.
+**Point here:** PAUSE. All six KLs come from the closed-form Gaussian formula of 2.4.
 
 **Transition:** Search systematically: a grid.
 
-## grid-search: Search a grid of means and widths
+## grid-search: Search a grid of means and widths: hover over it
 
-**Build 1, ask:** Where do you expect the minimum?
+**Build 1, ask:** Hover near the bottom right. Why is it so dark?
 
-**Expected:** At μ = 1 and σ = 4, where q = p.
+**Expected:** Narrow and off-centre: q puts all its mass where p is small, and KL(q‖p) punishes exactly that.
 
 **Build 2, ask:** How many evaluations for fourteen parameters?
 
 **Expected:** 40¹⁴ ≈ 2.7 × 10²², even with only 40 values per parameter.
+
+**Notebook demonstration:** Notebook 3.1: the grid cell prints the six candidates’ KLs and draws the same heatmap with matplotlib.
 
 **Transition:** Instead of evaluating everywhere, walk downhill.
 
@@ -478,9 +1235,11 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** A step could make σ zero or negative, which is not a valid Normal.
 
+**Notebook demonstration:** Switch to notebook 3.2, “The code on the slide, run”. Run it: the printed table shows the loss, μ and σ every 25 steps, and the three panels show the loss falling, μ and σ arriving at 1 and 4, and the learned curve landing on p. Drag the step slider in the next cell, then come back for the animation.
+
 **Transition:** Press play.
 
-## olive: Press play: q slides onto p
+## olive: Press play: the loss falls as q slides onto p
 
 **Build 1, ask:** Predict: does the centre or the width arrive first?
 
@@ -490,33 +1249,91 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** Each parameter has its own gradient. Adam steps both by roughly the learning rate each step.
 
-**Point here:** PAUSE (PML L23 12:13). Adam, learning rate 0.05, analytic KL. Notebook section 3.
+**Point here:** PAUSE (PML L23 12:13). Adam, learning rate 0.05, analytic KL. The faint curves are q at earlier steps.
 
-**Transition:** One dimension is easy. What happens with two correlated unknowns?
+**Transition:** One dimension is easy. What changes with two correlated unknowns?
 
-## two-d: In 2-D, a q that cannot tilt shrinks instead
+## cov-families: In two dimensions, q needs a covariance matrix: three families
 
-**Build 1, ask:** Predict the diagonal q’s widths: 1, more or less?
+**Build 1, ask:** How many numbers describe an isotropic Σ?
 
-**Expected:** Less: about 0.44, which is √(1 − 0.9²).
+**Expected:** One, s², whatever the dimension.
 
-**Build 2, ask:** Why shrink rather than spread?
+**Build 2, ask:** What can a diagonal q not express?
 
-**Expected:** KL(q‖p) heavily penalises q mass where p is tiny, which is off the diagonal ridge.
+**Expected:** Correlation: knowing θ₁ tells it nothing about θ₂.
 
-**Build 3, ask:** What does the full covariance cost?
+**Build 3, ask:** Why parameterise Σ = LLᵀ instead of Σ directly?
 
-**Expected:** More parameters: d(d + 1)/2 for L instead of d. For a million weights that is far too many.
+**Expected:** Any lower-triangular L with a positive diagonal gives a valid covariance; a step on Σ’s entries directly could break that, like a negative σ in 1-D.
 
-**Point here:** PAUSE. Measured fit: both widths 0.4359, KL 0.8304, matching √(1 − ρ²) and −½ log(1 − ρ²).
+**Transition:** Fit all three to the same tilted target.
 
-**Transition:** Now a target with no formula.
+## cov-fit: Fit all three to the same tilted target
+
+**Build 1, ask:** Predict: which q can reach KL = 0?
+
+**Expected:** Only the full one: p is tilted, and only the full family can tilt.
+
+**Build 2, ask:** Watch Σ under each panel. Which entries can each family change?
+
+**Expected:** Isotropic: one number on both diagonal entries. Diagonal: the two diagonal entries. Full: all three, including the off-diagonal one.
+
+**Point here:** Same random start (seed 33), Adam, learning rate 0.05, 600 steps of the closed-form KL. Final KL: isotropic 0.734, diagonal 0.511, full 0.
+
+**Notebook demonstration:** Notebook 3.3: the covariance cell runs all three fits, prints each final Σ and checks it against the formulas on the next slide.
+
+**Transition:** Read off the scores.
+
+## two-d: A q that cannot tilt shrinks instead
+
+**Build 1, ask:** Why are the diagonal widths 0.90 and 0.45, not 1.5 and 0.75?
+
+**Expected:** They are p’s conditional widths, σᵢ√(1 − ρ²) = 1.5 × 0.6 and 0.75 × 0.6: how wide p is along one axis when the other coordinate is held fixed.
+
+**Build 2, ask:** What should we expect of mean-field VI on a real posterior?
+
+**Expected:** Error bars that are too narrow wherever the posterior correlates its parameters.
+
+**Point here:** Under KL(q‖p) the best diagonal q has σᵢ² = 1/(Σₚ⁻¹)ᵢᵢ and the best isotropic q has s² = d / tr(Σₚ⁻¹). The notebook checks both against the fitted values.
+
+**Transition:** Now a target with no formula at all.
+
+## mixture-what: A mixture of Gaussians: first pick a bump, then draw from it
+
+**Build 1, ask:** If bump 1 is picked, where does θ land?
+
+**Expected:** Near −0.2: within about ±0.8, two widths.
+
+**Build 2, ask:** Why multiply each bell by ½?
+
+**Expected:** Each bump makes only half of the draws, so it contributes half of its bell.
+
+**Build 3, ask:** Does p(θ) integrate to 1?
+
+**Expected:** Yes: each bell integrates to 1 and the weights add to 1.
+
+**Point here:** The PML 2023 mixture. z is a latent variable: part of how the data are made, never observed. Lecture 3’s VAE has the same structure, with a continuous z.
+
+**Transition:** Draw from it yourself.
+
+## mixture-sample: Draw from the mixture yourself
+
+**Build 1, ask:** After 1,000 draws, what fraction came from each bump?
+
+**Expected:** About half each, and the stacked histogram follows the teal curve: the weighted sum of the two bells.
+
+**Point here:** Seeded, so the same draws replay. log p(θ) is easy to evaluate: the log of a weighted sum of two Gaussian densities.
+
+**Notebook demonstration:** Notebook 3.4: the sampling cell does the same two steps with Categorical and Normal, 2,000 draws, and colours the histogram by bump.
+
+**Transition:** How far is a Gaussian q from this mixture?
 
 ## mixture-no-formula: PyTorch has no formula for this KL. The definition still works.
 
-**Build 1, ask:** What would kl_divergence need for this pair?
+**Build 1, ask:** How would you compute KL(q‖p) for this p?
 
-**Expected:** A closed-form expression for a Gaussian against a mixture. There isn’t one.
+**Expected:** Sample θ from q and average log q(θ) − log p(θ). log p(θ) of a mixture is easy to evaluate.
 
 **Build 2, ask:** Is the KL undefined, then?
 
@@ -524,7 +1341,7 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Point here:** Mixture: ½·N(−0.2, 0.4²) + ½·N(1, 0.5²), from the PML notebook. The full error text is saved in science.json (PyTorch 2.13.0).
 
-**Transition:** Estimate the average by sampling.
+**Transition:** Estimate the average by sampling, and optimise it.
 
 ## now-optimise: Now optimise it: the code runs, and q does not move
 
@@ -532,39 +1349,45 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** Most expect it to slide onto the mixture. It does not move.
 
-**Build 2, ask:** The code runs. What could be wrong?
+**Build 2, ask:** Is this a bug?
 
-**Expected:** The gradient: it must be missing a piece.
+**Expected:** Not in the usual sense: every line does what it says. Something is missing from the gradient, and 3.5 finds out what.
 
 **Point here:** PAUSE (PML L23 34:49). Plain gradient descent, learning rate 0.05, 5,000 draws per step. With Adam the stuck run wanders aimlessly instead; it still never fits.
 
-**Transition:** Look at the gradient on a case we can solve.
+**Notebook demonstration:** Notebook 3.4, “Optimise it with sample()”: run it; no error, and q ends where it started.
 
-## missing-path: The gradient that would move q never reaches it
+**Transition:** Section 3.5: draw the computation as a graph.
+
+## missing-path: Why q does not move: the gradient stops at a random node
 
 **Build 1, ask:** Which arrow can the gradient not travel along?
 
-**Expected:** The sample arrow from q to u.
+**Expected:** From θ back to μ and σ: sample() returns plain numbers, with no record of how they depend on μ and σ.
 
 **Build 2, ask:** Why isn’t the surviving gradient exactly zero?
 
-**Expected:** log q(u) still contains μ and σ explicitly. That part averages to zero over draws; what remains is noise.
+**Expected:** log q(θ) contains μ and σ explicitly. That part averages to zero over draws; what remains is noise.
 
 **Point here:** Gaussian pair q = N(0, 2²), p = N(1, 4²), 50,000 shared draws. A score-function estimator is another valid fix (optional slide).
 
+**Notebook demonstration:** Notebook 3.5: the first cell shows draw.backward() failing on a sample() draw, then the tiny surviving gradient against the true one.
+
 **Transition:** Give the gradient a path.
 
-## reparam: Move the randomness outside: u = μ + σε
+**Source / evidence:** Graph conventions after <a href="https://lilianweng.github.io/posts/2018-08-12-vae/">Lilian Weng, “From Autoencoder to Beta-VAE”</a>, which follows Kingma’s NIPS 2015 talk
 
-**Build 1, ask:** Is u still distributed as N(μ, σ²)?
+## reparam: The fix: move the randomness into ε, and θ = μ + σε
+
+**Build 1, ask:** Is θ still distributed as N(μ, σ²)?
 
 **Expected:** Yes: shifting and scaling a standard Normal gives N(μ, σ²).
 
-**Build 2, ask:** Compute u and both derivatives.
+**Build 2, ask:** Compute θ and both derivatives.
 
-**Expected:** u = 0 + 2(−0.75) = −1.5; ∂u/∂μ = 1; ∂u/∂σ = ε = −0.75.
+**Expected:** θ = 0 + 2(−0.75) = −1.5; ∂θ/∂μ = 1; ∂θ/∂σ = ε = −0.75.
 
-**Build 3, ask:** Can ∂u/∂σ be negative?
+**Build 3, ask:** Can ∂θ/∂σ be negative?
 
 **Expected:** Yes, whenever ε < 0: widening q pushes this draw further left.
 
@@ -572,9 +1395,11 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** Picture what a fixed ε does.
 
+**Source / evidence:** Graph conventions after <a href="https://lilianweng.github.io/posts/2018-08-12-vae/">Lilian Weng, “From Autoencoder to Beta-VAE”</a>
+
 ## reparam-picture: What a fixed ε does when μ or σ changes
 
-**Build 1, ask:** If μ rises by 1, how far does u move?
+**Build 1, ask:** If μ rises by 1, how far does θ move?
 
 **Expected:** By exactly 1.
 
@@ -582,7 +1407,23 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** By ε = −0.75: to the left, because this ε is negative.
 
+**Transition:** The two graphs side by side.
+
+## reparam-compare: Side by side: where the randomness lives
+
+**Build 1, ask:** Where is the stochastic node in each graph?
+
+**Expected:** Top: θ itself. Bottom: ε, which has no parameters.
+
+**Build 2, ask:** What does the reparameterisation trick change: the distribution of θ, or the graph?
+
+**Expected:** Only the graph. θ is N(μ, σ²) either way.
+
+**Point here:** This is the reparameterisation trick of Kingma and Welling (2014), the step that makes VAEs trainable (Lecture 3).
+
 **Transition:** Change one word in the code.
+
+**Source / evidence:** Graph conventions after <a href="https://lilianweng.github.io/posts/2018-08-12-vae/">Lilian Weng, “From Autoencoder to Beta-VAE”</a>
 
 ## rsample-fit: Change one word: rsample() fits the mixture
 
@@ -592,11 +1433,13 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Build 2, ask:** Why doesn’t the KL reach 0?
 
-**Expected:** No Gaussian equals a two-bump mixture. 0.056 is the best the family can do; the notebook confirms it with a direct optimisation.
+**Expected:** No Gaussian equals a two-bump mixture. 0.056 is the best the family can do; the notebook confirms it with a direct numerical integral.
 
-**Point here:** Same seed, learning rate and draws as the stuck run. Monte Carlo plus reparameterisation: the payoff of Acts 3 and 4.
+**Point here:** Same seed, learning rate and draws as the stuck run. Monte Carlo plus reparameterisation: the payoff of Sections 2.5 and 3.5.
 
-**Transition:** One more question: which direction of KL?
+**Notebook demonstration:** Notebook 3.5, “Change one word”: run it and compare the two fits in the figure.
+
+**Transition:** Section 3.6: which direction of KL?
 
 ## fwdrev: The price: reverse KL picks one bump
 
@@ -622,37 +1465,151 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** log p(θ | 𝒟): it contains log p(𝒟).
 
-**Transition:** Substitute Bayes’ rule and see what survives.
+**Transition:** Step 1: Bayes’ rule, in logs.
 
-## bayes-sub: Substitute Bayes’ rule and see what survives
+**Source / evidence:** A careful written derivation: <a href="https://www.gregorygundersen.com/blog/2021/04/16/variational-inference/">Gregory Gundersen, “The ELBO in Variational Inference”</a>
 
-**Build 1, ask:** Substitute and simplify.
+## elbo-step1: Step 1: Bayes’ rule, in logs
 
-**Expected:** −log p(θ | 𝒟) = −log p(𝒟 | θ) − log p(θ) + log p(𝒟).
+**Build 1, ask:** What is log of a product?
 
-**Build 2, ask:** Why can log p(𝒟) leave the expectation?
+**Expected:** The sum of the logs.
 
-**Expected:** It is a constant: it depends on neither θ nor q.
+**Build 2, ask:** Which term does not depend on θ?
 
-**Build 3, ask:** Which side can we compute?
+**Expected:** log p(𝒟): it was integrated over every θ.
 
-**Expected:** The ELBO: draws from q, the likelihood, the prior and log q.
+**Build 3, ask:** Is log p(𝒟) known?
 
-**Point here:** PAUSE (PML L23 47:15). Students do the substitution on paper before build 2. KL ≥ 0, so the ELBO is a lower bound on log p(𝒟), and maximising it minimises the KL.
+**Expected:** No: it is the intractable integral. But it is a constant, and that is enough.
 
-**Transition:** What does the ELBO look like for our network?
+**Transition:** Step 2: put this into the KL.
 
-## elbo-two-terms: The ELBO for our network: fit the data, stay near the prior
+## elbo-step2: Step 2: substitute into the KL
 
-**Build 1, ask:** Which term pulls q towards a narrow, well-fitting θ?
+**Build 1, ask:** What does E_q mean, in words?
+
+**Expected:** Draw θ from q, evaluate, average: the Monte Carlo average of 2.5.
+
+**Build 2, ask:** What is inside the brackets now?
+
+**Expected:** Step 1’s expression for log p(θ | 𝒟).
+
+**Build 3, ask:** Which signs changed?
+
+**Expected:** All three: the likelihood and prior become minus, the evidence becomes plus.
+
+**Transition:** Step 3: the constant leaves the average.
+
+## elbo-step3: Step 3: a constant comes out of an average
+
+**Build 1, ask:** Why does adding c to every value add c to the average?
+
+**Expected:** The weights of an average add up to 1, so c gets weight 1 in total.
+
+**Build 2, ask:** Check the table.
+
+**Expected:** (12 + 14 + 16)/3 = 14 = 4 + 10.
+
+**Build 3, ask:** Could log p(θ) also leave the average?
+
+**Expected:** No: it changes with θ. Only terms with no θ can leave.
+
+**Transition:** Step 4: rearrange.
+
+## elbo-step4: Step 4: rearrange, and name the part we can compute
+
+**Build 1, ask:** Check the signs inside the bracket.
+
+**Expected:** −[a + b − c] = −a − b + c: matches the line above.
+
+**Build 2, ask:** Move the average across. What sign does it take?
+
+**Expected:** Plus: it was subtracted on the right, so it is added on the left.
+
+**Build 3, ask:** Which terms in the ELBO can we compute?
+
+**Expected:** All of them, for any θ drawn from q: log p(𝒟 | θ) by a forward pass, log p(θ) and log q(θ) by formula.
+
+**Point here:** Notation: ELBO(q) = E_q[log p(𝒟, θ) − log q(θ)], since p(𝒟 | θ) p(θ) = p(𝒟, θ), the joint.
+
+**Transition:** What is each of the three pieces?
+
+## elbo-pieces: One fixed number = what we can compute + what we cannot
+
+**Build 1, ask:** Which piece does not change when we change q?
+
+**Expected:** log p(𝒟): it involves the model and the data, not q.
+
+**Build 2, ask:** What do we know about the KL even without computing it?
+
+**Expected:** KL ≥ 0. Next slide: why.
+
+**Transition:** Why is KL never negative?
+
+## kl-nonneg: Why KL is never negative
+
+**Build 1, ask:** Where do log t and t − 1 touch?
+
+**Expected:** At t = 1, where both are 0.
+
+**Build 2, ask:** Can a single log ratio log(p/q) be positive?
+
+**Expected:** Yes, wherever p > q. Single terms can have either sign; only the q-weighted average is guaranteed ≥ 0.
+
+**Build 3, ask:** So can the KL be negative?
+
+**Expected:** No. And it is 0 only when p/q = 1 everywhere, that is, q = p.
+
+**Point here:** The same fact via Jensen’s inequality is an optional slide.
+
+**Transition:** So the ELBO is a lower bound.
+
+## elbo-bound: The ELBO is a lower bound on the log evidence
+
+**Build 1, ask:** Below what does the ELBO sit?
+
+**Expected:** The log evidence log p(𝒟), for every q: that is the “lower bound”.
+
+**Build 2, ask:** What is the gap between them?
+
+**Expected:** The KL from q to the posterior: here 0.62 nats.
+
+**Build 3, ask:** Is the ELBO always negative? Is log p(𝒟)?
+
+**Expected:** No, and no. For discrete data log p(𝒟) ≤ 0; for continuous data it can be positive. Only the order is guaranteed.
+
+**Point here:** A finite-sample ELBO estimate can cross log p(𝒟) on an unlucky draw (optional slide); the exact expectation cannot.
+
+**Transition:** What happens to the gap as q improves?
+
+## elbo-max: Raise the ELBO, and the KL falls by exactly as much
+
+**Build 1, ask:** By how much did the KL fall from Beta(10, 10) to Beta(30, 20)?
+
+**Expected:** From 0.62 to 0.05: by 0.57 nats, exactly the ELBO’s rise.
+
+**Build 2, ask:** Why does maximising one minimise the other?
+
+**Expected:** Their sum is the fixed number log p(𝒟).
+
+**Transition:** What does the ELBO ask of q?
+
+## elbo-two-terms: The ELBO in two terms: fit the data, stay near the prior
+
+**Build 1, ask:** Which rule splits the average?
+
+**Expected:** Linearity: E[a + b] = E[a] + E[b].
+
+**Build 2, ask:** Why is the second average minus a KL?
+
+**Expected:** E_q[log p − log q] = −E_q[log q − log p] = −KL(q ‖ prior).
+
+**Build 3, ask:** Which term pulls q towards a narrow, well-fitting θ?
 
 **Expected:** The data term. The KL to the N(0, 1) prior pulls the other way: wide, near zero.
 
-**Build 2, ask:** Which term needs sampling, and why?
-
-**Expected:** The data term: the network is nonlinear in θ, so there is no formula for its average.
-
-**Transition:** Check the identity on a model where p(𝒟) is known.
+**Transition:** Check the identity where p(𝒟) is known.
 
 ## elbo-slider: Check the identity where p(𝒟) is known: a coin
 
@@ -661,6 +1618,8 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 **Expected:** Beta(22, 16), the exact posterior: ELBO = log p(𝒟) = −21.40 and KL = 0.
 
 **Point here:** Conjugate coin: posterior Beta(22, 16), log p(𝒟) = log B(22, 16) − log B(5, 3). The ELBO comes from analytic Beta moments, the KL from its own formula.
+
+**Notebook demonstration:** Notebook 4.2: the coin cells compute log p(𝒟) exactly, then fit a Beta q using only the joint, and check ELBO + KL = log p(𝒟) for every candidate.
 
 **Transition:** Part 5: implement the ELBO for the network.
 
@@ -674,7 +1633,7 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** kl = kl_divergence(q, prior).sum(): seven closed-form terms.
 
-**Notebook demonstration:** Notebook section 8 runs this loop and records the frames for the next slide.
+**Notebook demonstration:** Switch to notebook 5.1 and run the VI cell (about 20 seconds): it prints the five restarts’ ELBOs and the split ELBO = E_q[log p(𝒟 | θ)] − KL(q ‖ prior). Then come back for the animation.
 
 **Transition:** Press play.
 
@@ -704,17 +1663,41 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Point here:** Fitted widths: w₁ 0.894, w₂ 0.113, b₁ 0.908, b₂ 0.071, v₁ 0.035, v₂ 0.028, c 0.022.
 
-**Transition:** How good is q’s predictive?
+**Transition:** Seven separate bells: what kind of q is that?
 
-## bnn-vs-ref: VI against the reference: the right curve, too-narrow bands
+## vi-families: Mean-field VI, and full-covariance VI
+
+**Build 1, ask:** Why is it called mean-field?
+
+**Expected:** From physics: each factor of q responds only to the average (“mean field”) of the others. In practice: independent factors, a diagonal covariance.
+
+**Build 2, ask:** What does full covariance cost for a million weights?
+
+**Expected:** 5 × 10¹¹ numbers in L: far too many to store or optimise.
+
+**Build 3, ask:** Why start the full fit from the mean-field answer?
+
+**Expected:** Full covariance contains mean-field as a special case, so from there it can only improve; from a random start, noisy gradients on 35 numbers can stop at a worse point.
+
+**Point here:** ELBO: mean-field −7.181, full covariance −6.321, log p(𝒟) ≈ −1.429. Full fit: Adam, learning rate 0.01, 4,000 steps, 64 draws per step.
+
+**Notebook demonstration:** Notebook 5.1, “Mean-field against full covariance”: run it (a few seconds); it prints both ELBOs and the largest correlation, and draws both predictive bands against the reference.
+
+**Transition:** Do the error bars improve?
+
+## bnn-vs-ref: Against the reference: the right curve, bands still too narrow
 
 **Build 1, ask:** Where do VI and the reference disagree most?
 
 **Expected:** Beyond the data at both ends, where VI is overconfident.
 
-**Build 2, ask:** Is a gap of 5.8 nats large?
+**Build 2, ask:** Why doesn’t full covariance close the gap?
 
-**Expected:** Yes: q misses much of the posterior. Up to log 8 ≈ 2.1 nats of it is because the posterior has eight mirror-image copies (swap the two units, flip their signs) and q sits on one.
+**Expected:** A Gaussian has one peak. The posterior has eight mirror-image copies of each mode, so up to log 8 ≈ 2.1 nats of the gap is that alone; the remaining shape is not Gaussian either.
+
+**Point here:** Even tilted, one Gaussian stays about 4.9 nats below log p(𝒟). Predictive sd at x = 0: mean-field 0.130, full 0.144, reference 0.162.
+
+**Notebook demonstration:** Notebook 5.1: the last figure shows both VI bands against the reference.
 
 **Transition:** Collect the tools.
 
@@ -738,11 +1721,173 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** Close the main route. Optional depth follows.
 
+## grades: By hand: two runs of this course, two grade distributions (optional)
+
+**Build 1, ask:** How would you score the difference between the two years?
+
+**Expected:** Students propose differences of percentages. Note that C, unchanged, should contribute nothing.
+
+**Build 2, ask:** A fourfold rise and a fourfold fall: should they count the same?
+
+**Expected:** By ratio, yes: both are a factor of 4. That suggests comparing ratios.
+
+**Point here:** p is this year (the distribution we weight by); q is the reference, last year.
+
+**Transition:** Compare grade by grade.
+
+**Source / evidence:** KL intuition after <a href="https://www.youtube.com/watch?v=q0AkK8aYbLY">ritvikmath, “The KL Divergence: Data Science Basics”</a> (YouTube)
+
+## grades-ratios: Compare grade by grade: ratios (optional)
+
+**Build 1, ask:** On the ratio scale, which change looks bigger?
+
+**Expected:** The rise: +3 against −0.75, although both are fourfold.
+
+**Build 2, ask:** What should identical years score?
+
+**Expected:** Zero. Raw ratios give 1.
+
+**Transition:** Find a function of the ratio that behaves.
+
+**Source / evidence:** KL intuition after <a href="https://www.youtube.com/watch?v=q0AkK8aYbLY">ritvikmath, “The KL Divergence: Data Science Basics”</a> (YouTube)
+
+## grades-f: What should a ratio count for? Find the function (optional)
+
+**Build 1, ask:** Why should f(1) be 0?
+
+**Expected:** No change in a grade should add any difference.
+
+**Build 2, ask:** Which test does r − 1/r fail?
+
+**Expected:** Adding up: f(2) + f(2) = 3, but f(4) = 3.75.
+
+**Build 3, ask:** Is the logarithm the only choice?
+
+**Expected:** Up to its base, yes: a smooth f with f(a·b) = f(a) + f(b) must be a logarithm. The base sets the unit.
+
+**Transition:** Now combine the three log ratios.
+
+**Source / evidence:** KL intuition after <a href="https://www.youtube.com/watch?v=q0AkK8aYbLY">ritvikmath, “The KL Divergence: Data Science Basics”</a> (YouTube)
+
+## grades-kl: Weight each grade by this year’s share: that is KL (optional)
+
+**Build 1, ask:** Why is the plain average 0 here?
+
+**Expected:** The rise in A and the fall in B are both fourfold, so their logs cancel, and C did not change.
+
+**Build 2, ask:** Why weight by this year’s shares?
+
+**Expected:** We are describing this year’s students: grades that many of them got should count more.
+
+**Build 3, ask:** What would identical years give?
+
+**Expected:** 0: every ratio is 1 and every log is 0.
+
+**Notebook demonstration:** Notebook 2.1: the grades cell computes the ratios, the logs and the weighted sum, and checks it against torch.distributions.kl_divergence.
+
+**Transition:** What unit is 0.42 in?
+
+**Source / evidence:** KL intuition after <a href="https://www.youtube.com/watch?v=q0AkK8aYbLY">ritvikmath, “The KL Divergence: Data Science Basics”</a> (YouTube)
+
+## nats-bits: The unit: nats, or bits (optional)
+
+**Build 1, ask:** Why does changing the base only rescale the KL?
+
+**Expected:** log₂ x = ln x / ln 2: every term scales by the same factor 1/ln 2 ≈ 1.44.
+
+**Build 2, ask:** What would a KL of 0 nats mean?
+
+**Expected:** e⁰ = 1: grades are equally probable under both years, so the two distributions match.
+
+**Point here:** e^KL is the geometric mean of p(x)/q(x) over x drawn from p.
+
+**Transition:** Does it matter which year is the reference?
+
+## asymmetry: Swap the reference year: a different number (optional)
+
+**Build 1, ask:** Which direction do you expect to be larger?
+
+**Expected:** From this year’s view the A’s are a big change that many students have, so 0.64 is larger.
+
+**Build 2, ask:** Is KL a distance in the everyday sense?
+
+**Expected:** No: a distance is the same both ways. KL is a divergence.
+
+**Point here:** The first grades example happens to give 0.42 in both directions, because it is a mirror image (A and B swap shares). That is why this slide uses a second pair.
+
+**Transition:** Why does the reference matter?
+
+## asymmetry-why: Why the reference matters (optional)
+
+**Build 1, ask:** Which grade dominates each direction?
+
+**Expected:** A from this year’s view; B from last year’s.
+
+**Build 2, ask:** So which order will VI use, and why might it matter?
+
+**Expected:** VI will put q first, KL(q ‖ p). Part 3 shows what that order does to the fit.
+
+**Transition:** Sample grades to estimate it.
+
+## mc-grades: Sample grades and watch the average find the KL (optional)
+
+**Build 1, ask:** After 10 draws, is the estimate close?
+
+**Expected:** Not necessarily: with few draws the shares are off, so the estimate wobbles. It settles as the counts approach 40/10/50.
+
+**Point here:** The exact value is the weighted sum (analytic); the running average is the Monte Carlo estimate. Draws are seeded, so the sequence replays identically.
+
+**Notebook demonstration:** Notebook 2.5: the grades-sampling cell draws 10,000 grades and prints the running average at 10, 100, 1,000 and 10,000 draws.
+
+**Transition:** Back to the optional slides.
+
+## kl-estimators: A KL estimator that is never negative (optional)
+
+**Build 1, ask:** Why does adding r − 1 not change the average?
+
+**Expected:** E_q[r] = ∫ q · p/q = ∫ p = 1, so E_q[r − 1] = 0: it only removes noise.
+
+**Build 2, ask:** When can the better estimator be worse?
+
+**Expected:** When p has heavier tails than q: r = p/q can then have infinite variance. Here p is narrower than q, so r stays bounded.
+
+**Point here:** q = N(0, 2²) against p = N(0.5, 1.5²), exact KL 0.157; 400 repeats per size. From Jia-Bin Huang’s video and John Schulman’s note “Approximating KL divergence”; GRPO uses this estimator for its KL penalty.
+
+**Source / evidence:** After <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang</a> and <a href="http://joschu.net/blog/kl-approx.html">John Schulman, “Approximating KL divergence”</a>
+
+## evidence-mc: Sampling from the prior: a few lucky draws carry everything (optional)
+
+**Build 1, ask:** Why are the small-S estimates so low?
+
+**Expected:** Prior draws almost never land where the likelihood is high, like θ<sub>B</sub>; the rare good draws dominate the average.
+
+**Build 2, ask:** What happens with a million parameters?
+
+**Expected:** The chance that a prior draw lands near the posterior shrinks exponentially; no feasible S is enough.
+
+**Point here:** Effective number of draws, out of 10⁷: 77, 93, 134, 108. The largest single draw carries 8%, 4%, 4%, 4% of the total.
+
+**Transition:** Why do we want the posterior at all?
+
+## coin-evidence: A KL value is how fast evidence piles up (optional)
+
+**Build 1, ask:** Predict: after 30 tosses, how many times more likely are the data under 0.8 than under 0.5?
+
+**Expected:** Most guess far too low. It is about 325×.
+
+**Build 2, ask:** Why does a small KL eventually matter so much?
+
+**Expected:** Log evidence adds up toss by toss, so the ratio grows exponentially with n.
+
+**Point here:** PAUSE. A simulation of 20,000 sequences gives a mean log ratio after 30 tosses of 5.780, against 30 × KL = 5.782.
+
+**Transition:** Sums become integrals for continuous unknowns.
+
 ## exit-transfer: A sensor has an unknown constant bias (optional)
 
 **Build 1, ask:** Identify the unknown, the observations and one possible q family.
 
-**Expected:** u is the bias; 𝒟 contains the readings; a Normal q is a sensible choice.
+**Expected:** θ is the bias; 𝒟 contains the readings; a Normal q is a sensible choice.
 
 **Build 2, ask:** Which available functions form the joint?
 
@@ -814,7 +1959,7 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** Integrating q · p/q gives the integral of p, which is 1 on a common support.
 
-**Point here:** The tangent-line argument in the main route is the same fact without naming Jensen.
+**Point here:** The tangent-line argument of Section 4.1 is the same fact without naming Jensen.
 
 ## optional-negative-estimate: Five draws can give a negative KL estimate (optional)
 
@@ -856,9 +2001,9 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Build 1, ask:** Which term was missing from the naive sample() gradient?
 
-**Expected:** The term accounting for the change in the probability of drawing u.
+**Expected:** The term accounting for the change in the probability of drawing θ.
 
-**Build 2, ask:** Does this identity require u = μ + σε?
+**Build 2, ask:** Does this identity require θ = μ + σε?
 
 **Expected:** No. It works for discrete q too, usually with higher variance.
 
@@ -882,11 +2027,11 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** For this fixed model and data, the posterior KL decreased.
 
-**Build 2, ask:** Does a stable loss establish q = p(u | 𝒟)?
+**Build 2, ask:** Does a stable loss establish q = p(θ | 𝒟)?
 
 **Expected:** No. The family or optimisation can leave a positive gap.
 
-**Point here:** Recall the diagonal q in 2-D: its best possible KL was 0.83.
+**Point here:** Recall the diagonal q in Section 3.3: its best possible KL was 0.51.
 
 ## optional-coin-check: Check the fixed total with three Beta candidates (optional)
 

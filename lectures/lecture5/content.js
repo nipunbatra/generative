@@ -1,5 +1,5 @@
 import {m,eq,at,only,cols,code,image,table,flow,palette as C} from '../shared/author.js';
-const F=await fetch(new URL('./data/fixtures.json',import.meta.url)).then(r=>r.json());
+const F=await fetch(new URL('./data/fixtures.json',import.meta.url),{cache:'no-cache'}).then(r=>r.json());
 const S=F.scalar,R=F.reverse,f=(v,n=4)=>Number(v).toFixed(n),tex=String.raw;
 const p=x=>`<p class="lead">${x}</p>`,cap=x=>`<p class="caption">${x}</p>`,pic=(n,a,c='')=>image(`figures/${n}`,a,c),pair=(a,b)=>cols(a,b);
 const four=(ns,labels)=>`<div class="image-pair" style="grid-template-columns:repeat(${ns.length},minmax(0,1fr))">${ns.map((n,i)=>pic(n,labels[i],labels[i]).replace('<img ','<img style="max-height:260px" ')).join('')}</div>`;

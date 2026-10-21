@@ -68,7 +68,7 @@ const WATCH_LABELS=['0','1','2','3','4','5','6','7'];
 // ---------------------------------------------------------------- sections, notebook links and the slide builder
 export const meta={
  id:'lecture2',number:2,title:'From fitting a distribution to the VAE',
- subtitle:'Why generate, fit and sample, PCA and Gaussians on MNIST, autoencoders, and the variational autoencoder',minutes:140,
+ subtitle:'Why generate, fit and sample, PCA and Gaussians on MNIST, autoencoders, and the variational autoencoder',minutes:145,
  notebook:'lecture2-generative-models.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
@@ -77,7 +77,7 @@ export const meta={
   {id:'pca',title:'Part 3 · Images: PCA and Gaussians',minutes:20},
   {id:'ae',title:'Part 4 · Autoencoders',minutes:20},
   {id:'gen',title:'Part 5 · Can an autoencoder generate?',minutes:18},
-  {id:'vae',title:'Part 6 · The variational autoencoder',minutes:42},
+  {id:'vae',title:'Part 6 · The variational autoencoder',minutes:46},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
 };
@@ -987,9 +987,9 @@ S('vae-arch','vae','Road 1: the network, with a cloud in the middle',{builds:3,
  transition:'The encoder on our 3.'});
 S('road1-penalty','vae','Road 1: keep the clouds near N(0, I) with a KL penalty',{builds:3,
  body:act(6,stack(`<div class="eq-sm">${eq(R`L=\underbrace{\lVert x-f_\theta(z)\rVert^2}_{\text{rebuild the image}}\;+\;\underbrace{\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,I)\big)}_{\text{keep the cloud near }\N(0,I)}`)}</div>`,
-  at(2,`<div class="eq-sm">${eq(R`\KL=\tfrac12\sum_{k}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)`)}</div>`),at(2,l1('diag-kl','2.7','KL between diagonal Gaussians')),
+  at(2,`<div class="eq-sm">${eq(R`\KL=\tfrac12\sum_{k}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)`)}</div>`),at(2,l1('diag-kl','2.8','KL between diagonal Gaussians')),
   at(3,takeaway('Without the penalty, the encoder could shrink the clouds to points and spread them far apart: an autoencoder again. The KL stops both.')))),
- lines:['Loss = squared reconstruction error + a penalty: the KL divergence from each image’s cloud to N(0, I).','The KL between two Gaussians has a formula (Lecture 1, section 2.7): it is zero only when μ = 0 and σ = 1.','The penalty pulls every cloud towards N(0, I) (wish 1) and stops it from shrinking to a point (wish 2).'],
+ lines:['Loss = squared reconstruction error + a penalty: the KL divergence from each image’s cloud to N(0, I).','The KL between two Gaussians has a formula (Lecture 1, section 2.8): it is zero only when μ = 0 and σ = 1.','The penalty pulls every cloud towards N(0, I) (wish 1) and stops it from shrinking to a point (wish 2).'],
  ask:['What is the KL for a cloud with μ = 0, σ = 1?','What does the KL do to a code with μ = 5?','What does the −log σ² term do as σ → 0?'],
  expected:['Zero: the cloud is exactly N(0, I).','About 12.5 per number: a strong pull back towards the origin.','It grows without limit: tiny clouds are penalised.'],
  point:'Road 1 looks like a hand-made penalty, like ridge regression (squared error + λ‖w‖²). Road 2 shows that this exact sum comes out of maximum likelihood, with a weight fixed by σ.',
@@ -1121,7 +1121,7 @@ chap('6.4');
 S('vae-loss','vae','The loss for one image is the negative ELBO',{builds:3,
  body:act(6,stack(eq(R`L(\phi,\theta;x)=\underbrace{\E_{q_\phi(z\mid x)}\Big[\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2\Big]}_{\text{reconstruction}}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,\N(0,I)\big)}_{\text{stay near the prior}}`),
   at(2,eq(R`\text{reconstruction}\approx\tfrac{1}{2\sigma^2}\lVert x-f_\theta(\mu+\sigma\odot\epsilon)\rVert^2,\qquad \epsilon\sim\N(0,I)\ \text{(one draw)}`)),
-  at(3,eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(Lecture 1, section 2.7)}`)),at(3,`<div>${l1('kl-sampling','2.8','Monte Carlo estimates')}${l1('reparam','3.5','reparameterisation')}${l1('diag-kl','2.7','diagonal-Gaussian KL')}</div>`))),
+  at(3,eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(Lecture 1, section 2.8)}`)),at(3,`<div>${l1('kl-sampling','2.9','Monte Carlo estimates')}${l1('reparam','3.5','reparameterisation')}${l1('diag-kl','2.8','diagonal-Gaussian KL')}</div>`))),
  lines:['Minus the ELBO, up to the constant 541.4 from section 6.1: an expected scaled squared error, plus a KL from q to the prior.','The expectation is estimated with one reparameterised draw per image per step.','The KL between two diagonal Gaussians has a closed form: no sampling needed.'],
  ask:['Which term pulls the codes towards N(0, I)?','Why is one draw enough?','What does the KL do to a code with μ = 5?'],
  expected:['The KL term.','Over many steps and images the noise averages out; the estimate is unbiased.','Penalises it by about 12.5: strong pressure back towards the origin.'],

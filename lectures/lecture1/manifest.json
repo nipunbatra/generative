@@ -3,18 +3,23 @@
   "number": 1,
   "title": "KL and variational inference",
   "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
-  "minutes": 80,
+  "minutes": 140,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
+      "id": "map",
+      "title": "Lecture map",
+      "minutes": 1
+    },
+    {
       "id": "bayes",
       "title": "Part 1 · Bayes’ rule for a neural network",
-      "minutes": 21
+      "minutes": 22
     },
     {
       "id": "kl",
       "title": "Part 2 · How far apart are two distributions?",
-      "minutes": 20
+      "minutes": 74
     },
     {
       "id": "fit",
@@ -24,7 +29,7 @@
     {
       "id": "elbo",
       "title": "Part 4 · Back to Bayes: the ELBO",
-      "minutes": 9
+      "minutes": 13
     },
     {
       "id": "impl",
@@ -37,9 +42,16 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 53,
-  "optionalSlides": 15,
+  "coreSlides": 117,
+  "optionalSlides": 26,
   "slides": [
+    {
+      "id": "contents",
+      "title": "Lecture 1 at a glance: five parts, twenty-four sections",
+      "section": "map",
+      "builds": 1,
+      "optional": false
+    },
     {
       "id": "bayes-rule",
       "title": "Bayes’ rule: update what you believe, using data",
@@ -90,21 +102,28 @@
       "optional": false
     },
     {
-      "id": "theta-a",
-      "title": "Meet θ<sub>A</sub>: one good setting of the seven numbers",
+      "id": "map-train",
+      "title": "Finding a good θ: train the network",
       "section": "bayes",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "likelihood-by-hand",
-      "title": "The likelihood of θ<sub>A</sub>, one data point at a time",
+      "id": "theta-a",
+      "title": "Meet θ<sub>A</sub>: the network with its trained numbers",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "likelihood-formula",
+      "title": "The likelihood of θ<sub>A</sub>: formula, then value",
       "section": "bayes",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "prior-by-hand",
+      "id": "prior-formula",
       "title": "The prior of θ<sub>A</sub>, then the evidence",
       "section": "bayes",
       "builds": 3,
@@ -118,15 +137,15 @@
       "optional": false
     },
     {
-      "id": "evidence-integral",
-      "title": "The evidence needs every θ, and has no formula",
+      "id": "evidence-area",
+      "title": "The evidence is an area: add up thin rectangles",
       "section": "bayes",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "evidence-mc",
-      "title": "Sampling from the prior: a few lucky draws carry everything",
+      "id": "intractable",
+      "title": "Intractable: why the rectangles do not scale",
       "section": "bayes",
       "builds": 2,
       "optional": false
@@ -139,8 +158,15 @@
       "optional": false
     },
     {
+      "id": "core-problem",
+      "title": "The core problem of probabilistic machine learning",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "three-ways",
-      "title": "Three ways to approximate a posterior",
+      "title": "Three ways to approximate the posterior; we take the third",
       "section": "bayes",
       "builds": 3,
       "optional": false
@@ -153,73 +179,388 @@
       "optional": false
     },
     {
-      "id": "distance-ideas",
-      "title": "How far apart are two distributions?",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "fruit",
-      "title": "Two surveys: how different are they?",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "ratios-logs",
-      "title": "Ratios say “how many times”; logs make up and down cancel",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "weight",
-      "title": "Weight by how common each fruit is now: that is KL",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "bits",
-      "title": "KL is the extra message length of using the wrong code",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "used-before",
-      "title": "You have minimised KL before: in every cross-entropy loss",
+      "id": "pretend-posterior",
+      "title": "For now, pretend we know the posterior",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "coin-evidence",
-      "title": "A KL value is how fast evidence piles up",
+      "id": "surprise-forecast",
+      "title": "How surprised would you be? A forecast of 90% sun",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "surprise-candidates",
+      "title": "What should surprise be? Three requirements",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "surprise-five",
+      "title": "Five days: probabilities multiply, surprises add",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "surprise-curve",
+      "title": "Surprise in bits: I(x) = log₂ 1/p(x)",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "entropy-average",
+      "title": "Entropy: how surprised are you, on average?",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "entropy-days",
+      "title": "Why an expectation? It is the average over many days",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "entropy-explorer",
+      "title": "From certain to fully uncertain: between 0 and 1 bit",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "entropy-three",
+      "title": "Three kinds of weather: 1.5 bits",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "entropy-questions",
+      "title": "Entropy counts yes/no questions",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "channel",
+      "title": "Way 2: send the weather, in bits",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "uniform-code",
+      "title": "A code: a string of bits for each kind of day",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "prefix-code",
+      "title": "Prefix codes: the bits split up without separators",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "huffman",
+      "title": "Huffman’s recipe: merge the two rarest, repeat",
+      "section": "kl",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "efficient-code",
+      "title": "Each codeword is exactly as long as its surprise",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "wrong-belief",
+      "title": "A code built on a wrong belief",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "cross-entropy",
+      "title": "Cross-entropy: the average cost when the code expects q",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "bits-days",
+      "title": "Watch it happen: our weather through both codes",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "kl-extra-bits",
+      "title": "KL divergence: the extra bits we waste",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "kl-properties",
+      "title": "Never negative, and zero only for the right code",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "kl-asymmetry",
+      "title": "Which one is the truth? KL is not symmetric",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "classifier",
+      "title": "A classifier outputs a distribution",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ce-surprise",
+      "title": "The loss is the model’s surprise at the true label",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ce-is-kl",
+      "title": "With a one-hot label, cross-entropy is exactly KL",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "loss-curve",
+      "title": "The loss curve is the surprise curve",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "soft-labels",
+      "title": "Soft labels: cross-entropy = entropy + KL",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "mle-data",
+      "title": "The data: twenty days of weather",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "mle-likelihood",
+      "title": "How probable are these twenty days under q?",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mle-surprise",
+      "title": "Per day: the data’s average surprise under q",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mle-group",
+      "title": "Why: group the days by weather",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mle-split",
+      "title": "The data’s surprise = entropy of the data + KL",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "mle-fit",
+      "title": "Find the q that makes the data least surprising",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "mle-kl",
+      "title": "Maximum likelihood minimises KL(data ‖ model)",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "kl-everywhere",
+      "title": "KL at work: the same quantity in many losses",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "distill-why",
+      "title": "Knowledge distillation: a big teacher, a small student",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "distill-match",
+      "title": "Make the student’s distribution match the teacher’s",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "distill-loss",
+      "title": "The distillation loss, term by term",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "distill-soft",
+      "title": "What soft labels teach: a cat looks a bit like a dog",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "distill-demo",
+      "title": "Press play: a tiny student learns a big teacher",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "rlhf-setup",
+      "title": "RLHF: reward a chatbot, but keep it close to where it started",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "rlhf-hacking",
+      "title": "Without the KL: the policy fools the reward model",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "rlhf-beta",
+      "title": "Slide the leash: the best policy for each β",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "rlhf-tokens",
+      "title": "In practice: the KL is estimated token by token, from samples",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "densities",
-      "title": "For densities, sums become integrals, and KL ≥ 0",
+      "title": "From sums to integrals",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "kl-formulas",
-      "title": "Closed forms for simple distributions",
+      "id": "bern-pmf",
+      "title": "Bernoulli: a coin with P(x = 1) = a",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "gaussian-derivation",
-      "title": "Deriving the Gaussian formula",
+      "id": "bern-kl",
+      "title": "KL between two Bernoullis, step by step",
+      "section": "kl",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "cat-pmf",
+      "title": "Categorical: K outcomes with probabilities π₁, …, π<sub>K</sub>",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "cat-kl",
+      "title": "KL between two categoricals, step by step",
       "section": "kl",
       "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "gauss-pdf",
+      "title": "The Gaussian: a bell with mean μ and width σ",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "gauss-log-ratio",
+      "title": "Gaussian KL, step 1: the log ratio",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "gauss-expectation",
+      "title": "Gaussian KL, step 2: average over q",
+      "section": "kl",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "diag-pdf",
+      "title": "A diagonal Gaussian: one bell per coordinate",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "diag-kl",
+      "title": "KL between diagonal Gaussians, step by step",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "torch-discrete",
+      "title": "The same formulas in PyTorch: Bernoulli and categorical",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "torch-normal",
+      "title": "The same formulas in PyTorch: Gaussian and diagonal",
+      "section": "kl",
+      "builds": 2,
       "optional": false
     },
     {
@@ -232,6 +573,27 @@
     {
       "id": "kl-area",
       "title": "KL is an area you can watch",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "kl-expectation",
+      "title": "KL is an average: an expectation under p",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "expectation-sampling",
+      "title": "Two ways to compute an expectation",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mc-weather",
+      "title": "Sample days and watch the average find the KL",
       "section": "kl",
       "builds": 1,
       "optional": false
@@ -259,7 +621,7 @@
     },
     {
       "id": "grid-search",
-      "title": "Search a grid of means and widths",
+      "title": "Search a grid of means and widths: hover over it",
       "section": "fit",
       "builds": 2,
       "optional": false
@@ -280,16 +642,44 @@
     },
     {
       "id": "olive",
-      "title": "Press play: q slides onto p",
+      "title": "Press play: the loss falls as q slides onto p",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "cov-families",
+      "title": "In two dimensions, q needs a covariance matrix: three families",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "cov-fit",
+      "title": "Fit all three to the same tilted target",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
       "id": "two-d",
-      "title": "In 2-D, a q that cannot tilt shrinks instead",
+      "title": "A q that cannot tilt shrinks instead",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "mixture-what",
+      "title": "A mixture of Gaussians: first pick a bump, then draw from it",
       "section": "fit",
       "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mixture-sample",
+      "title": "Draw from the mixture yourself",
+      "section": "fit",
+      "builds": 1,
       "optional": false
     },
     {
@@ -308,14 +698,14 @@
     },
     {
       "id": "missing-path",
-      "title": "The gradient that would move q never reaches it",
+      "title": "Why q does not move: the gradient stops at a random node",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
       "id": "reparam",
-      "title": "Move the randomness outside: u = μ + σε",
+      "title": "The fix: move the randomness into ε, and θ = μ + σε",
       "section": "fit",
       "builds": 3,
       "optional": false
@@ -323,6 +713,13 @@
     {
       "id": "reparam-picture",
       "title": "What a fixed ε does when μ or σ changes",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "reparam-compare",
+      "title": "Side by side: where the randomness lives",
       "section": "fit",
       "builds": 2,
       "optional": false
@@ -349,17 +746,66 @@
       "optional": false
     },
     {
-      "id": "bayes-sub",
-      "title": "Substitute Bayes’ rule and see what survives",
+      "id": "elbo-step1",
+      "title": "Step 1: Bayes’ rule, in logs",
       "section": "elbo",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "elbo-two-terms",
-      "title": "The ELBO for our network: fit the data, stay near the prior",
+      "id": "elbo-step2",
+      "title": "Step 2: substitute into the KL",
+      "section": "elbo",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "elbo-step3",
+      "title": "Step 3: a constant comes out of an average",
+      "section": "elbo",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "elbo-step4",
+      "title": "Step 4: rearrange, and name the part we can compute",
+      "section": "elbo",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "elbo-pieces",
+      "title": "One fixed number = what we can compute + what we cannot",
       "section": "elbo",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "kl-nonneg",
+      "title": "Why KL is never negative",
+      "section": "elbo",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "elbo-bound",
+      "title": "The ELBO is a lower bound on the log evidence",
+      "section": "elbo",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "elbo-max",
+      "title": "Raise the ELBO, and the KL falls by exactly as much",
+      "section": "elbo",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "elbo-two-terms",
+      "title": "The ELBO in two terms: fit the data, stay near the prior",
+      "section": "elbo",
+      "builds": 3,
       "optional": false
     },
     {
@@ -391,8 +837,15 @@
       "optional": false
     },
     {
+      "id": "vi-families",
+      "title": "Mean-field VI, and full-covariance VI",
+      "section": "impl",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "bnn-vs-ref",
-      "title": "VI against the reference: the right curve, too-narrow bands",
+      "title": "Against the reference: the right curve, bands still too narrow",
       "section": "impl",
       "builds": 2,
       "optional": false
@@ -410,6 +863,83 @@
       "section": "impl",
       "builds": 2,
       "optional": false
+    },
+    {
+      "id": "grades",
+      "title": "By hand: two runs of this course, two grade distributions",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "grades-ratios",
+      "title": "Compare grade by grade: ratios",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "grades-f",
+      "title": "What should a ratio count for? Find the function",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "grades-kl",
+      "title": "Weight each grade by this year’s share: that is KL",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "nats-bits",
+      "title": "The unit: nats, or bits",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "asymmetry",
+      "title": "Swap the reference year: a different number",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "asymmetry-why",
+      "title": "Why the reference matters",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "mc-grades",
+      "title": "Sample grades and watch the average find the KL",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "kl-estimators",
+      "title": "A KL estimator that is never negative",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "evidence-mc",
+      "title": "Sampling from the prior: a few lucky draws carry everything",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "coin-evidence",
+      "title": "A KL value is how fast evidence piles up",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
     },
     {
       "id": "exit-transfer",
@@ -517,5 +1047,5 @@
       "optional": true
     }
   ],
-  "totalStates": 147
+  "totalStates": 320
 }

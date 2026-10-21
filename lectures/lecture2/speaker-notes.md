@@ -1,6 +1,6 @@
 # From fitting a distribution to the VAE: speaker notes
 
-Planned main route: 140 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 145 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -12,7 +12,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 | Part 3 · Images: PCA and Gaussians | 20 |
 | Part 4 · Autoencoders | 20 |
 | Part 5 · Can an autoencoder generate? | 18 |
-| Part 6 · The variational autoencoder | 42 |
+| Part 6 · The variational autoencoder | 46 |
 
 ## contents: Lecture 2 at a glance: six parts, twenty-seven sections
 

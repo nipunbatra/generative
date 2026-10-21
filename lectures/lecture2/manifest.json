@@ -3,7 +3,7 @@
   "number": 2,
   "title": "From fitting a distribution to the VAE",
   "subtitle": "Why generate, fit and sample, PCA and Gaussians on MNIST, autoencoders, and the variational autoencoder",
-  "minutes": 140,
+  "minutes": 145,
   "notebook": "lecture2-generative-models.ipynb",
   "sections": [
     {
@@ -39,7 +39,7 @@
     {
       "id": "vae",
       "title": "Part 6 · The variational autoencoder",
-      "minutes": 42
+      "minutes": 46
     },
     {
       "id": "optional",
