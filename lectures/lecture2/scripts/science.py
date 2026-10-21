@@ -136,28 +136,29 @@ def faithful():
     # one Gaussian's density at a few waiting times, for the "score one point" slide
     F['gauss']['at'] = {str(v): rnd(math.exp(normal_logpdf(v, mu, sd)), 5) for v in (54, 66, 71, 80)}
 
-    # a two-bump mixture, fitted by gradient descent on the average negative log-likelihood (as in Lecture 1)
-    torch.manual_seed(0)
-    u = torch.tensor((wait - mu) / sd)
-    logit = torch.zeros(2, requires_grad=True)
-    m = torch.tensor([-0.25, 0.25], dtype=F64, requires_grad=True)
-    logs = torch.tensor([0.0, 0.0], dtype=F64, requires_grad=True)
-    opt = torch.optim.Adam([logit, m, logs], lr=0.03)
-    frames, keep = [], set(list(range(0, 40)) + list(range(40, 160, 3)) + list(range(160, 600, 10)) + [599])
+    # a two-bump mixture, fitted by gradient descent on minus the average log-likelihood (as in Lecture 1).
+    # The same code as the slide: waits in minutes, an explicit bell-curve formula, one line per term.
+    x = torch.tensor(wait)
+    bell = lambda x_, m_, s_: torch.exp(-((x_ - m_) / s_) ** 2 / 2) / (s_ * math.sqrt(2 * math.pi))
+    mu_ = torch.tensor([65., 75.], dtype=F64, requires_grad=True)       # centres (minutes)
+    log_s = torch.tensor([2.3, 2.3], dtype=F64, requires_grad=True)     # widths: sigma = exp(log_s), starts at 10
+    w_ = torch.zeros(2, dtype=F64, requires_grad=True)                  # shares: pi = softmax(w), starts at (1/2, 1/2)
+    opt = torch.optim.Adam([mu_, log_s, w_], lr=0.1)
+    frames, keep = [], set(list(range(0, 60)) + list(range(60, 300, 4)) + [299])
 
     def state():
-        pi = torch.softmax(logit.detach().double(), 0).numpy()
-        return pi, (m.detach().numpy() * sd + mu), (np.exp(logs.detach().numpy()) * sd)
+        return torch.softmax(w_.detach(), 0).numpy(), mu_.detach().numpy(), log_s.detach().exp().numpy()
 
-    for step in range(600):
-        lp = torch.log_softmax(logit.double(), 0)[:, None] + torch.distributions.Normal(m[:, None], logs.exp()[:, None]).log_prob(u[None])
-        nll = -torch.logsumexp(lp, 0).mean()
+    for step in range(300):
+        pi_, sigma_ = torch.softmax(w_, 0), torch.exp(log_s)
+        p_short = pi_[0] * bell(x, mu_[0], sigma_[0])
+        p_long = pi_[1] * bell(x, mu_[1], sigma_[1])
+        loss = -torch.log(p_short + p_long).mean()
         if step in keep:
             pi, mm, ss = state()
-            ll = -float(nll.detach()) - math.log(sd)   # average log-likelihood in minutes
-            frames.append([step, rnd(pi[1], 4), rnd(mm[0], 3), rnd(mm[1], 3), rnd(ss[0], 3), rnd(ss[1], 3), rnd(ll, 4)])
+            frames.append([step, rnd(pi[1], 4), rnd(mm[0], 3), rnd(mm[1], 3), rnd(ss[0], 3), rnd(ss[1], 3), rnd(-float(loss.detach()), 4)])
         opt.zero_grad()
-        nll.backward()
+        loss.backward()
         opt.step()
     pi, mm, ss = state()
     order = np.argsort(mm)
@@ -253,6 +254,15 @@ def mnist_part(data):
     # independent pixels: one Gaussian per pixel
     m = Xtr.mean(0)
     s = Xtr.std(0, correction=0)
+    # one pixel, worked: position (14, 14) in all 60,000 training digits
+    c = 14 * 28 + 14
+    vals = Xtr[:, c]
+    M['pixel_c'] = {'row': 14, 'col': 14, 'mean': rnd(m[c], 4), 'sd': rnd(s[c], 4),
+                    'hist': torch.histc(vals.float(), bins=20, min=0, max=1).int().tolist(),
+                    'frac_zero': rnd((vals == 0).double().mean(), 3), 'frac_inked': rnd((vals > 0.5).double().mean(), 3),
+                    'first6': rnd(vals[:6], 2), 'labels6': ytr[:6].tolist()}
+    M['pixel_corner'] = {'mean': rnd(m[0], 4), 'sd': rnd(s[0], 4)}
+    M['pixel_spread_zero'] = int((s == 0).sum())
     put('pixel_mean', m[None])
     put('pixel_std', (s / s.max())[None])
     put('indep_samples', (m + s * torch.randn(8, 784, generator=gr, dtype=F64)).clamp(0, 1))
@@ -298,6 +308,23 @@ def mnist_part(data):
     put('pca_recon_watch_2', (m + ((Xte[WATCH] - m) @ W[:, :2]) @ W[:, :2].T).clamp(0, 1))
     put('pca_recon_watch_16', (m + ((Xte[WATCH] - m) @ W[:, :16]) @ W[:, :16].T).clamp(0, 1))
     M['pca']['display_codes2'] = rnd((D - m) @ W[:, :2], 3)
+    t3 = Xtr[ytr == 3]
+    m3 = t3.mean(0)
+    e3, v3 = torch.linalg.eigh((t3 - m3).T @ (t3 - m3) / len(t3))
+    V3 = v3[:, torch.argsort(e3, descending=True)[:2]]
+    te3 = torch.nonzero(yte == 3).squeeze(1)
+    z3s = (Xte[te3] - m3) @ V3
+    lo3, hi3 = torch.quantile(z3s, 0.04, dim=0), torch.quantile(z3s, 0.96, dim=0)
+    pick, pos = [], []
+    for r in range(5):
+        for c in range(7):
+            target = torch.stack([lo3[0] + (hi3[0] - lo3[0]) * c / 6, hi3[1] - (hi3[1] - lo3[1]) * r / 4])
+            j = int(((z3s - target) ** 2).sum(1).argmin())
+            if j not in pick:
+                pick.append(j); pos.append([c, r])
+    put('threes_map', Xte[te3[pick]])
+    M['threes_map'] = {'pos': pos, 'n_threes_train': int(len(t3)),
+                       'var2': rnd((e3.sort(descending=True).values[:2].sum() / e3.sum()), 3)}
     M['pca']['basis'] = f32(W[:, :100].T.contiguous())   # 100 x 784, float32 so the live slider matches these numbers
     M['pca']['mean'] = f32(m)
     M['pca']['z3_100'] = rnd(z3[:100], 4)
@@ -313,6 +340,19 @@ def mnist_part(data):
             xs = (m + zs @ W[:, :d].T).clamp(0, 1)
             key = f'd{d}k{K}'
             put('gen_' + key, xs)
+            if (d, K) == (2, 1):
+                # one sample drawn by hand: z = mean + L eps, then x = m + z1 w1 + z2 w2
+                eps = torch.tensor([0.8, -0.5], dtype=F64)
+                L = torch.linalg.cholesky(covs[0])
+                z = mus[0] + L @ eps
+                M['worked_gen'] = {'eps': rnd(eps, 2), 'z': rnd(z, 3), 'mean_z': rnd(mus[0], 3), 'sd_z': rnd(torch.sqrt(torch.diagonal(covs[0])), 3),
+                                   'corr_z': rnd(covs[0][0, 1] / torch.sqrt(covs[0][0, 0] * covs[0][1, 1]), 3)}
+                put('worked_gen', (m + z @ W[:, :2].T).clamp(0, 1)[None])
+                put('worked_terms', torch.stack([z[0] * W[:, 0], z[1] * W[:, 1]]), signed=True)
+                M['codes2_train'] = rnd(((Xtr[:3000] - m) @ W[:, :2]), 2)
+                M['gauss2'] = {'mean': rnd(mus[0], 3), 'cov': rnd(covs[0], 3)}
+            if (d, K) == (2, 10):
+                M['mog2'] = {'w': rnd(w, 3), 'means': rnd(mus, 3), 'covs': rnd(covs, 3)}
             held = float(mog_logpdf((Xte - m) @ W[:, :d], w, mus, covs).mean())
             gens[key] = {'d': d, 'K': K, 'train_ll': rnd(ll), 'test_ll': rnd(held), 'iters': its,
                          'params': int(K - 1 + K * d + K * d * (d + 1) // 2),
@@ -378,6 +418,11 @@ def networks(data, m, W):
         labels.append(step)
     put('ae2_train_frames', imgs)
     A['ae2_frames_steps'] = labels
+    A['ae2_frames_sse'] = [rnd(h2['step_test_sse'][str(st)], 2) for st in labels]
+    A['ae2_frames_digit_sse'] = [h2['step_digit_sse'][str(st)] for st in labels]
+    dense = sorted(h2['step_test_sse'], key=int)
+    A['ae2_step_curve'] = {'step': [int(k) for k in dense], 'test_sse': [rnd(h2['step_test_sse'][k], 2) for k in dense]}
+    A['ae2_init_pixel_mse'] = rnd(h2['test_sse_init'] / 784, 4)
     first = np.array(h2['snapshots']['0'])
     A['init_pixel_range'] = [rnd(first.min(), 3), rnd(first.max(), 3)]
     A['ae2_curve'] = {'epoch': h2['epoch'], 'train_sse': rnd(h2['train_sse'], 3), 'test_sse': rnd(h2['test_sse'], 3)}
@@ -396,7 +441,9 @@ def networks(data, m, W):
     sweep = {}
     for z in (2, 4, 8, 16, 32, 64, 128):
         net, h = load(f'ae{z}')
-        sweep[str(z)] = {'train_sse': rnd(h['train_sse'][-1], 3), 'test_sse': rnd(h['test_sse'][-1], 3),
+        with torch.no_grad():
+            tr_sse = float(torch.cat([((dec(net, enc(net, Xtr[i:i + 10000])[0]) - Xtr[i:i + 10000]) ** 2).sum(1) for i in range(0, len(Xtr), 10000)]).mean())
+        sweep[str(z)] = {'train_sse': rnd(tr_sse, 3), 'test_sse': rnd(h['test_sse'][-1], 3),
                          'curve': rnd(h['test_sse'], 3), 'train_curve': rnd(h['train_sse'], 3),
                          'params': int(sum(p.numel() for p in net.parameters())),
                          'pca_test_sse': S['mnist']['pca']['test_sse'][str(z)]}
@@ -420,6 +467,9 @@ def networks(data, m, W):
     # ---- 2-number codes of the display set
     c2 = enc(net2, D)[0]
     A['ae2_codes'] = rnd(c2, 3)
+    Dl = torch.as_tensor(S['mnist']['display_labels'])
+    zeros, ones = torch.nonzero(Dl == 0).squeeze(1), torch.nonzero(Dl == 1).squeeze(1)
+    A['spread_example'] = {'zero_a': int(zeros[0]), 'zero_b': int(zeros[1]), 'one': int(ones[0])}
     lo, hi = torch.quantile(c2, 0.01, dim=0), torch.quantile(c2, 0.99, dim=0)
     A['ae2_box'] = rnd(torch.stack([lo, hi]), 3)
     # ---- denoising
@@ -600,7 +650,11 @@ def vae_part(data, m, W):
                 'final_mu': rnd(mqd, 4), 'final_sd': rnd(sqd, 4)}
     # samples from the prior, through the decoder
     g = torch.Generator().manual_seed(5)
-    put('vae2_prior_samples', dec(net, torch.randn(16, 2, generator=g, dtype=F64)))
+    zp = torch.randn(16, 2, generator=g, dtype=F64)
+    V['prior_z'] = rnd(zp[:4], 3)
+    put('vae2_prior_samples', dec(net, zp))
+    gn = torch.Generator().manual_seed(55)
+    put('vae2_noisy_sample', (dec(net, zp[:1]) + SIGMA * torch.randn(1, 784, generator=gn, dtype=F64)).clamp(0, 1))
     net16, h16 = load('vae16')
     V['vae16'] = {'test_sse': rnd(h16['test_sse'][-1], 3), 'test_kl': rnd(h16['test_kl'][-1], 3)}
     g = torch.Generator().manual_seed(5)

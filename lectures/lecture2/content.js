@@ -1,5 +1,5 @@
 import {m,eq,at,only,cols,code,table,palette} from '../shared/author.js';
-import {init,mount as mountWidgets,panel,label,svg,fig,widget,legend,num,comma,lin,digits,digit,digitSrc,rawDigit,imgs,waitPanel,scatterSVG,classLegend,posteriorSVG,normalPdf,covEllipse,CLASS,BUMP,MUTED,TINT,LINE,AX} from './widgets.js';
+import {init,mount as mountWidgets,panel,label,svg,fig,widget,legend,num,comma,lin,digits,digit,digitSrc,rawDigit,imgs,waitPanel,scatterSVG,classLegend,posteriorSVG,normalPdf,covEllipse,squareW,CLASS,BUMP,MUTED,TINT,LINE,AX} from './widgets.js';
 
 const get=f=>fetch(new URL(f,import.meta.url),{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(`${f}: ${r.status}`);return r.json();});
 const [d,DG,NETS,NW,WAVE]=await Promise.all([get('./data/science.json'),get('./data/digits.json'),get('./data/nets.json'),get('./assets/examples/next-word.json'),get('./assets/examples/tts-wave.json')]);
@@ -25,7 +25,7 @@ const CSS=`
 .pca-code span{font-weight:400;font-size:17px}
 .pca-read{display:flex;flex-direction:column;gap:14px;font-size:18px;color:${MUTED};max-width:220px}.pca-read b{display:block;font-size:30px;color:${palette.ink}}
 .mog-live{display:flex;flex-direction:column;gap:12px}.mog-read{font-size:19px;color:${MUTED}}
-.hover-card[hidden]{display:none!important}.eq-sm .display{font-size:26px}.code-xs .code{font-size:18px;line-height:1.38;padding:10px 16px}
+.hover-card[hidden]{display:none!important}.eq-sm .display{font-size:26px}.takeaway{font-size:22px;line-height:1.38;border-left:4px solid #0F766E;background:#0F766E0D;padding:9px 16px;border-radius:6px}.takeaway b{color:#0F766E}.l1-link{display:inline-block;font-size:16px;font-weight:650;color:#8B2CDE;border:1px solid #8B2CDE66;background:#8B2CDE0D;border-radius:999px;padding:3px 12px;text-decoration:none;margin:2px 6px 2px 0}.code-xs .code{font-size:18px;line-height:1.38;padding:10px 16px}
 @media(max-width:760px){.reading .dgrid,.reading .digit-rows>div,.reading .photo-row,.reading .pix-table,.reading .mog-live{overflow-x:auto;max-width:100%}.reading .cards{grid-template-columns:1fr!important}.reading .pca-live,.reading .dflex{flex-wrap:wrap}.reading .dflex>*{min-width:0;max-width:100%}.reading .digit-rows{grid-template-columns:1fr}.reading .pix-table{display:block}.reading .photo-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}}.tsm table{font-size:21px}.tsm th,.tsm td{padding:7px 12px}
 .hover-card{position:absolute;right:40px;top:150px;display:flex;flex-direction:column;gap:8px;font-size:20px;background:#fff;border:1px solid ${LINE};padding:12px;border-radius:10px;box-shadow:0 8px 30px #14171F14}
 .cards{display:grid;gap:18px}.card{border:1.5px solid ${LINE};border-radius:14px;padding:14px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -56,6 +56,11 @@ const grid=(n,...a)=>`<div class="image-pair" style="grid-template-columns:repea
 const card=(title,body,color=palette.ink,src='')=>`<div class="card" style="border-color:${color}55"><h4 style="color:${color}">${title}</h4><p>${body}</p>${src?`<span class="src">${src}</span>`:''}</div>`;
 const photo=(src,caption='',extra='')=>`<figure><img class="photo" src="${src}" alt="${caption.replace(/<[^>]+>/g,'')}" ${extra}>${caption?`<figcaption>${caption}</figcaption>`:''}</figure>`;
 const dimg=(key,i,x,y,s,extra='')=>`<image href="${digitSrc(key,i)}" x="${x}" y="${y}" width="${s}" height="${s}" style="image-rendering:pixelated" ${extra}/><rect x="${x}" y="${y}" width="${s}" height="${s}" fill="none" stroke="${LINE}"/>`;
+/** A subscript inside SVG text, e.g. sub('g','φ'). */
+const sub=(base,s_)=>`${base}<tspan baseline-shift="sub" font-size="70%">${s_}</tspan>`;
+const takeaway=s=>`<div class="takeaway"><b>Takeaway.</b> ${s}</div>`;
+/** A link back to the Lecture 1 slide where an idea was taught. */
+const l1=(id,sec,text)=>`<a class="l1-link" href="../lecture1/#${id}/1" target="_blank" rel="noopener">↗ Lecture 1, ${sec}: ${text}</a>`;
 const rows=(...r)=>`<div class="digit-rows">${r.map(([lab,html])=>`<div class="row-label">${lab}</div><div>${html}</div>`).join('')}</div>`;
 const F=d.faithful,M=d.mnist,A=d.ae,G=d.gen,V=d.vae,SW=A.sweep,BETA=V.beta;
 const WATCH_LABELS=['0','1','2','3','4','5','6','7'];
@@ -63,27 +68,27 @@ const WATCH_LABELS=['0','1','2','3','4','5','6','7'];
 // ---------------------------------------------------------------- sections, notebook links and the slide builder
 export const meta={
  id:'lecture2',number:2,title:'From fitting a distribution to the VAE',
- subtitle:'Why generate, fit and sample, PCA and Gaussians on MNIST, autoencoders, and the variational autoencoder',minutes:150,
+ subtitle:'Why generate, fit and sample, PCA and Gaussians on MNIST, autoencoders, and the variational autoencoder',minutes:140,
  notebook:'lecture2-generative-models.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
   {id:'why',title:'Part 1 · Why generate?',minutes:16},
   {id:'fit',title:'Part 2 · Fit a distribution, then sample',minutes:24},
-  {id:'pca',title:'Part 3 · Images: PCA and Gaussians',minutes:24},
-  {id:'ae',title:'Part 4 · Autoencoders',minutes:22},
+  {id:'pca',title:'Part 3 · Images: PCA and Gaussians',minutes:20},
+  {id:'ae',title:'Part 4 · Autoencoders',minutes:20},
   {id:'gen',title:'Part 5 · Can an autoencoder generate?',minutes:18},
-  {id:'vae',title:'Part 6 · The variational autoencoder',minutes:45},
+  {id:'vae',title:'Part 6 · The variational autoencoder',minutes:42},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
 };
 export const slides=[];
 const CHAPTERS=[
  ['1.1','Things that do not exist'],['1.2','Text, pictures and sound'],['1.3','Beyond pictures'],['1.4','What they all share'],
- ['2.1','The data: Old Faithful'],['2.2','One Gaussian: fit, score, sample'],['2.3','Two bumps: a hidden choice'],['2.4','Fit the mixture, then sample it'],['2.5','How many bumps?'],['2.6','Two numbers per eruption'],
- ['3.1','An image is 784 numbers'],['3.2','Gaussians on raw pixels'],['3.3','PCA: a few numbers per image'],['3.4','Generate from PCA numbers'],
- ['4.1','From PCA to an autoencoder'],['4.2','Train one'],['4.3','How many numbers in the code?'],['4.4','What codes are good for'],
- ['5.1','Decode a random code'],['5.2','Where the codes are'],['5.3','Fit a density to the codes'],
- ['6.1','The generative story'],['6.2','Which code made this 3?'],['6.3','Variational inference for one image'],['6.4','An encoder does it for every image'],['6.5','The loss, term by term'],['6.6','What the VAE learned'],['6.7','The KL weight β'],['6.8','Wrap-up'],
+ ['2.1','The data: Old Faithful'],['2.2','One Gaussian: fit, score, sample'],['2.3','Two bumps: a hidden choice'],['2.4','Fit the mixture, then sample it'],['2.5','How many bumps?'],
+ ['3.1','An image is 784 numbers'],['3.2','A bell for every pixel'],['3.3','A few numbers per digit'],['3.4','Generate: sample a code, decode it'],
+ ['4.1','From PCA to an autoencoder'],['4.2','Train one'],['4.3','How many numbers in the code?'],['4.4','Where the codes land'],
+ ['5.1','Decode a random code'],['5.2','Where the codes are'],['5.3','What we want instead'],
+ ['6.1','Two roads to the VAE'],['6.2','Road 1: from the autoencoder'],['6.3','Road 2: from a generative model'],['6.4','The loss, term by term'],['6.5','What the VAE learned'],['6.6','The KL weight β'],['6.7','Wrap-up'],
 ];
 const PARTS=[['1','Why generate?'],['2','Fit a distribution, then sample'],['3','Images: PCA and Gaussians'],['4','Autoencoders'],['5','Can an autoencoder generate?'],['6','The variational autoencoder']];
 const COLAB='https://colab.research.google.com/github/nipunbatra/generative/blob/main/lectures/lecture2/lecture2-generative-models.ipynb';
@@ -158,9 +163,9 @@ function pca2d(stage){
  if(stage>=4)s+=`<g ${P.clip}>${z.map(v=>`<circle cx="${P.x(v*w[0]).toFixed(1)}" cy="${P.y(v*w[1]).toFixed(1)}" r="4" fill="${palette.noise}" fill-opacity=".7"/>`).join('')}</g>`;
  // right: the one number per eruption
  if(stage>=3){const Q=panel({ox:610,W:490,H:150,L:20,R:14,T:40,B:46,xMin:-3,xMax:3,yMax:1,ticksX:[-2,-1,0,1,2],yAxis:false,fs:17,xLabel:'z = w₁ · x'});
-  s+=Q.axes+label(630,26,'one number per eruption',{fill:palette.noise,size:20,weight:600})+z.map(v=>`<line x1="${Q.x(v).toFixed(1)}" y1="${Q.y(0)}" x2="${Q.x(v).toFixed(1)}" y2="${Q.y(0)-22}" stroke="${palette.noise}" stroke-opacity=".5" stroke-width="2"/>`).join('');}
+  s+=Q.axes+label(630,26,'encode: one number per eruption',{fill:palette.noise,size:20,weight:600})+z.map(v=>`<line x1="${Q.x(v).toFixed(1)}" y1="${Q.y(0)}" x2="${Q.x(v).toFixed(1)}" y2="${Q.y(0)-22}" stroke="${palette.noise}" stroke-opacity=".5" stroke-width="2"/>`).join('');}
  if(stage>=2)s+=label(630,210,`share of the spread along w₁: ${f(100*(1+rho)/2,0)}%`,{fill:palette.ink,size:21})+label(630,242,`the other direction keeps ${f(100*(1-rho)/2,0)}%`,{size:20});
- if(stage>=4)s+=label(630,300,'rebuild: x̂ = z · w₁ (orange)',{fill:palette.noise,size:21,weight:600})+label(630,332,'two numbers per eruption became one',{size:20});
+ if(stage>=4)s+=label(630,300,'decode: x̂ = z · w₁ (orange)',{fill:palette.noise,size:21,weight:600})+label(630,332,'two numbers per eruption became one',{size:20});
  return fig(W,H,s,'PCA in two dimensions: the direction of most spread, each point projected to one number, and rebuilt on the line.');
 }
 /** A small line chart with direct labels. series: [{x, y, color, label, dashed}] */
@@ -365,23 +370,42 @@ S('mixture-score','fit','To score a wait, add over both kinds',{builds:3,
  point:'These are the fitted values from the next section; showing the score first motivates fitting.',
  transition:'How were the five numbers found? The same loop as Lecture 1.',source:FAITHFUL_SRC});
 chap('2.4');
-S('mix-code','fit','Fit it by gradient descent, as Lecture 1 fitted q',{builds:2,
- body:act(2,cols(`<div class="code-sm">${code(`# x: the 272 waits, standardised
-logits = torch.zeros(2, requires_grad=True)
-mu = torch.tensor([-.25, .25], requires_grad=True)
-log_sd = torch.zeros(2, requires_grad=True)
-opt = Adam([logits, mu, log_sd], lr=0.03)
-for step in range(600):
-    log_pi = torch.log_softmax(logits, 0)
-    comp = Normal(mu, log_sd.exp()).log_prob(x[:, None])
-    loss = -torch.logsumexp(log_pi + comp, 1).mean()
+S('mix-loss','fit','What we minimise: minus the average log-likelihood',{builds:3,
+ body:act(2,`<div class="eq-sm">`+stack(small('one wait'),eq(R`p(x_i)=\pi_1\,\N(x_i;\,\mu_1,\sigma_1^2)+\pi_2\,\N(x_i;\,\mu_2,\sigma_2^2)`),
+  at(2,small('all 272 waits: the score, higher is better')),at(2,eq(R`\text{score}=\frac{1}{272}\sum_{i=1}^{272}\log p(x_i)`)),
+  at(3,small('flip the sign: the loss, lower is better')),at(3,eq(R`\text{loss}=-\frac{1}{272}\sum_{i=1}^{272}\log p(x_i)`)))+`</div>`),
+ lines:['Start from the last slide: the probability of one wait adds the two kinds of eruption.','Score the whole dataset: the average log-probability of the 272 waits. A better mixture gives a higher score.','Flip the sign to get something to minimise: the loss. Now we only need the loop.'],
+ ask:['Which numbers does p(xᵢ) depend on?','Why average the logs rather than multiply the probabilities?','Why the minus sign?'],
+ expected:['The shares π₁, π₂, the centres μ₁, μ₂ and the widths σ₁, σ₂.','A product of 272 small numbers underflows; the log turns it into a sum, and the average does not depend on how many waits we have.','Optimisers minimise by convention; maximising the score = minimising its negative.'],
+ transition:'What exactly does the loop change?',source:FAITHFUL_SRC});
+S('mix-params','fit','The numbers to learn, each kept valid',{builds:3,
+ body:act(2,`<div class="tsm">${table(['','must be','we learn','and use','start'],[
+  ['centres μ₁, μ₂','any number','<code>mu</code>','μ = <code>mu</code>','65 and 75 min'],
+  [at(2,'widths σ₁, σ₂'),at(2,'positive'),at(2,'<code>log_s</code>'),at(2,'σ = exp(<code>log_s</code>)'),at(2,'exp(2.3) ≈ 10 min')],
+  [at(3,'shares π₁, π₂'),at(3,'positive, add to 1'),at(3,'<code>w</code>'),at(3,'π = softmax(<code>w</code>)'),at(3,'softmax(0, 0) = (½, ½)')]])}</div>`,
+  at(3,eq(R`\text{softmax}(w)_k=\frac{e^{w_k}}{e^{w_1}+e^{w_2}}`))),
+ lines:['The centres can be any number, so the loop changes them directly. Start them near the middle: 65 and 75 minutes.','A width must stay positive. Learn its log instead: whatever log_s becomes, σ = exp(log_s) is positive.','The two shares must be positive and add to 1. Learn any two numbers w and pass them through softmax.'],
+ ask:['What could go wrong if the loop changed σ directly?','Why is exp(log_s) always positive?','What does softmax give for w = (0, 0)? For w = (0, 1)?'],
+ expected:['One large step could make σ negative, and a negative width is meaningless.','exp of any real number is positive.','(½, ½). For (0, 1): (1/(1 + e), e/(1 + e)) ≈ (0.27, 0.73).'],
+ point:'Lecture 1 used the same trick for σ (section 3.2).',
+ transition:'Now the loop: one line per piece of the formula.',source:FAITHFUL_SRC});
+S('mix-code','fit','The loop: one line for each piece of the formula',{builds:2,
+ body:act(2,`<div class="code-sm">${code(`def bell(x, m, s):                    # N(x; m, s²), the formula from 2.2
+    return torch.exp(-((x - m) / s)**2 / 2) / (s * math.sqrt(2 * math.pi))
+
+opt = torch.optim.Adam([mu, log_s, w], lr=0.1)
+for step in range(300):
+    pi, sigma = torch.softmax(w, 0), torch.exp(log_s)
+    p_short = pi[0] * bell(x, mu[0], sigma[0])     # π₁ N(x; μ₁, σ₁²)
+    p_long  = pi[1] * bell(x, mu[1], sigma[1])     # π₂ N(x; μ₂, σ₂²)
+    loss = -torch.log(p_short + p_long).mean()     # −(1/272) Σ log p(x)
     opt.zero_grad(); loss.backward(); opt.step()`)}</div>`,
-  stack(at(2,mini('<code>log_softmax</code>: π₁, π₂ stay positive and add to 1.')),at(2,mini('<code>log_sd.exp()</code>: σ stays positive.')),at(2,mini('<code>logsumexp</code>: log of the sum over kinds, computed safely.'))),'1.9fr 1fr')),
- lines:['Same loop as Lecture 1: parameters, a loss (the negative average log-likelihood), Adam.','Three details keep the parameters valid: softmax for π, exp for σ, and logsumexp for the log of a sum.'],
- ask:['What is the loss?','Why not optimise σ directly?'],
- expected:['Minus the average of log p(x_i) over the 272 waits.','A gradient step could make σ negative; optimising log σ keeps σ = exp(log σ) positive.'],
- point:'Waits are standardised before fitting (as in the notebook); values shown are converted back to minutes. EM is a faster classic algorithm for mixtures; the notebook uses it in Part 3.',
- transition:'Watch it run.',nb:'sec-2-4'});
+  at(2,p('<code>x</code> holds all 272 waits, so <code>p_short</code> and <code>p_long</code> are 272 numbers each, one per wait.'))),
+ lines:['Read it against the loss: p_short is the short kind’s term, p_long the long kind’s, add them, take the log, average, flip the sign.','x is a tensor of all 272 waits, so each line works on every wait at once. backward() finds how the loss changes with mu, log_s and w; step() nudges them.'],
+ ask:['Which line is the formula for p(xᵢ)?','How many numbers does the optimiser change?'],
+ expected:['p_short + p_long: the two terms of the sum.','Six: two in mu, two in log_s, two in w (only five are free, because the shares add to 1).'],
+ point:'For many dimensions, compute logs of the terms and combine them with torch.logsumexp: the same value without underflow. The notebook’s EM fit (section 2.5) is the classic faster algorithm.',
+ transition:'Watch it run.',nb:'sec-2-4',source:FAITHFUL_SRC});
 S('mix-fit','fit','Press play: the bumps separate onto the two clumps',{builds:2,
  body:act(2,widget('faith-fit','A two-bump mixture fitted by gradient descent.')),
  lines:['Both bumps start wide and near the middle.',`They pull apart onto the clumps; the score rises from ${f(F.mix.frames[0][6],2)} to ${f(F.mix.avg_ll,2)}.`],
@@ -413,14 +437,6 @@ S('how-many','fit','More bumps always fit the training waits better; new waits d
  lines:['Fit K = 1 to 6 bumps on 200 waits. The training score only goes up, or stays level.','On the 72 held-out waits the score peaks at two bumps. Extra bumps fit noise in the training waits.'],
  ask:['Why can the training score never get worse with more bumps?','How would you choose K for a new dataset?'],
  expected:['A model with K + 1 bumps can copy the K-bump fit (give the extra bump zero weight).','Hold out data, or use a score that penalises extra parameters.'],
- transition:'Two numbers per eruption.',source:FAITHFUL_SRC});
-chap('2.6');
-S('two-d','fit','Two numbers per eruption: Gaussians need a covariance',{builds:3,
- body:act(2,cols(`<div class="state-slot"><div data-only="1">${fig(600,420,faith2d({gauss:true}).s,'One 2-D Gaussian over the eruptions.')}</div><div data-only="2">${fig(600,420,faith2d({mix:true}).s,'A mixture of two 2-D Gaussians.')}</div><div data-only="3">${fig(600,420,faith2d({mix:true,samples:F.samples2.mix}).s,'272 samples from the 2-D mixture.')}</div></div>`,
-  stack(p(`One 2-D Gaussian: a mean and a 2 × 2 covariance. Correlation ${f(F.g2.corr,2)}.`),at(2,p(`Two 2-D bumps, each with its own covariance: average log-likelihood ${f(F.m2.avg_ll,2)} against ${f(F.g2.avg_ll,2)}.`)),at(3,p('Samples from the 2-D mixture look like the eruptions.'))),'1.2fr 1fr')),
- lines:['With two numbers per example, a Gaussian needs a 2 × 2 covariance: how length and wait vary together (Lecture 1, section 3.3).','A mixture of two 2-D Gaussians: one tilted ellipse per kind of eruption.','Sampling works exactly as before: pick a kind, then draw a pair from its 2-D Gaussian.'],
- ask:['What does the tilt of the ellipse say?','How many numbers does each 2-D bump need?','What changes if each example had 784 numbers?'],
- expected:['Longer eruptions go with longer waits: positive correlation.','2 for the mean, 3 for the symmetric covariance, plus its share π.','A full covariance needs 784 × 785 / 2 ≈ 300,000 numbers per bump. That is Part 3’s problem.'],
  transition:'Recap Part 2.',source:FAITHFUL_SRC});
 S('recap-2','fit','Part 2 in one slide',{builds:2,
  body:act(2,table(['step','one number per example','what we learned'],[['fit','choose parameters to maximise the average log p(x)','same loop as Lecture 1'],['score','evaluate log p(x) of any wait','held-out score picks the model'],['sample','run the recipe: pick a bump, then draw','hidden variables make samples realistic']]),at(2,p('Next: each example is a 28 × 28 image, 784 numbers. Same three steps, much harder.'))),
@@ -455,33 +471,75 @@ S('random-points','pca','A random point in that space looks like static',{builds
  expected:['No: neighbouring pixels in digits are strongly related; random pixels are not.','Where in the space digits are, and how likely each region is.'],
  transition:'First attempt: fit Gaussians to raw pixels.'});
 chap('3.2');
-S('indep','pca','First try: one Gaussian per pixel, all independent',{builds:3,
- body:act(3,cols(stack(`<div class="dflex" style="display:flex;gap:22px;align-items:end">${`<figure class="dg-cell">${digit('pixel_mean',0,120)}<figcaption>mean of each pixel</figcaption></figure>`}${`<figure class="dg-cell">${digit('pixel_std',0,120)}<figcaption>spread of each pixel</figcaption></figure>`}</div>`,at(2,eq(R`p(x)=\prod_{j=1}^{784}\N(x_j;\,m_j,s_j^2)`)),at(2,p(`2 × 784 = ${comma(M.params.indep)} numbers.`))),
-  at(3,stack(small('8 samples'),digits('indep_samples',{cols:4,size:96,gap:10}))),'1.1fr 1fr')),
- lines:['Fit a Gaussian to each pixel separately, like Part 2: its mean and its spread over the 60,000 training digits.','The model multiplies 784 independent bells: 1,568 numbers.','Samples are speckled noise around the average digit: every pixel decides on its own.'],
- ask:['Where is the spread largest?','What does “independent” assume about neighbouring pixels?','Why do the samples look speckled?'],
- expected:['In the middle, where strokes of different digits pass.','That knowing one pixel tells you nothing about its neighbour.','Neighbours are drawn independently, so no strokes form.'],
- transition:'Is the independence assumption reasonable?',source:'MNIST training set. '+OURS});
+const PXC=M.pixel_c;
+/** Digits drawn in an SVG with one pixel outlined; returns the inner SVG. */
+function markedRow(key,idx,size,r,c,values){
+ const cell=size/28;let g='';
+ idx.forEach((i,j)=>{const x=j*(size+26);g+=dimg(key,i,x,0,size)+`<rect x="${(x+c*cell).toFixed(1)}" y="${(r*cell).toFixed(1)}" width="${cell.toFixed(1)}" height="${cell.toFixed(1)}" fill="none" stroke="${palette.loss}" stroke-width="2.5"/>`+
+  (values?label(x+size/2,size+28,values[j],{fill:palette.loss,size:21,anchor:'middle',weight:600}):'');});
+ return g;
+}
+function pixelHist(){
+ const h=PXC.hist,n=h.reduce((a,b)=>a+b,0),bw=.05,edges=lin(0,1,21),dens=h.map(v=>v/(n*bw)),yMax=2;
+ const P=panel({W:620,H:330,L:56,R:20,T:46,B:56,xMin:0,xMax:1,yMin:0,yMax,ticksX:[0,.25,.5,.75,1],ticksY:[0,.5,1,1.5,2],xLabel:'value of pixel (14, 14)',fs:18});
+ const xs=lin(0,1,201),bell=xs.map(x=>normalPdf(x,PXC.mean,PXC.sd));
+ let g=P.axes+P.bars(edges,dens.map(v=>Math.min(v,yMax)),palette.data+'88')+label(56,24,'all 60,000 training digits',{size:18});
+ for(const k of [0,19])g+=label(k?P.x(1):P.x(0),P.y(yMax)-6,`${comma(h[k])} digits (bar cut off)`,{fill:palette.data,size:16,anchor:k?'end':'start',weight:600});
+ return {g,P,bell:P.line(xs,bell,palette.q,'style="stroke-width:4.5"')+P.dot(PXC.mean,normalPdf(PXC.mean,PXC.mean,PXC.sd),palette.q)+label(P.x(PXC.mean),P.y(normalPdf(PXC.mean,PXC.mean,PXC.sd))-14,`bell: N(${f(PXC.mean,2)}, ${f(PXC.sd,2)}²)`,{fill:palette.q,size:18,anchor:'middle',weight:600})};
+}
+S('one-model','pca','What we fit: one distribution for all 60,000 training digits',{builds:3,
+ body:act(3,cols(digits('first_train',{cols:8,size:66,gap:8}),stack(p('All ten digits, mixed together. We do not use the labels.'),at(2,p('One model p(x), not ten. Sampling it should give 0s, 1s, …, 9s, each about as often as in the data.')),at(3,p('Each digit is a list of 784 numbers. p(x) must say how likely each list is.'))),'1.2fr 1fr')),
+ lines:['The training set: 60,000 images of all ten digits, mixed. We ignore which digit each one is.','We fit one distribution to all of them, not one per digit. A good p(x) produces every kind of digit when sampled.','An image is 784 numbers, so p(x) is a distribution over lists of 784 numbers. The simplest idea: treat each of the 784 positions on its own.'],
+ ask:['Are we using the labels 0–9 here?','Why one model instead of ten?','What is the simplest way to model 784 numbers?'],
+ expected:['No: generative modelling here is unsupervised; the model sees only images.','We want a model of handwritten digits in general; ten separate models would need the label to sample (that would be p(x | label), a conditional model).','One distribution per number, each fitted separately, like Part 2’s one Gaussian, 784 times.'],
+ transition:'Start with one of the 784 positions.',source:'MNIST training set.'});
+S('one-pixel','pca','Start with one pixel: position (14, 14), in every training digit',{builds:3,
+ body:act(3,`<div class="state-slot"><div data-only="1">${fig(1100,150,markedRow('first_train',[0,1,2,3,4,5],100,14,14,PXC.first6.map(v=>f(v,2))),'Six training digits with the pixel at row 14, column 14 outlined, and its value under each.')}</div>`+
+  `<div data-only="2-3">${cols((()=>{const H2=pixelHist(),H3=pixelHist();return `<div class="state-slot"><div data-only="2">${fig(620,330,H2.g,'Histogram of the value of pixel (14, 14) over all training digits.')}</div><div data-only="3">${fig(620,330,H3.g+H3.bell,'The same histogram with the fitted bell.')}</div></div>`;})(),
+   stack(p(`${f(100*PXC.frac_zero,0)}% of digits leave it blank (0); ${f(100*PXC.frac_inked,0)}% put ink on it (above 0.5).`),at(3,`<div class="eq-sm">${eq(R`m=\tfrac{1}{60000}\textstyle\sum_i x_i=${f(PXC.mean,2)},\quad s=${f(PXC.sd,2)}`)}</div>`),at(3,small('The bell peaks at a grey that few digits have: Part 2’s average-is-a-poor-sample, again. We use it anyway; it is the simplest choice.'))),'1.2fr 1fr')}</div></div>`),
+ lines:[`Take one position, row 14, column 14 (outlined). In the first six training digits its values are ${PXC.first6.map(v=>f(v,2)).join(', ')}.`,'Collect that one number from all 60,000 training digits and make a histogram: mostly 0 (paper) or close to 1 (ink).',`Fit one Gaussian to these 60,000 numbers, exactly as in Part 2: mean m = ${f(PXC.mean,2)}, spread s = ${f(PXC.sd,2)}.`],
+ ask:['Why is this pixel blank in the 0?','What shape is the histogram?','Is a Gaussian a good fit here?'],
+ expected:['A 0 is a ring; the centre of the image is the hole in the middle.','Two spikes: at 0 (no ink) and at 1 (full ink), with a thin spread in between.','No: it puts most probability on grey values around 0.5, which are rare. It is the simplest model, and it shows what we will have to fix.'],
+ transition:'Now every pixel.',source:'MNIST training set. '+OURS});
+S('indep','pca','Do it for all 784 pixels, then sample each pixel from its own bell',{builds:3,
+ body:act(3,cols(`<div class="state-slot"><div data-only="1-2"><div class="dflex" style="display:flex;gap:24px;align-items:end"><figure class="dg-cell">${digit('pixel_mean',0,150)}<figcaption>784 means m</figcaption></figure><figure class="dg-cell">${digit('pixel_std',0,150)}<figcaption>784 spreads s</figcaption></figure></div></div><div data-only="3">${stack(small('8 samples'),digits('indep_samples',{cols:4,size:92,gap:10}))}</div></div>`,
+  stack(mini(`Repeat the one-pixel fit at every position: 784 means and 784 spreads, ${comma(M.params.indep)} numbers. That is the whole model.`),
+   at(2,mini('To sample, every pixel draws from its own bell, without looking at any other pixel:')),at(2,`<div class="code-xs">${code('x = (m + s * torch.randn(784)).clamp(0, 1)')}</div>`),
+   at(3,takeaway('Each pixel decides alone, so no strokes form: the samples are speckle around the average digit.'))),'1.05fr 1fr')),
+ lines:['The same fit at every one of the 784 positions. The means, drawn as an image, are the average of all 60,000 digits; the spreads show where digits disagree.','Sampling: a fresh standard-normal number for every pixel, scaled by its spread and added to its mean.','The result: grey speckle. A stroke needs neighbouring pixels to be dark together, and this model never lets them coordinate.'],
+ ask:['Why does the mean image look like a blur, not a digit?','How many random numbers does one sample use?','Why are there no strokes?'],
+ expected:['It averages all ten digits on top of each other.','784: one per pixel.','Each pixel is drawn without looking at its neighbours.'],
+ transition:'Are neighbouring pixels really unrelated?',source:'MNIST training set. '+OURS});
 const corrURL=(()=>{const c=document.createElement('canvas');c.width=c.height=28;const g=c.getContext('2d'),im=g.createImageData(28,28),v=M.corr_centre.flat();
  for(let i=0;i<784;i++){const t=v[i],col=t>=0?[250-235*t,250-132*t,251-141*t]:[250+(190-250)*(-t)*2,250+(18-250)*(-t)*2,251+(60-251)*(-t)*2].map(x=>Math.max(0,Math.min(255,x)));im.data.set([...col.map(Math.round),255],i*4);}
  g.putImageData(im,0,0);return c.toDataURL();})();
-S('neighbours','pca','Neighbouring pixels move together',{builds:2,
+S('neighbours','pca','Why it fails: neighbouring pixels move together',{builds:2,
  body:act(3,cols(`<figure class="dg-cell"><img class="dg" src="${corrURL}" width="260" height="260" alt="Correlation of the centre pixel with every pixel"><figcaption>correlation of the centre pixel (14, 14) with every pixel: teal positive, red negative</figcaption></figure>`,
-  stack(table(['pixel pair','correlation'],[['centre and its right neighbour',f(M.corr_pairs.right,2)],['two to the right',f(M.corr_pairs.two_right,2)],['five to the right',f(M.corr_pairs.five_right,2)],['a far corner pixel',f(M.corr_pairs.far,2)]]),at(2,p('An independent model throws all of this away.'))),'1fr 1.2fr')),
+  stack(`<div class="tsm">${table(['pixel pair','correlation'],[['centre and its right neighbour',f(M.corr_pairs.right,2)],['two to the right',f(M.corr_pairs.two_right,2)],['five to the right',f(M.corr_pairs.five_right,2)],['a far corner pixel',f(M.corr_pairs.far,2)]])}</div>`,at(2,takeaway('Pixels are not independent. Modelling every pair directly needs a 784 × 784 covariance: over 300,000 numbers. We need a smarter idea.'))),'1fr 1.2fr')),
  lines:['If the centre pixel is inked, its neighbours usually are too: correlation 0.78 with the pixel to its right.','Strokes are made of neighbouring pixels that move together. A model of digits must capture that.'],
  ask:['Why is the correlation five pixels away negative?','What do we need instead of independent bells?'],
- expected:['A stroke through the centre often means white space a little further out.','A covariance between pixels: Part 2’s 2 × 2 covariance, now 784 × 784.'],
+ expected:['A stroke through the centre often means white space a little further out.','A covariance between pixels: like the 2 × 2 covariances of Lecture 1 (section 3.3), now 784 × 784.'],
  transition:'Second try: one Gaussian with a full covariance.',source:'Correlations over the 60,000 MNIST training digits. '+OURS});
-S('full-gauss','pca','Second try: one 784-dimensional Gaussian with a full covariance',{builds:2,
- body:act(3,cols(stack(eq(R`p(x)=\N(x;\,m,\Sigma),\qquad \Sigma\in\mathbb{R}^{784\times784}`),p(`${comma(M.params.full)} numbers: 784 for the mean, ${comma(M.params.full-784)} for the covariance.`),at(2,small('Samples have smoother, stroke-like blobs, but they are ghosts, not digits.'))),stack(small('8 samples'),digits('full_samples',{cols:4,size:96,gap:10})),'1fr 1fr')),
- lines:['One big Gaussian whose covariance links every pair of pixels: over 300,000 numbers.','Samples are smoother, because neighbouring pixels now move together. Still not digits: one bump for ten kinds of digit, and far too many numbers.'],
- ask:['Why are the samples smoother than before?','What is wrong with one bump? Think of Part 2.'],
- expected:['The covariance makes neighbours move together.','Digits form clusters (one per digit, at least); one Gaussian is Part 2’s single bell again.'],
- transition:'Idea: describe each image with a few numbers first.',source:OURS});
 chap('3.3');
-S('pca-2d','pca','Idea: describe each example with fewer numbers. PCA in 2-D first',{builds:4,
+S('threes-map','pca','Digits vary in only a few ways',{builds:3,
+ body:act(3,cols(`<div class="dgrid" style="grid-template-columns:repeat(7,58px);gap:6px">${M.threes_map.pos.map(([c,r],i)=>`<figure class="dg-cell" style="grid-column:${c+1};grid-row:${r+1}">${digit('threes_map',i,58)}</figure>`).join('')}</div>`,
+  stack(mini(`35 test 3s, placed by two numbers computed from all ${comma(M.threes_map.n_threes_train)} training 3s.`),at(2,mini('Neighbours look alike. Left to right the strokes get thicker; top to bottom the 3s become more upright and rounder.')),
+   at(3,takeaway('A 3 is not 784 independent numbers. A few numbers (a <b>code</b>) can say which digit and which style.'))),'1.1fr 1fr')),
+ lines:['Look at many 3s at once: each sits next to 3s that look like it.','They differ in only a few ways: thickness, slant, roundness. Two numbers already order them sensibly.','So describe each image by a short code instead of 784 pixels, and model the codes. That is the plan for the rest of the lecture.'],
+ ask:['What changes as you move to the right? Down?','How many numbers would you need to describe any 3?','Why would modelling codes be easier than modelling pixels?'],
+ expected:['Thicker strokes to the right; more upright and rounder downwards.','A handful: thickness, slant, width, loop size … far fewer than 784.','A few numbers are easy to fit with Part 2’s tools; the code also captures how pixels move together.'],
+ point:'The two numbers are the first two PCA directions of the training 3s; one 3 per cell of a 7 × 5 grid (the nearest to each cell centre). PCA is introduced on the next slides.',
+ transition:'Two machines: one that finds the code, one that redraws the image.',source:'MNIST 3s. '+OURS});
+S('encode-decode','pca','Encoder and decoder: image → a few numbers → image',{builds:3,
+ body:act(3,`<div class="state-slot">${[2,3,4].map((k,i)=>`<div data-only="${i+1}">${aeDiagram({kind:'generic',stage:k})}</div>`).join('')}</div>`,
+  at(3,takeaway('If the rebuilt image matches the original, the code kept what matters. The simplest encoder and decoder are straight lines: PCA.'))),
+ lines:['The encoder reads an image and outputs its code: a few numbers.','The decoder reads a code and draws an image.','Train or choose both so that the image comes back. With straight-line maps this is PCA; with neural networks (Part 4) it is an autoencoder.'],
+ ask:['What goes in and out of the encoder?','What goes in and out of the decoder?','How would you check that a code is good?'],
+ expected:['In: 784 pixels. Out: a few numbers.','In: a few numbers. Out: 784 pixels.','Decode it and compare with the original image: the reconstruction error.'],
+ transition:'PCA, seen in two dimensions first.'});
+S('pca-2d','pca','PCA, the simplest encoder and decoder, in two dimensions',{builds:4,
  body:act(3,`<div class="state-slot">${[1,2,3,4].map(k=>`<div data-only="${k}">${pca2d(k)}</div>`).join('')}</div>`),
- lines:['Back to the eruptions: two numbers each (standardised), strongly correlated.',`Find the direction along which the points spread most: here ${f(50*(1+F.g2.corr),0)}% of the spread.`,'Project each point onto that line: one number z per eruption instead of two.','Rebuild each point from its one number: it lands on the line, close to where it started. That is PCA.'],
+ lines:['Back to the eruptions: two numbers each (standardised), strongly correlated.',`Find the direction along which the points spread most: here ${f(50*(1+F.g2.corr),0)}% of the spread.`,'Encode: project each point onto that line. One number z per eruption instead of two.','Decode: go back from the number to its point on the line, close to where it started. That is PCA.'],
  ask:['If you could keep one number per eruption, which would you keep?','How would you find the direction of most spread?','What is lost by projecting?','How many numbers did we save?'],
  expected:['A mix of length and wait: the position along the main diagonal.','The top eigenvector of the covariance matrix.','The distance from each point to the line: here only 5% of the spread.','Half: two numbers became one.'],
  point:'For standardised data with correlation ρ the directions are (1, 1)/√2 and (1, −1)/√2 with variances 1 ± ρ.',
@@ -507,12 +565,6 @@ function varChart(){
  let s=C.s;for(const k of [2,10,50,100]){const y=v[k-1];s+=C.P.dot(k,y,palette.noise)+label(C.P.x(k)+8,C.P.y(y)+22,`${k}: ${f(100*y,0)}%`,{fill:palette.noise,size:18,weight:600});}
  return s;
 }
-S('pca-variance','pca','How many numbers do we need?',{builds:2,
- body:act(3,cols(fig(700,330,varChart(),'Share of the spread of all digits kept by the first d PCA directions.'),stack(p(`d = 10 keeps ${f(100*M.pca.at['10'],0)}% of the spread; d = 50 keeps ${f(100*M.pca.at['50'],0)}%.`),at(2,p('784 numbers per digit, but about 50 carry most of the information.'))),'1.4fr 1fr')),
- lines:['The first few directions carry the most spread; the curve flattens fast.','Digits really live near a much lower-dimensional surface. That is why compressing first is a good idea.'],
- ask:['Why does the curve flatten?','What is a good d for generating digits?'],
- expected:['Later directions describe small details and pixel noise.','A trade-off: small d is easier to model, large d keeps detail. We will try several.'],
- transition:'A map of digits in two numbers.'});
 S('pca-scatter','pca','Each digit as 2 numbers: PCA’s map of 1,000 test digits',{builds:2,
  body:act(3,widget('scatter','The first two PCA numbers of 1,000 test digits.',{src:'pca',lim:'-6,7.5,-6,6',ticks:'-4,0,4|-4,0,4',title:'z₁, z₂ from PCA',side:'hover any point to see its digit'})),
  lines:['Each point is one test digit, placed at its first two PCA numbers and coloured by its label. Hover to see the digit.','0s and 1s separate; 4, 7 and 9 overlap heavily. Two straight-line numbers cannot pull every digit apart.'],
@@ -527,18 +579,62 @@ function genDiagram(kind='pca'){
  const arrow=(x1,x2)=>`<line x1="${x1}" y1="105" x2="${x2-8}" y2="105" stroke="${palette.ink}" stroke-width="2.5"/><path d="M${x2},105 l-12,-7 v14 z" fill="${palette.ink}"/>`;
  return fig(W,H,label(150,30,'step 1: sample a code',{fill:palette.ink,size:20,anchor:'middle',weight:600})+box(20,260,prior[0],prior[1],palette.data)+arrow(280,420)+label(540,30,'step 2: turn it into an image',{fill:palette.ink,size:20,anchor:'middle',weight:600})+box(420,240,dec[0],dec[1],dec[2])+arrow(660,800)+`<image href="${digitSrc(kind==='pca'?'gen_d20k10':kind==='ae'?'ae2_prior_samples':'vae2_prior_samples',0)}" x="800" y="40" width="130" height="130" style="image-rendering:pixelated"/><rect x="800" y="40" width="130" height="130" fill="none" stroke="${LINE}"/>`+label(960,110,'a new digit',{size:20}),'Generation in two steps: sample a code, then decode it into an image.');
 }
-S('pca-gen-recipe','pca','Generate in two steps: sample a few numbers, then rebuild an image',{builds:2,
- body:act(3,genDiagram('pca'),at(2,p('Part 2’s recipe again: first a hidden thing (the code z), then the data. Here step 2 is PCA’s decoder.'))),
- lines:['Fit a distribution to the d PCA numbers of the 60,000 training digits, sample a new code, and decode it with x̂ = m + W z.','The same shape as the mixture: pick a hidden value first, then produce x from it. The code z plays the role of the bump k.'],
- ask:['Where do the 60,000 codes come from?','Which distribution should we fit to them?'],
- expected:['Encode every training digit: z = Wᵀ(x − m).','Start with one Gaussian; Part 2 suggests a mixture.'],
- transition:'One Gaussian over the codes.'});
-S('pca-gauss','pca','One Gaussian over d PCA numbers',{builds:2,
- body:act(3,rows(['d = 2',digits('gen_d2k1',{cols:16,size:60,gap:4})],['d = 10',digits('gen_d10k1',{cols:16,size:60,gap:4})],['d = 50',at(2,digits('gen_d50k1',{cols:16,size:60,gap:4}))])),
- lines:['A Gaussian over 2 numbers gives blurry average-looking digits; over 10 numbers, rough digits appear.','Over 50 numbers: more detail, but many samples are mixtures of two digits. One bump for ten kinds of digit.'],
- ask:['Why are the d = 2 samples so blurry?','Why do some d = 50 samples look like two digits on top of each other?'],
- expected:['Two PCA numbers can only describe a blurry digit, whatever their values.','The single Gaussian puts a lot of probability between the clusters of different digits.'],
- transition:'Use a mixture over the codes.',source:OURS});
+/** A small graphical model: circles for variables (shaded = observed), arrows for "depends on", a plate for "repeat". */
+function pgm({nodes,edges,plate,notes='',W=1100,H=300}){
+ let g='';
+ if(plate)g+=`<rect x="${plate.x}" y="${plate.y}" width="${plate.w}" height="${plate.h}" rx="10" fill="none" stroke="${MUTED}" stroke-width="2"/>`+label(plate.x+plate.w-12,plate.y+plate.h-12,plate.label,{size:18,anchor:'end'});
+ const N=Object.fromEntries(nodes.map(n=>[n.id,n])),r=46;
+ for(const e of edges){const a=N[e.from],b=N[e.to],dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,x1=a.x+ux*r,y1=a.y+uy*r,x2=b.x-ux*(r+4),y2=b.y-uy*(r+4);
+  g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${palette.ink}" stroke-width="2.5"/><path d="M${x2+ux*4},${y2+uy*4} l${(-ux*14-uy*7).toFixed(1)},${(-uy*14+ux*7).toFixed(1)} l${(uy*14).toFixed(1)},${(-ux*14).toFixed(1)} z" fill="${palette.ink}"/>`+
+   (e.label?label((x1+x2)/2,(y1+y2)/2-14,e.label,{fill:e.color||palette.ink,size:20,anchor:'middle',weight:600}):'');}
+ for(const n of nodes)g+=`<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${n.observed?'#D9DEE5':palette.paper}" stroke="${n.color||palette.ink}" stroke-width="3"/>`+label(n.x,n.y+10,n.label,{fill:n.color||palette.ink,size:30,anchor:'middle',weight:650})+
+  (n.below?label(n.x,n.y+r+28,n.below,{size:18,anchor:'middle'}):'')+(n.side?n.side.map((t,i)=>label(n.x+r+18,n.y-8+i*26,t,{fill:n.color||palette.ink,size:19})).join(''):'');
+ return fig(W,H,g+notes,'A graphical model: a hidden variable with an arrow to an observed variable, inside a plate.');
+}
+const pgmKey=label(760,60,'○ hidden: never observed',{size:19})+`<circle cx="752" cy="54" r="0"/>`+label(760,92,'● shaded: observed data',{size:19})+label(760,124,'→ “is drawn given”',{size:19})+label(760,156,'box: repeat for every example',{size:19});
+function codeFitFig(stage){
+ const C=M.codes2_train,G2=M.gauss2,MG=M.mog2,lab=d.mnist;
+ const P=panel({W:560,H:420,L:46,R:12,T:16,B:46,xMin:-7,xMax:9,yMin:-7,yMax:7,ticksX:[-5,0,5],ticksY:[-5,0,5],fs:17,xAxisAtBottom:true,xLabel:'z₁'});
+ const sx=P.x(1)-P.x(0),sy=P.y(0)-P.y(1);
+ let g=`<rect x="46" y="16" width="502" height="358" fill="#fff" stroke="${LINE}"/>`+P.axes+label(52,36,'z₂',{size:17});
+ g+=`<g ${P.clip}>${C.map(([a,b])=>`<circle cx="${P.x(a).toFixed(1)}" cy="${P.y(b).toFixed(1)}" r="2.6" fill="${palette.noise}" fill-opacity=".35"/>`).join('')}</g>`;
+ if(stage===2)for(const k of [1,2])g+=covEllipse(P.x(G2.mean[0]),P.y(G2.mean[1]),[G2.cov[0][0],G2.cov[0][1],G2.cov[1][1]],k,sx,sy,palette.q,`${P.clip} ${k===2?'stroke-dasharray="7 5"':''}`);
+ if(stage===3)MG.means.forEach((mu,k)=>{const c=MG.covs[k];g+=covEllipse(P.x(mu[0]),P.y(mu[1]),[c[0][0],c[0][1],c[1][1]],1.5,sx,sy,palette.q,`${P.clip} stroke-width="2"`);});
+ return fig(560,420,g,'Two PCA numbers of 3,000 training digits, with a fitted Gaussian or mixture.');
+}
+function genSteps(){
+ const C=M.codes2_train.slice(0,700),G2=M.gauss2,WGz=M.worked_gen.z,W=1100,H=272;
+ const mini=(ox,k)=>{const P=panel({ox,oy:36,W:250,H:206,L:10,R:10,T:10,B:20,xMin:-7,xMax:9,yMin:-7,yMax:7,yAxis:false,xAxis:false});
+  let g=`<rect x="${ox+10}" y="46" width="230" height="176" fill="#fff" stroke="${LINE}"/>`+`<g ${P.clip}>${C.map(([a,b])=>`<circle cx="${P.x(a).toFixed(1)}" cy="${P.y(b).toFixed(1)}" r="2" fill="${palette.noise}" fill-opacity=".35"/>`).join('')}</g>`;
+  const sx=P.x(1)-P.x(0),sy=P.y(0)-P.y(1);
+  if(k>=2)for(const t of [1,2])g+=covEllipse(P.x(G2.mean[0]),P.y(G2.mean[1]),[G2.cov[0][0],G2.cov[0][1],G2.cov[1][1]],t,sx,sy,palette.q,t===2?'stroke-dasharray="6 5"':'');
+  if(k>=3)g+=`<path d="M${P.x(WGz[0])},${P.y(WGz[1])-11} l3,8 9,0 -7,5 3,9 -8,-6 -8,6 3,-9 -7,-5 9,0z" fill="${palette.loss}" stroke="#fff"/>`;
+  return g;};
+ const arrow=(x1,x2,y)=>`<line x1="${x1}" y1="${y}" x2="${x2-8}" y2="${y}" stroke="${palette.ink}" stroke-width="2.5"/><path d="M${x2},${y} l-12,-7 v14 z" fill="${palette.ink}"/>`;
+ let g=`<g>${label(10,26,'① encode the training digits',{fill:palette.noise,size:19,weight:650})}`;
+ for(let j=0;j<4;j++)g+=dimg('first_train',j,10+(j%2)*62,60+Math.floor(j/2)*62,56);
+ g+=label(10,200,'60,000 digits …',{size:17})+arrow(140,190,120)+mini(180,1)+label(190,258,'… become 60,000 dots (codes)',{size:17})+`</g>`;
+ g+=`<g data-at="2">${label(470,26,'② fit a bell to the dots',{fill:palette.q,size:19,weight:650})}${mini(450,2)}${label(460,258,'p(z): Part 2, in 2-D',{size:17})}</g>`;
+ g+=`<g data-at="3">${label(730,26,'③ draw a new dot',{fill:palette.loss,size:19,weight:650})}${mini(720,3).replace(/<circle[^>]*fill-opacity="\.35"\/>/g,'')}${label(730,258,`z = (${f(WGz[0],2)}, ${f(WGz[1],2)})`,{fill:palette.loss,size:17})}</g>`;
+ g+=`<g data-at="4">${label(985,26,'④ decode it',{fill:palette.p,size:19,weight:650})}${arrow(975,995,135)}${dimg('worked_gen',0,1000,86,96)}${label(1000,212,'m + W z',{fill:palette.p,size:17})}</g>`;
+ return fig(W,H,g,'Generation in four steps: encode the training digits to codes, fit a bell to the codes, draw a new code, decode it.');
+}
+S('gen-steps','pca','To generate, four steps: encode, fit, draw, decode',{builds:5,
+ body:act(3,genSteps(),at(5,takeaway('Steps ① and ② fit the model, once. Steps ③ and ④ make a digit, every time. The code is hidden first, then the image: the same shape as the geyser’s kind, then wait.'))),
+ lines:['Step 1: encode every training digit with PCA. Each becomes a dot: its two code numbers.','Step 2: fit a bell to the dots, exactly as Part 2 fitted the eruptions. This is p(z), a distribution over codes.','Step 3: draw a new dot from the bell. No real digit has this code.','Step 4: decode the new code into an image.','Fitting happens once; sampling repeats steps 3 and 4. Next: step 3 and 4 by hand, with numbers.'],
+ ask:['What does each dot stand for?','Why fit a bell to codes instead of pixels?','Is the drawn dot one of the training digits?','What turns the dot into a picture?','Which steps run each time we want a new digit?'],
+ expected:['One training digit, described by two numbers.','Two numbers are easy to fit; 784 dependent pixels were not.','No: it is a new code, drawn from the fitted bell.','The decoder, m + W z.','Steps 3 and 4.'],
+ transition:'One sample, by hand.'});
+const WG=M.worked_gen;
+S('pca-sample-worked','pca','Steps ③ and ④ by hand: first a code, then an image',{builds:3,
+ body:act(3,stack(`<div class="eq-sm">${eq(R`\epsilon=(${f(WG.eps[0],1)},\,${f(WG.eps[1],1)})\ \sim\N(0,I)\quad\Rightarrow\quad z=\big(${f(WG.sd_z[0],2)}\times${f(WG.eps[0],1)},\ ${f(WG.sd_z[1],2)}\times(${f(WG.eps[1],1)})\big)=(${f(WG.z[0],2)},\,${f(WG.z[1],2)})`)}</div>`,
+  at(2,`<div class="dflex" style="display:flex;gap:16px;align-items:center">${digit('pca_mean',0,104)}<span class="lead">+ ${f(WG.z[0],2)} ×</span>${digit('pca_components',0,104)}<span class="lead">+ (${f(WG.z[1],2)}) ×</span>${digit('pca_components',1,104)}<span class="lead">=</span>${at(3,digit('worked_gen',0,104))}</div>`),
+  at(2,small('mean image m, plus z₁ times direction w₁, plus z₂ times direction w₂ (teal adds ink, red removes it)')),
+  at(3,p('A new image, drawn in two steps: the parent z first, then the child x. Repeat with fresh ε for more samples.')))),
+ lines:['Step 1, the hidden circle: draw a standard normal ε and scale it by the fitted spreads. That gives one code z.','Step 2, the arrow: decode. Start from the mean image and add z₁ copies of w₁ and z₂ copies of w₂.','The result is a sample: a blurry digit, because two PCA numbers can only describe a blur. More numbers and more bumps come next.'],
+ ask:['Why scale ε by 2.26 and 1.93?','Why does adding w₁ with z₁ = 1.81 make the image look more like a 0?','What would a code of (0, 0) decode to?'],
+ expected:['Those are the fitted spreads of the codes; the fitted centre is 0, so z = 0 + spread × ε.','w₁ adds ink on a ring (teal) and removes it from the middle stroke (red).','The mean image: the average digit.'],
+ transition:'More PCA numbers, then more bumps.',nb:'sec-3-4',source:OURS});
 S('pca-mog','pca','A mixture of K Gaussians over d numbers: try it',{builds:1,
  body:act(3,widget('mog-gen','Sample digits from a mixture of Gaussians over PCA numbers.',{d:20,k:10})),
  lines:['Choose d and K, then press Sample: 16 codes from the mixture, each decoded with PCA. Compare K = 1 and K = 20 at d = 20.'],
@@ -563,25 +659,28 @@ S('recap-3','pca','Part 3 in one slide',{builds:2,
 
 // ================================================================= Part 4 · Autoencoders
 chap('4.1');
-/** image → encoder → code → decoder → image, as PCA, an autoencoder, or a VAE. */
+/** image → encoder → code → decoder → image, as PCA, an autoencoder, a VAE, or a generic encoder–decoder. */
 function aeDiagram({kind='ae',stage=9,loss=false,zText,showOut=true}={}){
  const W=1100,H=kind==='vae'?330:280,y0=kind==='vae'?60:40,mid=y0+100;
- const encC=kind==='pca'?palette.noise:palette.p,decC=encC;
- const encT=kind==='pca'?['encode','Wᵀ(x − m)']:kind==='vae'?['encoder','784 → 400 → 4']:['encoder','784 → 400 → 2'];
- const decT=kind==='pca'?['decode','m + W z']:['decoder','2 → 400 → 784'];
- const trap=(x,wide,narrowRight,c,t)=>{const h1=wide?200:80,h2=wide?80:200,x2=x+170;return `<polygon points="${x},${mid-h1/2} ${x2},${mid-h2/2} ${x2},${mid+h2/2} ${x},${mid+h1/2}" fill="${c}14" stroke="${c}" stroke-width="2.5"/>`+label(x+85,mid-6,t[0],{fill:c,size:22,anchor:'middle',weight:600})+label(x+85,mid+22,t[1],{size:17,anchor:'middle'});};
+ const encC=kind==='pca'?palette.noise:kind==='generic'?palette.ink:palette.p,decC=encC;
+ const T={pca:[['encode','Wᵀ(x − m)'],['decode','m + W z']],generic:[['encoder','image → code'],['decoder','code → image']],
+  ae:[[`encoder ${sub('g','φ')}`,'weights φ · 784 → 400 → 2'],[`decoder ${sub('f','θ')}`,'weights θ · 2 → 400 → 784']],
+  vae:[['encoder','weights φ · 784 → 400 → 4'],[`decoder ${sub('f','θ')}`,'weights θ · 2 → 400 → 784']]}[kind];
+ const [encT,decT]=T;
+ const trap=(x,wide,c,t)=>{const h1=wide?200:80,h2=wide?80:200,x2=x+170,sub_=t[1].split(' · ');return `<polygon points="${x},${mid-h1/2} ${x2},${mid-h2/2} ${x2},${mid+h2/2} ${x},${mid+h1/2}" fill="${c}14" stroke="${c}" stroke-width="2.5"/>`+label(x+85,mid-10,t[0],{fill:c,size:22,anchor:'middle',weight:600})+sub_.map((u,i)=>label(x+85,mid+16+i*20,u,{size:15,anchor:'middle'})).join('');};
  let s=dimg('example',0,10,mid-60,120)+label(70,mid+88,'x: 784 numbers',{size:18,anchor:'middle'});
- if(stage>=2)s+=trap(150,true,true,encC,encT);
+ if(stage>=2)s+=trap(150,true,encC,encT);
  if(kind==='vae'){
   if(stage>=2)s+=`<rect x="350" y="${mid-88}" width="96" height="54" rx="8" fill="${palette.paper}" stroke="${palette.q}" stroke-width="2.5"/>`+label(398,mid-53,'μ (2)',{fill:palette.q,size:21,anchor:'middle',weight:600})+`<rect x="350" y="${mid+34}" width="96" height="54" rx="8" fill="${palette.paper}" stroke="${palette.q}" stroke-width="2.5"/>`+label(398,mid+69,'log σ² (2)',{fill:palette.q,size:19,anchor:'middle',weight:600});
   if(stage>=3)s+=`<circle cx="520" cy="${mid+130}" r="34" fill="${palette.paper}" stroke="${palette.noise}" stroke-width="2.5"/>`+label(520,mid+138,'ε',{fill:palette.noise,size:26,anchor:'middle',weight:600})+label(574,mid+150,'ε ~ N(0, I)',{fill:palette.noise,size:17})+
    `<rect x="480" y="${mid-36}" width="130" height="72" rx="10" fill="${palette.paper}" stroke="${palette.noise}" stroke-width="2.5"/>`+label(545,mid+8,'z = μ + σ ⊙ ε',{fill:palette.noise,size:19,anchor:'middle',weight:600})+
    `<line x1="446" y1="${mid-60}" x2="480" y2="${mid-20}" stroke="${palette.ink}" stroke-width="2"/><line x1="446" y1="${mid+60}" x2="480" y2="${mid+20}" stroke="${palette.ink}" stroke-width="2"/><line x1="520" y1="${mid+96}" x2="530" y2="${mid+36}" stroke="${palette.noise}" stroke-width="2"/>`;
-  if(stage>=4){s+=trap(640,false,false,decC,decT);if(showOut)s+=dimg(stage>=5?'vae2_mean_recon3':'example',0,840,mid-60,120)+label(900,mid+88,'x̂: the mean image',{size:18,anchor:'middle'});}
+  if(stage>=4){s+=trap(640,false,decC,decT);if(showOut)s+=dimg(stage>=5?'vae2_mean_recon3':'example',0,840,mid-60,120)+label(900,mid+88,'x̂: the mean image',{size:18,anchor:'middle'});}
  }else{
-  if(stage>=3)s+=`<rect x="334" y="${mid-36}" width="142" height="72" rx="10" fill="${palette.paper}" stroke="${palette.q}" stroke-width="2.5"/>`+label(405,mid+8,zText||(kind==='pca'?'z: d numbers':'z: 2 numbers'),{fill:palette.q,size:19,anchor:'middle',weight:600});
-  if(stage>=4)s+=trap(490,false,false,decC,decT);
-  if(stage>=4&&showOut)s+=dimg(kind==='pca'?'pca_recon3':'ae2_recon3',kind==='pca'?1:0,690,mid-60,120)+label(750,mid+88,'x̂: rebuilt',{size:18,anchor:'middle'});
+  if(stage>=3)s+=`<rect x="334" y="${mid-36}" width="142" height="72" rx="10" fill="${palette.paper}" stroke="${palette.q}" stroke-width="2.5"/>`+label(405,mid+8,zText||(kind==='pca'?'z: d numbers':kind==='generic'?'code z':'z: 2 numbers'),{fill:palette.q,size:19,anchor:'middle',weight:600});
+  if(stage>=4)s+=trap(490,false,decC,decT);
+  if(stage>=4&&showOut)s+=dimg(kind==='pca'?'pca_recon3':kind==='generic'?'pca_recon3':'ae2_recon3',kind==='pca'?1:kind==='generic'?5:0,690,mid-60,120)+label(750,mid+88,'x̂: rebuilt',{size:18,anchor:'middle'});
+  if(kind==='pca'&&stage>=4)s+=label(405,mid+128,'parameters m and W, shared by both maps',{fill:palette.noise,size:17,anchor:'middle'});
   if(loss&&stage>=4)s+=`<rect x="850" y="${mid-40}" width="240" height="80" rx="10" fill="${palette.paper}" stroke="${palette.loss}" stroke-width="2.5"/>`+label(970,mid-6,'loss',{fill:palette.loss,size:22,anchor:'middle',weight:600})+label(970,mid+22,'Σⱼ (xⱼ − x̂ⱼ)²',{fill:palette.loss,size:19,anchor:'middle'});
  }
  return fig(W,H,s,'An image goes through an encoder to a short code and back through a decoder.');
@@ -594,26 +693,26 @@ S('pca-as-ae','ae','PCA is an encoder and a decoder',{builds:2,
  transition:'Replace the straight lines with networks.'});
 S('ae-arch','ae','An autoencoder: replace both maps with small neural networks',{builds:3,
  body:act(4,`<div class="state-slot"><div data-only="1">${aeDiagram({kind:'ae',stage:2,showOut:false})}</div><div data-only="2">${aeDiagram({kind:'ae',stage:3,showOut:false})}</div><div data-only="3">${aeDiagram({kind:'ae',stage:4})}</div></div>`),
- lines:['The encoder is a small network: 784 inputs, 400 hidden units with ReLU, 2 outputs.','Its output is the code z, the bottleneck: like the neck of a bottle, everything must squeeze through 2 numbers.','The decoder mirrors it: 2 → 400 → 784, then a sigmoid. Train both so that x̂ ≈ x.'],
+ lines:[`The encoder ${m(R`g_\phi`)} is a small network with weights φ: 784 inputs, 400 hidden units with ReLU, 2 outputs.`,'Its output is the code z, the bottleneck: like the neck of a bottle, everything must squeeze through 2 numbers.',`The decoder ${m(R`f_\theta`)}, with weights θ, mirrors it: 2 → 400 → 784, then a sigmoid. Train φ and θ together so that x̂ ≈ x.`],
  ask:['Why squeeze through so few numbers?','What would happen with a 784-number code?','What is the target output?'],
  expected:['To force it to keep only what matters about the digit.','It could copy the input and learn nothing useful.','The input itself: the network is trained to reconstruct x.'],
  point:'Hinton and Salakhutdinov (Science, 2006) made deep autoencoders work; the idea goes back to the 1980s. One hidden layer of 400 units follows Kingma and Welling (2014).',
  transition:'The same in PyTorch.'});
 S('ae-code','ae','Two small networks in PyTorch',{builds:2,
- body:act(4,cols(`<div class="code-sm">${code(`class AutoEncoder(nn.Module):
+ body:act(4,cols(`<div class="code-xs">${code(`class AutoEncoder(nn.Module):
     def __init__(self, z=2):
         super().__init__()
-        self.encoder = nn.Sequential(
+        self.encoder = nn.Sequential(  # g_φ, weights φ
             nn.Linear(784, 400), nn.ReLU(),
             nn.Linear(400, z))
-        self.decoder = nn.Sequential(
+        self.decoder = nn.Sequential(  # f_θ, weights θ
             nn.Linear(z, 400), nn.ReLU(),
             nn.Linear(400, 784), nn.Sigmoid())
 
     def forward(self, x):
         z = self.encoder(x)     # 784 -> z numbers
         return self.decoder(z)  # z -> 784 numbers`)}</div>`,
-  stack(at(2,p('Why a sigmoid at the end? Are we classifying?')),at(2,small('No: it keeps every output pixel between 0 and 1, like the data.'))),'1.6fr 1fr')),
+  stack(at(2,p('Why a sigmoid at the end? Are we classifying?')),at(2,small('No: it keeps every output pixel between 0 and 1, like the data.'))),'2fr 1fr')),
  lines:['Two nn.Sequential blocks. The forward pass encodes, then decodes.','The final sigmoid squashes each of the 784 outputs into (0, 1), the range of our pixels.'],
  ask:['How many weights does the encoder have?','Why no activation after the encoder’s last layer?'],
  expected:['784 × 400 + 400 + 400 × 2 + 2 ≈ 315,000.','The code can be any real number; a ReLU would forbid negative codes.'],
@@ -621,17 +720,20 @@ S('ae-code','ae','Two small networks in PyTorch',{builds:2,
 S('ae-loss','ae','The loss: squared error, summed over pixels, averaged over images',{builds:3,
  body:act(4,stack(eq(R`L(\phi,\theta)=\frac1n\sum_{i=1}^{n}\ \sum_{j=1}^{784}\big(x_{ij}-\hat x_{ij}\big)^2,\qquad \hat x_i=f_\theta\big(g_\phi(x_i)\big)`),
   at(2,p(`Our 3, through a trained 2-number autoencoder: squared error <b>${f(A.ae2_sse3,1)}</b>.`)),at(3,p(`PCA on the same 3 with the same 2 numbers: <b>${f(M.pca.sse3['2'],1)}</b>. Same budget, bent maps, less error.`)))),
- lines:['g_φ is the encoder with weights φ; f_θ the decoder with weights θ. Both are trained together on one loss.','For our 3 the trained autoencoder leaves a squared error of 26.3, summed over the 784 pixels.','PCA, the best straight-line version, leaves 41.3. The bend buys a lot.'],
+ lines:[`${m(R`g_\phi`)} is the encoder with weights φ; ${m(R`f_\theta`)} the decoder with weights θ. Both are trained together on one loss.`,'For our 3 the trained autoencoder leaves a squared error of 26.3, summed over the 784 pixels.','PCA, the best straight-line version, leaves 41.3. The bend buys a lot.'],
  ask:['Which weights does the loss depend on?','Why sum over pixels but average over images?','Why must the autoencoder do at least as well as PCA, in principle?'],
  expected:['Both φ (encoder) and θ (decoder).','The sum is the error of one image; averaging over images makes the loss independent of the batch size.','With no ReLUs and no sigmoid it could represent PCA exactly; the nonlinearities only add options.'],
  transition:'Before training: what comes out?'});
 chap('4.2');
-S('ae-untrained','ae','Before training: always look at what the network outputs',{builds:2,
+S('ae-untrained','ae','Before training: always look at what the network outputs',{builds:3,
  body:act(4,cols(rows(['8 test digits',digits('watch',{cols:8,size:64,gap:6})],['untrained output',digits('ae2_train_frames',{idx:[0,1,2,3,4,5,6,7],cols:8,size:64,gap:6})]),
-  stack(p(`Every output pixel is between ${f(A.init_pixel_range[0],2)} and ${f(A.init_pixel_range[1],2)}: flat grey.`),at(2,p(`Test squared error: <b>${f(A.init_test_sse,0)}</b> per image.`))),'1.45fr 1fr')),
- lines:['With random weights the sigmoid outputs about 0.5 everywhere: grey squares, whatever the input.','The starting loss is about 185 per image. This is the number training must bring down; a sanity check before any training.'],
- ask:['Why is every output close to 0.5?','Why check the untrained model at all?'],
- expected:['Small random weights make the pre-sigmoid values near 0, and sigmoid(0) = 0.5.','To catch bugs early and know the starting loss: if training ends near 185, it learned nothing.'],
+  stack(mini(`Every output pixel is between ${f(A.init_pixel_range[0],2)} and ${f(A.init_pixel_range[1],2)}: flat grey, whatever the input.`),
+   at(2,mini('Each pixel is off by about 0.5: the target is 0 (paper) or 1 (ink), the output about 0.5. Squared: about 0.24.')),
+   at(2,`<div class="eq-sm">${eq(R`\underbrace{784}_{\text{pixels}}\times\underbrace{${f(A.ae2_init_pixel_mse,3)}}_{\text{per pixel}}\approx${f(A.init_test_sse,0)}`)}</div>`),
+   at(3,takeaway(`${f(A.init_test_sse,0)} is where training starts. A trained model should bring it far down; if it does not move, something is broken.`))),'1.3fr 1fr')),
+ lines:['With random weights, the sigmoid outputs about 0.5 everywhere: grey squares, whatever the input.','Where does 185 come from? Each of the 784 pixels is off by about half, which squares to about a quarter; 784 quarters make about 185.','Always check this before training: it tells you the starting loss and catches bugs early.'],
+ ask:['Why is every output close to 0.5?','Why is the loss as large as 185 when every pixel error is below 1?','What would it mean if training ended near 185?'],
+ expected:['Small random weights make the pre-sigmoid values near 0, and sigmoid(0) = 0.5.','It is a sum over 784 pixels: about 0.24 each.','The network learned nothing: a bug, or a learning rate that is far off.'],
  transition:'Train it: one step at a time.',source:OURS});
 S('ae-step','ae','One training step: forward, loss, backward, update',{builds:2,
  body:act(4,cols(`<div class="code-sm">${code(`model = AutoEncoder(z=2)
@@ -650,14 +752,14 @@ for epoch in range(30):
  transition:'Watch the reconstructions form.',nb:'sec-4-2'});
 S('ae-train','ae','Press play: reconstructions sharpen as it trains',{builds:2,
  body:act(4,widget('ae-train','Reconstructions during training of the 2-number autoencoder.')),
- lines:['Frame 0: grey. Within the first 100 steps, blurry average digits appear.',`By the end, each digit is recognisable from 2 numbers. Training took ${f(A.seconds_ae2,0)} s on a laptop.`],
+ lines:[`Frame 0: grey, error ${f(A.ae2_frames_sse[0],0)}. Press play: after 10 steps the error is already ${f(A.ae2_frames_sse[1],0)}: the network has learned the average blob.`,`The error keeps falling as each digit takes shape; after 30 epochs it is ${f(A.ae2_frames_sse.at(-1),1)}. The number under each digit is that digit’s own error.`],
  ask:['What does the network learn first?','Which digits stay hardest to rebuild from 2 numbers?'],
  expected:['The average digit: a blurry blob that lowers the error everywhere.','Ones that resemble other digits, like 4 and 9, or unusual shapes.'],
  transition:'Did it just memorise the training digits?',source:OURS});
 S('ae-test','ae','Did it memorise? Compare training and test error',{builds:2,
  body:act(4,cols(table(['2-number code','training error','test error'],[['autoencoder',f(SW['2'].train_sse,1),f(SW['2'].test_sse,1)],['PCA','',f(M.pca.test_sse['2'],1)]]),
   stack(p('Test digits were never used for training.'),at(2,p('Training and test errors are close: it learned digits in general, not these particular 60,000.'))),'1fr 1fr')),
- lines:['Average squared error per image on the training digits, and on the 10,000 test digits.','The gap is small (30.5 vs 31.1). And the autoencoder beats PCA by a wide margin on the same 2 numbers.'],
+ lines:['Average squared error per image, measured after training, on the 60,000 training digits and on the 10,000 test digits.',`The gap is small (${f(SW['2'].train_sse,1)} against ${f(SW['2'].test_sse,1)}). And the autoencoder beats PCA by a wide margin with the same 2 numbers.`],
  ask:['What would memorising look like in these numbers?','Why is the test error a little higher?'],
  expected:['Very low training error and much higher test error.','The weights were tuned to the training digits; new digits fit a little less well.'],
  transition:'What if we take out the bends?',source:OURS});
@@ -669,6 +771,7 @@ S('linear-ae','ae','Take out the ReLUs and the sigmoid: a linear autoencoder red
  expected:['PCA is the best linear encoder–decoder pair under squared error; training finds it (up to a rotation within the plane).','Curved maps: a better reconstruction from the same few numbers.'],
  transition:'How many numbers should the code have?',source:OURS});
 chap('4.3');
+const AE_LIM=(()=>{const c=A.ae2_codes,xs=c.map(v=>v[0]),ys=c.map(v=>v[1]),pad=(a,b)=>[Math.floor(a-1.5),Math.ceil(b+1.5)];return [...pad(Math.min(...xs),Math.max(...xs)),...pad(Math.min(...ys),Math.max(...ys))];})();
 const ZS=['2','4','8','16','32','64','128'],ZCOL=['#C4B5FD','#A78BFA','#8B5CF6','#7C3AED','#6D28D9','#5B21B6','#3B0F86'];
 function bottleneckChart(){
  const ep=d.ae.ae2_curve.epoch,L10=Math.log10;
@@ -699,27 +802,12 @@ S('ae-vs-pca','ae','Autoencoder against PCA, at every code size',{builds:2,
  expected:['Short codes: 2 to 16 numbers.','When you need speed, no training, or a guaranteed, interpretable linear map.'],
  transition:'What are the codes themselves good for?',source:OURS});
 chap('4.4');
-S('ae-scatter','ae','The 2-number codes of 1,000 test digits',{builds:2,
- body:act(4,widget('scatter','The 2-number autoencoder codes of 1,000 test digits.',{src:'ae2',lim:'-6,24,-9,14',ticks:'0,10,20|-5,0,5,10',title:'z₁, z₂ from the autoencoder',side:'hover any point to see its digit'})),
+S('ae-scatter','ae','Where the codes land: the autoencoder with a 2-number code',{builds:2,
+ body:act(4,widget('scatter','The 2-number autoencoder codes of 1,000 test digits.',{src:'ae2',lim:AE_LIM.join(','),ticks:'0,10,20,30|-10,0,10',title:'its whole code: z₁ and z₂',side:'This autoencoder has exactly 2 numbers|in its code, so nothing is hidden here.|Hover any point to see its digit.'})),
  lines:['The same 1,000 test digits, now placed at their autoencoder codes. Hover to see digits.','Compared with PCA’s map, the digits form tighter, better-separated groups. No labels were used in training.'],
  ask:['Which digits are still mixed?','The codes go from about −5 to 22. Is that a problem?'],
  expected:['4 and 9; some 3, 5 and 8.','Not for reconstruction. For generation, we will see (Part 5).'],
- transition:'Use codes to search.',source:OURS});
-S('search','ae','Search by code: the nearest digits to a query',{builds:2,
- body:act(4,cols(`<div class="dflex" style="display:flex;gap:24px;align-items:end"><figure class="dg-cell">${digit('search_query',0,130)}<figcaption>query</figcaption></figure>${at(2,digits('search_code',{cols:5,size:100,gap:10,labels:['1st','2nd','3rd','4th','5th']}))}</div>`,
-  stack(p('Encode the query, encode all 60,000 training digits, return the 5 nearest codes.'),at(2,small('Music apps and “vector databases” do the same with codes of songs, images and text.'))),'1.45fr 1fr')),
- lines:['Codes from a 16-number autoencoder. To search, compare 16 numbers instead of 784 pixels.','The nearest codes are other 1s with the same slant: the code keeps what matters about the digit.'],
- ask:['Why search with codes instead of pixels?','What would make two codes close?'],
- expected:['Fewer numbers, and distances that reflect shape rather than exact pixel positions.','Digits the decoder rebuilds similarly: same identity and similar style.'],
- transition:'Codes can also clean images.',source:OURS});
-S('denoise','ae','Denoising: damage the input, ask for the clean image',{builds:3,
- body:act(4,cols(rows(['clean',digits('watch',{cols:8,size:58,gap:5})],['half the pixels removed',digits('damaged_watch',{cols:8,size:58,gap:5})],['plain autoencoder',at(2,digits('ae16_on_damaged',{cols:8,size:58,gap:5}))],['denoising autoencoder',at(2,digits('dae16_clean',{cols:8,size:58,gap:5}))]),
-  stack(at(2,p(`Error against the clean digits: plain ${f(A.ae16_test_sse_damaged,1)}, denoising ${f(A.dae16_test_sse_damaged,1)}.`)),at(3,eq(R`L=\frac1n\sum_i\big\lVert x_i-f_\theta(g_\phi(\tilde x_i))\big\rVert^2`)),at(3,small('Input: the damaged x̃. Target: the clean x.'))),'1.5fr 1fr')),
- lines:['Remove a random half of the pixels of each test digit.','A plain autoencoder rebuilds the damage faithfully. A denoising autoencoder, trained on damaged inputs, fills in the strokes.','Its loss compares the output with the clean image, so it must learn what digits look like, not copy its input.'],
- ask:['Why does the plain autoencoder reproduce the holes?','What does the denoising version have to learn?','What does this have in common with dropout?'],
- expected:['It was trained to copy its input, holes and all.','What digits look like, so it can guess the missing pixels.','Both randomly remove inputs during training (denoising autoencoders came first, in 2008).'],
- point:'Both have 16-number codes. Vincent et al., “Extracting and composing robust features with denoising autoencoders”, ICML 2008.',
- transition:'Part 4 recap.',source:OURS});
+ transition:'Recap Part 4.',source:OURS});
 S('recap-4','ae','Part 4 in one slide',{builds:2,
  body:act(4,table(['','PCA','autoencoder'],[['encoder, decoder','straight lines','small networks'],['trained by','an eigenvector formula','gradient descent on squared error'],['2-number test error',f(M.pca.test_sse['2'],1),f(SW['2'].test_sse,1)],['codes','overlapping','tighter groups']]),at(2,p('PCA gave us generation by “sample a code, decode it”. Can the autoencoder’s decoder do the same?'))),
  lines:['An autoencoder is a learned, bent PCA: much better reconstructions from the same few numbers.','Part 5: keep only the decoder, feed it random codes, and see what it draws.'],
@@ -750,102 +838,92 @@ S('std-normal','gen','N(0, I) in two dimensions: two independent standard bells'
  expected:['The covariance is the identity: unit variance, no correlation between the numbers.','Within about 2 or 3 of the origin.','About 4 (the square root of 16): in more dimensions the draws sit on a shell.'],
  transition:'Feed such draws to three decoders.',source:OURS});
 S('ae-random','gen','Random codes through three autoencoders',{builds:3,
- body:act(5,rows(['z = 2',digits('ae2_prior_samples',{cols:16,size:58,gap:4})],['z = 8',at(2,digits('ae8_prior_samples',{cols:16,size:58,gap:4}))],['z = 128',at(3,digits('ae128_prior_samples',{cols:16,size:58,gap:4}))])),
+ body:act(5,rows(['z = 2',digits('ae2_prior_samples',{cols:16,size:54,gap:4})],['z = 8',at(2,digits('ae8_prior_samples',{cols:16,size:54,gap:4}))],['z = 128',at(3,digits('ae128_prior_samples',{cols:16,size:54,gap:4}))]),at(3,takeaway('Better reconstruction did not give better samples: the best reconstructor makes static. Why? Look at where the codes are.'))),
  lines:['2-number autoencoder: some digits, mostly the same few blurry shapes.','8 numbers: strokes that belong to no digit.','128 numbers, the best reconstructor of all: static. Better reconstruction, worse generation.'],
  ask:['Which of the three looks most like digits?','The 128-number model reconstructed best. Why does it generate worst?','What would you check to find out?'],
  expected:['The 2-number one.','Its codes for real digits are nowhere near where N(0, I) puts its draws.','Plot where real codes are, next to the random codes.'],
  transition:'Plot where the codes are.',source:OURS});
 chap('5.2');
 S('overlay','gen','Put the random codes on top of the real ones',{builds:2,
- body:act(5,cols(`<div class="state-slot"><div data-only="1">${fig(600,440,scatterSVG('ae2',{W:600,H:440,lim:[-6,24,-9,14],ticks:[[0,10,20],[-5,0,5,10]]}).s,'Autoencoder codes of 1,000 test digits.')}</div><div data-only="2">${fig(600,440,scatterSVG('ae2',{W:600,H:440,lim:[-6,24,-9,14],ticks:[[0,10,20],[-5,0,5,10]],prior:500}).s,'The same codes with 500 draws from N(0, I) in red.')}</div></div>`,
-  stack(p(`Real codes spread from about ${f(A.ae2_box[0][0],0)} to ${f(A.ae2_box[1][0],0)} and ${f(A.ae2_box[0][1],0)} to ${f(A.ae2_box[1][1],0)}.`),at(2,p('The 500 red draws from N(0, I) all land in one small corner.')),at(2,small('Nothing in the loss asked the codes to sit near N(0, I). Random codes miss most digits.'))),'1.3fr 1fr')),
- lines:['The 2-number codes of 1,000 test digits, coloured by digit.','Add 500 draws from N(0, I) in red. They cover one corner: a few digit types, and nothing of the rest.'],
- ask:['Which digits would random codes ever produce?','For the 128-number model, where are the red points?'],
- expected:['Only those whose codes sit near (0, 0).','Even further from the real codes, in a space that is mostly empty.'],
- point:'This is the experiment improvised in the PML 2023 recording of Lecture 25, around 29–31 minutes.',
- transition:'Try it yourself.',source:OURS});
-S('explore-ae','gen','Your turn: three ways to choose a code',{builds:1,
- body:act(5,widget('explorer','Choose a code for the autoencoder and see its decoder output.',{net:'ae2',lim:'-6,24,-9,14'})),
- lines:['(1) Draw a random code from N(0, I). (2) Encode a real test digit and decode its code. (3) Click anywhere on the plane. The decoder runs live in your browser.'],
- ask:['Which of the three ways gives the best digits? Click in an empty region: what do you get?'],
- expected:['Encoding a real digit; random codes give a few digit types; empty regions give smudges or strange shapes.'],
+ body:act(5,widget('scatter','Autoencoder codes of 1,000 test digits, 500 draws from N(0, I) in red, and the circles of N(0, I).',{src:'ae2',lim:AE_LIM.join(','),ticks:'0,10,20,30|-10,0,10',prior:500,contours:'1',decode:'ae2',h:300,title:'real codes and 500 random ones (red)',side:'Circles: N(0, I) at radius 1, 2 and 3.|Hover a dot to see the digit and what|the decoder draws from that code.'}),
+  at(2,takeaway('N(0, I) covers only a small corner of the real codes: random codes reach a few digit types and miss the rest.'))),
+ lines:['The 2-number codes of 1,000 test digits, and 500 draws from N(0, I) in red, inside its circles at radius 1, 2 and 3. Hover any dot to see what the decoder draws from it.','Nothing in the loss asked the codes to sit near N(0, I). The red draws land in one corner: some digits there, nothing of the rest.'],
+ ask:['Hover a red dot near the origin, then one in an empty area. What does the decoder draw?','For the 128-number model, where would the red points fall?'],
+ expected:['Near real codes: a digit; in empty places: blurs or odd strokes.','Even further from the real codes: in 128 numbers the space is mostly empty.'],
+ point:'This is the experiment improvised in the PML 2023 recording of Lecture 25, around 29–31 minutes. The decoder runs in the browser.',
+ transition:'Try choosing codes yourself.',source:OURS});
+S('explore-ae','gen','Your turn: three ways to choose a code',{builds:2,
+ body:act(5,widget('explorer','Choose a code for the autoencoder and see its decoder output.',{net:'ae2',lim:AE_LIM.join(',')}),at(2,takeaway('Encoded real digits decode well. Random N(0, I) codes and clicks in empty space mostly do not.'))),
+ lines:['(1) Draw a random code from N(0, I). (2) Encode a real test digit and decode its code. (3) Click anywhere on the plane. The decoder runs live in your browser.','Only codes near real codes give good digits, and N(0, I) does not know where those are.'],
+ ask:['Which of the three ways gives the best digits?','Click far from any dot: what do you get?'],
+ expected:['Encoding a real digit.','A smudge or an exaggerated stroke: the decoder was never trained there.'],
  point:'The decoder (2 → 400 → 784) runs in JavaScript from data/nets.json, weights stored in half precision.',
  transition:'Decode a whole grid of codes at once.',source:OURS});
 S('ae-grid','gen','Decode a whole grid of codes',{builds:2,
- body:act(5,cols(fig(560,400,scatterSVG('ae2',{W:560,H:400,lim:[-12,30,-13,18],ticks:[[-10,0,10,20,30],[-10,0,10]],box:G.ae2_grid_box,r:3,opacity:.45}).s,'Codes with the decoded grid’s area marked.'),
-  digits('ae2_grid',{cols:12,size:31,gap:1}),'1.15fr 1fr')),
+ body:act(5,cols(fig(squareW([-12,30,-13,18],400),400,scatterSVG('ae2',{W:squareW([-12,30,-13,18],400),H:400,lim:[-12,30,-13,18],ticks:[[-10,0,10,20,30],[-10,0,10]],box:G.ae2_grid_box,r:3,opacity:.45}).s,'Codes with the decoded grid’s area marked.'),
+  stack(digits('ae2_grid',{cols:12,size:23,gap:1}),at(2,takeaway('Good digits only where real codes are. Away from them the decoder only extrapolates.'))),'1.15fr 1fr')),
  lines:['Decode a 12 × 12 grid of codes covering the dashed box: the codes on the left, the decoder’s output at each grid point on the right.','Over the real codes the grid shows digits blending into each other. Far from them the decoder only extrapolates: thick 1s and 0s, and broken strokes in the bottom-left corner.'],
  ask:['Which parts of the grid are useful for generation?','What does the decoder do far from any real code?'],
  expected:['Those over the clusters of real codes.','It extrapolates from the nearest digits: exaggerated or broken shapes. It was never trained on codes there, and N(0, I) would not even reach most of the box.'],
  transition:'Wider codes make it worse.',source:OURS});
-S('spread','gen','Wider codes spread out',{builds:2,
- body:act(5,cols(table(['code size','two 0s apart','a 0 and a 1 apart','ratio'],ZS.filter(z=>['2','8','32','128'].includes(z)).map(z=>[z,f(SW[z].dist.same0,1),f(SW[z].dist.zero_one,1),f(SW[z].dist.ratio,2)])),
-  stack(p('Average distance between codes of two 0s, and between a 0 and a 1.'),at(2,p(`With 128 numbers two 0s are almost as far apart as a 0 and a 1 (ratio ${f(SW['128'].dist.ratio,2)}).`))),'1.25fr 1fr')),
- lines:['As the code grows, codes of the same digit drift apart.','In the widest codes, similarity is nearly gone: every digit gets its own private spot. Great for reconstruction, useless for sampling.'],
- ask:['Why would a wider code let same-digit codes drift apart?','What would we want instead?'],
- expected:['The loss only cares about reconstruction; with room to spare, nothing keeps similar digits together.','Codes of similar digits close together, all within a region we know how to sample.'],
+function spreadFig(stage){
+ const c=A.ae2_codes,lab=DG.labels,dist=(u,v)=>Math.hypot(u[0]-v[0],u[1]-v[1]);
+ const Z=lab.map((l,i)=>l===0?i:-1).filter(i=>i>=0),O=lab.map((l,i)=>l===1?i:-1).filter(i=>i>=0);
+ let best=[Z[0],Z[1]],bd=1e9;for(const i of Z.slice(0,40))for(const j of Z.slice(0,40))if(i<j){const e=Math.abs(dist(c[i],c[j])-SW['2'].dist.same0);if(e<bd&&dist(c[i],c[j])>4){bd=e;best=[i,j];}}
+ const one=O.slice(0,60).reduce((a,i)=>Math.abs(dist(c[best[0]],c[i])-SW['2'].dist.zero_one)<Math.abs(dist(c[best[0]],c[a])-SW['2'].dist.zero_one)?i:a,O[0]);
+ const E={zero_a:best[0],zero_b:best[1],one},pa=c[E.zero_a],pb=c[E.zero_b],po=c[E.one];
+ const {s:base,P}=scatterSVG('ae2',{W:squareW(AE_LIM,400),H:400,lim:AE_LIM,ticks:[[0,10,20,30],[-10,0,10]],opacity:.18,r:3});
+ let g=base;
+ const pin=(p,i,dx,dy)=>`<circle cx="${P.x(p[0])}" cy="${P.y(p[1])}" r="7" fill="${CLASS[DG.labels[i]]}" stroke="#fff" stroke-width="2"/>`+dimg('display',i,P.x(p[0])+dx,P.y(p[1])+dy,52);
+ if(stage>=2)g+=`<line x1="${P.x(pa[0])}" y1="${P.y(pa[1])}" x2="${P.x(pb[0])}" y2="${P.y(pb[1])}" stroke="${palette.p}" stroke-width="3.5"/>`+label((P.x(pa[0])+P.x(pb[0]))/2+8,(P.y(pa[1])+P.y(pb[1]))/2-8,f(dist(pa,pb),1),{fill:palette.p,size:20,weight:650});
+ if(stage>=3)g+=`<line x1="${P.x(pa[0])}" y1="${P.y(pa[1])}" x2="${P.x(po[0])}" y2="${P.y(po[1])}" stroke="${palette.loss}" stroke-width="3.5"/>`+label((P.x(pa[0])+P.x(po[0]))/2+8,(P.y(pa[1])+P.y(po[1]))/2+22,f(dist(pa,po),1),{fill:palette.loss,size:20,weight:650});
+ const cen=[(pa[0]+pb[0]+po[0])/3,(pa[1]+pb[1]+po[1])/3],away=p=>{const dx=p[0]-cen[0],dy=p[1]-cen[1],n=Math.hypot(dx,dy)||1;return [dx/n*40-26,-dy/n*40-26];};
+ g+=[[pa,E.zero_a],[pb,E.zero_b],[po,E.one]].map(([p_,i])=>pin(p_,i,...away(p_))).join('');
+ return fig(squareW(AE_LIM,400),400,g,'Codes of two 0s and a 1, with the distances between them.');
+}
+S('spread-what','gen','How close are codes of similar digits? Measure it',{builds:4,
+ body:act(5,cols(`<div class="state-slot">${[1,2,3,3].map((k,i)=>`<div data-only="${i+1}">${spreadFig(k)}</div>`).join('')}</div>`,
+  stack(mini('Two 0s and a 1 from the test set, at their 2-number codes.'),at(2,mini('Distance between the two 0s (teal).')),at(3,mini('Distance from a 0 to the 1 (red).')),
+   at(4,mini(`Averaged over all pairs among 100 test 0s and 100 test 1s: two 0s are ${f(SW['2'].dist.same0,1)} apart, a 0 and a 1 are ${f(SW['2'].dist.zero_one,1)} apart.`)),
+   at(4,takeaway(`Ratio ${f(SW['2'].dist.ratio,2)}: with 2 numbers, 0s sit closer to each other than to 1s. Similar digits get similar codes.`))),'1.05fr 1fr')),
+ lines:['A simple question about the code map: are similar digits close together? Take two 0s and a 1.','Measure the straight-line distance between the two 0s’ codes.','And between a 0 and the 1.','Average over many pairs and take the ratio: below 1 means same-digit codes are closer than different-digit codes.'],
+ ask:['What would a good code do with two 0s?','Is a single pair enough?','What ratio would mean the code ignores digit identity?','Why might this matter for generation?'],
+ expected:['Put them close together.','No: one pair could be unusual; average over many.','About 1: two 0s as far apart as a 0 and a 1.','If similar digits are close, the space between them holds similar digits, so random codes nearby make sense.'],
+ transition:'Now the same measurement for wider codes.',source:OURS});
+function spreadBars(){
+ const zs=['2','8','32','128'],W=700,H=340,P=panel({W,H,L:60,R:20,T:50,B:56,xMin:0,xMax:4,yMin:0,yMax:30,ticksY:[0,10,20,30],fs:18,xAxisAtBottom:true});
+ let g=P.axes+label(60,24,'average distance between codes',{size:18})+legend(330,24,[['two 0s',palette.p,false,'box'],['a 0 and a 1',palette.loss,false,'box']],18);
+ zs.forEach((z,i)=>{const dd=SW[z].dist,x=P.x(i+.5);
+  g+=`<rect x="${x-38}" y="${P.y(dd.same0)}" width="34" height="${P.y(0)-P.y(dd.same0)}" fill="${palette.p}" fill-opacity=".75"/><rect x="${x+4}" y="${P.y(dd.zero_one)}" width="34" height="${P.y(0)-P.y(dd.zero_one)}" fill="${palette.loss}" fill-opacity=".75"/>`+
+   label(x,H-30,`${z} numbers`,{size:18,anchor:'middle'})+label(x,P.y(Math.max(dd.same0,dd.zero_one))-12,`ratio ${f(dd.ratio,2)}`,{fill:palette.ink,size:17,anchor:'middle',weight:600});});
+ return fig(W,H,g,'Average distances between codes of two 0s and of a 0 and a 1, for codes of 2 to 128 numbers.');
+}
+S('spread-sizes','gen','Wider codes: similar digits drift apart',{builds:2,
+ body:act(5,cols(spreadBars(),stack(mini('The same measurement for autoencoders with 2, 8, 32 and 128 numbers in the code.'),
+  at(2,takeaway(`With 128 numbers two 0s are almost as far apart as a 0 and a 1 (ratio ${f(SW['128'].dist.ratio,2)}). The loss only rewards reconstruction, so every digit gets its own private spot, and the space between them is empty.`))),'1.35fr 1fr')),
+ lines:['As the code gets wider, both distances grow and the ratio climbs towards 1.','Nothing in the loss keeps codes near each other or near N(0, I). Great for reconstruction, bad for generation: this is what the VAE will fix.'],
+ ask:['Why do distances grow with more numbers?','What would we want instead?'],
+ expected:['More room: with nothing pulling codes together, they spread wherever reconstruction is easiest.','Codes kept near a known region, with similar digits overlapping.'],
  point:'Distances averaged over the 100 0s and 100 1s of the display set. PML 2023 Lecture 25 shows the same trend for one pair of 0s.',
  transition:'Walk between two digits.',source:OURS});
 S('interp','gen','Walk in a straight line from a 1 to a 0',{builds:2,
- body:act(5,rows(['ends',digits('interp_ends',{cols:2,size:62,gap:6})],['z = 2',digits('ae2_interp',{cols:9,size:62,gap:6})],['z = 16',at(2,digits('ae16_interp',{cols:9,size:62,gap:6}))])),
+ body:act(5,rows(['ends',digits('interp_ends',{cols:2,size:60,gap:6})],['z = 2',digits('ae2_interp',{cols:9,size:60,gap:6})],['z = 16',at(2,digits('ae16_interp',{cols:9,size:60,gap:6}))]),at(2,takeaway('Straight lines between codes leave the region where real codes live. The space between digits is not filled with digits.'))),
  lines:['Encode a 1 and a 0, take 9 evenly spaced codes on the line between them, decode each. With 2 numbers the path crosses the clusters of 8, 3 and 5 on its way.','With 16 numbers the endpoints are sharp, but the middle passes through blobs that are no digit: the straight line leaves the region where codes live.'],
  ask:['Why does the 2-number path pass through other digits?','Why might the 16-number path cross empty space?'],
  expected:['In 2 numbers the clusters are packed side by side; a straight line from 1 to 0 has to cross the 8, 3 and 5 clusters.','The straight line between two codes need not stay where real codes are; in 16 dimensions most of the space between them is empty.'],
- transition:'A fix we already know.',source:OURS});
+ transition:'What we want instead.',source:OURS});
 chap('5.3');
-S('posthoc','gen','A fix we already know: fit a mixture to where the codes are',{builds:3,
- body:act(5,cols(fig(520,380,scatterSVG('ae2',{W:520,H:380,lim:[-6,24,-9,14],ticks:[[0,10,20],[-5,0,5,10]],mog:G.ae2_mog,opacity:.35,r:3}).s,'Autoencoder codes with ten fitted Gaussian ellipses.'),
-  stack(mini('Part 3’s recipe: fit 10 Gaussians to the codes of the 60,000 training digits, sample a code, decode.'),at(2,stack(small('2-number autoencoder + mixture'),digits('ae2_mog_samples',{cols:8,size:52,gap:4}))),at(3,stack(small('16-number autoencoder + mixture'),digits('ae16_mog_samples',{cols:8,size:52,gap:4})))),'1fr 1.15fr')),
- lines:['Fit a mixture of 10 Gaussians to the training codes: the ellipses follow the clusters.','Sample codes from it, decode: real-looking digits from the 2-number autoencoder.','The same with 16-number codes: sharper digits. A density fitted after training works.'],
- ask:['Do the ellipses cover the clusters?','Why do these samples look better than N(0, I) codes?','What is unsatisfying about this two-stage approach?'],
- expected:['Roughly: about one ellipse per digit group, some shared.','The codes are drawn where real codes are.','Two separate fits; the codes were never shaped for easy sampling; and there is no single model that scores p(x).'],
- transition:'What we would like instead.',source:OURS});
-S('wishes','gen','What we would like instead',{builds:3,
- body:act(5,`<div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr))">${card('1 · Codes we can sample','Codes that fill a simple, known shape, such as N(0, I), so that torch.randn gives good codes.',palette.data)}${at(2,card('2 · Smooth codes','Nearby codes decode to similar images, so the space between digits holds plausible digits too.',palette.p))}${at(3,card('3 · One probability model','One model, trained by maximum likelihood as in Part 2, that can both score and sample.',palette.q))}</div>`),
- lines:['First wish: decide the code distribution in advance, N(0, I), and make the codes fit it.','Second: each image should own a small region of codes, not a single point, so the space between is filled.','Third: write it as one probability model and train by maximum likelihood. The variational autoencoder does all three.'],
- ask:['How could we force codes to fill N(0, I)?','How could each image own a region instead of a point?','What is the likelihood of an image, if a code is drawn first?'],
- expected:['Penalise codes that stray from it, for example with a KL to N(0, I).','Let the encoder output a small cloud of codes: a mean and a spread.','The sum, or integral, over all codes of p(code) times p(image | code). Part 6.'],
+S('wishes','gen','What we saw, and what we want instead',{builds:3,
+ body:act(5,`<div class="tsm">${table(['what we saw','what we want','how the VAE does it'],[
+  ['random N(0, I) codes miss the real codes','codes that fill N(0, I), so <code>torch.randn</code> gives good codes','a KL penalty pulls every code towards N(0, I)'],
+  [at(2,'similar digits drift apart; gaps decode to junk'),at(2,'each image owns a small cloud of codes, and clouds overlap'),at(2,'the encoder outputs a mean and a spread; z is drawn from that cloud')],
+  [at(3,'no way to say how likely an image is'),at(3,'one probability model that can score and sample'),at(3,'a prior and a decoder, trained with Lecture 1’s ELBO')]])}</div>`),
+ lines:['Problem one: random codes from N(0, I) land away from the real codes. Want: codes that fill N(0, I).','Problem two: similar digits drift apart and gaps decode to junk. Want: each image owning a small cloud, so the gaps are filled.','Problem three: the autoencoder cannot score an image. Want: a probability model. The variational autoencoder does all three.'],
+ ask:['How could we push codes towards N(0, I)?','How could each image own a cloud instead of a point?','Which tool from Lecture 1 will we need?'],
+ expected:['Penalise codes that stray from it, for example with a KL to N(0, I).','Let the encoder output a mean and a spread, and draw the code from them.','Variational inference and the ELBO.'],
  transition:'Part 6: the variational autoencoder.'});
-
 // ================================================================= Part 6 · The VAE
-chap('6.1');
-S('vae-story','vae','Write the recipe first: pick a code, then draw an image',{builds:3,
- body:act(6,stack(eq(R`z\sim\N(0,I)\qquad\text{2 numbers, decided in advance}`),eq(R`x\mid z\sim\N\big(f_\theta(z),\ \sigma^2 I\big)\qquad\text{784 numbers, centred on the decoder's output}`),
-  at(2,genDiagram('vae')))),
- lines:['Step 1: draw a 2-number code from N(0, I). Step 2: the decoder f_θ turns it into a mean image, and each pixel is that mean plus a little Gaussian noise of size σ.','To generate, run the two steps. No encoder needed: the prior N(0, I) is fixed in advance.','It is Part 2’s recipe with a neural network in step 2.'],
- ask:['What are the parameters of this model?','What is the role of σ?','What is new compared with PCA + Gaussian?'],
- expected:['The decoder weights θ (σ is fixed).','How far an image may stray from the decoder’s mean image; it sets how much reconstruction errors cost.','The decoder bends, and the code distribution is chosen in advance, not fitted afterwards.'],
- point:'When showing samples we display the mean image f_θ(z), not the noisy x: the noise is independent per pixel and would only add speckle.',
- transition:'Why σ = 0.2, and what the likelihood of one image is.'});
-S('sigma','vae','The likelihood of an image, given its code, is a squared error',{builds:3,
- body:act(6,stack(eq(R`\log p_\theta(x\mid z)=\sum_{j=1}^{784}\log\N\big(x_j;\,f_\theta(z)_j,\sigma^2\big)`),at(2,eq(R`=-\frac{1}{2\sigma^2}\,\big\lVert x-f_\theta(z)\big\rVert^2\;-\;784\log\big(\sigma\sqrt{2\pi}\big)`)),
-  at(3,p(`We use σ = ${f(d.meta.sigma,1)}: about the typical pixel error of a 2-number code, √(31 / 784) ≈ 0.2. The constant term, −784 log(σ√2π), is +${f(-V.loglik_const,1)}.`)))),
- lines:['Each pixel is an independent Gaussian around the decoder’s output, so the log-likelihood is a sum over 784 pixels.','Expand the Gaussian: minus the squared error over 2σ², plus a constant. The autoencoder’s loss was a likelihood all along.','σ = 0.2 matches the size of a typical pixel error; it is a modelling choice, and Section 6.7 shows what changing its weight does.'],
- ask:['What happens to the first term if σ is small?','Where have you seen squared error = Gaussian likelihood before?','Is σ learned here?'],
- expected:['Errors cost more: the model is pushed to reconstruct precisely.','Linear regression: least squares is maximum likelihood with Gaussian noise.','No, fixed at 0.2. It can be learned; we keep it fixed for clarity.'],
- transition:'Train by maximum likelihood, like Part 2.'});
-S('vae-mle','vae','Train like Part 2: maximise log p(x) for every image',{builds:2,
- body:act(6,stack(eq(R`p_\theta(x)=\int p_\theta(x\mid z)\,p(z)\,dz`),at(2,cols(stack(small('Part 2: a sum over two kinds'),eq(R`p(x)=\sum_{k=1}^{2}\pi_k\N(x;\mu_k,\sigma_k^2)`)),stack(small('Now: an integral over every possible code'),eq(R`p_\theta(x)=\int \N(x;f_\theta(z),\sigma^2 I)\,\N(z;0,I)\,dz`)),'1fr 1fr')))),
- lines:['The likelihood of an image adds up all the ways it could have been made: every code z, weighted by its prior probability.','For the geyser the sum had two terms. Here it is an integral over all codes, through a neural network. No formula.'],
- ask:['Why do we need p(x) at all?','Why can we not compute this integral exactly?'],
- expected:['To train θ by maximum likelihood, and to score images.','The decoder is a neural network; the integral has no closed form, and for 16 numbers a grid is hopeless.'],
- transition:'Look at one image: which codes could have made it?'});
-chap('6.2');
-const wideMark=(()=>{const W_=posteriorSVG({S:400,prior:true}),P_=W_.P,cx=P_.x(V.grid.post_mean[0]),cy=P_.y(V.grid.post_mean[1]);return W_.s+`<circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="${palette.loss}" stroke-width="2.5"/>`+label(cx,cy+40,'the posterior: a tiny patch',{fill:palette.loss,size:17,weight:600,anchor:'middle'});})();
-S('posterior3','vae','For our 3: which codes could have made it?',{builds:3,
- body:act(6,cols(`<div class="state-slot"><div data-only="1">${fig(400,400,wideMark,'The posterior over codes for our 3, within the prior.')}</div><div data-only="2-3">${fig(810,400,wideMark+posteriorSVG({ox:410,S:400,view:'zoom',title:'zoomed in about 27×'}).s,'The posterior, wide and zoomed.')}</div></div>`,
-  stack(at(3,eq(R`p(z\mid x)=\frac{p(x\mid z)\,p(z)}{p(x)}`))),'1.6fr .7fr')),
- lines:['The trained VAE’s decoder, our 3, and every code on a fine grid: shade = how well that code explains the 3. Dashed circles: the prior N(0, I).',`Zoomed in: the codes that explain this 3 form a tiny patch, about ${f(V.grid.post_sd[0],3)} wide, near (${f(V.grid.post_mean[0],2)}, ${f(V.grid.post_mean[1],2)}).`,'This is the posterior over codes, by Bayes’ rule. Its denominator is the p(x) we want.'],
- ask:['Why is the patch so small?','Which part of Bayes’ rule is hard?','What is the prior here, and what is the likelihood?'],
- expected:['784 pixels with σ = 0.2 pin the code down very precisely.','The evidence p(x) in the denominator: the integral from the last slide.','Prior N(0, I) over codes; likelihood p(x | z) from the decoder.'],
- transition:'In two dimensions we can still add up rectangles.',source:OURS});
-S('evidence-grid','vae','With 2 numbers we can add up rectangles; with 16 we cannot',{builds:2,
- body:act(6,stack(eq(R`\log p(x)\approx\log\sum_{\text{cells}}p(x\mid z_c)\,p(z_c)\,\Delta z=${f(V.grid.log_px,2)}`),p(`Checked by importance sampling with 100,000 draws: ${f(V.grid.log_px_is,2)}.`),at(2,p('A grid with 161 points per axis (from −4 to 4 in steps of 0.05) has 161² ≈ 26,000 cells for 2 numbers, and 161¹⁶ ≈ 10³⁵ cells for 16. Lecture 1’s intractable evidence, again.')))),
- lines:[`For our 3 the grid gives log p(x) = ${f(V.grid.log_px,2)}. (A density over 784 numbers can exceed 1, so its log can be positive.)`,'Grids grow exponentially with the number of code dimensions. We need another way.'],
- ask:['Why is log p(x) positive?','Why do grids fail in 16 dimensions?'],
- expected:['It is a density, not a probability: with σ = 0.2 per pixel, densities are large.','The number of cells is (points per axis) to the power of the dimension.'],
- point:`The fine grid is 241 × 241 cells over a window of ±0.15 around the posterior. A coarse grid over the whole prior gives ${f(V.grid.log_px_wide,2)}: too coarse to resolve the patch.`,
- transition:'Sample codes from the prior instead?',source:OURS});
+const wideMark=()=>((()=>{const W_=posteriorSVG({S:400,prior:true}),P_=W_.P,cx=P_.x(V.grid.post_mean[0]),cy=P_.y(V.grid.post_mean[1]);return W_.s+`<circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="${palette.loss}" stroke-width="2.5"/>`+label(cx,cy+40,'the posterior: a tiny patch',{fill:palette.loss,size:17,weight:600,anchor:'middle'});})());
 function mcChart(){
  const mc=V.naive_mc,xs=mc.map(r=>Math.log10(r.S)),P=panel({W:680,H:290,L:70,R:20,T:40,B:52,xMin:0,xMax:5,yMin:-600,yMax:300,ticksX:[0,1,2,3,4,5],fmtX:v=>`10${'⁰¹²³⁴⁵'[v]}`,ticksY:[-600,-300,0,300],xLabel:'number of prior draws S',fs:18,xAxisAtBottom:true});
  let s=P.axes+label(70,22,'estimate of log p(x), 30 repeats',{size:18});
@@ -854,59 +932,161 @@ function mcChart(){
  s+=`<line x1="${P.x(0)}" y1="${P.y(V.grid.log_px)}" x2="${P.x(5)}" y2="${P.y(V.grid.log_px)}" stroke="${palette.data}" stroke-dasharray="7 5" stroke-width="2"/>`+label(P.x(0)+8,P.y(V.grid.log_px)-10,`true value ${f(V.grid.log_px,1)}`,{fill:palette.data,size:18});
  return s;
 }
-S('naive-mc','vae','Average p(x | z) over random codes? Most draws are wasted',{builds:2,
- body:act(6,cols(stack(eq(R`p(x)=\E_{z\sim p(z)}\big[p(x\mid z)\big]\approx\frac1S\sum_{s=1}^{S}p(x\mid z_s)`),fig(680,290,mcChart(),'The Monte Carlo estimate of log p(x) against the number of prior draws.')),
-  stack(p(`With 100 draws the estimate is still off by about ${f(V.grid.log_px-V.naive_mc[2].median,0)}.`),at(2,p(`Of 100,000 prior draws, the best 10 carry ${f(100*V.top10_share,0)}% of the total.`)),at(2,small('Almost every code from the prior explains this 3 terribly. We need codes from the posterior’s tiny patch.'))),'1.45fr 1fr')),
- lines:['Lecture 1’s Monte Carlo: p(x) is an average of p(x | z) over prior codes. It converges, but only after tens of thousands of draws.','A handful of lucky draws carry the whole sum. We should draw codes where the posterior is, not from the prior.'],
- ask:['Why is the estimate so low with few draws?','Where should we draw codes from instead?'],
- expected:['Most prior draws decode to a different digit; p(x | z) is astronomically small for them.','From near the posterior: codes that could have made this 3. That is what an encoder will provide.'],
- transition:'Lecture 1’s tool for an intractable posterior.',source:OURS});
-chap('6.3');
-S('vi-recall','vae','Lecture 1’s tool: fit a simple q to the posterior',{builds:3,
- body:act(6,stack(eq(R`q(z)=\N\big(m,\ \mathrm{diag}(s^2)\big)`),at(2,eq(R`\log p(x)=\underbrace{\E_{q}\big[\log p(x\mid z)\big]-\KL\big(q(z)\,\|\,p(z)\big)}_{\ELBO(q)}\;+\;\KL\big(q(z)\,\|\,p(z\mid x)\big)`)),
-  at(3,`<div class="tsm">${table(['Lecture 1','today'],[['unknown: network weights θ','unknown: the code z of one image'],['data 𝒟: 17 points','data: one image x'],['prior N(0, 1) on each weight','prior N(0, I) on the code']])}</div>`))),
- lines:['Approximate the posterior over codes with a Gaussian q, with its own mean m and widths s.','Lecture 1’s identity: log p(x) = ELBO + KL(q ‖ posterior). Raising the ELBO pushes q towards the posterior, without ever computing p(x).','Same maths, new roles: the unknown is now the code of one image, not the weights of a network.'],
- ask:['Which two terms make up the ELBO, in words?','Why is the ELBO a lower bound on log p(x)?','What are the variational parameters here?'],
- expected:['Reconstruct x well from codes drawn from q; keep q close to the prior.','The last KL is never negative.','m and s: four numbers for a 2-number code.'],
- transition:'Fit q for our 3.'});
-S('vi3','vae','Fit q for our 3: press play',{builds:2,
- body:act(6,widget('vi3','Variational inference for one image.')),
- lines:['Start q at the prior N(0, I) (a circle of radius 2 in the left panel) and climb the ELBO with reparameterised draws.',`q moves into the posterior’s patch and shrinks to fit it. The ELBO ends at ${f(V.vi3.final_elbo,2)}, just below log p(x) = ${f(V.grid.log_px,2)}.`],
- ask:['What happens to the ELBO at first? Why?','How big is the final gap?'],
- expected:['It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.',`About ${f(V.grid.log_px-V.vi3.final_elbo,2)} nats: q is nearly the exact posterior.`],
- point:'Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step.',
- transition:'One image took 1,200 steps. Now 60,000 images.',source:OURS});
-chap('6.4');
-S('amortise','vae','60,000 images would mean 60,000 separate fits',{builds:3,
- body:act(6,stack(p('Each image has its own posterior, so its own m and s: 1,200 steps each, and again for every new image.'),at(2,p('Instead, train a network that reads an image and outputs its m and s in one pass: the <b>encoder</b>.')),at(3,eq(R`q_\phi(z\mid x)=\N\big(\mu_\phi(x),\ \mathrm{diag}\,\sigma_\phi(x)^2\big)`)))),
- lines:['Per-image VI works, but it is slow: 60,000 fits during training, and a fresh fit for every new image.','Learn the fit instead: an encoder network outputs the mean and spread of q for any image.','One network with weights φ, shared by all images. This is called amortised inference: pay once in training, then every image is one forward pass.'],
- ask:['How many variational parameters would per-image VI need for 60,000 images?','What does the encoder output?','What is the price of sharing one network?'],
- expected:['4 × 60,000 = 240,000.','Two means and two log-variances per image.','Its q may be a little worse than a dedicated fit for each image (next slides).'],
- transition:'Put the encoder in front of the decoder.'});
-S('vae-arch','vae','The VAE: an encoder that outputs q, a code drawn from it, and the decoder',{builds:3,
+const WK=V.worked;
+function vaeCurves(){
+ const c=V.curve,ep=c.epoch;
+ const A_=lineChart({W:540,H:320,xMin:1,xMax:50,yMin:300,yMax:600,ticksX:[1,25,50],ticksY:[300,400,500,600],xLabel:'epoch',yLabel:'reconstruction term',series:[{x:ep,y:c.recon,color:palette.loss}]});
+ const B_=lineChart({ox:560,W:540,H:320,xMin:1,xMax:50,yMin:0,yMax:12,ticksX:[1,25,50],ticksY:[0,4,8,12],xLabel:'epoch',yLabel:'KL term',series:[{x:ep,y:c.kl,color:palette.q}],L:630-560});
+ return A_.s+B_.s;
+}
+chap('6.1');
+function roadsFig(stage){
+ const W=1100,H=340,box=(x,y,w,h,t,sub_,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${palette.paper}" stroke="${c}" stroke-width="2.5"/>`+label(x+w/2,y+h/2+(sub_?-3:8),t,{fill:c,size:20,anchor:'middle',weight:650})+(sub_?label(x+w/2,y+h/2+22,sub_,{size:15,anchor:'middle'}):'');
+ const arrow=(x1,x2,y,c=palette.ink)=>`<line x1="${x1}" y1="${y}" x2="${x2-8}" y2="${y}" stroke="${c}" stroke-width="2.5"/><path d="M${x2},${y} l-12,-7 v14 z" fill="${c}"/>`;
+ let g=label(10,24,'Road 1 · start from the autoencoder',{fill:palette.p,size:21,weight:650});
+ g+=dimg('example',0,10,48,70)+arrow(84,124,83)+box(124,50,150,66,'encoder','image → μ, σ²',palette.p)+arrow(274,314,83)+box(314,50,190,66,'z ~ N(μ, σ²)','a cloud, not a point',palette.noise)+arrow(504,544,83)+box(544,50,150,66,'decoder','z → image',palette.p)+arrow(694,734,83)+dimg('vae2_mean_recon3',0,736,48,70)+label(830,78,'+ a KL penalty that keeps',{size:17})+label(830,100,'the clouds near N(0, I)',{size:17});
+ if(stage>=2){g+=label(10,176,'Road 2 · start from a generative model',{fill:palette.q,size:21,weight:650});
+  g+=`<circle cx="80" cy="250" r="40" fill="${palette.paper}" stroke="${palette.noise}" stroke-width="3"/>`+label(80,260,'z',{fill:palette.noise,size:28,anchor:'middle',weight:650})+label(80,312,'prior N(0, I)',{size:16,anchor:'middle'})+
+   arrow(120,250,250)+label(185,236,'decoder',{size:16,anchor:'middle'})+`<circle cx="290" cy="250" r="40" fill="#D9DEE5" stroke="${palette.data}" stroke-width="3"/>`+label(290,260,'x',{fill:palette.data,size:28,anchor:'middle',weight:650})+label(290,312,'image',{size:16,anchor:'middle'})+
+   label(370,232,'learn the decoder ⇒ need p(z | x), the posterior,',{size:18})+label(370,258,'which has no formula ⇒ approximate it with q(z | x)',{size:18})+label(370,284,'(variational inference, Lecture 1): the encoder.',{size:18});}
+ if(stage>=3)g+=`<rect x="852" y="156" width="240" height="166" rx="12" fill="${palette.q}10" stroke="${palette.q}" stroke-width="2"/>`+label(972,196,'Both roads arrive at',{fill:palette.q,size:19,anchor:'middle',weight:650})+label(972,224,'the same network and',{fill:palette.q,size:19,anchor:'middle',weight:650})+label(972,252,'the same loss:',{fill:palette.q,size:19,anchor:'middle',weight:650})+label(972,288,'reconstruction + KL',{fill:palette.ink,size:20,anchor:'middle',weight:650});
+ return fig(W,H,g,'Two roads to the VAE: change the autoencoder, or start from a generative model and approximate its posterior.');
+}
+S('two-roads','vae','Two roads to the VAE',{builds:3,
+ body:act(6,`<div class="state-slot">${[1,2,3].map(k=>`<div data-only="${k}">${roadsFig(k)}</div>`).join('')}</div>`),
+ lines:['Road 1, quick and intuitive: keep the autoencoder, but let the encoder output a small cloud instead of a point, draw the code from it, and add a penalty that keeps the clouds near N(0, I).','Road 2, principled: write a generative model first (a prior on codes, a decoder), then learn it. That needs the posterior, which we approximate with variational inference, as in Lecture 1.','They meet: the same encoder, the same decoder, the same loss. We take Road 1 first, then Road 2 explains why it is the right thing to do.'],
+ ask:['Which wishes from the last slide does Road 1 address?','Where does Road 2 need Lecture 1?','What is the encoder in Road 2?'],
+ expected:['Clouds (wish 2) and the pull towards N(0, I) (wish 1).','The posterior over codes is intractable, so we fit an approximation by maximising the ELBO.','The approximate posterior q(z | x): it outputs the mean and spread of q for each image.'],
+ transition:'Road 1.'});
+chap('6.2');
+function cloudsFig(vae){
+ const W=1100,H=330,PW=520;
+ const draw=(ox,isVae)=>{const P=panel({ox,W:PW,H,L:30,R:10,T:40,B:30,xMin:-4,xMax:4,yMin:-3,yMax:3,xAxis:false,yAxis:false});
+  const pts=[[-2.2,1.1,0],[-1.6,1.6,0],[1.8,-.6,1],[2.3,-1.3,1],[.2,-1.9,3],[-.5,-1.5,3]];
+  let g=`<rect x="${ox+30}" y="40" width="${PW-40}" height="${H-70}" fill="#fff" stroke="${LINE}"/>`+label(ox+30,26,isVae?'VAE: each image → a small cloud':'autoencoder: each image → one point',{fill:isVae?palette.q:palette.p,size:20,weight:650});
+  if(isVae)g+=`<circle cx="${P.x(0)}" cy="${P.y(0)}" r="${(P.x(2.4)-P.x(0)).toFixed(1)}" fill="none" stroke="${MUTED}" stroke-dasharray="6 5" stroke-width="2"/>`+label(P.x(0)+(P.x(2.4)-P.x(0))*.72,P.y(0)-(P.x(2.4)-P.x(0))*.72-6,'N(0, I)',{size:15});
+  const col=[CLASS[0],CLASS[1],CLASS[3]];
+  pts.forEach(([a,b,k])=>{const [x,y]=isVae?[a*.75,b*.75]:[a,b];
+   g+=isVae?`<ellipse cx="${P.x(x)}" cy="${P.y(y)}" rx="46" ry="30" fill="${col[k===0?0:k===1?1:2]}33" stroke="${col[k===0?0:k===1?1:2]}" stroke-width="2"/>`:'';
+   g+=`<circle cx="${P.x(x)}" cy="${P.y(y)}" r="6" fill="${col[k===0?0:k===1?1:2]}"/>`;});
+  g+=isVae?label(ox+40,H-8,'clouds overlap: the space between images is used',{size:16}):label(ox+40,H-8,'points: the space between them is never trained',{size:16});
+  return g;};
+ return fig(W,H,draw(0,false)+(vae?draw(570,true):''),'Sketch: an autoencoder maps each image to a point; a VAE maps it to a cloud, and the clouds overlap.');
+}
+S('road1-cloud','vae','Road 1: encode each image to a cloud, not a point',{builds:2,
+ body:act(6,`<div class="state-slot"><div data-only="1">${cloudsFig(false)}</div><div data-only="2">${cloudsFig(true)}</div></div>`,at(2,small('A sketch, not data. Colours: three kinds of digit.'))),
+ lines:['The autoencoder sends each image to one point. Only those points are ever decoded during training; the space between them is never used.','Instead, send each image to a small cloud, a Gaussian N(μ, σ²), and decode a random point from the cloud. Neighbouring clouds overlap, so the gaps get trained too.'],
+ ask:['Which parts of the code plane does an autoencoder’s decoder ever see during training?','What does the decoder learn when clouds overlap?'],
+ expected:['Only the exact codes of training images.','To draw something sensible everywhere the clouds reach, including between images.'],
+ transition:'What the network looks like.'});
+S('vae-arch','vae','Road 1: the network, with a cloud in the middle',{builds:3,
  body:act(6,`<div class="state-slot"><div data-only="1">${aeDiagram({kind:'vae',stage:2,showOut:false})}</div><div data-only="2">${aeDiagram({kind:'vae',stage:3,showOut:false})}</div><div data-only="3">${aeDiagram({kind:'vae',stage:5})}</div></div>`),
- lines:['The encoder now ends in 4 numbers, not 2. A bug? No: a mean and a log variance for each code number.','Draw the code by reparameterisation (Lecture 1, section 3.5): z = μ + σ ⊙ ε with ε ~ N(0, I). Sampling z directly would block the gradient; written this way, backpropagation reaches μ and σ.','The decoder is unchanged: from z to a mean image.'],
+ lines:['The encoder now ends in 4 numbers, not 2. A bug? No: a mean and a log variance for each code number.',`Draw the code from the cloud by reparameterisation: z = μ + σ ⊙ ε with ε ~ N(0, I). Sampling z directly would block the gradient; this way backpropagation reaches μ and σ. ${l1('reparam','3.5','the trick')}`,'The decoder is unchanged: from z to a mean image.'],
  ask:['Why log σ² instead of σ?','Why reparameterise instead of sampling z directly?','At test time, which code do we use to reconstruct?'],
  expected:['Any real number is a valid log variance; σ = exp(½ log σ²) is then positive.','sample() blocks the gradient path from the loss to μ and σ.','Usually the mean μ.'],
  transition:'The encoder on our 3.'});
-S('q3','vae','The encoder on our 3: one pass, almost as good as 1,200 steps',{builds:2,
+S('road1-penalty','vae','Road 1: keep the clouds near N(0, I) with a KL penalty',{builds:3,
+ body:act(6,stack(`<div class="eq-sm">${eq(R`L=\underbrace{\lVert x-f_\theta(z)\rVert^2}_{\text{rebuild the image}}\;+\;\underbrace{\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,I)\big)}_{\text{keep the cloud near }\N(0,I)}`)}</div>`,
+  at(2,`<div class="eq-sm">${eq(R`\KL=\tfrac12\sum_{k}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)`)}</div>`),at(2,l1('diag-kl','2.7','KL between diagonal Gaussians')),
+  at(3,takeaway('Without the penalty, the encoder could shrink the clouds to points and spread them far apart: an autoencoder again. The KL stops both.')))),
+ lines:['Loss = squared reconstruction error + a penalty: the KL divergence from each image’s cloud to N(0, I).','The KL between two Gaussians has a formula (Lecture 1, section 2.7): it is zero only when μ = 0 and σ = 1.','The penalty pulls every cloud towards N(0, I) (wish 1) and stops it from shrinking to a point (wish 2).'],
+ ask:['What is the KL for a cloud with μ = 0, σ = 1?','What does the KL do to a code with μ = 5?','What does the −log σ² term do as σ → 0?'],
+ expected:['Zero: the cloud is exactly N(0, I).','About 12.5 per number: a strong pull back towards the origin.','It grows without limit: tiny clouds are penalised.'],
+ point:'Road 1 looks like a hand-made penalty, like ridge regression (squared error + λ‖w‖²). Road 2 shows that this exact sum comes out of maximum likelihood, with a weight fixed by σ.',
+ transition:'Road 2: start from the generative model.'});
+chap('6.3');
+function vaePgm(stage){
+ const W=1100,H=300;let g=`<rect x="60" y="16" width="560" height="250" rx="10" fill="none" stroke="${MUTED}" stroke-width="2"/>`+label(608,254,'60,000 images',{size:17,anchor:'end'});
+ g+=`<circle cx="170" cy="120" r="46" fill="${palette.paper}" stroke="${palette.noise}" stroke-width="3"/>`+label(170,130,'z',{fill:palette.noise,size:30,anchor:'middle',weight:650})+label(170,196,'code (hidden)',{size:17,anchor:'middle'});
+ g+=label(650,52,'this is our prior:',{fill:palette.noise,size:20,weight:650})+label(650,80,'p(z) = N(0, I), 2 numbers, fixed in advance',{fill:palette.noise,size:19});
+ if(stage>=2){g+=`<line x1="216" y1="120" x2="414" y2="120" stroke="${palette.ink}" stroke-width="2.5"/><path d="M424,120 l-14,-7 v14 z" fill="${palette.ink}"/>`+label(318,104,'decoder network',{size:17,anchor:'middle'})+
+  `<circle cx="470" cy="120" r="46" fill="#D9DEE5" stroke="${palette.data}" stroke-width="3"/>`+label(470,130,'x',{fill:palette.data,size:30,anchor:'middle',weight:650})+label(470,196,'image (observed)',{size:17,anchor:'middle'});
+  g+=label(650,132,'the likelihood:',{fill:palette.data,size:20,weight:650})+label(650,160,'p(x | z) = N(x; decoder(z), σ² I)',{fill:palette.data,size:19})+label(650,186,'each pixel: the decoder’s value + noise of size σ',{size:17});}
+ if(stage>=3){g+=`<circle cx="318" cy="290" r="9" fill="${palette.ink}"/>`+label(332,296,'θ: the decoder’s weights, shared by all images (learned)',{size:17})+`<line x1="318" y1="281" x2="318" y2="142" stroke="${palette.ink}" stroke-width="2" stroke-dasharray="4 4"/>`;}
+ return fig(W,H+12,g,'The VAE as a graphical model: a hidden code z with prior N(0, I), an arrow through the decoder to the observed image x, decoder weights θ shared.');
+}
+S('vae-pgm','vae','Road 2: the VAE as a generative model',{builds:3,
+ body:act(6,`<div class="state-slot">${[1,2,3].map(k=>`<div data-only="${k}">${vaePgm(k)}</div>`).join('')}</div>`),
+ lines:['Start with the prior: every image has a hidden code z, and before seeing any image we say z ~ N(0, I).','Then the likelihood: the decoder network turns z into a mean image, and the image x is that mean plus a little Gaussian noise per pixel.','The decoder weights θ sit outside the box: one set of weights, shared by every image, and learned from the data.'],
+ ask:['Which circle is observed?','What does the arrow mean?','How many sets of decoder weights are there?'],
+ expected:['x, the image (shaded). z is never observed.','x is drawn given z: through the decoder, then pixel noise.','One, shared by all 60,000 images.'],
+ point:'Notation of probabilistic graphical models (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter.',
+ transition:'How to draw a new image from this model.'});
+const PZ=V.prior_z;
+S('vae-draw','vae','To draw an image, follow the arrows: first z, then x',{builds:3,
+ body:act(6,`<div class="dflex" style="display:flex;gap:26px;align-items:center">`+
+  `<div class="card" style="border-color:${palette.noise}66;min-width:210px"><h4 style="color:${palette.noise}">① draw z</h4><p><code>z = torch.randn(2)</code></p><p>z = (${f(PZ[0][0],2)}, ${f(PZ[0][1],2)})</p></div>`+
+  at(2,`<div class="dflex" style="display:flex;gap:26px;align-items:center"><span class="lead">→</span><div class="card" style="border-color:${palette.p}66"><h4 style="color:${palette.p}">② decode</h4><figure class="dg-cell">${digit('vae2_prior_samples',0,120)}<figcaption>mean image f<sub>θ</sub>(z)</figcaption></figure></div></div>`)+
+  at(3,`<div class="dflex" style="display:flex;gap:26px;align-items:center"><span class="lead">→</span><div class="card" style="border-color:${palette.data}66"><h4 style="color:${palette.data}">③ add pixel noise</h4><figure class="dg-cell">${digit('vae2_noisy_sample',0,120)}<figcaption>x = mean + 0.2 × noise</figcaption></figure></div></div>`)+`</div>`,
+  at(3,takeaway('We usually show the mean image: the pixel noise is independent speckle and adds nothing about the digit.'))),
+ lines:['Step one, the prior: draw two numbers from N(0, I). No image is needed.','Step two, the arrow: the decoder turns the code into a mean image.','Step three: add independent noise of size σ = 0.2 to each pixel. That is a true sample of x; the mean image is what we display.'],
+ ask:['Does generating need the encoder?','Why is this a 9 and not another digit?','Why display the mean image?'],
+ expected:['No: only the prior and the decoder.','Because of where this z sits: the decoder has learned which region of codes means which digit.','The noise carries no information about the digit; it only makes speckle.'],
+ transition:'What the likelihood means in numbers.',source:OURS});
+S('sigma','vae','The likelihood, in numbers: a squared error',{builds:3,
+ body:act(6,stack(eq(R`\log p_\theta(x\mid z)=\sum_{j=1}^{784}\log\N\big(x_j;\,f_\theta(z)_j,\sigma^2\big)`),at(2,eq(R`=-\frac{1}{2\sigma^2}\,\big\lVert x-f_\theta(z)\big\rVert^2\;-\;784\log\big(\sigma\sqrt{2\pi}\big)`)),
+  at(3,p(`We use σ = ${f(d.meta.sigma,1)}: about the typical pixel error of a 2-number code, √(31 / 784) ≈ 0.2. The constant term, −784 log(σ√2π), is +${f(-V.loglik_const,1)}.`)))),
+ lines:['Each pixel is an independent Gaussian around the decoder’s output, so the log-likelihood is a sum over 784 pixels.','Expand the Gaussian: minus the squared error over 2σ², plus a constant. The autoencoder’s loss was a likelihood all along.','σ = 0.2 matches the size of a typical pixel error; it is a modelling choice, and Section 6.7 shows what changing its weight does.'],
+ ask:['What happens to the first term if σ is small?','Where have you seen squared error = Gaussian likelihood before?','Is σ learned here?'],
+ expected:['Errors cost more: the model is pushed to reconstruct precisely.','Linear regression: least squares is maximum likelihood with Gaussian noise.','No, fixed at 0.2. It can be learned; we keep it fixed for clarity.'],
+ transition:'Train by maximum likelihood, like Part 2.'});
+S('vae-mle','vae','To learn θ, maximise log p(x) for every image: an integral',{builds:2,
+ body:act(6,stack(eq(R`p_\theta(x)=\int p_\theta(x\mid z)\,p(z)\,dz`),at(2,cols(stack(small('Part 2: a sum over two kinds'),eq(R`p(x)=\sum_{k=1}^{2}\pi_k\N(x;\mu_k,\sigma_k^2)`)),stack(small('Now: an integral over every possible code'),eq(R`p_\theta(x)=\int \N(x;f_\theta(z),\sigma^2 I)\,\N(z;0,I)\,dz`)),'1fr 1fr')))),
+ lines:['The likelihood of an image adds up all the ways it could have been made: every code z, weighted by its prior probability.','For the geyser the sum had two terms. Here it is an integral over all codes, through a neural network. No formula.'],
+ ask:['Why do we need p(x) at all?','Why can we not compute this integral exactly?'],
+ expected:['To train θ by maximum likelihood, and to score images.','The decoder is a neural network; the integral has no closed form, and for 16 numbers a grid is hopeless.'],
+ transition:'Look at one image: which codes could have made it?'});
+S('posterior3','vae','For our 3: which codes could have made it?',{builds:3,
+ body:act(6,cols(`<div class="state-slot"><div data-only="1">${fig(400,400,wideMark(),'The posterior over codes for our 3, within the prior.')}</div><div data-only="2-3">${fig(810,400,wideMark()+posteriorSVG({ox:410,S:400,view:'zoom',title:'zoomed in about 27×'}).s,'The posterior, wide and zoomed.')}</div></div>`,
+  stack(at(3,eq(R`p(z\mid x)=\frac{p(x\mid z)\,p(z)}{p(x)}`))),'1.6fr .7fr')),
+ lines:['The trained VAE’s decoder, our 3, and every code on a fine grid: shade = how well that code explains the 3. Dashed circles: the prior N(0, I).',`Zoomed in: the codes that explain this 3 form a tiny patch, about ${f(V.grid.post_sd[0],3)} wide, near (${f(V.grid.post_mean[0],2)}, ${f(V.grid.post_mean[1],2)}).`,'This is the posterior over codes, by Bayes’ rule. Its denominator is the p(x) we want.'],
+ ask:['Why is the patch so small?','Which part of Bayes’ rule is hard?','What is the prior here, and what is the likelihood?'],
+ expected:['784 pixels with σ = 0.2 pin the code down very precisely.','The evidence p(x) in the denominator: the integral from the last slide.','Prior N(0, I) over codes; likelihood p(x | z) from the decoder.'],
+ transition:'In two dimensions we can still add up rectangles.',source:OURS});
+function inferPgm(stage){
+ const W=1100,H=290;let g=`<rect x="60" y="16" width="520" height="240" rx="10" fill="none" stroke="${MUTED}" stroke-width="2"/>`+label(568,244,'60,000 images',{size:17,anchor:'end'});
+ g+=`<circle cx="170" cy="120" r="46" fill="${palette.paper}" stroke="${palette.noise}" stroke-width="3"/>`+label(170,130,'z',{fill:palette.noise,size:30,anchor:'middle',weight:650})+
+  `<circle cx="450" cy="120" r="46" fill="#D9DEE5" stroke="${palette.data}" stroke-width="3"/>`+label(450,130,'x',{fill:palette.data,size:30,anchor:'middle',weight:650})+
+  `<line x1="216" y1="104" x2="394" y2="104" stroke="${palette.ink}" stroke-width="2.5"/><path d="M404,104 l-14,-7 v14 z" fill="${palette.ink}"/>`+label(310,90,`${sub('p','θ')}(x | z): decoder`,{size:17,anchor:'middle'});
+ if(stage>=2)g+=`<path d="M404,140 Q310,190 222,142" fill="none" stroke="${palette.q}" stroke-width="2.5" stroke-dasharray="8 6"/><path d="M216,138 l14,0 l-6,12 z" fill="${palette.q}"/>`+label(310,206,`${sub('q','φ')}(z | x): encoder`,{fill:palette.q,size:18,anchor:'middle',weight:650});
+ g+=label(630,46,'the posterior p(z | x): which codes made this x?',{fill:palette.ink,size:19,weight:650})+label(630,74,'Bayes’ rule needs p(x) = ∫ p(x | z) p(z) dz: no formula',{size:17});
+ if(stage>=2)g+=label(630,124,'the variational part: approximate it with',{fill:palette.q,size:19,weight:650})+label(630,152,`${sub('q','φ')}(z | x) = N(${sub('μ','φ')}(x), ${sub('σ','φ')}(x)²), a Gaussian whose`,{fill:palette.q,size:17})+label(630,176,'mean and spread the encoder computes from x',{fill:palette.q,size:17});
+ if(stage>=3)g+=label(630,226,'fit θ and φ together by maximising the ELBO',{fill:palette.ink,size:19,weight:650})+label(630,252,'(Lecture 1, section 4.1)',{size:17});
+ return fig(W,H,g,'The VAE graphical model with the dashed inference arrow: the encoder q_φ(z | x) approximates the posterior.');
+}
+S('vae-infer','vae','The variational part: an encoder that approximates the posterior',{builds:3,
+ body:act(6,`<div class="state-slot">${[1,2,3].map(k=>`<div data-only="${k}">${inferPgm(k)}</div>`).join('')}</div>`,at(3,`<div>${l1('vi-idea','1.5','the VI idea')}${l1('elbo-step1','4.1','deriving the ELBO')}</div>`)),
+ lines:['To learn the decoder we need, for each image, the codes that could have made it: the posterior p(z | x). Its denominator is the intractable p(x).','Variational inference: pick a simple family, Gaussians, and approximate the posterior with q. The dashed arrow is the encoder: it reads x and outputs q’s mean and spread.','Train the decoder (θ) and the encoder (φ) together by maximising the ELBO, exactly as Lecture 1 fitted q.'],
+ ask:['Why do we need the posterior at all?','What is “variational” about the VAE?','Why is one encoder for all images a good idea?'],
+ expected:['Training needs log p(x), and the ELBO replaces it using a q close to the posterior.','We approximate the posterior with a member of a simple family (diagonal Gaussians) fitted by optimisation: Lecture 1’s variational inference.','One forward pass gives q for any image, instead of a separate optimisation per image (this is called amortised inference).'],
+ point:'Kingma and Welling (2014), figure 1: solid = generative model p_θ, dashed = variational approximation q_φ.',
+ transition:'Check the encoder against the true posterior of our 3.'});
+S('q3','vae','Check the encoder: its q for our 3, against the true posterior',{builds:2,
  body:act(6,cols(fig(420,420,posteriorSVG({S:420,view:'zoom',enc:true,q:[V.vi3.final_mu[0],V.vi3.final_mu[1],V.vi3.final_sd[0],V.vi3.final_sd[1]]}).s,'The posterior, the per-image q and the encoder’s q, zoomed.'),
-  stack(table(['','ELBO'],[['log p(x), the exact target',f(V.grid.log_px,2)],['q fitted for this image (1,200 steps)',f(V.vi3.final_elbo,2)],['q from the encoder (one pass)',f(V.q3.elbo,2)]]),at(2,p(`Encoder: μ = (${f(V.q3.mu[0],3)}, ${f(V.q3.mu[1],3)}), σ = (${f(V.q3.sd[0],3)}, ${f(V.q3.sd[1],3)}).`)),at(2,small('Dashed: the encoder’s q. Shaded: the per-image fit. Both 2 standard deviations.'))),'1fr 1.1fr')),
+  stack(`<div class="tsm">${table(['','ELBO'],[['log p(x), the exact target',f(V.grid.log_px,2)],['q fitted to this image alone',f(V.vi3.final_elbo,2)],['q from the encoder (one pass)',f(V.q3.elbo,2)]])}</div>`,at(2,p(`Encoder: μ = (${f(V.q3.mu[0],3)}, ${f(V.q3.mu[1],3)}), σ = (${f(V.q3.sd[0],3)}, ${f(V.q3.sd[1],3)}).`)),at(2,small('Dashed: the encoder’s q. Shaded: the per-image fit. Both 2 standard deviations.'))),'1fr 1.1fr')),
  lines:[`The per-image fit gets within ${f(V.grid.log_px-V.vi3.final_elbo,2)} of log p(x); the encoder, in one pass, within ${f(V.q3.gap,2)}.`,'The encoder’s q sits slightly off-centre and a little too narrow. That small loss is the price of amortisation.'],
  ask:['Which q is better, and by how much?','Why is the encoder’s q not perfect?'],
  expected:[`The per-image fit, by ${f(V.vi3.final_elbo-V.q3.elbo,2)} nats.`,'One network must serve all 60,000 images; it cannot be exactly right for each.'],
  transition:'The loss, term by term.',source:OURS});
-chap('6.5');
+S('elbo-meets','vae','The ELBO for one image is Road 1’s loss',{builds:3,
+ body:act(6,stack(`<div class="eq-sm">${eq(R`\ELBO=\underbrace{\E_{q_\phi(z\mid x)}\big[\log p_\theta(x\mid z)\big]}_{\text{reconstruct }x}\;-\;\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,p(z)\big)}_{\text{stay near the prior}}`)}</div>`,
+  at(2,`<div class="eq-sm">${eq(R`\log p_\theta(x\mid z)=-\frac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2+\text{const}`)}</div>`),
+  at(3,`<div class="eq-sm">${eq(R`-\ELBO=\E_{q}\Big[\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2\Big]+\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,I)\big)+\text{const}`)}</div>`),
+  at(3,takeaway('Road 2 gives Road 1’s loss: squared error plus the KL to N(0, I). The weight on the squared error is 1 / 2σ², set by the pixel noise.')),at(3,`<div>${l1('elbo-two-terms','4.1','the ELBO in two terms')}</div>`))),
+ lines:['Lecture 1’s ELBO, with today’s roles: an expected log-likelihood of the image, minus a KL from q to the prior.','With Gaussian pixel noise, the log-likelihood is minus a scaled squared error (section 6.3).','Flip the sign: squared error plus KL. The two roads meet; the penalty of Road 1 was maximum likelihood all along.'],
+ ask:['Which term rewards reconstruction?','Where does 1 / 2σ² come from?','What happens to the loss if σ is small?'],
+ expected:['The expected log-likelihood (the first term).','The Gaussian density of each pixel around the decoder’s output.','The squared error dominates: the model is pushed to reconstruct precisely, and the KL matters less.'],
+ transition:'Train it: the loss, term by term, with numbers.'});
+chap('6.4');
 S('vae-loss','vae','The loss for one image is the negative ELBO',{builds:3,
  body:act(6,stack(eq(R`L(\phi,\theta;x)=\underbrace{\E_{q_\phi(z\mid x)}\Big[\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2\Big]}_{\text{reconstruction}}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,\N(0,I)\big)}_{\text{stay near the prior}}`),
   at(2,eq(R`\text{reconstruction}\approx\tfrac{1}{2\sigma^2}\lVert x-f_\theta(\mu+\sigma\odot\epsilon)\rVert^2,\qquad \epsilon\sim\N(0,I)\ \text{(one draw)}`)),
-  at(3,eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(Lecture 1, section 2.7)}`)))),
+  at(3,eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(Lecture 1, section 2.7)}`)),at(3,`<div>${l1('kl-sampling','2.8','Monte Carlo estimates')}${l1('reparam','3.5','reparameterisation')}${l1('diag-kl','2.7','diagonal-Gaussian KL')}</div>`))),
  lines:['Minus the ELBO, up to the constant 541.4 from section 6.1: an expected scaled squared error, plus a KL from q to the prior.','The expectation is estimated with one reparameterised draw per image per step.','The KL between two diagonal Gaussians has a closed form: no sampling needed.'],
  ask:['Which term pulls the codes towards N(0, I)?','Why is one draw enough?','What does the KL do to a code with μ = 5?'],
  expected:['The KL term.','Over many steps and images the noise averages out; the estimate is unbiased.','Penalises it by about 12.5: strong pressure back towards the origin.'],
  point:'Shape of the loss: data fit + penalty, like ridge regression (squared error + λ‖w‖²). Here the penalty is a KL to the prior, and it falls out of the ELBO rather than being added by hand.',
  transition:'Put in the numbers for our 3.'});
-const WK=V.worked;
 S('vae-worked','vae','One step for our 3, with numbers',{builds:3,
  body:act(6,stack(eq(R`\mu=(${f(V.q3.mu[0],3)},\,${f(V.q3.mu[1],3)}),\quad\sigma=(${f(V.q3.sd[0],3)},\,${f(V.q3.sd[1],3)}),\quad\epsilon=(${f(WK.eps[0],1)},\,${f(WK.eps[1],1)})`),eq(R`z=\mu+\sigma\odot\epsilon=(${f(WK.z[0],3)},\,${f(WK.z[1],3)})`),
   at(2,`<div class="dflex" style="display:flex;gap:20px;align-items:center">${digit('example',0,92)}<span class="lead">vs</span>${digit('vae2_worked_recon',0,92)}${eq(R`\tfrac{1}{2(0.2)^2}\times${f(WK.sse,2)}=${f(WK.recon,1)}`)}</div>`),
@@ -935,19 +1115,13 @@ loss = (recon + kl).mean()`)}</div>`,stack(at(2,p('(1) the encoder outputs 2z nu
  ask:['What are the three changes?','How many lines of the training loop change?'],
  expected:['Two outputs per code number, a random draw of z, and the KL term.','None: only the model and the loss.'],
  transition:'How the two terms behave while training.',nb:'sec-6-5'});
-function vaeCurves(){
- const c=V.curve,ep=c.epoch;
- const A_=lineChart({W:540,H:320,xMin:1,xMax:50,yMin:300,yMax:600,ticksX:[1,25,50],ticksY:[300,400,500,600],xLabel:'epoch',yLabel:'reconstruction term',series:[{x:ep,y:c.recon,color:palette.loss}]});
- const B_=lineChart({ox:560,W:540,H:320,xMin:1,xMax:50,yMin:0,yMax:12,ticksX:[1,25,50],ticksY:[0,4,8,12],xLabel:'epoch',yLabel:'KL term',series:[{x:ep,y:c.kl,color:palette.q}],L:630-560});
- return A_.s+B_.s;
-}
 S('vae-curves','vae','While training: reconstruction falls, the KL settles',{builds:2,
  body:act(6,fig(1100,320,vaeCurves(),'The two terms of the VAE loss during training.'),at(2,p(`After 50 epochs: reconstruction ${f(V.curve.recon.at(-1),0)}, KL ${f(V.curve.kl.at(-1),1)} per image.`))),
  lines:['The reconstruction term falls steadily, as for the autoencoder.','The KL stays near 9 nats per image: each code is allowed to say about 9 nats more than the prior, no more.'],
  ask:['Why does the KL not fall to zero?','What would a KL of zero mean?'],
  expected:['Then q would equal the prior for every image: the code would carry no information and reconstruction would suffer.','The code ignores the image: every 3 and 7 gets the same q. We will see this happen.'],
  transition:'Now sample.',source:OURS});
-chap('6.6');
+chap('6.5');
 S('vae-samples','vae','Now sample: z ~ N(0, I), then decode',{builds:3,
  body:act(6,rows(['autoencoder, 2',digits('ae2_prior_samples',{cols:16,size:58,gap:4})],['VAE, 2',at(2,digits('vae2_prior_samples',{cols:16,size:58,gap:4}))],['VAE, 16',at(3,digits('vae16_prior_samples',{cols:16,size:58,gap:4}))])),
  lines:['The same 16 draws from N(0, I) as before, through the autoencoder’s decoder.','Through the 2-number VAE: almost every draw is a digit, and all ten digits appear.','Through the 16-number VAE: sharper and more varied. These include the fakes from the start of the lecture.'],
@@ -955,7 +1129,7 @@ S('vae-samples','vae','Now sample: z ~ N(0, I), then decode',{builds:3,
  expected:['Training made the codes fill N(0, I), so random codes land on digits.','Each pixel is modelled as an independent Gaussian around a mean image; the mean of plausible strokes is soft.','Most of them: random codes reach only the digits whose codes sit near the origin.'],
  transition:'Where the codes are now.',source:OURS});
 S('vae-scatter','vae','The codes now fill N(0, I)',{builds:2,
- body:act(6,cols(`<div class="state-slot"><div data-only="1">${fig(560,440,scatterSVG('vae2',{W:560,H:440,lim:[-5,5,-5,5],ticks:[[-4,-2,0,2,4],[-4,-2,0,2,4]]}).s,'VAE codes of 1,000 test digits.')}</div><div data-only="2">${fig(560,440,scatterSVG('vae2',{W:560,H:440,lim:[-5,5,-5,5],ticks:[[-4,-2,0,2,4],[-4,-2,0,2,4]],prior:500}).s,'VAE codes with 500 draws from N(0, I).')}</div></div>`,
+ body:act(6,cols(`<div class="state-slot"><div data-only="1">${fig(squareW([-5,5,-5,5],420),420,scatterSVG('vae2',{W:squareW([-5,5,-5,5],420),H:420,lim:[-5,5,-5,5],ticks:[[-4,-2,0,2,4],[-4,-2,0,2,4]],contours:true}).s,'VAE codes of 1,000 test digits.')}</div><div data-only="2">${fig(squareW([-5,5,-5,5],420),420,scatterSVG('vae2',{W:squareW([-5,5,-5,5],420),H:420,lim:[-5,5,-5,5],ticks:[[-4,-2,0,2,4],[-4,-2,0,2,4]],prior:500,contours:true}).s,'VAE codes with 500 draws from N(0, I).')}</div></div>`,
   stack(p(`Codes of all 10,000 test digits: mean (${f(V.agg.mean[0],1)}, ${f(V.agg.mean[1],1)}), spread (${f(V.agg.sd[0],1)}, ${f(V.agg.sd[1],1)}).`),at(2,p('Random draws (red) now land among real codes, on every digit.'))),'1.25fr 1fr')),
  lines:['The VAE’s codes (the means μ of q) for the same 1,000 test digits: one round cloud around the origin, digits side by side.','Overlay 500 draws from N(0, I): they fall on real codes of every digit. That is why sampling works.'],
  ask:['Compare with the autoencoder’s map (Part 5). What changed?','Is the cloud exactly N(0, I)?'],
@@ -973,7 +1147,7 @@ S('vae-grid','vae','Decode a grid of codes: digits everywhere',{builds:2,
  ask:['Compare with the autoencoder’s grid. What is different?','Why are the in-between images plausible now?'],
  expected:['No junk: the whole region that N(0, I) samples from is used.','Each image owned a small cloud of codes during training, so the decoder learned to draw something sensible everywhere in between.'],
  transition:'Section 6.7: a weight on the KL.',source:OURS});
-chap('6.7');
+chap('6.6');
 S('beta-what','vae','Put a weight on the KL: β',{builds:2,
  body:act(6,stack(eq(R`L_\beta=\E_{q}\Big[\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2\Big]+\beta\,\KL\big(q(z\mid x)\,\|\,\N(0,I)\big)`),p('β = 1 is the true ELBO. Changing β is the same as assuming noisier or cleaner pixels (a different σ).'),
   at(2,cols(card('Small β','codes free to spread: close to an autoencoder',palette.p),card('Large β','codes squeezed towards the prior: closer to N(0, I), less detail',palette.q),'1fr 1fr')))),
@@ -1001,7 +1175,7 @@ S('beta-collapse','vae','β = 256: every code decodes to the same blur',{builds:
  ask:['Why is KL = 0 the cheapest solution here?','How would you spot collapse during training?'],
  expected:['β × KL dominates the loss; reconstruction error is worth less than any information in the code.','The KL term falls to about 0 and samples all look the same.'],
  transition:'Wrap-up.',source:OURS});
-chap('6.8');
+chap('6.7');
 S('arc','vae','The whole lecture in one table',{
  body:act(6,`<div class="tsm">`+table(['model','how it generates','how it is fitted','what goes wrong'],[
   ['Gaussian or mixture (Part 2)','pick a bump, draw a number','maximum likelihood','fine for a few numbers'],
@@ -1040,8 +1214,76 @@ O('em','EM in one slide: the classic way to fit a mixture',{builds:2,
  expected:['It is p(k | x), the posterior over the hidden variable: Bayes’ rule.','Both alternate between inferring hidden variables and refitting the model; the VAE uses an approximate posterior q because the exact one is intractable.'],
  transition:'Back to the main route.'});
 
+// ---------------------------------------------------------------- appendix: slides moved out of the main route
+S('full-gauss','optional','Second try: one 784-dimensional Gaussian with a full covariance',{optional:true,builds:2,
+ body:act(3,cols(stack(eq(R`p(x)=\N(x;\,m,\Sigma),\qquad \Sigma\in\mathbb{R}^{784\times784}`),p(`${comma(M.params.full)} numbers: 784 for the mean, ${comma(M.params.full-784)} for the covariance.`),at(2,small('Samples have smoother, stroke-like blobs, but they are ghosts, not digits.'))),stack(small('8 samples'),digits('full_samples',{cols:4,size:96,gap:10})),'1fr 1fr')),
+ lines:['One big Gaussian whose covariance links every pair of pixels: over 300,000 numbers.','Samples are smoother, because neighbouring pixels now move together. Still not digits: one bump for ten kinds of digit, and far too many numbers.'],
+ ask:['Why are the samples smoother than before?','What is wrong with one bump? Think of Part 2.'],
+ expected:['The covariance makes neighbours move together.','Digits form clusters (one per digit, at least); one Gaussian is Part 2’s single bell again.'],
+ transition:'Idea: describe each image with a few numbers first.',source:OURS});
+S('pca-variance','optional','How many numbers do we need?',{optional:true,builds:2,
+ body:act(3,cols(fig(700,330,varChart(),'Share of the spread of all digits kept by the first d PCA directions.'),stack(p(`d = 10 keeps ${f(100*M.pca.at['10'],0)}% of the spread; d = 50 keeps ${f(100*M.pca.at['50'],0)}%.`),at(2,p('784 numbers per digit, but about 50 carry most of the information.'))),'1.4fr 1fr')),
+ lines:['The first few directions carry the most spread; the curve flattens fast.','Digits really live near a much lower-dimensional surface. That is why compressing first is a good idea.'],
+ ask:['Why does the curve flatten?','What is a good d for generating digits?'],
+ expected:['Later directions describe small details and pixel noise.','A trade-off: small d is easier to model, large d keeps detail. We will try several.'],
+ transition:'A map of digits in two numbers.'});
+S('pca-gauss','optional','One Gaussian over d PCA numbers',{optional:true,builds:2,
+ body:act(3,rows(['d = 2',digits('gen_d2k1',{cols:16,size:60,gap:4})],['d = 10',digits('gen_d10k1',{cols:16,size:60,gap:4})],['d = 50',at(2,digits('gen_d50k1',{cols:16,size:60,gap:4}))])),
+ lines:['A Gaussian over 2 numbers gives blurry average-looking digits; over 10 numbers, rough digits appear.','Over 50 numbers: more detail, but many samples are mixtures of two digits. One bump for ten kinds of digit.'],
+ ask:['Why are the d = 2 samples so blurry?','Why do some d = 50 samples look like two digits on top of each other?'],
+ expected:['Two PCA numbers can only describe a blurry digit, whatever their values.','The single Gaussian puts a lot of probability between the clusters of different digits.'],
+ transition:'Use a mixture over the codes.',source:OURS});
+S('search','optional','Search by code: the nearest digits to a query',{optional:true,builds:2,
+ body:act(4,cols(`<div class="dflex" style="display:flex;gap:24px;align-items:end"><figure class="dg-cell">${digit('search_query',0,130)}<figcaption>query</figcaption></figure>${at(2,digits('search_code',{cols:5,size:100,gap:10,labels:['1st','2nd','3rd','4th','5th']}))}</div>`,
+  stack(p('Encode the query, encode all 60,000 training digits, return the 5 nearest codes.'),at(2,small('Music apps and “vector databases” do the same with codes of songs, images and text.'))),'1.45fr 1fr')),
+ lines:['Codes from a 16-number autoencoder. To search, compare 16 numbers instead of 784 pixels.','The nearest codes are other 1s with the same slant: the code keeps what matters about the digit.'],
+ ask:['Why search with codes instead of pixels?','What would make two codes close?'],
+ expected:['Fewer numbers, and distances that reflect shape rather than exact pixel positions.','Digits the decoder rebuilds similarly: same identity and similar style.'],
+ transition:'Codes can also clean images.',source:OURS});
+S('denoise','optional','Denoising: damage the input, ask for the clean image',{optional:true,builds:3,
+ body:act(4,cols(rows(['clean',digits('watch',{cols:8,size:58,gap:5})],['half the pixels removed',digits('damaged_watch',{cols:8,size:58,gap:5})],['plain autoencoder',at(2,digits('ae16_on_damaged',{cols:8,size:58,gap:5}))],['denoising autoencoder',at(2,digits('dae16_clean',{cols:8,size:58,gap:5}))]),
+  stack(at(2,p(`Error against the clean digits: plain ${f(A.ae16_test_sse_damaged,1)}, denoising ${f(A.dae16_test_sse_damaged,1)}.`)),at(3,eq(R`L=\frac1n\sum_i\big\lVert x_i-f_\theta(g_\phi(\tilde x_i))\big\rVert^2`)),at(3,small('Input: the damaged x̃. Target: the clean x.'))),'1.5fr 1fr')),
+ lines:['Remove a random half of the pixels of each test digit.','A plain autoencoder rebuilds the damage faithfully. A denoising autoencoder, trained on damaged inputs, fills in the strokes.','Its loss compares the output with the clean image, so it must learn what digits look like, not copy its input.'],
+ ask:['Why does the plain autoencoder reproduce the holes?','What does the denoising version have to learn?','What does this have in common with dropout?'],
+ expected:['It was trained to copy its input, holes and all.','What digits look like, so it can guess the missing pixels.','Both randomly remove inputs during training (denoising autoencoders came first, in 2008).'],
+ point:'Both have 16-number codes. Vincent et al., “Extracting and composing robust features with denoising autoencoders”, ICML 2008.',
+ transition:'Part 4 recap.',source:OURS});
+S('posthoc','optional','A fix we already know: fit a mixture to where the codes are',{optional:true,builds:3,
+ body:act(5,cols(fig(520,380,scatterSVG('ae2',{W:520,H:380,lim:[-6,24,-9,14],ticks:[[0,10,20],[-5,0,5,10]],mog:G.ae2_mog,opacity:.35,r:3}).s,'Autoencoder codes with ten fitted Gaussian ellipses.'),
+  stack(mini('Part 3’s recipe: fit 10 Gaussians to the codes of the 60,000 training digits, sample a code, decode.'),at(2,stack(small('2-number autoencoder + mixture'),digits('ae2_mog_samples',{cols:8,size:52,gap:4}))),at(3,stack(small('16-number autoencoder + mixture'),digits('ae16_mog_samples',{cols:8,size:52,gap:4})))),'1fr 1.15fr')),
+ lines:['Fit a mixture of 10 Gaussians to the training codes: the ellipses follow the clusters.','Sample codes from it, decode: real-looking digits from the 2-number autoencoder.','The same with 16-number codes: sharper digits. A density fitted after training works.'],
+ ask:['Do the ellipses cover the clusters?','Why do these samples look better than N(0, I) codes?','What is unsatisfying about this two-stage approach?'],
+ expected:['Roughly: about one ellipse per digit group, some shared.','The codes are drawn where real codes are.','Two separate fits; the codes were never shaped for easy sampling; and there is no single model that scores p(x).'],
+ transition:'What we would like instead.',source:OURS});
+S('evidence-grid','optional','With 2 numbers we can add up rectangles; with 16 we cannot',{optional:true,builds:2,
+ body:act(6,stack(eq(R`\log p(x)\approx\log\sum_{\text{cells}}p(x\mid z_c)\,p(z_c)\,\Delta z=${f(V.grid.log_px,2)}`),p(`Checked by importance sampling with 100,000 draws: ${f(V.grid.log_px_is,2)}.`),at(2,p('A grid with 161 points per axis (from −4 to 4 in steps of 0.05) has 161² ≈ 26,000 cells for 2 numbers, and 161¹⁶ ≈ 10³⁵ cells for 16. Lecture 1’s intractable evidence, again.')))),
+ lines:[`For our 3 the grid gives log p(x) = ${f(V.grid.log_px,2)}. (A density over 784 numbers can exceed 1, so its log can be positive.)`,'Grids grow exponentially with the number of code dimensions. We need another way.'],
+ ask:['Why is log p(x) positive?','Why do grids fail in 16 dimensions?'],
+ expected:['It is a density, not a probability: with σ = 0.2 per pixel, densities are large.','The number of cells is (points per axis) to the power of the dimension.'],
+ point:`The fine grid is 241 × 241 cells over a window of ±0.15 around the posterior. A coarse grid over the whole prior gives ${f(V.grid.log_px_wide,2)}: too coarse to resolve the patch.`,
+ transition:'Sample codes from the prior instead?',source:OURS});
+S('naive-mc','optional','Average p(x | z) over random codes? Most draws are wasted',{optional:true,builds:2,
+ body:act(6,cols(stack(eq(R`p(x)=\E_{z\sim p(z)}\big[p(x\mid z)\big]\approx\frac1S\sum_{s=1}^{S}p(x\mid z_s)`),fig(680,290,mcChart(),'The Monte Carlo estimate of log p(x) against the number of prior draws.')),
+  stack(p(`With 100 draws the estimate is still off by about ${f(V.grid.log_px-V.naive_mc[2].median,0)}.`),at(2,p(`Of 100,000 prior draws, the best 10 carry ${f(100*V.top10_share,0)}% of the total.`)),at(2,small('Almost every code from the prior explains this 3 terribly. We need codes from the posterior’s tiny patch.'))),'1.45fr 1fr')),
+ lines:['Lecture 1’s Monte Carlo: p(x) is an average of p(x | z) over prior codes. It converges, but only after tens of thousands of draws.','A handful of lucky draws carry the whole sum. We should draw codes where the posterior is, not from the prior.'],
+ ask:['Why is the estimate so low with few draws?','Where should we draw codes from instead?'],
+ expected:['Most prior draws decode to a different digit; p(x | z) is astronomically small for them.','From near the posterior: codes that could have made this 3. That is what an encoder will provide.'],
+ transition:'Lecture 1’s tool for an intractable posterior.',source:OURS});
+S('vi3','optional','Fit q for our 3: press play',{optional:true,builds:2,
+ body:act(6,widget('vi3','Variational inference for one image.')),
+ lines:['Start q at the prior N(0, I) (a circle of radius 2 in the left panel) and climb the ELBO with reparameterised draws.',`q moves into the posterior’s patch and shrinks to fit it. The ELBO ends at ${f(V.vi3.final_elbo,2)}, just below log p(x) = ${f(V.grid.log_px,2)}.`],
+ ask:['What happens to the ELBO at first? Why?','How big is the final gap?'],
+ expected:['It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.',`About ${f(V.grid.log_px-V.vi3.final_elbo,2)} nats: q is nearly the exact posterior.`],
+ point:'Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step.',
+ transition:'One image took 1,200 steps. Now 60,000 images.',source:OURS});
+S('amortise','optional','60,000 images would mean 60,000 separate fits',{optional:true,builds:3,
+ body:act(6,stack(p('Each image has its own posterior, so its own m and s: 1,200 steps each, and again for every new image.'),at(2,p('Instead, train a network that reads an image and outputs its m and s in one pass: the <b>encoder</b>.')),at(3,eq(R`q_\phi(z\mid x)=\N\big(\mu_\phi(x),\ \mathrm{diag}\,\sigma_\phi(x)^2\big)`)))),
+ lines:['Per-image VI works, but it is slow: 60,000 fits during training, and a fresh fit for every new image.','Learn the fit instead: an encoder network outputs the mean and spread of q for any image.','One network with weights φ, shared by all images. This is called amortised inference: pay once in training, then every image is one forward pass.'],
+ ask:['How many variational parameters would per-image VI need for 60,000 images?','What does the encoder output?','What is the price of sharing one network?'],
+ expected:['4 × 60,000 = 240,000.','Two means and two log-variances per image.','Its q may be a little worse than a dedicated fit for each image (next slides).'],
+ transition:'Put the encoder in front of the decoder.'});
 // ---------------------------------------------------------------- the map slide, first
 const toc=PARTS.map(([k,t])=>`<div><h3>${k} · ${t}</h3><ol>${CHAPTERS.filter(c=>c[0].startsWith(k+'.')).map(c=>`<li><a href="#${firstOf[c[0]]}/1" data-goto="${firstOf[c[0]]}">${c[0]} ${c[1]}</a></li>`).join('')}</ol></div>`).join('');
-slides.unshift({id:'contents',section:'map',title:'Lecture 2 at a glance: six parts, twenty-nine sections',builds:1,
+slides.unshift({id:'contents',section:'map',title:'Lecture 2 at a glance: six parts, twenty-seven sections',builds:1,
  body:`<div class="toc toc-flow">${toc}</div>`,prompts:['Click a section to jump to it. We start with why generative models matter, and end by training a VAE.'],chapter:'',notebook:ANCHORS.size?{href:COLAB,label:'▶ Notebook'}:null,
  notes:{ask:['What does each part add to the one before?'],expected:['A harder kind of data, or a better way to compress and sample it.'],point:'',misconception:'',transition:'Part 1: things that do not exist.',demo:''},source:'',optional:false});

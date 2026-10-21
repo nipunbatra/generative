@@ -1,6 +1,6 @@
 # From fitting a distribution to the VAE: speaker notes
 
-Planned main route: 150 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 140 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -9,12 +9,12 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 | Lecture map | 1 |
 | Part 1 · Why generate? | 16 |
 | Part 2 · Fit a distribution, then sample | 24 |
-| Part 3 · Images: PCA and Gaussians | 24 |
-| Part 4 · Autoencoders | 22 |
+| Part 3 · Images: PCA and Gaussians | 20 |
+| Part 4 · Autoencoders | 20 |
 | Part 5 · Can an autoencoder generate? | 18 |
-| Part 6 · The variational autoencoder | 45 |
+| Part 6 · The variational autoencoder | 42 |
 
-## contents: Lecture 2 at a glance: six parts, twenty-nine sections
+## contents: Lecture 2 at a glance: six parts, twenty-seven sections
 
 **Build 1, ask:** What does each part add to the one before?
 
@@ -348,19 +348,59 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** Old Faithful geyser data (Azzalini and Bowman, 1990), as distributed with R (<code>datasets::faithful</code>): 272 eruptions.
 
-## mix-code: Fit it by gradient descent, as Lecture 1 fitted q
+## mix-loss: What we minimise: minus the average log-likelihood
 
-**Build 1, ask:** What is the loss?
+**Build 1, ask:** Which numbers does p(xᵢ) depend on?
 
-**Expected:** Minus the average of log p(x_i) over the 272 waits.
+**Expected:** The shares π₁, π₂, the centres μ₁, μ₂ and the widths σ₁, σ₂.
 
-**Build 2, ask:** Why not optimise σ directly?
+**Build 2, ask:** Why average the logs rather than multiply the probabilities?
 
-**Expected:** A gradient step could make σ negative; optimising log σ keeps σ = exp(log σ) positive.
+**Expected:** A product of 272 small numbers underflows; the log turns it into a sum, and the average does not depend on how many waits we have.
 
-**Point here:** Waits are standardised before fitting (as in the notebook); values shown are converted back to minutes. EM is a faster classic algorithm for mixtures; the notebook uses it in Part 3.
+**Build 3, ask:** Why the minus sign?
+
+**Expected:** Optimisers minimise by convention; maximising the score = minimising its negative.
+
+**Transition:** What exactly does the loop change?
+
+**Source / evidence:** Old Faithful geyser data (Azzalini and Bowman, 1990), as distributed with R (<code>datasets::faithful</code>): 272 eruptions.
+
+## mix-params: The numbers to learn, each kept valid
+
+**Build 1, ask:** What could go wrong if the loop changed σ directly?
+
+**Expected:** One large step could make σ negative, and a negative width is meaningless.
+
+**Build 2, ask:** Why is exp(log_s) always positive?
+
+**Expected:** exp of any real number is positive.
+
+**Build 3, ask:** What does softmax give for w = (0, 0)? For w = (0, 1)?
+
+**Expected:** (½, ½). For (0, 1): (1/(1 + e), e/(1 + e)) ≈ (0.27, 0.73).
+
+**Point here:** Lecture 1 used the same trick for σ (section 3.2).
+
+**Transition:** Now the loop: one line per piece of the formula.
+
+**Source / evidence:** Old Faithful geyser data (Azzalini and Bowman, 1990), as distributed with R (<code>datasets::faithful</code>): 272 eruptions.
+
+## mix-code: The loop: one line for each piece of the formula
+
+**Build 1, ask:** Which line is the formula for p(xᵢ)?
+
+**Expected:** p_short + p_long: the two terms of the sum.
+
+**Build 2, ask:** How many numbers does the optimiser change?
+
+**Expected:** Six: two in mu, two in log_s, two in w (only five are free, because the shares add to 1).
+
+**Point here:** For many dimensions, compute logs of the terms and combine them with torch.logsumexp: the same value without underflow. The notebook’s EM fit (section 2.5) is the classic faster algorithm.
 
 **Transition:** Watch it run.
+
+**Source / evidence:** Old Faithful geyser data (Azzalini and Bowman, 1990), as distributed with R (<code>datasets::faithful</code>): 272 eruptions.
 
 ## mix-fit: Press play: the bumps separate onto the two clumps
 
@@ -416,24 +456,6 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Expected:** Hold out data, or use a score that penalises extra parameters.
 
-**Transition:** Two numbers per eruption.
-
-**Source / evidence:** Old Faithful geyser data (Azzalini and Bowman, 1990), as distributed with R (<code>datasets::faithful</code>): 272 eruptions.
-
-## two-d: Two numbers per eruption: Gaussians need a covariance
-
-**Build 1, ask:** What does the tilt of the ellipse say?
-
-**Expected:** Longer eruptions go with longer waits: positive correlation.
-
-**Build 2, ask:** How many numbers does each 2-D bump need?
-
-**Expected:** 2 for the mean, 3 for the symmetric covariance, plus its share π.
-
-**Build 3, ask:** What changes if each example had 784 numbers?
-
-**Expected:** A full covariance needs 784 × 785 / 2 ≈ 300,000 numbers per bump. That is Part 3’s problem.
-
 **Transition:** Recap Part 2.
 
 **Source / evidence:** Old Faithful geyser data (Azzalini and Bowman, 1990), as distributed with R (<code>datasets::faithful</code>): 272 eruptions.
@@ -488,25 +510,61 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Transition:** First attempt: fit Gaussians to raw pixels.
 
-## indep: First try: one Gaussian per pixel, all independent
+## one-model: What we fit: one distribution for all 60,000 training digits
 
-**Build 1, ask:** Where is the spread largest?
+**Build 1, ask:** Are we using the labels 0–9 here?
 
-**Expected:** In the middle, where strokes of different digits pass.
+**Expected:** No: generative modelling here is unsupervised; the model sees only images.
 
-**Build 2, ask:** What does “independent” assume about neighbouring pixels?
+**Build 2, ask:** Why one model instead of ten?
 
-**Expected:** That knowing one pixel tells you nothing about its neighbour.
+**Expected:** We want a model of handwritten digits in general; ten separate models would need the label to sample (that would be p(x | label), a conditional model).
 
-**Build 3, ask:** Why do the samples look speckled?
+**Build 3, ask:** What is the simplest way to model 784 numbers?
 
-**Expected:** Neighbours are drawn independently, so no strokes form.
+**Expected:** One distribution per number, each fitted separately, like Part 2’s one Gaussian, 784 times.
 
-**Transition:** Is the independence assumption reasonable?
+**Transition:** Start with one of the 784 positions.
+
+**Source / evidence:** MNIST training set.
+
+## one-pixel: Start with one pixel: position (14, 14), in every training digit
+
+**Build 1, ask:** Why is this pixel blank in the 0?
+
+**Expected:** A 0 is a ring; the centre of the image is the hole in the middle.
+
+**Build 2, ask:** What shape is the histogram?
+
+**Expected:** Two spikes: at 0 (no ink) and at 1 (full ink), with a thin spread in between.
+
+**Build 3, ask:** Is a Gaussian a good fit here?
+
+**Expected:** No: it puts most probability on grey values around 0.5, which are rare. It is the simplest model, and it shows what we will have to fix.
+
+**Transition:** Now every pixel.
 
 **Source / evidence:** MNIST training set. Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
-## neighbours: Neighbouring pixels move together
+## indep: Do it for all 784 pixels, then sample each pixel from its own bell
+
+**Build 1, ask:** Why does the mean image look like a blur, not a digit?
+
+**Expected:** It averages all ten digits on top of each other.
+
+**Build 2, ask:** How many random numbers does one sample use?
+
+**Expected:** 784: one per pixel.
+
+**Build 3, ask:** Why are there no strokes?
+
+**Expected:** Each pixel is drawn without looking at its neighbours.
+
+**Transition:** Are neighbouring pixels really unrelated?
+
+**Source / evidence:** MNIST training set. Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## neighbours: Why it fails: neighbouring pixels move together
 
 **Build 1, ask:** Why is the correlation five pixels away negative?
 
@@ -514,27 +572,49 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** What do we need instead of independent bells?
 
-**Expected:** A covariance between pixels: Part 2’s 2 × 2 covariance, now 784 × 784.
+**Expected:** A covariance between pixels: like the 2 × 2 covariances of Lecture 1 (section 3.3), now 784 × 784.
 
 **Transition:** Second try: one Gaussian with a full covariance.
 
 **Source / evidence:** Correlations over the 60,000 MNIST training digits. Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
-## full-gauss: Second try: one 784-dimensional Gaussian with a full covariance
+## threes-map: Digits vary in only a few ways
 
-**Build 1, ask:** Why are the samples smoother than before?
+**Build 1, ask:** What changes as you move to the right? Down?
 
-**Expected:** The covariance makes neighbours move together.
+**Expected:** Thicker strokes to the right; more upright and rounder downwards.
 
-**Build 2, ask:** What is wrong with one bump? Think of Part 2.
+**Build 2, ask:** How many numbers would you need to describe any 3?
 
-**Expected:** Digits form clusters (one per digit, at least); one Gaussian is Part 2’s single bell again.
+**Expected:** A handful: thickness, slant, width, loop size … far fewer than 784.
 
-**Transition:** Idea: describe each image with a few numbers first.
+**Build 3, ask:** Why would modelling codes be easier than modelling pixels?
 
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+**Expected:** A few numbers are easy to fit with Part 2’s tools; the code also captures how pixels move together.
 
-## pca-2d: Idea: describe each example with fewer numbers. PCA in 2-D first
+**Point here:** The two numbers are the first two PCA directions of the training 3s; one 3 per cell of a 7 × 5 grid (the nearest to each cell centre). PCA is introduced on the next slides.
+
+**Transition:** Two machines: one that finds the code, one that redraws the image.
+
+**Source / evidence:** MNIST 3s. Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## encode-decode: Encoder and decoder: image → a few numbers → image
+
+**Build 1, ask:** What goes in and out of the encoder?
+
+**Expected:** In: 784 pixels. Out: a few numbers.
+
+**Build 2, ask:** What goes in and out of the decoder?
+
+**Expected:** In: a few numbers. Out: 784 pixels.
+
+**Build 3, ask:** How would you check that a code is good?
+
+**Expected:** Decode it and compare with the original image: the reconstruction error.
+
+**Transition:** PCA, seen in two dimensions first.
+
+## pca-2d: PCA, the simplest encoder and decoder, in two dimensions
 
 **Build 1, ask:** If you could keep one number per eruption, which would you keep?
 
@@ -582,18 +662,6 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Transition:** How much of all digits does d keep?
 
-## pca-variance: How many numbers do we need?
-
-**Build 1, ask:** Why does the curve flatten?
-
-**Expected:** Later directions describe small details and pixel noise.
-
-**Build 2, ask:** What is a good d for generating digits?
-
-**Expected:** A trade-off: small d is easier to model, large d keeps detail. We will try several.
-
-**Transition:** A map of digits in two numbers.
-
 ## pca-scatter: Each digit as 2 numbers: PCA’s map of 1,000 test digits
 
 **Build 1, ask:** Which digits are easy to tell apart here?
@@ -608,29 +676,45 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** 1,000 MNIST test digits, 100 per class (seed 2024). Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
-## pca-gen-recipe: Generate in two steps: sample a few numbers, then rebuild an image
+## gen-steps: To generate, four steps: encode, fit, draw, decode
 
-**Build 1, ask:** Where do the 60,000 codes come from?
+**Build 1, ask:** What does each dot stand for?
 
-**Expected:** Encode every training digit: z = Wᵀ(x − m).
+**Expected:** One training digit, described by two numbers.
 
-**Build 2, ask:** Which distribution should we fit to them?
+**Build 2, ask:** Why fit a bell to codes instead of pixels?
 
-**Expected:** Start with one Gaussian; Part 2 suggests a mixture.
+**Expected:** Two numbers are easy to fit; 784 dependent pixels were not.
 
-**Transition:** One Gaussian over the codes.
+**Build 3, ask:** Is the drawn dot one of the training digits?
 
-## pca-gauss: One Gaussian over d PCA numbers
+**Expected:** No: it is a new code, drawn from the fitted bell.
 
-**Build 1, ask:** Why are the d = 2 samples so blurry?
+**Build 4, ask:** What turns the dot into a picture?
 
-**Expected:** Two PCA numbers can only describe a blurry digit, whatever their values.
+**Expected:** The decoder, m + W z.
 
-**Build 2, ask:** Why do some d = 50 samples look like two digits on top of each other?
+**Build 5, ask:** Which steps run each time we want a new digit?
 
-**Expected:** The single Gaussian puts a lot of probability between the clusters of different digits.
+**Expected:** Steps 3 and 4.
 
-**Transition:** Use a mixture over the codes.
+**Transition:** One sample, by hand.
+
+## pca-sample-worked: Steps ③ and ④ by hand: first a code, then an image
+
+**Build 1, ask:** Why scale ε by 2.26 and 1.93?
+
+**Expected:** Those are the fitted spreads of the codes; the fitted centre is 0, so z = 0 + spread × ε.
+
+**Build 2, ask:** Why does adding w₁ with z₁ = 1.81 make the image look more like a 0?
+
+**Expected:** w₁ adds ink on a ring (teal) and removes it from the middle stroke (red).
+
+**Build 3, ask:** What would a code of (0, 0) decode to?
+
+**Expected:** The mean image: the average digit.
+
+**Transition:** More PCA numbers, then more bumps.
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
@@ -738,9 +822,13 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Expected:** Small random weights make the pre-sigmoid values near 0, and sigmoid(0) = 0.5.
 
-**Build 2, ask:** Why check the untrained model at all?
+**Build 2, ask:** Why is the loss as large as 185 when every pixel error is below 1?
 
-**Expected:** To catch bugs early and know the starting loss: if training ends near 185, it learned nothing.
+**Expected:** It is a sum over 784 pixels: about 0.24 each.
+
+**Build 3, ask:** What would it mean if training ended near 185?
+
+**Expected:** The network learned nothing: a bug, or a learning rate that is far off.
 
 **Transition:** Train it: one step at a time.
 
@@ -842,7 +930,7 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
-## ae-scatter: The 2-number codes of 1,000 test digits
+## ae-scatter: Where the codes land: the autoencoder with a 2-number code
 
 **Build 1, ask:** Which digits are still mixed?
 
@@ -852,41 +940,7 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Expected:** Not for reconstruction. For generation, we will see (Part 5).
 
-**Transition:** Use codes to search.
-
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
-
-## search: Search by code: the nearest digits to a query
-
-**Build 1, ask:** Why search with codes instead of pixels?
-
-**Expected:** Fewer numbers, and distances that reflect shape rather than exact pixel positions.
-
-**Build 2, ask:** What would make two codes close?
-
-**Expected:** Digits the decoder rebuilds similarly: same identity and similar style.
-
-**Transition:** Codes can also clean images.
-
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
-
-## denoise: Denoising: damage the input, ask for the clean image
-
-**Build 1, ask:** Why does the plain autoencoder reproduce the holes?
-
-**Expected:** It was trained to copy its input, holes and all.
-
-**Build 2, ask:** What does the denoising version have to learn?
-
-**Expected:** What digits look like, so it can guess the missing pixels.
-
-**Build 3, ask:** What does this have in common with dropout?
-
-**Expected:** Both randomly remove inputs during training (denoising autoencoders came first, in 2008).
-
-**Point here:** Both have 16-number codes. Vincent et al., “Extracting and composing robust features with denoising autoencoders”, ICML 2008.
-
-**Transition:** Part 4 recap.
+**Transition:** Recap Part 4.
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
@@ -952,25 +1006,29 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 ## overlay: Put the random codes on top of the real ones
 
-**Build 1, ask:** Which digits would random codes ever produce?
+**Build 1, ask:** Hover a red dot near the origin, then one in an empty area. What does the decoder draw?
 
-**Expected:** Only those whose codes sit near (0, 0).
+**Expected:** Near real codes: a digit; in empty places: blurs or odd strokes.
 
-**Build 2, ask:** For the 128-number model, where are the red points?
+**Build 2, ask:** For the 128-number model, where would the red points fall?
 
-**Expected:** Even further from the real codes, in a space that is mostly empty.
+**Expected:** Even further from the real codes: in 128 numbers the space is mostly empty.
 
-**Point here:** This is the experiment improvised in the PML 2023 recording of Lecture 25, around 29–31 minutes.
+**Point here:** This is the experiment improvised in the PML 2023 recording of Lecture 25, around 29–31 minutes. The decoder runs in the browser.
 
-**Transition:** Try it yourself.
+**Transition:** Try choosing codes yourself.
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
 ## explore-ae: Your turn: three ways to choose a code
 
-**Build 1, ask:** Which of the three ways gives the best digits? Click in an empty region: what do you get?
+**Build 1, ask:** Which of the three ways gives the best digits?
 
-**Expected:** Encoding a real digit; random codes give a few digit types; empty regions give smudges or strange shapes.
+**Expected:** Encoding a real digit.
+
+**Build 2, ask:** Click far from any dot: what do you get?
+
+**Expected:** A smudge or an exaggerated stroke: the decoder was never trained there.
 
 **Point here:** The decoder (2 → 400 → 784) runs in JavaScript from data/nets.json, weights stored in half precision.
 
@@ -992,15 +1050,37 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
-## spread: Wider codes spread out
+## spread-what: How close are codes of similar digits? Measure it
 
-**Build 1, ask:** Why would a wider code let same-digit codes drift apart?
+**Build 1, ask:** What would a good code do with two 0s?
 
-**Expected:** The loss only cares about reconstruction; with room to spare, nothing keeps similar digits together.
+**Expected:** Put them close together.
+
+**Build 2, ask:** Is a single pair enough?
+
+**Expected:** No: one pair could be unusual; average over many.
+
+**Build 3, ask:** What ratio would mean the code ignores digit identity?
+
+**Expected:** About 1: two 0s as far apart as a 0 and a 1.
+
+**Build 4, ask:** Why might this matter for generation?
+
+**Expected:** If similar digits are close, the space between them holds similar digits, so random codes nearby make sense.
+
+**Transition:** Now the same measurement for wider codes.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## spread-sizes: Wider codes: similar digits drift apart
+
+**Build 1, ask:** Why do distances grow with more numbers?
+
+**Expected:** More room: with nothing pulling codes together, they spread wherever reconstruction is easiest.
 
 **Build 2, ask:** What would we want instead?
 
-**Expected:** Codes of similar digits close together, all within a region we know how to sample.
+**Expected:** Codes kept near a known region, with similar digits overlapping.
 
 **Point here:** Distances averaged over the 100 0s and 100 1s of the display set. PML 2023 Lecture 25 shows the same trend for one pair of 0s.
 
@@ -1018,63 +1098,125 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Expected:** The straight line between two codes need not stay where real codes are; in 16 dimensions most of the space between them is empty.
 
-**Transition:** A fix we already know.
+**Transition:** What we want instead.
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
-## posthoc: A fix we already know: fit a mixture to where the codes are
+## wishes: What we saw, and what we want instead
 
-**Build 1, ask:** Do the ellipses cover the clusters?
-
-**Expected:** Roughly: about one ellipse per digit group, some shared.
-
-**Build 2, ask:** Why do these samples look better than N(0, I) codes?
-
-**Expected:** The codes are drawn where real codes are.
-
-**Build 3, ask:** What is unsatisfying about this two-stage approach?
-
-**Expected:** Two separate fits; the codes were never shaped for easy sampling; and there is no single model that scores p(x).
-
-**Transition:** What we would like instead.
-
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
-
-## wishes: What we would like instead
-
-**Build 1, ask:** How could we force codes to fill N(0, I)?
+**Build 1, ask:** How could we push codes towards N(0, I)?
 
 **Expected:** Penalise codes that stray from it, for example with a KL to N(0, I).
 
-**Build 2, ask:** How could each image own a region instead of a point?
+**Build 2, ask:** How could each image own a cloud instead of a point?
 
-**Expected:** Let the encoder output a small cloud of codes: a mean and a spread.
+**Expected:** Let the encoder output a mean and a spread, and draw the code from them.
 
-**Build 3, ask:** What is the likelihood of an image, if a code is drawn first?
+**Build 3, ask:** Which tool from Lecture 1 will we need?
 
-**Expected:** The sum, or integral, over all codes of p(code) times p(image | code). Part 6.
+**Expected:** Variational inference and the ELBO.
 
 **Transition:** Part 6: the variational autoencoder.
 
-## vae-story: Write the recipe first: pick a code, then draw an image
+## two-roads: Two roads to the VAE
 
-**Build 1, ask:** What are the parameters of this model?
+**Build 1, ask:** Which wishes from the last slide does Road 1 address?
 
-**Expected:** The decoder weights θ (σ is fixed).
+**Expected:** Clouds (wish 2) and the pull towards N(0, I) (wish 1).
 
-**Build 2, ask:** What is the role of σ?
+**Build 2, ask:** Where does Road 2 need Lecture 1?
 
-**Expected:** How far an image may stray from the decoder’s mean image; it sets how much reconstruction errors cost.
+**Expected:** The posterior over codes is intractable, so we fit an approximation by maximising the ELBO.
 
-**Build 3, ask:** What is new compared with PCA + Gaussian?
+**Build 3, ask:** What is the encoder in Road 2?
 
-**Expected:** The decoder bends, and the code distribution is chosen in advance, not fitted afterwards.
+**Expected:** The approximate posterior q(z | x): it outputs the mean and spread of q for each image.
 
-**Point here:** When showing samples we display the mean image f_θ(z), not the noisy x: the noise is independent per pixel and would only add speckle.
+**Transition:** Road 1.
 
-**Transition:** Why σ = 0.2, and what the likelihood of one image is.
+## road1-cloud: Road 1: encode each image to a cloud, not a point
 
-## sigma: The likelihood of an image, given its code, is a squared error
+**Build 1, ask:** Which parts of the code plane does an autoencoder’s decoder ever see during training?
+
+**Expected:** Only the exact codes of training images.
+
+**Build 2, ask:** What does the decoder learn when clouds overlap?
+
+**Expected:** To draw something sensible everywhere the clouds reach, including between images.
+
+**Transition:** What the network looks like.
+
+## vae-arch: Road 1: the network, with a cloud in the middle
+
+**Build 1, ask:** Why log σ² instead of σ?
+
+**Expected:** Any real number is a valid log variance; σ = exp(½ log σ²) is then positive.
+
+**Build 2, ask:** Why reparameterise instead of sampling z directly?
+
+**Expected:** sample() blocks the gradient path from the loss to μ and σ.
+
+**Build 3, ask:** At test time, which code do we use to reconstruct?
+
+**Expected:** Usually the mean μ.
+
+**Transition:** The encoder on our 3.
+
+## road1-penalty: Road 1: keep the clouds near N(0, I) with a KL penalty
+
+**Build 1, ask:** What is the KL for a cloud with μ = 0, σ = 1?
+
+**Expected:** Zero: the cloud is exactly N(0, I).
+
+**Build 2, ask:** What does the KL do to a code with μ = 5?
+
+**Expected:** About 12.5 per number: a strong pull back towards the origin.
+
+**Build 3, ask:** What does the −log σ² term do as σ → 0?
+
+**Expected:** It grows without limit: tiny clouds are penalised.
+
+**Point here:** Road 1 looks like a hand-made penalty, like ridge regression (squared error + λ‖w‖²). Road 2 shows that this exact sum comes out of maximum likelihood, with a weight fixed by σ.
+
+**Transition:** Road 2: start from the generative model.
+
+## vae-pgm: Road 2: the VAE as a generative model
+
+**Build 1, ask:** Which circle is observed?
+
+**Expected:** x, the image (shaded). z is never observed.
+
+**Build 2, ask:** What does the arrow mean?
+
+**Expected:** x is drawn given z: through the decoder, then pixel noise.
+
+**Build 3, ask:** How many sets of decoder weights are there?
+
+**Expected:** One, shared by all 60,000 images.
+
+**Point here:** Notation of probabilistic graphical models (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter.
+
+**Transition:** How to draw a new image from this model.
+
+## vae-draw: To draw an image, follow the arrows: first z, then x
+
+**Build 1, ask:** Does generating need the encoder?
+
+**Expected:** No: only the prior and the decoder.
+
+**Build 2, ask:** Why is this a 9 and not another digit?
+
+**Expected:** Because of where this z sits: the decoder has learned which region of codes means which digit.
+
+**Build 3, ask:** Why display the mean image?
+
+**Expected:** The noise carries no information about the digit; it only makes speckle.
+
+**Transition:** What the likelihood means in numbers.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## sigma: The likelihood, in numbers: a squared error
 
 **Build 1, ask:** What happens to the first term if σ is small?
 
@@ -1090,7 +1232,7 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Transition:** Train by maximum likelihood, like Part 2.
 
-## vae-mle: Train like Part 2: maximise log p(x) for every image
+## vae-mle: To learn θ, maximise log p(x) for every image: an integral
 
 **Build 1, ask:** Why do we need p(x) at all?
 
@@ -1120,101 +1262,25 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
 
-## evidence-grid: With 2 numbers we can add up rectangles; with 16 we cannot
+## vae-infer: The variational part: an encoder that approximates the posterior
 
-**Build 1, ask:** Why is log p(x) positive?
+**Build 1, ask:** Why do we need the posterior at all?
 
-**Expected:** It is a density, not a probability: with σ = 0.2 per pixel, densities are large.
+**Expected:** Training needs log p(x), and the ELBO replaces it using a q close to the posterior.
 
-**Build 2, ask:** Why do grids fail in 16 dimensions?
+**Build 2, ask:** What is “variational” about the VAE?
 
-**Expected:** The number of cells is (points per axis) to the power of the dimension.
+**Expected:** We approximate the posterior with a member of a simple family (diagonal Gaussians) fitted by optimisation: Lecture 1’s variational inference.
 
-**Point here:** The fine grid is 241 × 241 cells over a window of ±0.15 around the posterior. A coarse grid over the whole prior gives 243.96: too coarse to resolve the patch.
+**Build 3, ask:** Why is one encoder for all images a good idea?
 
-**Transition:** Sample codes from the prior instead?
+**Expected:** One forward pass gives q for any image, instead of a separate optimisation per image (this is called amortised inference).
 
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+**Point here:** Kingma and Welling (2014), figure 1: solid = generative model p_θ, dashed = variational approximation q_φ.
 
-## naive-mc: Average p(x | z) over random codes? Most draws are wasted
+**Transition:** Check the encoder against the true posterior of our 3.
 
-**Build 1, ask:** Why is the estimate so low with few draws?
-
-**Expected:** Most prior draws decode to a different digit; p(x | z) is astronomically small for them.
-
-**Build 2, ask:** Where should we draw codes from instead?
-
-**Expected:** From near the posterior: codes that could have made this 3. That is what an encoder will provide.
-
-**Transition:** Lecture 1’s tool for an intractable posterior.
-
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
-
-## vi-recall: Lecture 1’s tool: fit a simple q to the posterior
-
-**Build 1, ask:** Which two terms make up the ELBO, in words?
-
-**Expected:** Reconstruct x well from codes drawn from q; keep q close to the prior.
-
-**Build 2, ask:** Why is the ELBO a lower bound on log p(x)?
-
-**Expected:** The last KL is never negative.
-
-**Build 3, ask:** What are the variational parameters here?
-
-**Expected:** m and s: four numbers for a 2-number code.
-
-**Transition:** Fit q for our 3.
-
-## vi3: Fit q for our 3: press play
-
-**Build 1, ask:** What happens to the ELBO at first? Why?
-
-**Expected:** It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.
-
-**Build 2, ask:** How big is the final gap?
-
-**Expected:** About 0.02 nats: q is nearly the exact posterior.
-
-**Point here:** Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step.
-
-**Transition:** One image took 1,200 steps. Now 60,000 images.
-
-**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
-
-## amortise: 60,000 images would mean 60,000 separate fits
-
-**Build 1, ask:** How many variational parameters would per-image VI need for 60,000 images?
-
-**Expected:** 4 × 60,000 = 240,000.
-
-**Build 2, ask:** What does the encoder output?
-
-**Expected:** Two means and two log-variances per image.
-
-**Build 3, ask:** What is the price of sharing one network?
-
-**Expected:** Its q may be a little worse than a dedicated fit for each image (next slides).
-
-**Transition:** Put the encoder in front of the decoder.
-
-## vae-arch: The VAE: an encoder that outputs q, a code drawn from it, and the decoder
-
-**Build 1, ask:** Why log σ² instead of σ?
-
-**Expected:** Any real number is a valid log variance; σ = exp(½ log σ²) is then positive.
-
-**Build 2, ask:** Why reparameterise instead of sampling z directly?
-
-**Expected:** sample() blocks the gradient path from the loss to μ and σ.
-
-**Build 3, ask:** At test time, which code do we use to reconstruct?
-
-**Expected:** Usually the mean μ.
-
-**Transition:** The encoder on our 3.
-
-## q3: The encoder on our 3: one pass, almost as good as 1,200 steps
+## q3: Check the encoder: its q for our 3, against the true posterior
 
 **Build 1, ask:** Which q is better, and by how much?
 
@@ -1227,6 +1293,22 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 **Transition:** The loss, term by term.
 
 **Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## elbo-meets: The ELBO for one image is Road 1’s loss
+
+**Build 1, ask:** Which term rewards reconstruction?
+
+**Expected:** The expected log-likelihood (the first term).
+
+**Build 2, ask:** Where does 1 / 2σ² come from?
+
+**Expected:** The Gaussian density of each pixel around the decoder’s output.
+
+**Build 3, ask:** What happens to the loss if σ is small?
+
+**Expected:** The squared error dominates: the model is pushed to reconstruct precisely, and the KL matters less.
+
+**Transition:** Train it: the loss, term by term, with numbers.
 
 ## vae-loss: The loss for one image is the negative ELBO
 
@@ -1453,3 +1535,157 @@ Planned main route: 150 minutes. Timing includes student responses and the speci
 **Expected:** Both alternate between inferring hidden variables and refitting the model; the VAE uses an approximate posterior q because the exact one is intractable.
 
 **Transition:** Back to the main route.
+
+## full-gauss: Second try: one 784-dimensional Gaussian with a full covariance (optional)
+
+**Build 1, ask:** Why are the samples smoother than before?
+
+**Expected:** The covariance makes neighbours move together.
+
+**Build 2, ask:** What is wrong with one bump? Think of Part 2.
+
+**Expected:** Digits form clusters (one per digit, at least); one Gaussian is Part 2’s single bell again.
+
+**Transition:** Idea: describe each image with a few numbers first.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## pca-variance: How many numbers do we need? (optional)
+
+**Build 1, ask:** Why does the curve flatten?
+
+**Expected:** Later directions describe small details and pixel noise.
+
+**Build 2, ask:** What is a good d for generating digits?
+
+**Expected:** A trade-off: small d is easier to model, large d keeps detail. We will try several.
+
+**Transition:** A map of digits in two numbers.
+
+## pca-gauss: One Gaussian over d PCA numbers (optional)
+
+**Build 1, ask:** Why are the d = 2 samples so blurry?
+
+**Expected:** Two PCA numbers can only describe a blurry digit, whatever their values.
+
+**Build 2, ask:** Why do some d = 50 samples look like two digits on top of each other?
+
+**Expected:** The single Gaussian puts a lot of probability between the clusters of different digits.
+
+**Transition:** Use a mixture over the codes.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## search: Search by code: the nearest digits to a query (optional)
+
+**Build 1, ask:** Why search with codes instead of pixels?
+
+**Expected:** Fewer numbers, and distances that reflect shape rather than exact pixel positions.
+
+**Build 2, ask:** What would make two codes close?
+
+**Expected:** Digits the decoder rebuilds similarly: same identity and similar style.
+
+**Transition:** Codes can also clean images.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## denoise: Denoising: damage the input, ask for the clean image (optional)
+
+**Build 1, ask:** Why does the plain autoencoder reproduce the holes?
+
+**Expected:** It was trained to copy its input, holes and all.
+
+**Build 2, ask:** What does the denoising version have to learn?
+
+**Expected:** What digits look like, so it can guess the missing pixels.
+
+**Build 3, ask:** What does this have in common with dropout?
+
+**Expected:** Both randomly remove inputs during training (denoising autoencoders came first, in 2008).
+
+**Point here:** Both have 16-number codes. Vincent et al., “Extracting and composing robust features with denoising autoencoders”, ICML 2008.
+
+**Transition:** Part 4 recap.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## posthoc: A fix we already know: fit a mixture to where the codes are (optional)
+
+**Build 1, ask:** Do the ellipses cover the clusters?
+
+**Expected:** Roughly: about one ellipse per digit group, some shared.
+
+**Build 2, ask:** Why do these samples look better than N(0, I) codes?
+
+**Expected:** The codes are drawn where real codes are.
+
+**Build 3, ask:** What is unsatisfying about this two-stage approach?
+
+**Expected:** Two separate fits; the codes were never shaped for easy sampling; and there is no single model that scores p(x).
+
+**Transition:** What we would like instead.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## evidence-grid: With 2 numbers we can add up rectangles; with 16 we cannot (optional)
+
+**Build 1, ask:** Why is log p(x) positive?
+
+**Expected:** It is a density, not a probability: with σ = 0.2 per pixel, densities are large.
+
+**Build 2, ask:** Why do grids fail in 16 dimensions?
+
+**Expected:** The number of cells is (points per axis) to the power of the dimension.
+
+**Point here:** The fine grid is 241 × 241 cells over a window of ±0.15 around the posterior. A coarse grid over the whole prior gives 243.96: too coarse to resolve the patch.
+
+**Transition:** Sample codes from the prior instead?
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## naive-mc: Average p(x | z) over random codes? Most draws are wasted (optional)
+
+**Build 1, ask:** Why is the estimate so low with few draws?
+
+**Expected:** Most prior draws decode to a different digit; p(x | z) is astronomically small for them.
+
+**Build 2, ask:** Where should we draw codes from instead?
+
+**Expected:** From near the posterior: codes that could have made this 3. That is what an encoder will provide.
+
+**Transition:** Lecture 1’s tool for an intractable posterior.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## vi3: Fit q for our 3: press play (optional)
+
+**Build 1, ask:** What happens to the ELBO at first? Why?
+
+**Expected:** It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.
+
+**Build 2, ask:** How big is the final gap?
+
+**Expected:** About 0.02 nats: q is nearly the exact posterior.
+
+**Point here:** Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step.
+
+**Transition:** One image took 1,200 steps. Now 60,000 images.
+
+**Source / evidence:** Computed for this lecture: <code>scripts/science.py</code> from the networks trained by <code>scripts/train.py</code> (MNIST, fixed seeds).
+
+## amortise: 60,000 images would mean 60,000 separate fits (optional)
+
+**Build 1, ask:** How many variational parameters would per-image VI need for 60,000 images?
+
+**Expected:** 4 × 60,000 = 240,000.
+
+**Build 2, ask:** What does the encoder output?
+
+**Expected:** Two means and two log-variances per image.
+
+**Build 3, ask:** What is the price of sharing one network?
+
+**Expected:** Its q may be a little worse than a dedicated fit for each image (next slides).
+
+**Transition:** Put the encoder in front of the decoder.

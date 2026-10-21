@@ -237,7 +237,7 @@ function faithFit(el,ctx){
  const render=i=>{
   const [step,pl,m0,m1,s0,s1,ll]=fr[i],mx={pi:[1-pl,pl],mu:[m0,m1],sd:[s0,s1]};
   const {s}=waitPanel({W:720,H,mixture:true,mix:mx,yMax:.07});
-  const steps=fr.map(f=>f[0]),lls=fr.map(f=>f[6]),Q=panel({ox:770,W:380,H,L:70,R:28,T:62,B:56,xMin:0,xMax:600,yMin:-4.1,yMax:-3.75,ticksX:[0,300,600],ticksY:[-4.1,-4,-3.9,-3.8],xLabel:'step'});
+  const steps=fr.map(f=>f[0]),lls=fr.map(f=>f[6]),Q=panel({ox:770,W:380,H,L:70,R:28,T:62,B:56,xMin:0,xMax:300,yMin:-4.1,yMax:-3.75,ticksX:[0,100,200,300],ticksY:[-4.1,-4,-3.9,-3.8],xLabel:'step'});
   return svg(W,H,s+legend(16,30,[['short bump',BUMP[0],true],['long bump',BUMP[1],true],['mixture',palette.p]],19)+
    Q.axes+Q.line(steps.slice(0,i+1),lls.slice(0,i+1),palette.loss)+Q.dot(step,ll,palette.loss)+label(770+70,30,`average log-likelihood ${num(ll,3)}`,{fill:palette.loss,size:20,weight:600}),
    'A two-bump mixture fitted by gradient descent: the bumps move apart onto the two clumps, and the average log-likelihood rises.');
@@ -302,35 +302,44 @@ export function codesOf(src){
  throw new Error('Unknown code source '+src);
 }
 /** The scatter itself: SVG inner and the panel. lim: [xmin, xmax, ymin, ymax]. */
-export function scatterSVG(src,{ox=0,oy=0,W=560,H=420,lim,prior=0,priorColor=palette.loss,r=4,opacity=.55,highlight=null,ticks,box=null,mog=null,points=true}={}){
+export function scatterSVG(src,{ox=0,oy=0,W=560,H=420,lim,prior=0,priorColor=palette.loss,r=4,opacity=.55,highlight=null,ticks,box=null,mog=null,points=true,contours=false}={}){
  const C=codesOf(src),labels=DATA.mnist.display_labels;
  const [x0,x1,y0,y1]=lim,P=panel({ox,oy,W,H,L:46,R:12,T:16,B:46,xMin:x0,xMax:x1,yMin:y0,yMax:y1,ticksX:ticks?.[0],ticksY:ticks?.[1],fs:17,xAxisAtBottom:true});
  let s=`<rect x="${ox+46}" y="${oy+16}" width="${W-58}" height="${H-62}" fill="#FFFFFF" stroke="${LINE}"/>`+P.axes;
  if(box)s+=`<rect ${P.clip} x="${P.x(box[0][0]).toFixed(1)}" y="${P.y(box[1][1]).toFixed(1)}" width="${(P.x(box[1][0])-P.x(box[0][0])).toFixed(1)}" height="${(P.y(box[0][1])-P.y(box[1][1])).toFixed(1)}" fill="none" stroke="${MUTED}" stroke-dasharray="6 5"/>`;
  if(points)s+=`<g ${P.clip}>${C.map(([a,b],i)=>`<circle data-i="${i}" cx="${P.x(a).toFixed(1)}" cy="${P.y(b).toFixed(1)}" r="${r}" fill="${CLASS[labels[i]]}" fill-opacity="${opacity}"/>`).join('')}</g>`;
  if(mog)mog.means.forEach((m,k)=>{const c=mog.covs[k];s+=covEllipse(P.x(m[0]),P.y(m[1]),[c[0][0],c[0][1],c[1][1]],2,(P.x(1)-P.x(0)),(P.y(0)-P.y(1)),palette.ink,`${P.clip} stroke-width="2" stroke-opacity=".75"`);});
- if(prior){const pts=DATA.gen.prior_points.slice(0,prior);s+=`<g ${P.clip}>${pts.map(([a,b])=>`<circle cx="${P.x(a).toFixed(1)}" cy="${P.y(b).toFixed(1)}" r="3.4" fill="${priorColor}" stroke="#fff" stroke-width=".8"/>`).join('')}</g>`;}
+ if(prior){const pts=DATA.gen.prior_points.slice(0,prior);s+=`<g ${P.clip}>${pts.map(([a,b],i)=>`<circle data-p="${i}" cx="${P.x(a).toFixed(1)}" cy="${P.y(b).toFixed(1)}" r="3.4" fill="${priorColor}" stroke="#fff" stroke-width=".8"/>`).join('')}</g>`;}
+ if(contours){const sx=P.x(1)-P.x(0),sy=P.y(0)-P.y(1);for(const k of [1,2,3])s+=`<ellipse ${P.clip} cx="${P.x(0).toFixed(1)}" cy="${P.y(0).toFixed(1)}" rx="${(k*sx).toFixed(1)}" ry="${(k*sy).toFixed(1)}" fill="none" stroke="${palette.ink}" stroke-width="${k===1?2.5:1.8}" stroke-dasharray="${k===1?'':'6 5'}" pointer-events="none"/>`+label(P.x(0)+k*sx*.71+4,P.y(0)-k*sy*.71-4,String(k),{fill:palette.ink,size:15,weight:600,extra:'pointer-events="none"'});}
  if(highlight!==null){const [a,b]=C[highlight];s+=`<circle cx="${P.x(a).toFixed(1)}" cy="${P.y(b).toFixed(1)}" r="11" fill="none" stroke="${palette.ink}" stroke-width="3"/>`;}
  return {s,P};
 }
+/** The SVG width that gives equal units on both axes, for a scatter of height H (plot margins as in scatterSVG). */
+export const squareW=(lim,H,max=600)=>Math.min(max,Math.round((H-62)*(lim[1]-lim[0])/(lim[3]-lim[2])+58));
 export const classLegend=(x,y,size=18,step=36)=>Array.from({length:10},(_,c)=>`<circle cx="${x+c*step+7}" cy="${y-6}" r="7" fill="${CLASS[c]}"/>`+label(x+c*step+18,y,String(c),{fill:CLASS[c],size,weight:600})).join('');
 /** Hover a point to see its digit. Attributes: src, lim (comma list), prior (count), title. */
 function scatter(el,ctx){
- const src=el.dataset.src,lim=el.dataset.lim.split(',').map(Number),prior=Number(el.dataset.prior||0),W=1150,H=400;
+ const src=el.dataset.src,lim=el.dataset.lim.split(',').map(Number),prior=Number(el.dataset.prior||0),W=1150,H=Number(el.dataset.h||400);
  const ticks=el.dataset.ticks?el.dataset.ticks.split('|').map(t=>t.split(',').map(Number)):undefined;
- const mog=el.dataset.mog==='ae2'?DATA.gen.ae2_mog:null;
- const {s}=scatterSVG(src,{W:600,H,lim,prior,ticks,mog});
- const side=el.dataset.side||'',title=el.dataset.title||'';
- const base=s+classLegend(640,40)+label(640,90,title,{fill:palette.ink,size:22,weight:600})+(side?label(640,122,side,{size:19}):'');
- const hint='';
+ const contours=el.dataset.contours==='1',decodeNet=el.dataset.decode||null;
+ const SW=squareW(lim,H),X0=SW+40,{s}=scatterSVG(src,{W:SW,H,lim,prior,ticks,contours});
+ const title=el.dataset.title||'',side=el.dataset.side||'';
+ let base=s+classLegend(X0,36)+label(X0,80,title,{fill:palette.ink,size:22,weight:600});
+ (side?side.split('|'):[]).forEach((t,i)=>{base+=label(X0,112+i*26,t,{size:19});});
  if(ctx.printing){el.innerHTML=svg(W,H,base,'Codes of 1,000 test digits, coloured by digit.');return;}
- el.innerHTML=`<div class="w-fig diagram-scroll" style="position:relative">${svg(W,H,base+hint,'Codes of 1,000 test digits, coloured by digit; hover a point to see its digit.')}<div class="hover-card" hidden></div></div>`;
+ el.innerHTML=`<div class="w-fig diagram-scroll" style="position:relative">${svg(W,H,base,'Codes of 1,000 test digits, coloured by digit; hover a point to see its digit.')}<div class="hover-card" hidden></div></div>`;
  const card=el.querySelector('.hover-card'),svgEl=el.querySelector('svg');let ring=null;
+ const show=html=>{card.hidden=false;card.innerHTML=html;};
  svgEl.addEventListener('mousemove',e=>{
-  const t=e.target.closest('circle[data-i]');
+  const t=e.target.closest('circle[data-i],circle[data-p]');
   if(!t){card.hidden=true;ring?.remove();ring=null;return;}
-  const i=Number(t.dataset.i),[a,b]=codesOf(src)[i],lab=DATA.mnist.display_labels[i];
-  card.hidden=false;card.innerHTML=`${digit('display',i,150)}<div>a <b style="color:${CLASS[lab]}">${lab}</b><br>code (${num(a,2)}, ${num(b,2)})</div>`;
+  if(t.dataset.p!==undefined){
+   const z=DATA.gen.prior_points[Number(t.dataset.p)];
+   show(`<div style="display:flex;gap:10px;align-items:end">${decodeNet?`<figure class="dg-cell"><img class="dg" src="${digitURL(net(decodeNet).decode(z))}" width="130" height="130" alt=""><figcaption>decoder output</figcaption></figure>`:''}</div><div>a random code from N(0, I)<br>z = (${num(z[0],2)}, ${num(z[1],2)})</div>`);
+  }else{
+   const i=Number(t.dataset.i),z=codesOf(src)[i],lab=DATA.mnist.display_labels[i];
+   show(`<div style="display:flex;gap:10px;align-items:end"><figure class="dg-cell">${digit('display',i,decodeNet?100:150)}<figcaption>the digit</figcaption></figure>${decodeNet?`<figure class="dg-cell"><img class="dg" src="${digitURL(net(decodeNet).decode(z))}" width="100" height="100" alt=""><figcaption>decoded from its code</figcaption></figure>`:''}</div><div>a <b style="color:${CLASS[lab]}">${lab}</b>, code (${num(z[0],2)}, ${num(z[1],2)})</div>`);
+  }
   ring?.remove();ring=document.createElementNS('http://www.w3.org/2000/svg','circle');
   for(const [k,v] of Object.entries({cx:t.getAttribute('cx'),cy:t.getAttribute('cy'),r:9,fill:'none',stroke:palette.ink,'stroke-width':3}))ring.setAttribute(k,v);
   svgEl.append(ring);
@@ -344,24 +353,26 @@ function scatter(el,ctx){
  * Attributes: net ('ae2' | 'vae2'), lim (comma list), both ('1' to offer a switch between the networks).
  */
 function explorer(el,ctx){
- const W=1150,H=380,both=el.dataset.both==='1';
+ const W=1150,H=310,both=el.dataset.both==='1';
  const LIM={ae2:el.dataset.limae?.split(',').map(Number)||el.dataset.lim.split(',').map(Number),vae2:el.dataset.limvae?.split(',').map(Number)||[-3.5,3.5,-3.5,3.5]};
  const st={net:el.dataset.net||'ae2',z:null,how:'',src:null,prior:false};
  const rng=mulberry32(5);
- const scene=()=>{const lim=LIM[st.net];return scatterSVG(st.net,{W:600,H,lim,prior:st.prior?300:0,opacity:.4,r:3.6,highlight:st.src});};
+ const nice=(lo,hi)=>{const step=hi-lo>20?10:hi-lo>8?2:1,out=[];for(let v=Math.ceil(lo/step)*step;v<=hi;v+=step)out.push(v);return out;};
+ const scene=()=>{const lim=LIM[st.net];return scatterSVG(st.net,{W:squareW(lim,H),H,lim,prior:st.prior?300:0,opacity:.4,r:3.6,highlight:st.src,contours:true,ticks:[nice(lim[0],lim[1]),nice(lim[2],lim[3])]});};
  const render=()=>{
-  const {s,P}=scene();let out=s;
+  const {s,P}=scene();let out=s;const X0=squareW(LIM[st.net],H)+40;
   if(st.z){const [a,b]=st.z,cx=P.x(a),cy=P.y(b);out+=`<g><line x1="${cx-16}" y1="${cy}" x2="${cx+16}" y2="${cy}" stroke="${palette.ink}" stroke-width="3"/><line x1="${cx}" y1="${cy-16}" x2="${cx}" y2="${cy+16}" stroke="${palette.ink}" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="6" fill="${palette.q}" stroke="#fff" stroke-width="2"/></g>`;}
-  out+=classLegend(640,36,17,34);
+  out+=classLegend(X0,36,17,34);
   const name=st.net==='ae2'?'autoencoder':'VAE';
-  let right=label(640,80,`decoder of the ${name}, run in your browser`,{fill:palette.ink,size:20,weight:600});
+  let right=label(X0,80,`decoder of the ${name}, run in your browser`,{fill:palette.ink,size:20,weight:600});
   if(st.z){
    const x=net(st.net).decode(st.z);
-   right+=`<image href="${digitURL(x)}" x="640" y="96" width="200" height="200" style="image-rendering:pixelated"/>`+`<rect x="640" y="96" width="200" height="200" fill="none" stroke="${LINE}"/>`;
-   right+=label(640,326,`z = (${num(st.z[0],2)}, ${num(st.z[1],2)})`,{fill:palette.q,size:22,weight:600})+label(640,354,st.how,{size:19});
-   if(st.src!==null)right+=`<image href="${digitSrc('display',st.src)}" x="870" y="96" width="100" height="100" style="image-rendering:pixelated"/><rect x="870" y="96" width="100" height="100" fill="none" stroke="${LINE}"/>`+label(870,220,'the digit we encoded',{size:17});
-  }else right+=label(640,130,'click anywhere on the plane, or use a button',{size:20});
-  if(st.prior)right+=label(870,260,'red dots: 300 draws',{fill:palette.loss,size:17})+label(870,282,'from N(0, I)',{fill:palette.loss,size:17});
+   right+=`<image href="${digitURL(x)}" x="${X0}" y="90" width="160" height="160" style="image-rendering:pixelated"/>`+`<rect x="${X0}" y="90" width="160" height="160" fill="none" stroke="${LINE}"/>`;
+   right+=label(X0,278,`z = (${num(st.z[0],2)}, ${num(st.z[1],2)})`,{fill:palette.q,size:22,weight:600})+label(X0,302,st.how,{size:19});
+   if(st.src!==null)right+=`<image href="${digitSrc('display',st.src)}" x="${X0+190}" y="90" width="100" height="100" style="image-rendering:pixelated"/><rect x="${X0+190}" y="90" width="100" height="100" fill="none" stroke="${LINE}"/>`+label(X0+190,214,'the digit we encoded',{size:17});
+  }else right+=label(X0,130,'click anywhere on the plane, or use a button',{size:20});
+  if(st.prior)right+=label(X0+190,250,'red dots: 300 draws',{fill:palette.loss,size:17})+label(X0+190,272,'from N(0, I)',{fill:palette.loss,size:17});
+  right+=label(X0+330,140,'circles: N(0, I)',{size:17})+label(X0+330,162,'at radius 1, 2, 3',{size:17});
   return svg(W,H,out+right,`Codes of 1,000 test digits for the ${name}; a chosen code and the image its decoder produces.`);
  };
  const set=(z,how,src=null)=>{st.z=z;st.how=how;st.src=src;};
@@ -372,7 +383,7 @@ function explorer(el,ctx){
  const box=el.querySelector('.w-fig');
  box.addEventListener('click',e=>{
   const svgEl=box.querySelector('svg'),pt=svgEl.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const p=pt.matrixTransform(svgEl.getScreenCTM().inverse());
-  const lim=LIM[st.net],L=46,T=16,PW=600-46-12,PH=H-16-46;
+  const lim=LIM[st.net],L=46,T=16,PW=squareW(lim,H)-46-12,PH=H-16-46;
   if(p.x<L||p.x>L+PW||p.y<T||p.y>T+PH)return;
   set([lim[0]+(p.x-L)/PW*(lim[1]-lim[0]),lim[3]-(p.y-T)/PH*(lim[3]-lim[2])],'a point you clicked');draw();
  });
@@ -385,21 +396,25 @@ function explorer(el,ctx){
 
 // ---------------------------------------------------------------- Part 4: training an autoencoder
 function aeTrain(el,ctx){
- const A=DATA.ae,steps=A.ae2_frames_steps,n=steps.length,spe=A.steps_per_epoch,W=1150,H=330;
+ const A=DATA.ae,steps=A.ae2_frames_steps,n=steps.length,spe=A.steps_per_epoch,W=1150,H=360,C=A.ae2_step_curve,lx=v=>Math.log10(v+1);
+ const SZ=74,GAP=8;
  const render=i=>{
-  let s=label(0,24,'8 test digits',{fill:palette.ink,size:20,weight:600});
-  for(let j=0;j<8;j++)s+=`<image href="${digitSrc('watch',j)}" x="${j*76}" y="36" width="68" height="68" style="image-rendering:pixelated"/>`;
-  const stp=steps[i],ep=stp/spe;
-  s+=label(0,140,stp===0?'what the untrained network outputs':`its reconstructions after ${comma(stp)} step${stp===1?'':'s'}${stp>=spe?` (${num(ep,0)} epoch${ep>=2?'s':''})`:''}`,{fill:palette.q,size:20,weight:600});
-  for(let j=0;j<8;j++)s+=`<image href="${digitSrc('ae2_train_frames',i*8+j)}" x="${j*76}" y="152" width="68" height="68" style="image-rendering:pixelated"/><rect x="${j*76}" y="152" width="68" height="68" fill="none" stroke="${palette.q}" stroke-opacity=".5"/>`;
-  const c=A.ae2_curve,P=panel({ox:650,W:500,H,L:70,R:14,T:60,B:56,xMin:0,xMax:30,yMin:0,yMax:60,ticksX:[0,10,20,30],ticksY:[0,20,40,60],xLabel:'epoch'});
-  s+=P.axes+label(650+70,28,'test squared error per image',{fill:palette.loss,size:19,weight:600});
-  const k=Math.max(0,Math.min(30,Math.floor(ep)));
-  if(k>=1)s+=P.line(c.epoch.slice(0,k),c.test_sse.slice(0,k),palette.loss)+P.dot(c.epoch[k-1],c.test_sse[k-1],palette.loss);
-  else s+=label(650+80,90,`before training: ${num(A.init_test_sse,1)} (off the chart)`,{fill:palette.loss,size:18});
-  return svg(W,H,s,'Reconstructions of eight test digits as an autoencoder with a 2-number code trains, and its test error.');
+  const stp=steps[i],ep=stp/spe,sse=A.ae2_frames_sse[i],per=A.ae2_frames_digit_sse[i];
+  let s=label(0,22,'8 test digits',{fill:palette.ink,size:20,weight:600});
+  for(let j=0;j<8;j++)s+=`<image href="${digitSrc('watch',j)}" x="${j*(SZ+GAP)}" y="32" width="${SZ}" height="${SZ}" style="image-rendering:pixelated"/>`;
+  s+=label(0,140,stp===0?'what the untrained network outputs':`what it outputs after ${comma(stp)} step${stp===1?'':'s'}${stp>=spe?` (${num(ep,0)} epoch${ep>=2?'s':''})`:''}`,{fill:palette.q,size:20,weight:600});
+  for(let j=0;j<8;j++)s+=`<image href="${digitSrc('ae2_train_frames',i*8+j)}" x="${j*(SZ+GAP)}" y="152" width="${SZ}" height="${SZ}" style="image-rendering:pixelated"/><rect x="${j*(SZ+GAP)}" y="152" width="${SZ}" height="${SZ}" fill="none" stroke="${palette.q}" stroke-opacity=".5"/>`+
+   label(j*(SZ+GAP)+SZ/2,252,num(per[j],0),{fill:palette.loss,size:18,anchor:'middle',weight:600});
+  s+=label(0,284,'squared error of each digit (summed over its 784 pixels)',{fill:palette.loss,size:17});
+  s+=label(0,326,`average over the 10,000 test digits: ${num(sse,1)}`,{fill:palette.loss,size:22,weight:650});
+  const P=panel({ox:690,W:460,H,L:62,R:16,T:44,B:56,xMin:0,xMax:lx(14070),yMin:0,yMax:200,ticksX:[0,1,2,3,4],fmtX:v=>comma(10**v),ticksY:[0,50,100,150,200],xLabel:'training step (log scale)',fs:16});
+  const xs=C.step.map(lx);
+  s+=P.axes+label(690+62,24,'test error while training',{fill:palette.loss,size:19,weight:600})+
+   P.line(xs,C.test_sse,palette.loss+'44')+P.line(xs.filter((_,k)=>C.step[k]<=stp),C.test_sse.filter((_,k)=>C.step[k]<=stp),palette.loss)+P.dot(lx(stp),sse,palette.loss,7)+
+   label(P.x(lx(stp))+(lx(stp)>3.4?-10:10),P.y(sse)-12,num(sse,1),{fill:palette.loss,size:18,weight:600,anchor:lx(stp)>3.4?'end':'start'});
+  return svg(W,H,s,'Reconstructions of eight test digits as an autoencoder with a 2-number code trains, with each digit’s error and the test error so far.');
  };
- animated(el,ctx,{count:n,render,step:i=>`step ${comma(steps[i])}`,alt:'Autoencoder training',duration:6000});
+ animated(el,ctx,{count:n,render,step:i=>`step ${comma(steps[i])}`,alt:'Autoencoder training',duration:7000});
 }
 
 // ---------------------------------------------------------------- Part 6: the VAE

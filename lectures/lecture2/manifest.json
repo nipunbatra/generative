@@ -3,7 +3,7 @@
   "number": 2,
   "title": "From fitting a distribution to the VAE",
   "subtitle": "Why generate, fit and sample, PCA and Gaussians on MNIST, autoencoders, and the variational autoencoder",
-  "minutes": 150,
+  "minutes": 140,
   "notebook": "lecture2-generative-models.ipynb",
   "sections": [
     {
@@ -24,12 +24,12 @@
     {
       "id": "pca",
       "title": "Part 3 · Images: PCA and Gaussians",
-      "minutes": 24
+      "minutes": 20
     },
     {
       "id": "ae",
       "title": "Part 4 · Autoencoders",
-      "minutes": 22
+      "minutes": 20
     },
     {
       "id": "gen",
@@ -39,7 +39,7 @@
     {
       "id": "vae",
       "title": "Part 6 · The variational autoencoder",
-      "minutes": 45
+      "minutes": 42
     },
     {
       "id": "optional",
@@ -47,12 +47,12 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 98,
-  "optionalSlides": 3,
+  "coreSlides": 100,
+  "optionalSlides": 13,
   "slides": [
     {
       "id": "contents",
-      "title": "Lecture 2 at a glance: six parts, twenty-nine sections",
+      "title": "Lecture 2 at a glance: six parts, twenty-seven sections",
       "section": "map",
       "builds": 1,
       "optional": false
@@ -219,8 +219,22 @@
       "optional": false
     },
     {
+      "id": "mix-loss",
+      "title": "What we minimise: minus the average log-likelihood",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mix-params",
+      "title": "The numbers to learn, each kept valid",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "mix-code",
-      "title": "Fit it by gradient descent, as Lecture 1 fitted q",
+      "title": "The loop: one line for each piece of the formula",
       "section": "fit",
       "builds": 2,
       "optional": false
@@ -254,13 +268,6 @@
       "optional": false
     },
     {
-      "id": "two-d",
-      "title": "Two numbers per eruption: Gaussians need a covariance",
-      "section": "fit",
-      "builds": 3,
-      "optional": false
-    },
-    {
       "id": "recap-2",
       "title": "Part 2 in one slide",
       "section": "fit",
@@ -289,29 +296,50 @@
       "optional": false
     },
     {
+      "id": "one-model",
+      "title": "What we fit: one distribution for all 60,000 training digits",
+      "section": "pca",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "one-pixel",
+      "title": "Start with one pixel: position (14, 14), in every training digit",
+      "section": "pca",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "indep",
-      "title": "First try: one Gaussian per pixel, all independent",
+      "title": "Do it for all 784 pixels, then sample each pixel from its own bell",
       "section": "pca",
       "builds": 3,
       "optional": false
     },
     {
       "id": "neighbours",
-      "title": "Neighbouring pixels move together",
+      "title": "Why it fails: neighbouring pixels move together",
       "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "full-gauss",
-      "title": "Second try: one 784-dimensional Gaussian with a full covariance",
+      "id": "threes-map",
+      "title": "Digits vary in only a few ways",
       "section": "pca",
-      "builds": 2,
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "encode-decode",
+      "title": "Encoder and decoder: image → a few numbers → image",
+      "section": "pca",
+      "builds": 3,
       "optional": false
     },
     {
       "id": "pca-2d",
-      "title": "Idea: describe each example with fewer numbers. PCA in 2-D first",
+      "title": "PCA, the simplest encoder and decoder, in two dimensions",
       "section": "pca",
       "builds": 4,
       "optional": false
@@ -331,13 +359,6 @@
       "optional": false
     },
     {
-      "id": "pca-variance",
-      "title": "How many numbers do we need?",
-      "section": "pca",
-      "builds": 2,
-      "optional": false
-    },
-    {
       "id": "pca-scatter",
       "title": "Each digit as 2 numbers: PCA’s map of 1,000 test digits",
       "section": "pca",
@@ -345,17 +366,17 @@
       "optional": false
     },
     {
-      "id": "pca-gen-recipe",
-      "title": "Generate in two steps: sample a few numbers, then rebuild an image",
+      "id": "gen-steps",
+      "title": "To generate, four steps: encode, fit, draw, decode",
       "section": "pca",
-      "builds": 2,
+      "builds": 5,
       "optional": false
     },
     {
-      "id": "pca-gauss",
-      "title": "One Gaussian over d PCA numbers",
+      "id": "pca-sample-worked",
+      "title": "Steps ③ and ④ by hand: first a code, then an image",
       "section": "pca",
-      "builds": 2,
+      "builds": 3,
       "optional": false
     },
     {
@@ -411,7 +432,7 @@
       "id": "ae-untrained",
       "title": "Before training: always look at what the network outputs",
       "section": "ae",
-      "builds": 2,
+      "builds": 3,
       "optional": false
     },
     {
@@ -465,23 +486,9 @@
     },
     {
       "id": "ae-scatter",
-      "title": "The 2-number codes of 1,000 test digits",
+      "title": "Where the codes land: the autoencoder with a 2-number code",
       "section": "ae",
       "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "search",
-      "title": "Search by code: the nearest digits to a query",
-      "section": "ae",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "denoise",
-      "title": "Denoising: damage the input, ask for the clean image",
-      "section": "ae",
-      "builds": 3,
       "optional": false
     },
     {
@@ -523,7 +530,7 @@
       "id": "explore-ae",
       "title": "Your turn: three ways to choose a code",
       "section": "gen",
-      "builds": 1,
+      "builds": 2,
       "optional": false
     },
     {
@@ -534,8 +541,15 @@
       "optional": false
     },
     {
-      "id": "spread",
-      "title": "Wider codes spread out",
+      "id": "spread-what",
+      "title": "How close are codes of similar digits? Measure it",
+      "section": "gen",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "spread-sizes",
+      "title": "Wider codes: similar digits drift apart",
       "section": "gen",
       "builds": 2,
       "optional": false
@@ -548,36 +562,64 @@
       "optional": false
     },
     {
-      "id": "posthoc",
-      "title": "A fix we already know: fit a mixture to where the codes are",
-      "section": "gen",
-      "builds": 3,
-      "optional": false
-    },
-    {
       "id": "wishes",
-      "title": "What we would like instead",
+      "title": "What we saw, and what we want instead",
       "section": "gen",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "vae-story",
-      "title": "Write the recipe first: pick a code, then draw an image",
+      "id": "two-roads",
+      "title": "Two roads to the VAE",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "road1-cloud",
+      "title": "Road 1: encode each image to a cloud, not a point",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "vae-arch",
+      "title": "Road 1: the network, with a cloud in the middle",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "road1-penalty",
+      "title": "Road 1: keep the clouds near N(0, I) with a KL penalty",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-pgm",
+      "title": "Road 2: the VAE as a generative model",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-draw",
+      "title": "To draw an image, follow the arrows: first z, then x",
       "section": "vae",
       "builds": 3,
       "optional": false
     },
     {
       "id": "sigma",
-      "title": "The likelihood of an image, given its code, is a squared error",
+      "title": "The likelihood, in numbers: a squared error",
       "section": "vae",
       "builds": 3,
       "optional": false
     },
     {
       "id": "vae-mle",
-      "title": "Train like Part 2: maximise log p(x) for every image",
+      "title": "To learn θ, maximise log p(x) for every image: an integral",
       "section": "vae",
       "builds": 2,
       "optional": false
@@ -590,52 +632,24 @@
       "optional": false
     },
     {
-      "id": "evidence-grid",
-      "title": "With 2 numbers we can add up rectangles; with 16 we cannot",
-      "section": "vae",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "naive-mc",
-      "title": "Average p(x | z) over random codes? Most draws are wasted",
-      "section": "vae",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "vi-recall",
-      "title": "Lecture 1’s tool: fit a simple q to the posterior",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "vi3",
-      "title": "Fit q for our 3: press play",
-      "section": "vae",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "amortise",
-      "title": "60,000 images would mean 60,000 separate fits",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "vae-arch",
-      "title": "The VAE: an encoder that outputs q, a code drawn from it, and the decoder",
+      "id": "vae-infer",
+      "title": "The variational part: an encoder that approximates the posterior",
       "section": "vae",
       "builds": 3,
       "optional": false
     },
     {
       "id": "q3",
-      "title": "The encoder on our 3: one pass, almost as good as 1,200 steps",
+      "title": "Check the encoder: its q for our 3, against the true posterior",
       "section": "vae",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "elbo-meets",
+      "title": "The ELBO for one image is Road 1’s loss",
+      "section": "vae",
+      "builds": 3,
       "optional": false
     },
     {
@@ -756,7 +770,77 @@
       "section": "optional",
       "builds": 2,
       "optional": true
+    },
+    {
+      "id": "full-gauss",
+      "title": "Second try: one 784-dimensional Gaussian with a full covariance",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "pca-variance",
+      "title": "How many numbers do we need?",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "pca-gauss",
+      "title": "One Gaussian over d PCA numbers",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "search",
+      "title": "Search by code: the nearest digits to a query",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "denoise",
+      "title": "Denoising: damage the input, ask for the clean image",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "posthoc",
+      "title": "A fix we already know: fit a mixture to where the codes are",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "evidence-grid",
+      "title": "With 2 numbers we can add up rectangles; with 16 we cannot",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "naive-mc",
+      "title": "Average p(x | z) over random codes? Most draws are wasted",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "vi3",
+      "title": "Fit q for our 3: press play",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "amortise",
+      "title": "60,000 images would mean 60,000 separate fits",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
     }
   ],
-  "totalStates": 217
+  "totalStates": 258
 }

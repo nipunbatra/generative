@@ -117,15 +117,16 @@ section('2.2', 'One Gaussian: fit, score, sample', 'Maximum likelihood for one G
 code(r"""
 mu_hat = wait.mean()
 sd_hat = ((wait - mu_hat) ** 2).mean().sqrt()          # divide by n: the maximum-likelihood estimate
-bell = Normal(mu_hat, sd_hat)
+one_bell = Normal(mu_hat, sd_hat)
 print(f'mu = {mu_hat:.2f}, sigma = {sd_hat:.2f}')
 for x in (54., 71., 80.):
-    print(f'density at {x:.0f} minutes: {bell.log_prob(torch.tensor(x, dtype=F64)).exp():.4f}')
-print(f'average log-likelihood: {bell.log_prob(wait).mean():.3f}')
+    print(f'density at {x:.0f} minutes: {one_bell.log_prob(torch.tensor(x, dtype=F64)).exp():.4f}')
+bell_ll = float(one_bell.log_prob(wait).mean())
+print(f'average log-likelihood: {bell_ll:.3f}')
 """)
 code(r"""
 torch.manual_seed(7)
-draws = bell.sample((272,))
+draws = one_bell.sample((272,))
 print('draws between 62 and 72 minutes:', int(((draws >= 62) & (draws <= 72)).sum()), ' data:', int(((wait >= 62) & (wait <= 72)).sum()))
 plt.figure(figsize=(6, 2.6)); bins = range(40, 101, 2)
 plt.hist(wait.numpy(), bins=bins, color='#9AA5B1', alpha=.6, label='real waits')
@@ -136,24 +137,25 @@ code(r"""
 plt.figure(figsize=(4.5, 3.4)); plt.scatter(duration, wait, s=10, color='#245EDB', alpha=.6)
 plt.xlabel('eruption length (minutes)'); plt.ylabel('next wait (minutes)'); plt.show()
 """)
-section('2.4', 'Fit the mixture, then sample it', 'The same gradient-descent loop as in Lecture 1. Waits are standardised first, then the fitted values are converted back to minutes.')
+section('2.4', 'Fit the mixture, then sample it', 'The same gradient-descent loop as in Lecture 1, in minutes, one line per term of the loss. Centres are learned directly; widths through sigma = exp(log_s), so they stay positive; shares through softmax, so they are positive and add to 1.')
 code(r"""
-x = (wait - mu_hat) / sd_hat                    # standardised waits
-logits = torch.zeros(2, dtype=F64, requires_grad=True)
-mu = torch.tensor([-.25, .25], dtype=F64, requires_grad=True)
-log_sd = torch.zeros(2, dtype=F64, requires_grad=True)
-opt = torch.optim.Adam([logits, mu, log_sd], lr=0.03)
-for step in range(600):
-    log_pi = torch.log_softmax(logits, 0)
-    comp = Normal(mu, log_sd.exp()).log_prob(x[:, None])     # 272 x 2: log N(x_i; mu_k, sd_k^2)
-    loss = -torch.logsumexp(log_pi + comp, 1).mean()
+def bell(x, m, s):                    # N(x; m, s^2), the formula from 2.2
+    return torch.exp(-((x - m) / s)**2 / 2) / (s * math.sqrt(2 * math.pi))
+
+x = wait                                                  # all 272 waits, in minutes
+mu = torch.tensor([65., 75.], dtype=F64, requires_grad=True)   # centres
+log_s = torch.tensor([2.3, 2.3], dtype=F64, requires_grad=True) # widths: sigma = exp(log_s), about 10
+w = torch.zeros(2, dtype=F64, requires_grad=True)               # shares: pi = softmax(w) = (1/2, 1/2)
+opt = torch.optim.Adam([mu, log_s, w], lr=0.1)
+for step in range(300):
+    pi, sigma = torch.softmax(w, 0), torch.exp(log_s)
+    p_short = pi[0] * bell(x, mu[0], sigma[0])    # pi_1 N(x; mu_1, sigma_1^2), one number per wait
+    p_long  = pi[1] * bell(x, mu[1], sigma[1])    # pi_2 N(x; mu_2, sigma_2^2)
+    loss = -torch.log(p_short + p_long).mean()    # minus the average log p(x)
     opt.zero_grad(); loss.backward(); opt.step()
-pi = torch.softmax(logits, 0).detach()
-mu_min = (mu.detach() * sd_hat + mu_hat); sd_min = log_sd.detach().exp() * sd_hat
-order = torch.argsort(mu_min); pi, mu_min, sd_min = pi[order], mu_min[order], sd_min[order]
+pi, mu_min, sd_min = torch.softmax(w, 0).detach(), mu.detach(), torch.exp(log_s).detach()
 print('shares', pi.numpy().round(3), ' centres', mu_min.numpy().round(2), ' widths', sd_min.numpy().round(2))
-avg_ll = torch.logsumexp(pi.log() + Normal(mu_min, sd_min).log_prob(wait[:, None]), 1).mean()
-print(f'average log-likelihood: {avg_ll:.3f}  (one Gaussian: {bell.log_prob(wait).mean():.3f})')
+print(f'average log-likelihood: {-loss.item():.3f}  (one Gaussian: {bell_ll:.3f})')
 """)
 code(r"""
 # Which bump does each wait belong to? Compare with the eruption lengths the fit never saw.
@@ -199,18 +201,6 @@ for K in range(1, 7):
     best = max((em(tr, K, iters=300, seed=s, reg=1e-3) for s in range(8)), key=lambda r: r[3])
     print(f'K = {K}: train {best[3]:.3f}   held out {mog_logpdf(te, *best[:3]).mean():.3f}')
 """)
-section('2.6', 'Two numbers per eruption', 'With two numbers per example a Gaussian needs a 2 x 2 covariance.')
-code(r"""
-X2 = torch.stack([duration, wait], 1)
-w2, m2, c2, ll2 = max((em(X2, 2, iters=300, seed=s, reg=1e-6) for s in range(5)), key=lambda r: r[3])
-print('correlation of length and wait:', float(torch.corrcoef(X2.T)[0, 1]).__round__(3))
-print('two 2-D bumps: weights', w2.numpy().round(3), ' means', m2.numpy().round(2).tolist(), f' average log-likelihood {ll2:.3f}')
-k = torch.multinomial(w2, 272, replacement=True, generator=torch.Generator().manual_seed(4))
-S2 = torch.stack([torch.distributions.MultivariateNormal(m2[j], c2[j]).sample() for j in k])
-plt.figure(figsize=(4.5, 3.4)); plt.scatter(*X2.T, s=10, alpha=.5, label='eruptions'); plt.scatter(*S2.T, s=10, alpha=.5, label='samples')
-plt.xlabel('eruption length'); plt.ylabel('next wait'); plt.legend(); plt.show()
-""")
-
 # ------------------------------------------------------------------------------------------------ Part 3
 md('# Part 3 · Images: PCA and Gaussians')
 section('3.1', 'An image is 784 numbers', 'MNIST, grey levels scaled to [0, 1]. Our running example is test digit #90, a 3.')
@@ -233,7 +223,7 @@ threes = Xte[yte == 3][:100]
 show_digits(torch.cat([threes[:5], threes.mean(0, keepdim=True)]), ncol=6, title='five 3s, and the average of 100')
 show_digits(torch.rand(8, 784, generator=torch.Generator().manual_seed(1)), title='random points in [0, 1]^784')
 """)
-section('3.2', 'Gaussians on raw pixels', 'First one Gaussian per pixel, then one 784-dimensional Gaussian with a full covariance.')
+section('3.2', 'A bell for every pixel', 'One distribution for all 60,000 training digits (all ten digits, labels ignored): first one Gaussian per pixel, sampled independently, then (appendix on the slides) one 784-dimensional Gaussian with a full covariance.')
 code(r"""
 m = Xtr.mean(0); s = Xtr.std(0, correction=0)
 g = torch.Generator().manual_seed(1)
@@ -245,7 +235,7 @@ print('correlation of pixel (14,14) with its right neighbour:', round(float(corr
 L = torch.linalg.cholesky(C + 1e-4 * torch.eye(784, dtype=F64))
 show_digits((m + torch.randn(8, 784, generator=g, dtype=F64) @ L.T).clamp(0, 1), title='one full-covariance Gaussian: 308,504 numbers')
 """)
-section('3.3', 'PCA: a few numbers per image', 'The directions of most spread are the top eigenvectors of the covariance matrix.')
+section('3.3', 'A few numbers per digit', 'PCA is the simplest encoder and decoder: encode z = Wᵀ(x − m), decode x = m + W z. Its directions are the top eigenvectors of the covariance matrix.')
 code(r"""
 evals, evecs = torch.linalg.eigh(C)
 order = torch.argsort(evals, descending=True)
@@ -263,7 +253,7 @@ code(r"""
 Z2 = (Xte[:2000] - m) @ W[:, :2]
 plt.figure(figsize=(4.5, 4)); plt.scatter(*Z2.T, c=yte[:2000], cmap='tab10', s=5); plt.colorbar(label='digit'); plt.title('first two PCA numbers'); plt.show()
 """)
-section('3.4', 'Generate from PCA numbers', 'Fit a distribution to the d PCA numbers of the training digits, sample codes, decode with x = m + W z.')
+section('3.4', 'Generate: sample a code, decode it', 'Four steps: encode the training digits, fit a distribution to their codes, draw a new code, decode it with x = m + W z.')
 code(r"""
 def pca_sample(d, K, n=16, seed=7, sub=30000):
     Z = (Xtr[:sub] - m) @ W[:, :d]
@@ -358,19 +348,10 @@ for z, net in aes.items():
     pca = float((((m + Zt @ W[:, :z].T) - Xte) ** 2).sum(1).mean())
     print(f'code of {z:3d} numbers: autoencoder {test_sse(net):6.2f}   PCA {pca:6.2f}')
 """)
-section('4.4', 'What codes are good for', 'Search by code, and a denoising autoencoder.')
+section('4.4', 'Where the codes land', 'This autoencoder has exactly 2 numbers in its code, so we can plot every code.')
 code(r"""
-with torch.no_grad():
-    codes = aes[16].encode(Xtr.float())[0]; q = aes[16].encode(x3[None].float())[0]
-nearest = torch.cdist(q, codes)[0].argsort()[:5]
-show_digits(torch.cat([x3[None], Xtr[nearest]]), ncol=6, title='our 3 and its 5 nearest training digits by 16-number code')
-dae = train(AutoEncoder(z=16), epochs=10, mask=0.5, seed=12)
-g = torch.Generator().manual_seed(12); xw = Xte[[3, 2, 1, 18, 4, 8, 11, 0]]
-damaged = xw * (torch.rand(xw.shape, generator=g, dtype=F64) > 0.5)
-with torch.no_grad():
-    plain, clean = [n.decoder(n.encode(damaged.float())[0]).double() for n in (aes[16], dae)]
-print(f'squared error against the clean digits: plain {((plain - xw) ** 2).sum(1).mean():.1f}, denoising {((clean - xw) ** 2).sum(1).mean():.1f}')
-show_digits(torch.cat([xw, damaged, plain, clean]), title='clean · half the pixels removed · plain autoencoder · denoising autoencoder')
+with torch.no_grad(): C2 = ae2.encode(Xte[:2000].float())[0]
+plt.figure(figsize=(5, 4)); plt.scatter(*C2.T, c=yte[:2000], cmap='tab10', s=5); plt.colorbar(label='digit'); plt.title('2-number autoencoder codes of 2,000 test digits'); plt.show()
 """)
 
 # ------------------------------------------------------------------------------------------------ Part 5
@@ -398,18 +379,11 @@ def spread(net):
 for z, net in aes.items():
     a, b = spread(net); print(f'{z:3d} numbers: two 0s {a:6.2f} apart, a 0 and a 1 {b:6.2f} apart, ratio {a / b:.2f}')
 """)
-section('5.3', 'Fit a density to the codes', "Part 3's recipe: fit a mixture to the codes of the training digits, then sample codes from it.")
-code(r"""
-with torch.no_grad(): Ctr = ae2.encode(Xtr.float())[0].double()
-w, means, covs, ll = em(Ctr, 10, iters=200, seed=31)
-k = torch.multinomial(w, 16, replacement=True, generator=torch.Generator().manual_seed(8))
-zs = torch.stack([torch.distributions.MultivariateNormal(means[j], covs[j]).sample() for j in k])
-with torch.no_grad(): show_digits(ae2.decoder(zs.float()), ncol=16, size=.6, title='codes from a 10-bump mixture fitted to the codes, decoded')
-""")
+section('5.3', 'What we want instead', 'Codes that fill N(0, I); each image owning a small cloud of codes; one probability model that can score and sample. The VAE does all three.')
 
 # ------------------------------------------------------------------------------------------------ Part 6
 md('# Part 6 · The variational autoencoder')
-section('6.1', 'The generative story', 'z ~ N(0, I), then x | z ~ N(decoder(z), 0.2² I). Load the trained 2-number and 16-number VAEs (50 epochs).')
+section('6.1', 'Two roads to the VAE', 'Road 1: an autoencoder whose encoder outputs a cloud N(μ, σ²) instead of a point, plus a KL penalty. Road 2: a generative model z ~ N(0, I), x | z ~ N(decoder(z), 0.2² I), trained with variational inference. Both give the same network and loss. Load the trained 2-number and 16-number VAEs (50 epochs).')
 code(r"""
 vae2 = load_trained('vae2', 2, True); vae16 = load_trained('vae16', 16, True)
 const = 784 * math.log(SIGMA * math.sqrt(2 * math.pi))
@@ -418,7 +392,20 @@ def log_lik(net, x, Z):                     # log p(x | z) for a batch of codes 
     return -((net.decoder(Z.float()).double() - x) ** 2).sum(1) / (2 * SIGMA ** 2) - const
 print(f'the constant 784 log(sigma sqrt(2 pi)) = {const:.2f}')
 """)
-section('6.2', 'Which code made this 3?', 'With two numbers per code we can compute the posterior and the evidence on a grid. With 16 we could not.')
+section('6.2', 'Road 1: from the autoencoder', 'The encoder ends in 2 x 2 = 4 numbers: a mean and a log variance per code number. The code is drawn by reparameterisation, and the loss adds a KL to N(0, I).')
+code(r"""
+with torch.no_grad():
+    h = vae2.encoder(x3[None].float())
+    mu_, logvar_ = h.chunk(2, dim=1)
+print('encoder output for our 3 (4 numbers):', h.numpy().round(3))
+print('mean', mu_.numpy().round(3), ' sigma', torch.exp(0.5 * logvar_).numpy().round(4))
+eps = torch.randn(1, 2, generator=torch.Generator().manual_seed(1))
+z = mu_ + torch.exp(0.5 * logvar_) * eps                        # reparameterisation
+kl = 0.5 * (mu_ ** 2 + logvar_.exp() - logvar_ - 1).sum()
+print('one draw z =', z.numpy().round(4), f'; KL to N(0, I) = {kl:.2f}')
+""")
+section('6.3', 'Road 2: from a generative model', 'The posterior of our 3 on a grid (possible with two numbers), naive Monte Carlo for p(x), variational inference for this one image, and the encoder against both.')
+md('### The posterior and the evidence on a grid')
 code(r"""
 with torch.no_grad(): mu3, lv3 = vae2.encode(x3[None].float())
 mu3, sd3 = mu3[0].double(), (0.5 * lv3[0].double()).exp()
@@ -436,7 +423,7 @@ for S in (10, 100, 1000, 10000, 100000):
     z = torch.randn(S, 2, generator=g, dtype=F64)
     print(f'S = {S:6d}: estimate {float(torch.logsumexp(log_lik(vae2, x3, z), 0)) - math.log(S):8.2f}')
 """)
-section('6.3', 'Variational inference for one image', "Lecture 1's tool: fit q(z) = N(m, diag s²) to this one posterior by maximising the ELBO with reparameterised draws.")
+md("### Variational inference for one image: Lecture 1's tool, fitting q(z) = N(m, diag s²) by maximising the ELBO")
 code(r"""
 def elbo(net, x, m_, s_, draws=20000, seed=21):
     eps = torch.randn(draws, 2, generator=torch.Generator().manual_seed(seed), dtype=F64)
@@ -457,12 +444,12 @@ for step in range(1200):
 m_vi, s_vi = mq.detach().double(), ls.detach().double().exp()
 print('per-image q: mean', m_vi.numpy().round(4), ' sd', s_vi.numpy().round(4), f' ELBO {elbo(vae2, x3, m_vi, s_vi):.2f}')
 """)
-section('6.4', 'An encoder does it for every image', 'The encoder outputs q for any image in one forward pass. Compare its ELBO with the per-image fit and with log p(x).')
+md('### The encoder does it in one pass: compare its ELBO with the per-image fit and with log p(x)')
 code(r"""
 print('encoder q: mean', mu3.numpy().round(4), ' sd', sd3.numpy().round(4))
 print(f'log p(x) {log_px:.2f}  |  per-image q {elbo(vae2, x3, m_vi, s_vi):.2f}  |  encoder q {elbo(vae2, x3, mu3, sd3):.2f}')
 """)
-section('6.5', 'The loss, term by term', 'One reparameterised draw for our 3, with numbers.')
+section('6.4', 'The loss, term by term', 'One reparameterised draw for our 3, with numbers.')
 code(r"""
 eps = torch.tensor([0.5, -1.0], dtype=F64)
 z = mu3 + sd3 * eps
@@ -470,7 +457,7 @@ with torch.no_grad(): xh = vae2.decoder(z[None].float())[0].double()
 sse = float(((xh - x3) ** 2).sum()); kl = 0.5 * float((mu3 ** 2 + sd3 ** 2 - 2 * sd3.log() - 1).sum())
 print(f'z = {z.numpy().round(4)}; squared error {sse:.2f}; reconstruction term {sse / (2 * SIGMA ** 2):.1f}; KL {kl:.2f}; loss {sse / (2 * SIGMA ** 2) + kl:.1f}')
 """)
-section('6.6', 'What the VAE learned', 'Sample z ~ N(0, I) and decode; look at where the codes are.')
+section('6.5', 'What the VAE learned', 'Sample z ~ N(0, I) and decode; look at where the codes are.')
 code(r"""
 g = torch.Generator().manual_seed(5)
 with torch.no_grad():
@@ -480,7 +467,7 @@ with torch.no_grad():
 print('codes of all test digits: mean', V2.mean(0).numpy().round(2), ' sd', V2.std(0).numpy().round(2))
 plt.figure(figsize=(5, 4)); plt.scatter(*V2[:2000].T, c=yte[:2000], cmap='tab10', s=5); plt.scatter(*prior.T, s=4, c='red'); plt.title('VAE codes and N(0, I) draws'); plt.show()
 """)
-section('6.7', 'The KL weight β', 'Train 2-number VAEs with β = 0 and β = 256 (10 epochs each) and compare with β = 1.')
+section('6.6', 'The KL weight β', 'Train 2-number VAEs with β = 0 and β = 256 (10 epochs each) and compare with β = 1.')
 code(r"""
 for beta, net in ((0.0, train(AutoEncoder(2, True), epochs=10, beta=0.0, seed=40)), (1.0, vae2), (256.0, train(AutoEncoder(2, True), epochs=10, beta=256.0, seed=41))):
     with torch.no_grad():
@@ -488,7 +475,35 @@ for beta, net in ((0.0, train(AutoEncoder(2, True), epochs=10, beta=0.0, seed=40
         kl = 0.5 * (mu_ ** 2 + lv_.exp() - lv_ - 1).sum(1).mean()
     print(f'beta = {beta:5.0f}: KL per image {kl:6.2f}, average sigma of q {torch.exp(0.5 * lv_).mean():.4f}, spread of codes {mu_.std(0).mean():.2f}')
 """)
-section('6.8', 'Wrap-up', 'From one number per example to 784: a hidden code first, then the data. Next lectures: GANs, then diffusion.')
+section('6.7', 'Wrap-up', 'From one number per example to 784: a hidden code first, then the data. Next lectures: GANs, then diffusion.')
+
+# ------------------------------------------------------------------------------------------------ Appendix
+md('# Appendix · slides outside the main route')
+md('### Search by code, and a denoising autoencoder')
+code(r"""
+with torch.no_grad():
+    codes = aes[16].encode(Xtr.float())[0]; q = aes[16].encode(x3[None].float())[0]
+nearest = torch.cdist(q, codes)[0].argsort()[:5]
+show_digits(torch.cat([x3[None], Xtr[nearest]]), ncol=6, title='our 3 and its 5 nearest training digits by 16-number code')
+dae = train(AutoEncoder(z=16), epochs=10, mask=0.5, seed=12)
+g = torch.Generator().manual_seed(12); xw = Xte[[3, 2, 1, 18, 4, 8, 11, 0]]
+damaged = xw * (torch.rand(xw.shape, generator=g, dtype=F64) > 0.5)
+with torch.no_grad():
+    plain, clean = [n.decoder(n.encode(damaged.float())[0]).double() for n in (aes[16], dae)]
+print(f'squared error against the clean digits: plain {((plain - xw) ** 2).sum(1).mean():.1f}, denoising {((clean - xw) ** 2).sum(1).mean():.1f}')
+show_digits(torch.cat([xw, damaged, plain, clean]), title='clean · half the pixels removed · plain autoencoder · denoising autoencoder')
+""")
+
+md("### Fit a mixture to the codes, then sample (Part 3's recipe)")
+code(r"""
+with torch.no_grad(): Ctr = ae2.encode(Xtr.float())[0].double()
+w, means, covs, ll = em(Ctr, 10, iters=200, seed=31)
+k = torch.multinomial(w, 16, replacement=True, generator=torch.Generator().manual_seed(8))
+zs = torch.stack([torch.distributions.MultivariateNormal(means[j], covs[j]).sample() for j in k])
+with torch.no_grad(): show_digits(ae2.decoder(zs.float()), ncol=16, size=.6, title='codes from a 10-bump mixture fitted to the codes, decoded')
+""")
+
+
 
 nb = nbf.v4.new_notebook(cells=cells, metadata={'kernelspec': {'name': 'python3', 'display_name': 'Python 3', 'language': 'python'},
                                                 'language_info': {'name': 'python'}, 'colab': {'provenance': []}})

@@ -106,7 +106,7 @@ def train(name, data):
     beta, mask = cfg.get('beta', 1.0), cfg.get('mask', 0.0)
     gen = torch.Generator().manual_seed(seed)
     hist = dict(name=name, config=cfg, seed=seed, sigma=SIGMA, hidden=HIDDEN, epoch=[], train_loss=[], train_sse=[],
-                train_kl=[], test_sse=[], test_kl=[], snapshots={}, step_snapshots={})
+                train_kl=[], test_sse=[], test_kl=[], snapshots={}, step_snapshots={}, step_test_sse={}, step_digit_sse={})
 
     def snapshot():
         model.eval()
@@ -129,8 +129,23 @@ def train(name, data):
         model.train()
         return float(torch.cat(sse).mean()), (float(torch.cat(kl).mean()) if kl else 0.0)
 
+    def digit_sse():
+        model.eval()
+        with torch.no_grad():
+            mu, _ = model.encode(watch)
+            out = ((model.decoder(mu) - watch) ** 2).sum(1)
+        model.train()
+        return [round(float(v), 2) for v in out.cpu()]
+
+    def log_step(step):
+        hist['step_test_sse'][str(step)] = round(evaluate()[0], 3)
+        hist['step_digit_sse'][str(step)] = digit_sse()
+
     hist['snapshots']['0'] = snapshot()
     hist['test_sse_init'] = evaluate()[0]
+    log_step(0)
+    LOG_STEPS = {10, 30, 100, 250} | {k * len(range(0, len(xtr), 128)) for k in (1, 2, 3, 5, 10, 20, 30, 50)}
+    DENSE = set(int(round(10 ** (i / 20))) for i in range(0, 90))
     t0, step = time.time(), 0
     epochs = int(os.environ.get('EPOCHS', cfg['epochs']))
     for epoch in range(1, epochs + 1):
@@ -148,6 +163,8 @@ def train(name, data):
             tot[0] += float(loss); tot[1] += float(sse); tot[2] += float(kl); nb += 1
             if epoch == 1 and step in (10, 30, 100, 250):
                 hist['step_snapshots'][str(step)] = snapshot()
+            if step in LOG_STEPS or (name == 'ae2' and step in DENSE):
+                log_step(step)
         te_sse, te_kl = evaluate()
         hist['epoch'].append(epoch)
         hist['train_loss'].append(tot[0] / nb); hist['train_sse'].append(tot[1] / nb); hist['train_kl'].append(tot[2] / nb)
