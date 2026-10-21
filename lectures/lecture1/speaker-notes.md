@@ -1,12 +1,12 @@
 # KL and variational inference: speaker notes
 
-Planned main route: 75 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 80 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
-| Part 1 · Bayes’ rule for a neural network | 16 |
+| Part 1 · Bayes’ rule for a neural network | 21 |
 | Part 2 · How far apart are two distributions? | 20 |
 | Part 3 · Find the closest q | 22 |
 | Part 4 · Back to Bayes: the ELBO | 9 |
@@ -54,9 +54,41 @@ Planned main route: 75 minutes. Timing includes student responses and the specif
 
 **Expected:** Simplicity: before data nothing ties one weight to another, and very large weights are unlikely.
 
-**Build 2, ask:** What do these prior functions have in common?
+**Build 2, ask:** How many numbers make one draw of θ?
 
-**Expected:** They are smooth: flat, S-shaped or gently curved, mostly between −3 and 3.
+**Expected:** Seven, one per parameter. This draw is θ⁽¹⁾ on the next slide.
+
+**Transition:** What does one draw of θ look like as a network?
+
+## one-draw: One draw of θ is one whole function
+
+**Build 1, ask:** Look at θ⁽¹⁾. Which numbers decide where its curve steps, and how high?
+
+**Expected:** b/w sets where each tanh steps, |w| how sharply, v how high; c shifts the whole curve.
+
+**Build 2, ask:** Why does θ⁽²⁾ give a different shape?
+
+**Expected:** Different weights and biases: steps in other places, of other heights and signs.
+
+**Build 3, ask:** So what does the prior on θ say about functions?
+
+**Expected:** It is a distribution over functions: mostly smooth curves within about ±3.
+
+**Point here:** θ⁽¹⁾ is the draw marked on the bells on the previous slide. θ⁽¹⁾, θ⁽²⁾ and θ⁽³⁾ are the first three of the twenty lines on the next slide.
+
+**Transition:** Twenty draws at once.
+
+## prior-functions: Twenty draws, and the prior predictive
+
+**Build 1, ask:** Which numbers make a line steep? Which shift it up or down?
+
+**Expected:** A large |w| makes a sharp step; c shifts the whole curve; v sets how high each step is.
+
+**Build 2, ask:** Before any data, how sure is the model about y at x = 0?
+
+**Expected:** Not at all: the band is about ±2.7 wide everywhere.
+
+**Point here:** Prior over functions: the individual curves. Prior predictive: their average with the noise added, the band (4,000 draws). Slide 14 shows the same picture after the data: the posterior predictive.
 
 **Transition:** Now the data, and how well each θ explains them.
 
@@ -74,31 +106,61 @@ Planned main route: 75 minutes. Timing includes student responses and the specif
 
 **Transition:** Compute the right-hand side of Bayes’ rule for one θ.
 
-## rhs-by-hand: The right-hand side, term by term, for one θ
+## theta-a: Meet θ<sub>A</sub>: one good setting of the seven numbers
 
-**Build 1, ask:** Why add logs instead of multiplying densities?
+**Build 1, ask:** Which parameter is largest in size?
 
-**Expected:** A product of many small numbers underflows; a sum of logs is stable, and has the same maximiser.
+**Expected:** w₂ = −2.00: a sharp step from the second hidden unit.
 
-**Build 2, ask:** Which parameter costs most under the prior?
+**Build 2, ask:** Does this curve explain the data well?
 
-**Expected:** The largest in size: w₂ = −2.00, costing −2.93.
+**Expected:** Yes: it passes close to every point. The next two slides put numbers on that.
 
-**Build 3, ask:** How would you compute the third term?
+**Point here:** θ<sub>A</sub> maximises log p(𝒟 | θ) + log p(θ): it is the MAP estimate. It plays no special role later; it is a convenient, good θ to compute with.
 
-**Expected:** Students suggest a grid, or sampling. Both are next.
+**Transition:** The likelihood, one data point at a time.
 
-**Point here:** θ_A = (−0.48, −2.00, −0.59, 0.45, −0.46, −0.96, −0.16) is the most probable θ: it maximises log p(𝒟 | θ) + log p(θ). Each likelihood term is −½ log(2π · 0.1²) − (yᵢ − f(xᵢ))² / (2 · 0.1²) = 1.38 − 50 (yᵢ − f(xᵢ))².
+## likelihood-by-hand: The likelihood of θ<sub>A</sub>, one data point at a time
 
-**Transition:** Compare θ_A with a random θ from the prior.
+**Build 1, ask:** What is f at x₁ before any noise?
+
+**Expected:** About −1.18: mostly from the second unit, v₂ tanh(·) ≈ −0.96.
+
+**Build 2, ask:** Why is the best possible score 1.38?
+
+**Expected:** A point exactly on the curve has zero residual, so only −½ log(2π · 0.1²) = 1.38 remains.
+
+**Build 3, ask:** Which points score worst, and why?
+
+**Expected:** Points 12 and 13, near the steepest part of the step: the curve misses them by more than 0.17.
+
+**Point here:** Rounded to three decimals at every step; the exact first term is 1.156.
+
+**Transition:** The prior of θ<sub>A</sub>, one parameter at a time.
+
+## prior-by-hand: The prior of θ<sub>A</sub>, then the evidence
+
+**Build 1, ask:** What does a parameter at exactly 0 score?
+
+**Expected:** −0.919: the top of the bell.
+
+**Build 2, ask:** Which parameter costs most, and why?
+
+**Expected:** w₂ = −2.00: its square, halved, is 2.01.
+
+**Build 3, ask:** How would you compute the evidence?
+
+**Expected:** Students suggest a grid, or sampling. Both are coming.
+
+**Transition:** Compare θ<sub>A</sub> with a random θ from the prior.
 
 ## two-thetas: Two settings of θ, side by side
 
 **Build 1, ask:** Which θ explains the data better, and by how much?
 
-**Expected:** θ_A, by about 2,170 nats of log likelihood.
+**Expected:** θ<sub>A</sub>, by about 2,170 nats of log likelihood.
 
-**Build 2, ask:** How many times more probable is θ_A than θ_B after seeing the data?
+**Build 2, ask:** How many times more probable is θ<sub>A</sub> than θ<sub>B</sub> after seeing the data?
 
 **Expected:** About e²¹⁷⁰ times. p(𝒟) cancels in a ratio of posteriors: it is needed only to normalise.
 
@@ -120,7 +182,7 @@ Planned main route: 75 minutes. Timing includes student responses and the specif
 
 **Build 1, ask:** Why are the small-S estimates so low?
 
-**Expected:** Prior draws almost never land where the likelihood is high, like θ_B; the rare good draws dominate the average.
+**Expected:** Prior draws almost never land where the likelihood is high, like θ<sub>B</sub>; the rare good draws dominate the average.
 
 **Build 2, ask:** What happens with a million parameters?
 
@@ -138,7 +200,7 @@ Planned main route: 75 minutes. Timing includes student responses and the specif
 
 **Build 2, ask:** How would you compute this integral?
 
-**Expected:** Average f_θ(x*) over samples of θ from the posterior, which we cannot draw directly. Yet.
+**Expected:** Average f<sub>θ</sub>(x*) over samples of θ from the posterior, which we cannot draw directly. Yet.
 
 **Point here:** Reference: Hamiltonian Monte Carlo, 4 chains of 2,000 samples, acceptance about 0.90. Predictive sd 0.22 at x = −2.5, about 0.11 in the data.
 
@@ -308,7 +370,7 @@ Planned main route: 75 minutes. Timing includes student responses and the specif
 
 **Expected:** The common log √(2π) terms, leaving the log ratio of the widths.
 
-**Build 2, ask:** Why is E_q[(u − m)²] = σ² + (μ − m)²?
+**Build 2, ask:** Why is E<sub>q</sub>[(u − m)²] = σ² + (μ − m)²?
 
 **Expected:** Write u − m = (u − μ) + (μ − m); the cross term averages to zero under q.
 

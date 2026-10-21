@@ -1,5 +1,5 @@
 import {m,eq,at,only,cols,code,image,table,flow,plot,palette} from '../shared/author.js';
-import {panel,label,legend,fig,widget,TINT,MUTED,AX,num,lin,mount as mountWidgets} from './widgets.js';
+import {panel,label,legend,fig,widget,thetaBars,PARAM_NAMES,TINT,MUTED,AX,num,lin,mount as mountWidgets} from './widgets.js';
 import {normalPdf,normalKL} from './math.mjs';
 
 const d=await fetch(new URL('./data/science.json',import.meta.url)).then(r=>r.json());
@@ -12,10 +12,10 @@ const stack=(...a)=>`<div class="equation-stack">${a.join('')}</div>`;
 const n=d.normal,c=d.coin,g=d.gradients,mc=d.monte_carlo,st=d.story,b=st.bnn,ink=palette.ink;
 export const meta={
  id:'lecture1',number:1,title:'KL and variational inference',
- subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:75,
+ subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:80,
  notebook:'lecture1-variational-inference.ipynb',
  sections:[
-  {id:'bayes',title:'Part 1 · Bayes’ rule for a neural network',minutes:16},
+  {id:'bayes',title:'Part 1 · Bayes’ rule for a neural network',minutes:21},
   {id:'kl',title:'Part 2 · How far apart are two distributions?',minutes:20},
   {id:'fit',title:'Part 3 · Find the closest q',minutes:22},
   {id:'elbo',title:'Part 4 · Back to Bayes: the ELBO',minutes:9},
@@ -178,9 +178,48 @@ function nnDiagram(){
 }
 const fxPanel=(o={})=>panel({W:600,H:330,L:52,R:14,xMin:-2.5,xMax:2.5,yMin:-2.6,yMax:2.6,ticksX:[-2,-1,0,1,2],ticksY:[-2,0,2],xLabel:'x',...o});
 const dataDots=(P,r=5.5)=>b.x.map((x,k)=>`<circle cx="${P.x(x).toFixed(1)}" cy="${P.y(b.y[k]).toFixed(1)}" r="${r}" fill="${palette.data}"/>`).join('');
-function priorDrawsChart(){
- const P=fxPanel({yMin:-4,yMax:4,ticksY:[-4,-2,0,2,4]});
- return fig(600,330,P.axes+b.prior_draws.map(fy=>P.line(b.grid,fy,'#9CA3AF',thin(2,.85))).join('')+label(52,30,'f(x) for twenty draws of θ from the prior',{fill:MUTED,size:21}),'Twenty functions drawn from the prior.');
+const sub=t=>`<tspan baseline-shift="sub" font-size="72%">${t}</tspan>`;
+/** Seven N(0, 1) bells, one per parameter, with one draw of θ marked on each. */
+function bellsRow(theta){
+ const W=1150,H=200,PW=150,G=(W-7*PW)/6,us=lin(-3.4,3.4,171),prior=us.map(u=>normalPdf(u,{mu:0,sigma:1}));let s='';
+ b.names.forEach((nm,j)=>{
+  const ox=j*(PW+G),P=panel({ox,W:PW,H,L:6,R:6,T:70,B:40,xMin:-3.4,xMax:3.4,yMax:.45,yAxis:false,ticksX:[-2,0,2]});
+  const v=Math.max(-3.3,Math.min(3.3,theta[j])),top=normalPdf(v,{mu:0,sigma:1});
+  s+=P.axes+P.area(us,prior,'#E5E7EB')+P.line(us,prior,'#9CA3AF',thin(2))+label(ox+PW/2,24,TH[nm],{fill:palette.noise,size:23,anchor:'middle',weight:600})+
+   `<line x1="${P.x(v).toFixed(1)}" y1="${P.y(0).toFixed(1)}" x2="${P.x(v).toFixed(1)}" y2="${P.y(top).toFixed(1)}" stroke="${palette.noise}" stroke-width="3"/>`+P.dot(v,0,palette.noise,6.5)+
+   label(Math.max(ox+22,Math.min(ox+PW-22,P.x(v))),56,num(theta[j]),{fill:palette.noise,size:19,anchor:'middle',weight:600});
+ });
+ return fig(W,H,s,'Seven N(0, 1) priors, one per parameter, with one draw of θ marked on each.');
+}
+/** Three prior draws as rows of seven numbers, each revealed with its curve. */
+function oneDrawFigure(){
+ const colors=[palette.noise,'#475569',palette.loss],W=1150,H=330,cx=j=>118+j*62;
+ const P=panel({ox:550,W:600,H,L:52,R:14,T:56,B:56,xMin:-2.5,xMax:2.5,yMin:-4.2,yMax:4.2,ticksX:[-2,-1,0,1,2],ticksY:[-4,-2,0,2,4],xLabel:'x'});
+ let s=P.axes+label(602,30,'f(x) for each draw',{fill:MUTED,size:21});
+ PARAM_NAMES.forEach((nm,j)=>{s+=label(cx(j),96,nm,{fill:palette.noise,size:21,anchor:'middle',weight:600});});
+ s+=`<line x1="0" y1="112" x2="520" y2="112" stroke="${AX}"/>`;
+ [0,1,2].forEach(k=>{const y=154+k*56,c=colors[k];let row=label(0,y,`θ⁽${'¹²³'[k]}⁾`,{fill:c,size:23,weight:600});
+  b.prior_thetas[k].forEach((v,j)=>{row+=label(cx(j),y,num(v),{fill:c,size:20,anchor:'middle'});});
+  s+=`<g data-at="${k+1}">${row}${P.line(b.grid,b.prior_draws[k],c,thin(4))}</g>`;});
+ s+=label(0,318,'Each row, put through the network, is one curve.',{size:19});
+ return fig(W,H,s,'Three draws of θ from the prior as rows of seven numbers, and the function each one gives.');
+}
+function thetaAFigure(){
+ const W=1150,H=330,P=panel({ox:550,W:600,H,L:52,R:14,T:56,B:56,xMin:-2.5,xMax:2.5,yMin:-2.6,yMax:2.6,ticksX:[-2,-1,0,1,2],ticksY:[-2,0,2],xLabel:'x'});
+ return fig(W,H,label(0,30,`θ${sub('A')} ∈ ℝ⁷: the most probable θ`,{fill:palette.q,size:22,weight:600})+thetaBars(10,96,A.theta,palette.q)+
+  `<g data-at="2">${P.axes+P.line(b.grid,b.f_A,palette.q)+dataDots(P)+label(602,30,`the network with θ${sub('A')}, and the data`,{fill:palette.q,size:21})}</g>`,
+  'Theta A as seven numbers, and the network it gives drawn over the data.');
+}
+/** The seventeen per-point log-likelihood terms for θ<sub>A</sub>. */
+function likTermsChart(){
+ const t=A.log_lik_points,W=1150,H=320,L=70,R=20,T=56,B=50,lo=-1,hi=1.6,c0=-.5*Math.log(2*Math.PI*.01);
+ const X=i=>L+(i+.5)*(W-L-R)/t.length,Y=v=>T+(hi-v)/(hi-lo)*(H-T-B),bw=(W-L-R)/t.length*.7;
+ let s=`<line x1="${L}" y1="${Y(0).toFixed(1)}" x2="${W-R}" y2="${Y(0).toFixed(1)}" stroke="${AX}"/><line x1="${L}" y1="${Y(c0).toFixed(1)}" x2="${W-R}" y2="${Y(c0).toFixed(1)}" stroke="${palette.p}" stroke-width="2" stroke-dasharray="7 5"/>`+
+  label(W-R,Y(c0)-9,`${num(c0)}: the curve passes exactly through the point`,{fill:palette.p,size:19,anchor:'end'});
+ t.forEach((v,i)=>{s+=`<rect x="${(X(i)-bw/2).toFixed(1)}" y="${Math.min(Y(0),Y(v)).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.abs(Y(v)-Y(0)).toFixed(1)}" rx="2" fill="${palette.q}"/>`+label(X(i),H-B+24,String(i+1),{size:16,anchor:'middle'});});
+ for(const v of [-1,0,1])s+=label(L-10,Y(v)+6,num(v,0),{size:18,anchor:'end'});
+ s+=label(L,30,`17 terms, one per point; they add up to log p(𝒟 | θ${sub('A')}) = ${num(A.log_lik)}`,{fill:palette.q,size:21})+label(W-R,H-6,'data point i',{size:18,anchor:'end'});
+ return fig(W,H,s,'The seventeen per-point log-likelihood terms for theta A.');
 }
 function dataChart(){
  const P=fxPanel();
@@ -188,7 +227,7 @@ function dataChart(){
 }
 function twoThetasChart(){
  const P=fxPanel();
- return fig(600,330,P.axes+P.line(b.grid,b.f_B,palette.noise)+P.line(b.grid,b.f_A,palette.q)+dataDots(P)+legend(52,30,[['network with θ_A',palette.q],['network with θ_B',palette.noise]]),'With theta A the network follows the data; with theta B it does not.');
+ return fig(600,330,P.axes+P.line(b.grid,b.f_B,palette.noise)+P.line(b.grid,b.f_A,palette.q)+dataDots(P)+legend(52,30,[[`network with θ${sub('A')}`,palette.q],[`network with θ${sub('B')}`,palette.noise]]),'With theta A the network follows the data; with theta B it does not.');
 }
 function evidenceMcChart(){
  const e=b.evidence,xs=e.sizes.map(Math.log10),sup=['⁰','¹','²','³','⁴','⁵','⁶','⁷'];
@@ -301,10 +340,24 @@ S('tiny-net','bayes','A tiny network: one input, two hidden units, one output',{
  expected:['Four weights (w₁, w₂, v₁, v₂) and three biases (b₁, b₂, c).','Each extra hidden unit adds a weight in, a bias and a weight out. Real networks have millions of parameters.'],
  transition:'Before any data: a prior on all seven.'});
 S('priors','bayes','A prior on every parameter',{builds:2,
- body:cols(stack(eq(R`\theta_j\sim\N(0,1),\quad j=1,\dots,7`),eq(R`p(\theta)=\prod_{j=1}^{7}\N(\theta_j;\,0,\,1)`)),at(2,priorDrawsChart()),'1fr 1.15fr'),
- lines:['Before seeing data, every parameter gets its own prior: θⱼ ~ N(0, 1), independently.','Each draw of θ is a whole function, so the prior is a distribution over functions. Here are twenty.'],
- ask:['Why independent N(0, 1) priors?','What do these prior functions have in common?'],
- expected:['Simplicity: before data nothing ties one weight to another, and very large weights are unlikely.','They are smooth: flat, S-shaped or gently curved, mostly between −3 and 3.'],
+ body:stack(cols(eq(R`\theta_j\sim\N(0,1),\quad j=1,\dots,7`),eq(R`p(\theta)=\prod_{j=1}^{7}\N(\theta_j;\,0,\,1)`)),at(2,bellsRow(b.prior_thetas[0]))),
+ lines:['Before seeing data, every parameter gets its own prior: θⱼ ~ N(0, 1), independently.','One draw from the prior is seven numbers, one from each bell: a single point θ in ℝ⁷.'],
+ ask:['Why independent N(0, 1) priors?','How many numbers make one draw of θ?'],
+ expected:['Simplicity: before data nothing ties one weight to another, and very large weights are unlikely.','Seven, one per parameter. This draw is θ⁽¹⁾ on the next slide.'],
+ transition:'What does one draw of θ look like as a network?'});
+S('one-draw','bayes','One draw of θ is one whole function',{builds:3,
+ body:oneDrawFigure(),
+ lines:['Draw θ⁽¹⁾ from the prior, put its seven numbers into the network, and evaluate f at every x: one curve.','A second draw, θ⁽²⁾, gives a different curve.','Every point of ℝ⁷ is a whole function. Drawing θ from the prior draws functions.'],
+ ask:['Look at θ⁽¹⁾. Which numbers decide where its curve steps, and how high?','Why does θ⁽²⁾ give a different shape?','So what does the prior on θ say about functions?'],
+ expected:['b/w sets where each tanh steps, |w| how sharply, v how high; c shifts the whole curve.','Different weights and biases: steps in other places, of other heights and signs.','It is a distribution over functions: mostly smooth curves within about ±3.'],
+ point:'θ⁽¹⁾ is the draw marked on the bells on the previous slide. θ⁽¹⁾, θ⁽²⁾ and θ⁽³⁾ are the first three of the twenty lines on the next slide.',
+ transition:'Twenty draws at once.'});
+S('prior-functions','bayes','Twenty draws, and the prior predictive',{builds:2,
+ body:widget('priorfuncs','Twenty prior draws of the network; hover over a line to see its seven parameter values'),
+ lines:['Twenty draws of θ, twenty functions. Hover over a line, or step through, to see its point in ℝ⁷.','Average over every θ and add the 0.1 noise: the prior predictive, p(y | x) = ∫ p(y | x, θ) p(θ) dθ. What the model expects before any data.'],
+ ask:['Which numbers make a line steep? Which shift it up or down?','Before any data, how sure is the model about y at x = 0?'],
+ expected:['A large |w| makes a sharp step; c shifts the whole curve; v sets how high each step is.',`Not at all: the band is about ±${num(2*b.prior_predictive.sd[60],1)} wide everywhere.`],
+ point:`Prior over functions: the individual curves. Prior predictive: their average with the noise added, the band (4,000 draws). Slide 14 shows the same picture after the data: the posterior predictive.`,
  transition:'Now the data, and how well each θ explains them.'});
 S('data-likelihood','bayes','The data, and how well one θ explains them',{builds:2,
  body:cols(dataChart(),stack(eq(R`y_i\mid x_i,\theta\ \sim\ \N\big(f_\theta(x_i),\,0.1^2\big)`),at(2,eq(R`p(\mathcal D\mid\theta)=\prod_{i=1}^{17}\N\big(y_i;\,f_\theta(x_i),\,0.1^2\big)`))),'1.05fr 1fr'),
@@ -313,24 +366,43 @@ S('data-likelihood','bayes','The data, and how well one θ explains them',{build
  expected:['The noise standard deviation, assumed known here.','Given θ, the noise on different points is independent.'],
  point:`Data: ${b.data}.`,
  transition:'Compute the right-hand side of Bayes’ rule for one θ.'});
-S('rhs-by-hand','bayes','The right-hand side, term by term, for one θ',{builds:3,
- body:stack(eq(R`\log p(\mathcal D\mid\theta_A)=\sum_{i=1}^{17}\log\N\big(y_i;\,f_{\theta_A}(x_i),\,0.1^2\big)`),
-  eq(R`=\underbrace{${num(lt[0])}}_{i=1}+\underbrace{${num(lt[1])}}_{i=2}+\dots+\underbrace{${num(lt[16])}}_{i=17}=${num(A.log_lik)}`),
-  at(2,eq(R`\log p(\theta_A)=\sum_{j=1}^{7}\log\N(\theta_j;0,1)=\underbrace{${num(lp[0])}}_{w_1}+\underbrace{${num(lp[1])}}_{w_2}+\dots+\underbrace{${num(lp[6])}}_{c}=${num(A.log_prior)}`)),
+const r3=v=>Math.round(v*1000)/1000,th=A.theta,x1=b.x[0],y1=r3(b.y[0]);
+const z1=r3(th[0]*x1+th[2]),z2=r3(th[1]*x1+th[3]),t1=r3(Math.tanh(z1)),t2=r3(Math.tanh(z2)),v1=r3(th[4]),v2=r3(th[5]),cc=r3(th[6]);
+const f1=r3(v1*t1+v2*t2+cc),res=r3(y1-f1),sq=r3(res*res/.02),c0=r3(-.5*Math.log(2*Math.PI*.01)),term1=r3(c0-sq);
+S('theta-a','bayes','Meet θ<sub>A</sub>: one good setting of the seven numbers',{builds:2,
+ body:stack(thetaAFigure(),small('θ<sub>A</sub> is the most probable θ: gradient ascent on log p(𝒟 | θ) + log p(θ), the best of ten random starts. For now it is just one candidate.')),
+ lines:['θ<sub>A</sub> is one point in ℝ⁷: seven numbers.','Put it through the network: the curve follows the data. How likely does θ<sub>A</sub> make the data, and how likely is θ<sub>A</sub> under the prior?'],
+ ask:['Which parameter is largest in size?','Does this curve explain the data well?'],
+ expected:[`w₂ = ${num(th[1])}: a sharp step from the second hidden unit.`,'Yes: it passes close to every point. The next two slides put numbers on that.'],
+ point:'θ<sub>A</sub> maximises log p(𝒟 | θ) + log p(θ): it is the MAP estimate. It plays no special role later; it is a convenient, good θ to compute with.',
+ transition:'The likelihood, one data point at a time.'});
+S('likelihood-by-hand','bayes','The likelihood of θ<sub>A</sub>, one data point at a time',{builds:3,
+ body:`<div class="state-slot"><div data-only="1-2">${stack(
+  eq(R`\text{point }1:\qquad x_1=${num(x1,1)},\qquad y_1=${num(y1,3)}`),
+  eq(R`f_{\theta_A}(x_1)=(${num(v1,3)})\tanh(${num(z1,3)})+(${num(v2,3)})\tanh(${num(z2,3)})+(${num(cc,3)})\approx${num(f1,3)}`),
+  at(2,eq(R`\log\N\big(y_1;\,f_{\theta_A}(x_1),\,0.1^2\big)=\underbrace{-\tfrac12\log(2\pi\cdot0.1^2)}_{${num(c0,3)}}-\frac{\big(y_1-f_{\theta_A}(x_1)\big)^2}{2\cdot0.1^2}`)),
+  at(2,eq(R`=${num(c0,3)}-\frac{(${num(res,3)})^2}{0.02}=${num(c0,3)}-${num(sq,3)}\approx${num(term1,3)}`)))}</div><div data-only="3">${likTermsChart()}</div></div>`,
+ lines:['Point 1 is at x = −1.5. Put x through the network with θ<sub>A</sub>: two tanh units and a bias give f ≈ −1.18.',`Score it: a Gaussian log density with noise 0.1. The point sits ${num(-res,2)} below the curve, so it scores ${num(c0,2)} − ${num(sq,2)} ≈ ${num(term1,2)}.`,'Do that for all seventeen points and add: log p(𝒟 | θ<sub>A</sub>) = 12.17.'],
+ ask:['What is f at x₁ before any noise?','Why is the best possible score 1.38?','Which points score worst, and why?'],
+ expected:[`About ${num(f1,2)}: mostly from the second unit, v₂ tanh(·) ≈ ${num(v2*t2,2)}.`,'A point exactly on the curve has zero residual, so only −½ log(2π · 0.1²) = 1.38 remains.','Points 12 and 13, near the steepest part of the step: the curve misses them by more than 0.17.'],
+ point:'Rounded to three decimals at every step; the exact first term is '+num(lt[0],3)+'.',
+ transition:'The prior of θ<sub>A</sub>, one parameter at a time.'});
+S('prior-by-hand','bayes','The prior of θ<sub>A</sub>, then the evidence',{builds:3,
+ body:stack(eq(R`\log\N(\theta_j;0,1)=-\tfrac12\log2\pi-\frac{\theta_j^2}{2}=${num(-.5*Math.log(2*Math.PI),3)}-\frac{\theta_j^2}{2}`),
+  at(2,table(['',...PARAM_NAMES,'sum'],[[m(R`\theta_j`),...th.map(v=>num(v,3)),''],[m(R`\log\N(\theta_j;0,1)`),...lp.map(v=>num(v,3)),`<b>${num(A.log_prior,3)}</b>`]])),
   at(3,eq(R`\log p(\mathcal D)=\log\int_{\mathbb R^7}p(\mathcal D\mid\theta)\,p(\theta)\,d\theta=\ \boldsymbol{?}`))),
- lines:['The likelihood: one log density per data point, seventeen terms, added up.','The prior: one log density per parameter, seven terms, added up.','The evidence needs every θ at once: an integral over all of ℝ⁷.'],
- ask:['Why add logs instead of multiplying densities?','Which parameter costs most under the prior?','How would you compute the third term?'],
- expected:['A product of many small numbers underflows; a sum of logs is stable, and has the same maximiser.',`The largest in size: w₂ = ${num(A.theta[1])}, costing ${num(lp[1])}.`,'Students suggest a grid, or sampling. Both are next.'],
- point:`θ_A = (${A.theta.map(v=>num(v)).join(', ')}) is the most probable θ: it maximises log p(𝒟 | θ) + log p(θ). Each likelihood term is −½ log(2π · 0.1²) − (yᵢ − f(xᵢ))² / (2 · 0.1²) = 1.38 − 50 (yᵢ − f(xᵢ))².`,
- transition:'Compare θ_A with a random θ from the prior.'});
+ lines:['Each parameter scores against its own N(0, 1) bell: a constant, minus half its square.','Seven terms, added up: log p(θ<sub>A</sub>) = −9.41. The large w₂ costs the most.','The third term on the right of Bayes’ rule, the evidence, is not about θ<sub>A</sub>: it needs every θ at once.'],
+ ask:['What does a parameter at exactly 0 score?','Which parameter costs most, and why?','How would you compute the evidence?'],
+ expected:['−0.919: the top of the bell.','w₂ = −2.00: its square, halved, is 2.01.','Students suggest a grid, or sampling. Both are coming.'],
+ transition:'Compare θ<sub>A</sub> with a random θ from the prior.'});
 S('two-thetas','bayes','Two settings of θ, side by side',{builds:2,
  body:cols(twoThetasChart(),at(2,table(['',m(R`\theta_A`),`${m(R`\theta_B`)}, a prior draw`],[
   [m(R`\log p(\mathcal D\mid\theta)`),num(A.log_lik,1),big(Bt.log_lik,1)],
   [m(R`\log p(\theta)`),num(A.log_prior,1),num(Bt.log_prior,1)],
   ['sum of the two',num(Number(A.log_lik.toFixed(1))+Number(A.log_prior.toFixed(1)),1),big(Number(Bt.log_lik.toFixed(1))+Number(Bt.log_prior.toFixed(1)),1)]])),'1.1fr 1fr'),
- lines:['θ_A follows the data. θ_B, one random draw from the prior, does not.','Their priors are similar; their likelihoods differ by over 2,000 nats. A ratio of two posteriors does not even need p(𝒟).'],
- ask:['Which θ explains the data better, and by how much?','How many times more probable is θ_A than θ_B after seeing the data?'],
- expected:['θ_A, by about 2,170 nats of log likelihood.','About e²¹⁷⁰ times. p(𝒟) cancels in a ratio of posteriors: it is needed only to normalise.'],
+ lines:['θ<sub>A</sub> follows the data. θ<sub>B</sub>, one random draw from the prior, does not.','Their priors are similar; their likelihoods differ by over 2,000 nats. A ratio of two posteriors does not even need p(𝒟).'],
+ ask:['Which θ explains the data better, and by how much?','How many times more probable is θ<sub>A</sub> than θ<sub>B</sub> after seeing the data?'],
+ expected:['θ<sub>A</sub>, by about 2,170 nats of log likelihood.','About e²¹⁷⁰ times. p(𝒟) cancels in a ratio of posteriors: it is needed only to normalise.'],
  transition:'Normalising is the hard part.'});
 S('evidence-integral','bayes','The evidence needs every θ, and has no formula',{builds:2,
  body:cols(gridDots(),stack(eq(R`p(\mathcal D)=\int_{\mathbb R^7}p(\mathcal D\mid\theta)\,p(\theta)\,d\theta`),
@@ -344,7 +416,7 @@ S('evidence-mc','bayes','Sampling from the prior: a few lucky draws carry everyt
   at(2,p(`Ten draws: off by about 1,000 nats. Ten million: about ${effective} draws carry the estimate, ${num(E.estimate)}.`))),'1.05fr 1fr'),
  lines:['Average the likelihood over draws from the prior: four seeds, up to ten million draws each.','Almost every prior draw explains the data terribly. Seven parameters just about work; more parameters or more data make it hopeless.'],
  ask:['Why are the small-S estimates so low?','What happens with a million parameters?'],
- expected:['Prior draws almost never land where the likelihood is high, like θ_B; the rare good draws dominate the average.','The chance that a prior draw lands near the posterior shrinks exponentially; no feasible S is enough.'],
+ expected:['Prior draws almost never land where the likelihood is high, like θ<sub>B</sub>; the rare good draws dominate the average.','The chance that a prior draw lands near the posterior shrinks exponentially; no feasible S is enough.'],
  point:`Effective number of draws, out of 10⁷: ${E.runs.map(r=>Math.round(r.effective_draws)).join(', ')}. The largest single draw carries ${E.runs.map(r=>Math.round(100*r.largest_share)+'%').join(', ')} of the total.`,
  transition:'Why do we want the posterior at all?'});
 S('predictive','bayes','What we want in the end: predictions with error bars',{builds:2,
@@ -352,7 +424,7 @@ S('predictive','bayes','What we want in the end: predictions with error bars',{b
   at(2,p('Average every network’s prediction, weighted by the posterior. The band widens where there are no data.'))),'1.05fr 1fr'),
  lines:['The posterior is a means to an end. The posterior predictive averages every network’s prediction at a new x*.','Here it comes from a long MCMC run, used only as a reference. The band widens beyond the data and in the gap.'],
  ask:['Where should the model be least sure?','How would you compute this integral?'],
- expected:['Far from the data: beyond both ends, and in the gap.','Average f_θ(x*) over samples of θ from the posterior, which we cannot draw directly. Yet.'],
+ expected:['Far from the data: beyond both ends, and in the gap.','Average f<sub>θ</sub>(x*) over samples of θ from the posterior, which we cannot draw directly. Yet.'],
  point:`Reference: Hamiltonian Monte Carlo, 4 chains of 2,000 samples, acceptance about ${num(H.acceptance.reduce((a,v)=>a+v,0)/H.acceptance.length)}. Predictive sd ${num(H.sd[0])} at x = −2.5, about ${num(Math.min(...H.sd))} in the data.`,
  transition:'How else could we approximate the posterior?'});
 S('three-ways','bayes','Three ways to approximate a posterior',{builds:3,
@@ -451,7 +523,7 @@ S('gaussian-derivation','kl','Deriving the Gaussian formula',{builds:3,
   at(2,eq(R`\E_q[(u-m)^2]=\sigma^2+(\mu-m)^2,\qquad\E_q[(u-\mu)^2]=\sigma^2`)),
   at(3,eq(R`\KL(q\|p)=\log\frac{s}{\sigma}+\frac{\sigma^2+(\mu-m)^2}{2s^2}-\frac12`))),
  lines:['Write the log ratio of the two densities. The √(2π) terms cancel.','Average it under q. Two moments are all we need.','The result: a width term, a squared shift of the centres, and −½.'],
- ask:['Which constants cancel?','Why is E_q[(u − m)²] = σ² + (μ − m)²?','When is the KL zero?'],
+ ask:['Which constants cancel?','Why is E<sub>q</sub>[(u − m)²] = σ² + (μ − m)²?','When is the KL zero?'],
  expected:['The common log √(2π) terms, leaving the log ratio of the widths.','Write u − m = (u − μ) + (μ − m); the cross term averages to zero under q.','Only when μ = m and σ = s.'],
  transition:'Use the formula on the PML vote.'});
 S('compare-formula','kl','Use the formula: which Gaussian is closer to p?',{builds:2,

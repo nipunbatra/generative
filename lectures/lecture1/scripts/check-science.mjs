@@ -144,6 +144,11 @@ for(const key of ['theta_A','theta_B']){
 }
 check('theta_A explains the data far better than theta_B',bn.theta_A.log_lik-bn.theta_B.log_lik>1000);
 bn.grid.forEach((x,i)=>{near(`f_A at grid point ${i}`,net(bn.theta_A.theta,x),bn.f_A[i],1e-9);near(`f_B at grid point ${i}`,net(bn.theta_B.theta,x),bn.f_B[i],1e-9);});
+bn.prior_thetas.forEach((th,k)=>bn.grid.forEach((x,i)=>near(`prior draw ${k} at grid point ${i}`,net(th,x),bn.prior_draws[k][i],1e-9)));
+const pp=bn.prior_predictive;
+pp.sd.forEach((v,i)=>near(`prior predictive sd ${i} = spread and noise combined`,v,Math.hypot(pp.sd_f[i],bn.noise_sd),1e-9));
+check('The prior predictive is wide everywhere (sd > 1)',pp.sd.every(v=>v>1));
+check('The prior predictive is wider than the posterior predictive everywhere',pp.sd.every((v,i)=>v>bn.hmc.sd[i]));
 const ev=bn.evidence,finals=ev.runs.map(r=>r.estimates.at(-1));
 near('Evidence estimate is the mean of four seeds',finals.reduce((a,v)=>a+v,0)/finals.length,ev.estimate,1e-12);
 check('Four 10-million-draw evidence estimates agree within 0.3',Math.max(...finals)-Math.min(...finals)<.3);

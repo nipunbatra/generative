@@ -26,6 +26,9 @@ for(const parent of stage.querySelectorAll('.content, .content div, .prompt')){
 }
 // Optional live figures: a lecture may export mount(stage,{reading,printing,builds}) to bind widgets after rendering.
 if(typeof content.mount==='function'){try{await content.mount(stage,{reading,printing,builds:printing&&params.get('print')==='builds'});}catch(error){console.error(error);mathsErrors.push({tex:'mount',error:String(error)});}}
+// Name each figure, widget, table, equation and code block after its slide, so the path of an element
+// selected in a browser's annotation tool says which slide it is on (e.g. div#priors--figure1).
+for(const scene of stage.querySelectorAll('.scene')){const count={};for(const el of scene.querySelectorAll('.widget,.diagram-scroll,.table-scroll,.formula-scroll,pre.code,figure')){if(el.id)continue;const kind=el.matches('.widget')?'widget':el.matches('.table-scroll')?'table':el.matches('.formula-scroll')?'maths':el.matches('pre')?'code':'figure';count[kind]=(count[kind]||0)+1;el.id=`${scene.id}--${kind}${count[kind]}`;}}
 const elements=[...stage.querySelectorAll('.scene')];
 function matches(spec,b){return String(spec).split(',').some(part=>{const [lo,hi]=part.split('-').map(Number);return hi===undefined?b===lo:b>=lo&&b<=hi;});}
 function apply(el,b){el.dataset.build=b;el.querySelectorAll('[data-at]').forEach(x=>x.classList.toggle('reveal-hidden',b<Number(x.dataset.at)));el.querySelectorAll('[data-only]').forEach(x=>x.classList.toggle('reveal-hidden',!matches(x.dataset.only,b)));}

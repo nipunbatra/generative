@@ -3,13 +3,13 @@
   "number": 1,
   "title": "KL and variational inference",
   "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
-  "minutes": 75,
+  "minutes": 80,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
       "id": "bayes",
       "title": "Part 1 · Bayes’ rule for a neural network",
-      "minutes": 16
+      "minutes": 21
     },
     {
       "id": "kl",
@@ -37,7 +37,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 49,
+  "coreSlides": 53,
   "optionalSlides": 15,
   "slides": [
     {
@@ -69,6 +69,20 @@
       "optional": false
     },
     {
+      "id": "one-draw",
+      "title": "One draw of θ is one whole function",
+      "section": "bayes",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "prior-functions",
+      "title": "Twenty draws, and the prior predictive",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "data-likelihood",
       "title": "The data, and how well one θ explains them",
       "section": "bayes",
@@ -76,8 +90,22 @@
       "optional": false
     },
     {
-      "id": "rhs-by-hand",
-      "title": "The right-hand side, term by term, for one θ",
+      "id": "theta-a",
+      "title": "Meet θ<sub>A</sub>: one good setting of the seven numbers",
+      "section": "bayes",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "likelihood-by-hand",
+      "title": "The likelihood of θ<sub>A</sub>, one data point at a time",
+      "section": "bayes",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "prior-by-hand",
+      "title": "The prior of θ<sub>A</sub>, then the evidence",
       "section": "bayes",
       "builds": 3,
       "optional": false
@@ -489,5 +517,5 @@
       "optional": true
     }
   ],
-  "totalStates": 137
+  "totalStates": 147
 }

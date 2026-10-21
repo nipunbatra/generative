@@ -38,7 +38,7 @@ export const label=(tx,ty,s,{fill=MUTED,size=22,anchor='start',weight=''}={})=>`
 export const svg=(W,H,inner,alt)=>`<svg class="plot wsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(alt)}">${inner}</svg>`;
 export const fig=(W,H,inner,alt)=>`<div class="diagram-scroll">${svg(W,H,inner,alt)}</div>`;
 export const widget=(name,alt)=>`<div class="widget" data-widget="${name}" role="group" aria-label="${esc(alt)}"></div>`;
-const legend=(x0,y0,items,size=21)=>{let x=x0,s='';for(const [text,color,dashed] of items){s+=`<line x1="${x}" y1="${y0-7}" x2="${x+26}" y2="${y0-7}" stroke="${color}" stroke-width="3"${dashed?' stroke-dasharray="7 4"':''}/>`+label(x+34,y0,text,{fill:color,size});x+=56+text.length*size*.52;}return s;};
+const legend=(x0,y0,items,size=21)=>{let x=x0,s='';for(const [text,color,dashed] of items){s+=`<line x1="${x}" y1="${y0-7}" x2="${x+26}" y2="${y0-7}" stroke="${color}" stroke-width="3"${dashed?' stroke-dasharray="7 4"':''}/>`+label(x+34,y0,text,{fill:color,size});x+=56+text.replace(/<[^>]+>/g,'').length*size*.52;}return s;};
 export {legend};
 
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -204,6 +204,44 @@ function elboslider(el,ctx){
  el.querySelectorAll('[data-ab]').forEach(b=>b.addEventListener('click',()=>{[s.a,s.b]=b.dataset.ab.split(',').map(Number);sync(el,s);draw();}));
 }
 
+// ---- Part 1: twenty prior draws of θ, each one function; hover to see its point in ℝ⁷ ------------
+export const PARAM_NAMES=['w₁','w₂','b₁','b₂','v₁','v₂','c'];
+export const supDigits=n=>String(n).replace(/\d/g,c=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[c]);
+/** One point θ ∈ ℝ⁷ as seven labelled bars on a −3.3 … 3.3 scale, values printed on the right. */
+export function thetaBars(ox,oy,theta,color,{rowH=31,labelW=44,barW=300,size=21}={}){
+ const X=v=>ox+labelW+(Math.max(-3.3,Math.min(3.3,v))+3.3)/6.6*barW,zero=X(0);
+ let s=`<line x1="${zero.toFixed(1)}" y1="${oy-22}" x2="${zero.toFixed(1)}" y2="${oy+6*rowH+12}" stroke="${AX}"/>`+label(zero,oy-28,'0',{size:16,anchor:'middle'});
+ theta.forEach((v,j)=>{const y=oy+j*rowH,x1=X(v);
+  s+=label(ox,y+7,PARAM_NAMES[j],{fill:palette.noise,size,weight:600})+
+   `<rect x="${Math.min(zero,x1).toFixed(1)}" y="${y-9}" width="${Math.max(1.5,Math.abs(x1-zero)).toFixed(1)}" height="18" rx="3" fill="${color}"/>`+
+   label(ox+labelW+barW+14,y+7,num(v),{fill:color,size});});
+ return s;
+}
+function priorfuncs(el,ctx,d){
+ const b=d.story.bnn,xs=b.grid,F=b.prior_draws,T=b.prior_thetas,pp=b.prior_predictive,W=1150,H=320;
+ let cur=0,build=1;
+ const render=()=>{
+  const P=panel({W:600,H,L:52,R:14,T:56,B:56,xMin:-2.5,xMax:2.5,yMin:-4.2,yMax:4.2,ticksX:[-2,-1,0,1,2],ticksY:[-4,-2,0,2,4],xLabel:'x'});
+  let s=P.axes;
+  if(build>=2)s+=P.band(xs,pp.mean.map((m,k)=>m-2*pp.sd[k]),pp.mean.map((m,k)=>m+2*pp.sd[k]),'#AA4E0820');
+  F.forEach((fy,k)=>{if(k!==cur)s+=P.line(xs,fy,'#9CA3AF','style="stroke-width:2;stroke-opacity:.8"');});
+  s+=P.line(xs,F[cur],palette.noise,'style="stroke-width:4.5"');
+  F.forEach((fy,k)=>{s+=P.line(xs,fy,'transparent',`data-k="${k}" style="stroke-width:18;pointer-events:stroke;cursor:pointer"`);});
+  s+=label(52,30,build>=2?'20 draws, and the prior predictive: mean ± 2 sd':'f(x) for 20 draws of θ from the prior',{fill:build>=2?palette.noise:MUTED,size:21});
+  s+=label(640,30,`draw ${cur+1} of 20: θ⁽${supDigits(cur+1)}⁾ ∈ ℝ⁷`,{fill:palette.noise,size:22,weight:600})+thetaBars(650,92,T[cur],palette.noise);
+  s+=label(640,H-12,'Hover over a line, or step through the draws.',{size:18});
+  return svg(W,H,s,'Twenty functions drawn from the prior; the highlighted one is shown as its seven parameter values.');
+ };
+ if(ctx.printing){const first=render();build=2;el.innerHTML=`<div class="state-slot"><div data-only="1">${first}</div><div data-only="2-99">${render()}</div></div>`;return;}
+ el.innerHTML=`<div class="w-fig diagram-scroll"></div><div class="w-controls"><button type="button" data-step="-1">‹ previous draw</button><button type="button" data-step="1">next draw ›</button></div>`;
+ const box=el.querySelector('.w-fig'),scene=el.closest('.scene'),draw=()=>{box.innerHTML=render();};
+ build=ctx.reading||!scene?2:Number(scene.dataset.build||1);
+ if(scene&&!ctx.reading)new MutationObserver(()=>{const nb=Number(scene.dataset.build||1);if(nb!==build){build=nb;draw();}}).observe(scene,{attributes:true,attributeFilter:['data-build']});
+ box.addEventListener('pointerover',e=>{const k=e.target.closest?.('[data-k]')?.dataset.k;if(k!==undefined&&Number(k)!==cur){cur=Number(k);draw();}});
+ el.querySelectorAll('[data-step]').forEach(btn=>btn.addEventListener('click',()=>{cur=(cur+Number(btn.dataset.step)+F.length)%F.length;draw();}));
+ draw();
+}
+
 // ---- Part 2: a Monte Carlo KL estimate, one draw at a time ---------------------------------
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 const gauss=r=>{let u=0;while(u===0)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r());};
@@ -253,7 +291,7 @@ function bnnvi(el,ctx,d){
 }
 
 export function mount(stage,ctx,d){
- const make={klarea,fwdrev,olive,elboslider,mclive,bnnvi,'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
+ const make={klarea,fwdrev,olive,elboslider,mclive,bnnvi,priorfuncs,'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
  for(const el of stage.querySelectorAll('[data-widget]')){
   const f=make[el.dataset.widget];if(!f)throw new Error('Unknown widget '+el.dataset.widget);f(el,ctx,d);
  }

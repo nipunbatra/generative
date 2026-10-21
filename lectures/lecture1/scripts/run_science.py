@@ -80,11 +80,18 @@ def bnn_terms(theta):
 x_grid = torch.linspace(-2.5, 2.5, 121)
 torch.manual_seed(12)
 prior_draws = theta_prior.sample((20,))
+# The prior predictive: average over many prior draws, then add the observation noise
+torch.manual_seed(15)
+F_prior = net(theta_prior.sample((4000,)), x_grid)
+prior_predictive = dict(draws=4000, mean=F_prior.mean(0).tolist(), sd_f=F_prior.std(0).tolist(),
+                        sd=(F_prior.var(0) + noise_sd ** 2).sqrt().tolist())
 fixtures["story"] = {"bnn": dict(names=bnn_names, x=x_train.tolist(), y=y_train.tolist(), noise_sd=noise_sd,
     prior=[0., 1.], data="y = 0.8 tanh(3x) + 0.3x + N(0, 0.1²) noise, seed 7", grid=x_grid.tolist(),
     theta_A=bnn_terms(theta_A), theta_B=bnn_terms(theta_B),
     f_A=net(theta_A, x_grid).tolist(), f_B=net(theta_B, x_grid).tolist(),
-    prior_draws=net(prior_draws, x_grid).tolist())}
+    prior_draws=net(prior_draws, x_grid).tolist(), prior_thetas=prior_draws.tolist(),
+    prior_predictive=prior_predictive)}
+print("prior predictive sd at x = −2.5, 0, 2.5:", [round(prior_predictive["sd"][i], 2) for i in (0, 60, 120)])
 for name, th in [("A, the MAP", theta_A), ("B, a prior draw", theta_B)]:
     print(f"theta {name}: log p(D|θ) = {number(bnn_log_lik(th)):.2f}, log p(θ) = {number(bnn_log_prior(th)):.2f}")
 fig, axes = plt.subplots(1, 2, figsize=(12, 3.8), sharey=True)
