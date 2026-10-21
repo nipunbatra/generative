@@ -501,33 +501,6 @@ for ax, probs, title in [(axes[0], teacher_grid, f"teacher, {n_params(teacher_ne
     ax.set_title(title, loc="left")
 savefig("distillation")
 
-# RLHF in miniature: five possible replies to one prompt, a frozen reference model and a reward model.
-replies = ["Yes, it is hot. Careful!", "Yes.", "It might be.", "No.", "YES!!! AMAZING STOVE!!!"]
-pi_ref = torch.tensor([.40, .30, .20, .09, .01])             # the pretrained model's probabilities
-reward = torch.tensor([1.0, .6, .3, -1.0, 2.0])               # a reward model that is fooled by enthusiasm
-def best_policy(beta):
-    "argmax over π of E_π[r] − β KL(π ‖ π_ref): π*(y) ∝ π_ref(y) exp(r(y)/β)"
-    w = pi_ref * torch.exp(reward / beta)
-    return w / w.sum()
-def kl_ref(pi_):
-    return number((pi_ * (pi_ / pi_ref).log()).sum())
-policies = {}
-for beta in [.05, .1, .2, .5, 1., 2., 5., 20.]:
-    pb = best_policy(beta)
-    policies[str(beta)] = dict(probs=pb.tolist(), reward=number((pb * reward).sum()), kl=kl_ref(pb))
-    print(f"β = {beta:5}: π* = {pb.numpy().round(3)}, expected reward {number((pb * reward).sum()):.3f}, KL(π*‖π_ref) = {kl_ref(pb):.3f}")
-# The closed form, checked by gradient ascent on the objective at β = 1
-logits_r = torch.nn.Parameter(pi_ref.log().clone())
-opt_r = torch.optim.Adam([logits_r], lr=.05)
-for step in range(3000):
-    pi_ = torch.softmax(logits_r, 0)
-    loss_r = -((pi_ * reward).sum() - 1. * (pi_ * (torch.log_softmax(logits_r, 0) - pi_ref.log())).sum())
-    opt_r.zero_grad(); loss_r.backward(); opt_r.step()
-assert torch.allclose(torch.softmax(logits_r.detach(), 0), best_policy(1.), atol=1e-4)
-print("gradient ascent at β = 1 lands on the closed form:", torch.softmax(logits_r.detach(), 0).numpy().round(4))
-fixtures["story"]["rlhf"] = dict(replies=replies, ref=pi_ref.tolist(), reward=reward.tolist(), policies=policies,
-    ref_reward=number((pi_ref * reward).sum()), gd_check=torch.softmax(logits_r.detach(), 0).tolist())
-
 import inspect
 from torch.distributions import kl as torch_kl
 def row(name, by_hand, library):

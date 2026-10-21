@@ -13,7 +13,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 | Part 4 · Back to Bayes: the ELBO | 13 |
 | Part 5 · Implement it | 8 |
 
-## contents: Lecture 1 at a glance: five parts, twenty-four sections
+## contents: Lecture 1 at a glance: five parts, twenty-two sections
 
 **Build 1, ask:** Which part do you expect to be hardest?
 
@@ -383,7 +383,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** Only by luck: one rainy day in ten gives 0.47, two give 0.8. It settles as days accumulate, because sun comes on 90% of them and rain on 10%.
 
-**Point here:** The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.9).
+**Point here:** The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.7).
 
 **Notebook demonstration:** Notebook 2.2: the entropy cell simulates 10,000 days and prints the running average at 10, 100, 1,000 and 10,000 days.
 
@@ -599,7 +599,23 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-## classifier: A classifier outputs a distribution
+## apps-map: KL at work: one recipe, three applications
+
+**Build 1, ask:** What do the three KLs in row ④ have in common?
+
+**Expected:** The first argument is always the “truth” the model must match: the label, the data, the teacher.
+
+**Transition:** 2.5.1: classification.
+
+## app-classify: 2.5.1 Classification: the plan
+
+**Build 1, ask:** Which loss do you use to train a classifier?
+
+**Expected:** Cross-entropy. Step ④ shows that it is a KL.
+
+**Transition:** ①② The problem and the model.
+
+## classifier: ①② A classifier outputs a distribution
 
 **Build 1, ask:** What does the classifier output?
 
@@ -609,11 +625,11 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** One-hot: probability 1 on the true class, 0 on the others.
 
-**Transition:** How surprised is the model by the truth?
+**Transition:** ③ The usual loss.
 
 **Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-## ce-surprise: The loss is the model’s surprise at the true label
+## ce-surprise: ③ The usual loss: surprise at the true label
 
 **Build 1, ask:** Which terms survive?
 
@@ -627,11 +643,11 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** 0: no surprise.
 
-**Transition:** And where is the KL?
+**Transition:** ④ Where is the KL?
 
 **Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-## ce-is-kl: With a one-hot label, cross-entropy is exactly KL
+## ce-is-kl: ④ As KL: with a one-hot label, cross-entropy = KL
 
 **Build 1, ask:** What is H(p) for a one-hot label?
 
@@ -645,13 +661,13 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** They are equal here, and in general differ by H(p), which training cannot change. Cross-entropy avoids the log of the labels.
 
-**Notebook demonstration:** Notebook 2.5: F.cross_entropy prints 0.511 nats, −log 0.6, the same number as KL(one-hot ‖ q).
+**Notebook demonstration:** Notebook 2.5.1: F.cross_entropy prints 0.511 nats, −log 0.6, the same number as KL(one-hot ‖ q).
 
-**Transition:** What the loss looks like as the prediction changes.
+**Transition:** ⑤ Check: the loss as the prediction changes.
 
 **Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-## loss-curve: The loss curve is the surprise curve
+## loss-curve: ⑤ Check: the loss is the surprise curve
 
 **Build 1, ask:** Where is the curve steepest?
 
@@ -661,21 +677,29 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** Each step towards q(true) = 1 lowers the loss; with no other pressure it heads there.
 
-**Transition:** Soft labels.
+**Transition:** 2.5.2: maximum likelihood.
 
-## soft-labels: Soft labels: cross-entropy = entropy + KL
+## app-mle: 2.5.2 Maximum likelihood: the plan
 
-**Build 1, ask:** Which part can training change?
+**Build 1, ask:** Where have you used maximum likelihood before?
 
-**Expected:** Only the KL; H(p) is fixed by the teacher.
+**Expected:** Whenever a model is fitted by its likelihood: linear regression with Gaussian noise, logistic regression, the classifier of 2.5.1.
 
-**Build 2, ask:** Can the cross-entropy reach 0 here?
+**Transition:** ① The problem.
 
-**Expected:** No: its minimum is H(p) = 0.72 nats, reached when the student copies the teacher.
+## mle-problem: ① The problem: learn a distribution from data
 
-**Transition:** Section 2.6: real data.
+**Build 1, ask:** What is unknown here, and what is observed?
 
-## mle-data: The data: twenty days of weather
+**Expected:** The distribution p<sub>data</sub> is unknown; the twenty days are observed.
+
+**Build 2, ask:** What could the fitted q be used for?
+
+**Expected:** Predicting tomorrow’s weather, or generating realistic new days: a generative model.
+
+**Transition:** ② The data and the model.
+
+## mle-data: ② The data and the model: twenty days, three numbers
 
 **Build 1, ask:** What would you guess for tomorrow?
 
@@ -685,9 +709,9 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** Gives the data the highest probability: maximum likelihood. Let us see why that is the frequency.
 
-**Transition:** How probable are these twenty days under a model q?
+**Transition:** ③ The usual loss: how probable are the twenty days under q?
 
-## mle-likelihood: How probable are these twenty days under q?
+## mle-likelihood: ③ The usual loss: how probable are the twenty days?
 
 **Build 1, ask:** Why a product?
 
@@ -703,7 +727,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Transition:** Per day, that is a familiar number.
 
-## mle-surprise: Per day: the data’s average surprise under q
+## mle-surprise: ③ Per day: the data’s average surprise under q
 
 **Build 1, ask:** What is minus the log-likelihood per day, in words?
 
@@ -719,7 +743,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Transition:** Group the days by weather.
 
-## mle-group: Why: group the days by weather
+## mle-group: ④ Rewrite it: group the days by weather
 
 **Build 1, ask:** How many sunny terms are there?
 
@@ -735,7 +759,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Transition:** Split it, as in 2.4.
 
-## mle-split: The data’s surprise = entropy of the data + KL
+## mle-split: ④ As KL: the data’s surprise = H(p̂) + KL(p̂ ‖ q)
 
 **Build 1, ask:** Which part can the model change?
 
@@ -747,17 +771,29 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Transition:** Find the best q yourself.
 
-## mle-fit: Find the q that makes the data least surprising
+## mle-fit: ⑤ Check: find the least surprising q
 
 **Build 1, ask:** Start from (⅓, ⅓, ⅓). Which way should q(sunny) move?
 
 **Expected:** Up, to ½: the data have more sun than q expects. At q = p̂ the data are 32 times more probable than under (¼, ¼, ½).
 
-**Notebook demonstration:** Notebook 2.6: the second cell runs gradient descent on the data’s average surprise from equal logits and lands on (0.5, 0.25, 0.25) without being told.
+**Notebook demonstration:** Notebook 2.5.2: the second cell runs gradient descent on the data’s average surprise from equal logits and lands on (0.5, 0.25, 0.25) without being told.
+
+**Transition:** ⑤ Four formulations, one answer.
+
+## mle-same-answer: ⑤ Four formulations, one answer
+
+**Build 1, ask:** Why do all four rows agree?
+
+**Expected:** Each row rewrites the one above: take the log and divide by −20, group the days by weather, subtract the fixed H(p̂).
+
+**Build 2, ask:** How many times more probable are the data under p̂?
+
+**Expected:** 2⁵ = 32: twenty days times 0.25 bits per day.
 
 **Transition:** The general statement.
 
-## mle-kl: Maximum likelihood minimises KL(data ‖ model)
+## mle-kl: In general: maximum likelihood = minimum KL(data ‖ model)
 
 **Build 1, ask:** Which distribution comes first in this KL?
 
@@ -771,21 +807,17 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** The average surprise at the true labels: minus the average log-likelihood.
 
-**Transition:** Collect the pattern.
+**Transition:** 2.5.3: knowledge distillation.
 
-## kl-everywhere: KL at work: the same quantity in many losses
+## app-distill: 2.5.3 Knowledge distillation: the plan
 
-**Build 1, ask:** Which distribution comes first in each row?
+**Build 1, ask:** Why would anyone want a smaller copy of a model?
 
-**Expected:** The one that supplies the weights: labels, data, teacher, policy, q. Section 3.6 shows why the order matters for VI.
+**Expected:** Speed, memory and cost: phones, browsers, millions of requests a day.
 
-**Point here:** The video opens with distillation, generative models and RLHF as motivation.
+**Transition:** ① The problem.
 
-**Transition:** Distillation: a big teacher and a small student.
-
-**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
-
-## distill-why: Knowledge distillation: a big teacher, a small student
+## distill-why: ① The problem: a big teacher, a small student
 
 **Build 1, ask:** Why not just deploy the teacher?
 
@@ -797,37 +829,21 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Point here:** Hinton, Vinyals and Dean (2015), “Distilling the Knowledge in a Neural Network”. Smaller deployed models, such as DistilBERT, are trained this way.
 
-**Transition:** Make the two distributions the same.
+**Transition:** ② The data and the model.
 
-## distill-match: Make the student’s distribution match the teacher’s
+## distill-match: ② The data and the model: same inputs, two networks
 
-**Build 1, ask:** Why does the teacher come first in the KL?
-
-**Expected:** The teacher plays the truth: its distribution supplies the weights, exactly like the labels in 2.5.
-
-**Build 2, ask:** Does the student need the true labels?
+**Build 1, ask:** Does the student need the true labels?
 
 **Expected:** Not for this term: the teacher labels every input, even unlabelled ones. In practice a small label term is often added.
 
-**Transition:** The loss, term by term.
+**Build 2, ask:** What should the loss measure?
 
-## distill-loss: The distillation loss, term by term
+**Expected:** How far the student’s distribution is from the teacher’s, averaged over the inputs, with zero when they agree.
 
-**Build 1, ask:** Which part can the student change?
+**Transition:** ③ The usual loss.
 
-**Expected:** Only q_S: H(p_T) is fixed by the frozen teacher.
-
-**Build 2, ask:** How is this related to the ordinary classification loss?
-
-**Expected:** It is the same cross-entropy loss, with the teacher’s soft distribution in place of the one-hot label.
-
-**Build 3, ask:** What does a temperature τ > 1 do?
-
-**Expected:** It flattens the teacher’s distribution so its small probabilities, which carry the extra information, count for more.
-
-**Transition:** What do soft labels teach that a one-hot label cannot?
-
-## distill-soft: What soft labels teach: a cat looks a bit like a dog
+## distill-soft: ③ The usual loss: cross-entropy with soft labels
 
 **Build 1, ask:** What does the student learn from the 0.20 on dog?
 
@@ -837,9 +853,41 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** The 0.02 and 0.03 barely change the loss; dividing the logits by τ evens the distribution out.
 
+**Point here:** Hinton, Vinyals and Dean (2015) train the student on the teacher’s soft targets at a raised temperature, plus a small weight on the true labels.
+
+**Transition:** ④ The same loss as KL.
+
+## distill-loss: ④ The same loss as KL, term by term
+
+**Build 1, ask:** Which part can the student change?
+
+**Expected:** Only q_S: H(p_T) is fixed by the frozen teacher.
+
+**Build 2, ask:** Why does the teacher come first in the KL?
+
+**Expected:** The teacher plays the truth, like the label in 2.5.1 and the data in 2.5.2: its distribution supplies the weights.
+
+**Build 3, ask:** What does a temperature τ > 1 do?
+
+**Expected:** It flattens the teacher’s distribution so its small probabilities, which carry the extra information, count for more.
+
+**Point here:** Implementations often compute the second term with PyTorch’s KL loss, F.kl_div or nn.KLDivLoss.
+
+**Transition:** ⑤ Check with numbers.
+
+## soft-labels: ⑤ Check with numbers: cross-entropy = entropy + KL
+
+**Build 1, ask:** Which part can training change?
+
+**Expected:** Only the KL; H(p) is fixed by the teacher.
+
+**Build 2, ask:** Can the cross-entropy reach 0 here?
+
+**Expected:** No: its minimum is H(p) = 0.72 nats, reached when the student copies the teacher.
+
 **Transition:** Watch a real student learn.
 
-## distill-demo: Press play: a tiny student learns a big teacher
+## distill-demo: ⑤ Check: a tiny student learns a big teacher
 
 **Build 1, ask:** Predict: can a 27-parameter network copy a 4,547-parameter one?
 
@@ -849,65 +897,19 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** The student copies the teacher’s uncertainty too: where classes overlap, the teacher is unsure, and so is the student.
 
-**Notebook demonstration:** Notebook 2.7: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.
+**Notebook demonstration:** Notebook 2.5.3: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.
 
-**Transition:** Second application: RLHF.
+**Transition:** One principle in many disguises.
 
-## rlhf-setup: RLHF: reward a chatbot, but keep it close to where it started
+## apps-same: One principle in many disguises
 
-**Build 1, ask:** What does the reward model reward?
+**Build 1, ask:** What is the same in the three applications?
 
-**Expected:** Replies people preferred, as learned from human comparisons.
+**Expected:** Each minimises a KL from a known “truth” (label, data, teacher) to the model.
 
-**Build 2, ask:** Why keep a frozen copy?
+**Build 2, ask:** What is different about VI?
 
-**Expected:** To measure how far the policy has drifted from a model that writes fluent, sensible text.
-
-**Build 3, ask:** What does β control?
-
-**Expected:** The trade-off: small β chases reward, large β stays near the reference.
-
-**Point here:** This KL penalty is part of InstructGPT/ChatGPT-style RLHF (PPO) and of GRPO; DPO optimises the same KL-regularised objective without a separate reward model.
-
-**Transition:** What goes wrong without the leash?
-
-## rlhf-hacking: Without the KL: the policy fools the reward model
-
-**Build 1, ask:** Which reply does the reward model prefer?
-
-**Expected:** The shouting one, +2.0: a flaw in the learned reward.
-
-**Build 2, ask:** Why is the KL term a defence?
-
-**Expected:** A reply the reference almost never writes has a large log ratio <span class="pi">π</span>/<span class="pi">π</span><sub>ref</sub>, so piling probability on it costs a lot of KL.
-
-**Transition:** Slide the leash.
-
-## rlhf-beta: Slide the leash: the best policy for each β
-
-**Build 1, ask:** At β = 1, which reply gains most?
-
-**Expected:** “Yes, it is hot. Careful!”: probable under the reference and well rewarded.
-
-**Build 2, ask:** What happens as β → 0? As β → ∞?
-
-**Expected:** β → 0: all mass on the highest reward, the hacked reply. β → ∞: <span class="pi">π</span>* = <span class="pi">π</span><sub>ref</sub>, no change.
-
-**Point here:** Derivation: maximise Σ <span class="pi">π</span> r − β Σ <span class="pi">π</span> log(<span class="pi">π</span>/<span class="pi">π</span><sub>ref</sub>) subject to Σ <span class="pi">π</span> = 1; setting the derivative to zero gives log <span class="pi">π</span> = log <span class="pi">π</span><sub>ref</sub> + r/β − const. The notebook checks it by gradient ascent.
-
-**Notebook demonstration:** Notebook 2.7: the RLHF cell prints <span class="pi">π</span>* for eight values of β and checks the closed form at β = 1 by gradient ascent.
-
-**Transition:** How is that KL computed for real text?
-
-## rlhf-tokens: In practice: the KL is estimated token by token, from samples
-
-**Build 1, ask:** Why not compute the KL exactly?
-
-**Expected:** Vocabulary^length possible replies: astronomically many.
-
-**Build 2, ask:** Which estimator can never be negative?
-
-**Expected:** r − 1 − log r with r = <span class="pi">π</span><sub>ref</sub>/<span class="pi">π</span>: optional slide in the appendix; DeepSeek’s GRPO uses it.
+**Expected:** The order: q comes first. We cannot sample the posterior, so the weights must come from q.
 
 **Transition:** Back to continuous distributions: closed forms.
 
@@ -1087,7 +1089,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Point here:** In PyTorch’s code p and q are just the first and second arguments; with our VI order, its p is our q. A NotImplementedError check is left out.
 
-**Notebook demonstration:** Switch to notebook 2.4 and run the closed-forms cell: it checks all four formulas against kl_divergence and prints PyTorch’s own source for the Normal and Independent cases.
+**Notebook demonstration:** Switch to notebook 2.6 and run the closed-forms cell: it checks all four formulas against kl_divergence and prints PyTorch’s own source for the Normal and Independent cases.
 
 **Transition:** Use the formula: which Gaussian is closer?
 
@@ -1169,7 +1171,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Point here:** q₂ = N(1, 3²) against p = N(1, 4²), seed 1000.
 
-**Notebook demonstration:** Switch to notebook 2.5, “The code on the slide, run”: run it, then set S to 100 and to 1,000,000 and rerun. Come back for the live version.
+**Notebook demonstration:** Switch to notebook 2.7, “The code on the slide, run”: run it, then set S to 100 and to 1,000,000 and rerun. Come back for the live version.
 
 **Transition:** Watch the estimate settle as draws arrive.
 
@@ -1193,7 +1195,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** Yes: N(1, 4²), which is p itself, has KL 0. We need a way to search.
 
-**Point here:** PAUSE. All six KLs come from the closed-form Gaussian formula of 2.4.
+**Point here:** PAUSE. All six KLs come from the closed-form Gaussian formula of 2.6.
 
 **Transition:** Search systematically: a grid.
 
@@ -1435,7 +1437,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** No Gaussian equals a two-bump mixture. 0.056 is the best the family can do; the notebook confirms it with a direct numerical integral.
 
-**Point here:** Same seed, learning rate and draws as the stuck run. Monte Carlo plus reparameterisation: the payoff of Sections 2.5 and 3.5.
+**Point here:** Same seed, learning rate and draws as the stuck run. Monte Carlo plus reparameterisation: the payoff of Sections 2.7 and 3.5.
 
 **Notebook demonstration:** Notebook 3.5, “Change one word”: run it and compare the two fits in the figure.
 
@@ -1489,7 +1491,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Build 1, ask:** What does E_q mean, in words?
 
-**Expected:** Draw θ from q, evaluate, average: the Monte Carlo average of 2.5.
+**Expected:** Draw θ from q, evaluate, average: the Monte Carlo average of 2.7.
 
 **Build 2, ask:** What is inside the brackets now?
 
@@ -1783,7 +1785,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** 0: every ratio is 1 and every log is 0.
 
-**Notebook demonstration:** Notebook 2.1: the grades cell computes the ratios, the logs and the weighted sum, and checks it against torch.distributions.kl_divergence.
+**Notebook demonstration:** Notebook appendix: the grades cell computes the ratios, the logs and the weighted sum, and checks it against torch.distributions.kl_divergence.
 
 **Transition:** What unit is 0.42 in?
 
@@ -1837,7 +1839,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Point here:** The exact value is the weighted sum (analytic); the running average is the Monte Carlo estimate. Draws are seeded, so the sequence replays identically.
 
-**Notebook demonstration:** Notebook 2.5: the grades-sampling cell draws 10,000 grades and prints the running average at 10, 100, 1,000 and 10,000 draws.
+**Notebook demonstration:** Notebook appendix: the grades-sampling cell draws 10,000 grades and prints the running average at 10, 100, 1,000 and 10,000 draws.
 
 **Transition:** Back to the optional slides.
 

@@ -30,16 +30,19 @@ export const slides=[];
 /** Numbered sections. The notebook uses the same numbers, with anchors sec-1-1 … sec-5-2. */
 const CHAPTERS=[
  ['1.1','Bayes’ rule'],['1.2','A tiny network and its prior'],['1.3','Likelihood and training'],['1.4','The evidence is intractable'],['1.5','Approximating the posterior'],
- ['2.1','Surprise'],['2.2','Entropy: average surprise'],['2.3','Codes: entropy in bits'],['2.4','Cross-entropy and KL'],['2.5','Classification loss'],['2.6','Maximum likelihood'],['2.7','KL at work: distillation, RLHF'],['2.8','Closed forms and PyTorch'],['2.9','KL by sampling'],
+ ['2.1','Surprise'],['2.2','Entropy: average surprise'],['2.3','Codes: entropy in bits'],['2.4','Cross-entropy and KL'],['2.5','KL at work'],['2.6','Closed forms and PyTorch'],['2.7','KL by sampling'],
  ['3.1','Search a grid'],['3.2','Gradient descent'],['3.3','Covariance in 2-D'],['3.4','Mixtures: no formula'],['3.5','The reparameterisation trick'],['3.6','Which direction of KL?'],
  ['4.1','Deriving the ELBO'],['4.2','Checking it on a coin'],
  ['5.1','VI for the tiny network'],['5.2','Wrap-up'],
 ];
+/** Sub-sections: the three applications of Section 2.5; subsec(null) returns to the section itself. */
+const SUBS=[['2.5.1','Classification'],['2.5.2','Maximum likelihood'],['2.5.3','Knowledge distillation']];
 const PARTS=[['1','Bayes’ rule for a neural network'],['2','How far apart are two distributions?'],['3','Find the closest q'],['4','Back to Bayes: the ELBO'],['5','Implement it']];
 const COLAB='https://colab.research.google.com/github/nipunbatra/generative/blob/main/lectures/lecture1/lecture1-variational-inference.ipynb';
-const secAnchor=k=>`sec-${k.replace('.','-')}`;
-let chapter=null;const firstOf={};
-const chap=k=>{chapter=CHAPTERS.find(ch=>ch[0]===k);if(!chapter)throw new Error('Unknown section '+k);};
+const secAnchor=k=>`sec-${k.replaceAll('.','-')}`;
+let chapter=null,subchapter=null;const firstOf={};
+const chap=k=>{chapter=CHAPTERS.find(ch=>ch[0]===k);subchapter=null;if(!chapter)throw new Error('Unknown section '+k);};
+const subsec=k=>{if(k===null){subchapter=null;return;}subchapter=SUBS.find(x=>x[0]===k);if(!subchapter||!k.startsWith(chapter[0]+'.'))throw new Error('Unknown sub-section '+k);};
 /** A link to one notebook cell in Colab; the anchor must exist in the built notebook. */
 function nbLink(anchor,number){
  if(!ANCHORS.has(anchor))throw new Error(`Notebook anchor ${anchor} is missing: rebuild the notebook`);
@@ -49,10 +52,11 @@ function nbLink(anchor,number){
 function S(id,section,title,o){
  const builds=o.builds||1;
  for(const k of ['lines','ask','expected'])if(!Array.isArray(o[k])||o[k].length!==builds)throw new Error(`${id}: ${k} needs ${builds} entries`);
- const ch=section==='optional'||section==='map'?null:chapter;
+ const ch=section==='optional'||section==='map'?null:chapter,sc=ch?subchapter:null;
  if(ch&&!firstOf[ch[0]])firstOf[ch[0]]=id;
- const anchor=o.nb||(ch?secAnchor(ch[0]):null);
- slides.push({id,section,title,builds,body:o.body,prompts:o.lines,chapter:ch?`${ch[0]} ${ch[1]}`:'',notebook:anchor?nbLink(anchor,ch?.[0]):null,
+ if(sc&&!firstOf[sc[0]])firstOf[sc[0]]=id;
+ const anchor=o.nb||(sc?secAnchor(sc[0]):ch?secAnchor(ch[0]):null);
+ slides.push({id,section,title,builds,body:o.body,prompts:o.lines,chapter:sc?`${ch[0]} ${ch[1]} · ${sc[0]} ${sc[1]}`:ch?`${ch[0]} ${ch[1]}`:'',notebook:anchor?nbLink(anchor,o.nbNum||(sc||ch)?.[0]):null,
   notes:{ask:o.ask,expected:o.expected,point:o.point||'',misconception:o.misconception||'',transition:o.transition||'',demo:o.demo||''},
   source:o.source||'',optional:!!o.optional});
 }
@@ -417,9 +421,8 @@ function dataGrid(){
  return fig(W,H,s,`Twenty days of weather: ${ml.counts[0]} sunny, ${ml.counts[1]} cloudy and ${ml.counts[2]} rainy.`);
 }
 
-// ---------------------------------------------------------------- Section 2.7 figures: distillation and RLHF
-const ds=st.distill,rl=st.rlhf;
-const PI='<tspan font-family="Times New Roman,Georgia,serif" font-style="italic">π</tspan>',PIH='<span class="pi">π</span>';
+// ---------------------------------------------------------------- Section 2.5 figures: plan cards, maximum likelihood, distillation
+const ds=st.distill;
 const STUDENT0=[.25,.20,.40,.15];
 /** Probability bars over ape, bear, cat and dog, drawn at (ox, oy). */
 function classBars(ox,oy,vals,color,title,bw=150,rowH=34){
@@ -449,7 +452,7 @@ function distillDiagram(stage=3){
   classBars(570,198,STUDENT0,Sq,'student’s q(y | x)');
  s+=stage>=2?st2:`<g opacity="0">${st2}</g>`;
  // the KL link and the gradient into the student
- if(stage>=3)s+=`<path d="M805,102 C870,102 870,276 805,276" fill="none" stroke="${L}" stroke-width="3"/>`+label(872,182,'KL(p ‖ q)',{fill:L,size:22,weight:600})+label(872,210,'make these the same',{fill:L,size:18});
+ if(stage>=3)s+=`<path d="M805,102 C870,102 870,276 805,276" fill="none" stroke="${L}" stroke-width="3"/>`+label(872,182,'how far apart?',{fill:L,size:22,weight:600})+label(872,210,'make these the same',{fill:L,size:18});
  if(stage>=4)s+=backEdge('dd','M900,236 C930,372 520,360 444,272')+label(900,364,'gradient: only the student learns',{fill:L,size:17,anchor:'middle'})+
   `<rect x="452" y="16" width="42" height="24" rx="6" fill="${palette.paper}" stroke="${T}"/>`+label(473,33,'frozen',{fill:T,size:12,anchor:'middle',weight:600});
  return fig(W,H,s,'Knowledge distillation: the same image goes through a big teacher network and a small student network; the student is trained so its output distribution matches the teacher’s, minimising KL from the teacher to the student, and only the student receives gradients.');
@@ -461,19 +464,28 @@ function softTemps(){
  s+=classBars(380,26,soft(1),palette.p,'teacher, τ = 1',120)+classBars(760,26,soft(4),palette.p,'teacher softened, τ = 4',120);
  return fig(1150,220,s,'A one-hot label for cat, the teacher’s distribution, and the same distribution softened with temperature 4.');
 }
-/** RLHF: the policy writes a reply, a reward model scores it, and a frozen reference keeps it close. */
-function rlhfDiagram(stage=3){
- const W=1150,H=340,Q=palette.q,T=palette.p,L=palette.loss;let s=graphDefs('rd');
- s+=box(10,60,170,90,ink)+label(95,96,'prompt',{fill:ink,size:19,anchor:'middle',weight:600})+label(95,124,'“Is the stove hot?”',{size:16,anchor:'middle'});
- s+=`<rect x="240" y="40" width="220" height="130" rx="12" fill="${TINT.q}" stroke="${Q}" stroke-width="2.5"/>`+netGlyph(252,52,196,86,5,4,Q)+label(350,160,`policy ${PI}, being trained`,{fill:Q,size:17,anchor:'middle',weight:600});
- s+=fwdEdge('rd','M180,105 L238,105')+fwdEdge('rd','M460,105 L528,105')+box(530,62,220,86,ink)+label(640,96,'reply y',{fill:ink,size:19,anchor:'middle',weight:600})+label(640,124,'“Yes, careful!”',{size:16,anchor:'middle'});
- s+=fwdEdge('rd','M750,105 L818,105')+box(820,62,170,86,palette.d)+label(905,96,'reward model',{fill:palette.d,size:18,anchor:'middle',weight:600})+label(905,124,'score r(y)',{size:16,anchor:'middle'});
- s+=fwdEdge('rd','M990,105 L1040,105')+label(1046,112,'+r',{fill:palette.d,size:24,weight:700});
- const ref=`<rect x="240" y="226" width="220" height="100" rx="12" fill="${TINT.p}" stroke="${T}" stroke-width="2.5"/>`+netGlyph(252,232,196,70,5,4,T)+label(350,320,`reference ${PI}<tspan baseline-shift="sub" font-size="70%">ref</tspan>, frozen`,{fill:T,size:16,anchor:'middle',weight:600})+
-  `<path d="M350,172 L350,224" stroke="${L}" stroke-width="3" stroke-dasharray="6 5"/>`+label(364,204,`KL(${PI} ‖ ${PI}<tspan baseline-shift="sub" font-size="70%">ref</tspan>): stay close`,{fill:L,size:18,weight:600});
- s+=stage>=2?ref:`<g opacity="0">${ref}</g>`;
- if(stage>=3)s+=label(600,232,'maximise',{fill:ink,size:20})+label(600,266,`E[r(y)] − β · KL(${PI} ‖ ${PI}<tspan baseline-shift="sub" font-size="70%">ref</tspan>)`,{fill:ink,size:24,weight:600})+label(600,298,'reward, minus a leash to where it started',{size:17});
- return fig(W,H,s,'RLHF: a prompt goes to the policy, which writes a reply; a reward model scores the reply; a frozen reference copy of the model keeps the policy close through a KL penalty. The objective is expected reward minus beta times KL.');
+
+/** One row per step of the recipe, for one application. */
+const planCard=rows=>`<div class="table-sm">${table(['step','in this application'],rows.map(([k,t])=>[`<b>${k}</b>`,t]))}</div>`;
+/** Maximum likelihood as a machine learning problem: an unknown process, a record of days, a model, and its uses. */
+function mleProblemFig(){
+ const W=1150,H=280,kinds=['sunny','cloudy','rainy'];let s=graphDefs('mp');
+ s+=box(10,30,240,220,MUTED)+label(130,64,'the weather',{fill:ink,size:20,anchor:'middle',weight:600})+
+  label(130,92,'an unknown process',{fill:MUTED,size:17,anchor:'middle'})+label(130,122,'p<tspan baseline-shift="sub" font-size="70%">data</tspan>',{fill:MUTED,size:22,anchor:'middle'})+
+  label(130,220,'?',{fill:MUTED,size:80,anchor:'middle',weight:700});
+ s+=fwdEdge('mp','M250,140 L298,140')+label(274,128,'draws',{size:15,anchor:'middle'});
+ s+=box(300,30,340,220,palette.data)+label(470,64,'the data: twenty days',{fill:palette.data,size:20,anchor:'middle',weight:600});
+ ml.data.forEach((k,i)=>{s+=weather(kinds[k],330+(i%10)*31,i<10?118:172,.5);});
+ s+=label(470,230,'10 sunny · 5 cloudy · 5 rainy',{size:17,anchor:'middle'});
+ s+=fwdEdge('mp','M640,140 L698,140')+label(669,128,'fit',{size:15,anchor:'middle'});
+ s+=box(700,30,200,220,palette.q)+label(800,64,'a model q',{fill:palette.q,size:20,anchor:'middle',weight:600})+label(800,90,'three probabilities',{size:16,anchor:'middle'});
+ kinds.forEach((kind,i)=>{const x=740+i*60;s+=`<rect x="${x-18}" y="112" width="36" height="80" rx="4" fill="none" stroke="${palette.q}" stroke-width="2" stroke-dasharray="5 4"/>`+
+  label(x,160,'?',{fill:palette.q,size:22,anchor:'middle',weight:600})+weather(kind,x,222,.42);});
+ s+=`<g data-at="2">${fwdEdge('mp','M900,140 L948,140')+label(924,128,'use',{size:15,anchor:'middle'})+
+  box(950,30,190,100,palette.d)+label(1045,66,'predict tomorrow',{fill:palette.d,size:17,anchor:'middle',weight:600})+label(1045,100,'q(rainy) = ?',{size:16,anchor:'middle'})+
+  box(950,150,190,100,palette.d)+label(1045,184,'simulate new days',{fill:palette.d,size:17,anchor:'middle',weight:600})+
+  weather('sunny',1005,224,.42)+weather('rainy',1045,222,.42)+weather('sunny',1085,224,.42)}</g>`;
+ return fig(W,H,s,'An unknown weather process produces a record of twenty days; we fit a model q with three probabilities to the record, then use it to predict tomorrow or to simulate new days.');
 }
 
 // ---------------------------------------------------------------- Part 3 figures: covariance families, mixtures, computational graphs
@@ -833,7 +845,7 @@ S('entropy-days','kl','Why an expectation? It is the average over many days',{nb
  lines:['Let days go by, each with its surprise: 0.15 bits if sunny, 3.32 if rainy. The running average settles on 0.47 bits. An expectation is a long-run average.'],
  ask:['After 10 days, is the average close to 0.47?'],
  expected:['Only by luck: one rainy day in ten gives 0.47, two give 0.8. It settles as days accumulate, because sun comes on 90% of them and rain on 10%.'],
- point:'The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.9).',
+ point:'The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.7).',
  demo:'Notebook 2.2: the entropy cell simulates 10,000 days and prints the running average at 10, 100, 1,000 and 10,000 days.',
  transition:'How does entropy change with the forecast?'});
 S('entropy-explorer','kl','From certain to fully uncertain: between 0 and 1 bit',{nb:'cell-entropy',
@@ -941,49 +953,81 @@ S('kl-asymmetry','kl','Which one is the truth? KL is not symmetric',{builds:2,nb
  point:`Sunny town q = (0.98, 0.01, 0.01): codeword lengths log₂ 1/q = ${inf.kl.asym.codeword_bits.map(v=>num(v,2)).join(', ')} bits.`,
  source:HUANG,transition:'Section 2.5: where you have already met all this.'});
 chap('2.5');
-S('classifier','kl','A classifier outputs a distribution',{builds:2,nb:'cell-classifier',
+S('apps-map','kl','KL at work: one recipe, three applications',{nb:'sec-2-5',
+ body:stack(p('Three losses you may know separately are one idea. Each goes through the same five steps:'),
+  `<div class="table-sm">${table(['','2.5.1 Classification','2.5.2 Maximum likelihood','2.5.3 Distillation'],[
+   ['<b>① the problem</b>','label an image','model the weather','shrink a big model'],
+   ['<b>② data, model</b>','images; a classifier','20 days; three numbers q','inputs; teacher, student'],
+   ['<b>③ usual loss</b>','cross-entropy','minus log-likelihood','soft-label cross-entropy'],
+   ['<b>④ as KL</b>','KL(label ‖ prediction)','KL(data ‖ model)','KL(teacher ‖ student)'],
+   ['<b>⑤ check</b>','PyTorch’s loss = KL','best q = frequencies','student ≈ teacher']])}</div>`),
+ lines:['Three applications, one recipe: state the problem, name the data and the model, write down the loss people use, rewrite it as a KL, and check with numbers.'],
+ ask:['What do the three KLs in row ④ have in common?'],
+ expected:['The first argument is always the “truth” the model must match: the label, the data, the teacher.'],
+ transition:'2.5.1: classification.'});
+subsec('2.5.1');
+S('app-classify','kl','2.5.1 Classification: the plan',{nb:'sec-2-5-1',
+ body:planCard([['① the problem','Given an image, say what is in it: ape, bear, cat or dog.'],
+  ['② data and model','Images with their true labels. A network with a softmax outputs a distribution q over the four labels.'],
+  ['③ the usual loss','Cross-entropy: the loss you have used to train every classifier.'],
+  ['④ the same loss as KL','A one-hot label has no surprise, so cross-entropy = KL(label ‖ prediction).'],
+  ['⑤ check',`PyTorch’s loss for our cat is ${num(cl.loss_nats,3)} nats, the KL; plotted, it is the surprise curve of 2.1.`]]),
+ lines:['The first application, in five steps. You have trained classifiers before; now see which KL their loss is.'],
+ ask:['Which loss do you use to train a classifier?'],
+ expected:['Cross-entropy. Step ④ shows that it is a KL.'],
+ transition:'①② The problem and the model.'});
+S('classifier','kl','①② A classifier outputs a distribution',{builds:2,nb:'cell-classifier',
  body:classifier4(),
  lines:['An image goes into a classifier; out comes a distribution over four labels: ape 0.05, bear 0.05, cat 0.60, dog 0.30. Call it q.','The true label is a distribution too: all of its probability on cat. Call it p.'],
  ask:['What does the classifier output?','How can a label be a distribution?'],
  expected:['A probability for each label, from a softmax.','One-hot: probability 1 on the true class, 0 on the others.'],
- source:HUANG,transition:'How surprised is the model by the truth?'});
-S('ce-surprise','kl','The loss is the model’s surprise at the true label',{builds:3,nb:'cell-classifier',
+ source:HUANG,transition:'③ The usual loss.'});
+S('ce-surprise','kl','③ The usual loss: surprise at the true label',{builds:3,nb:'cell-classifier',
  body:stack(eq(R`H(\pcol p,\qcol q)=\sum_y \pcol{p(y)}\,\log\frac{1}{\qcol{q(y)}}`),
   at(2,eq(R`=0\cdot\log\tfrac{1}{0.05}+0\cdot\log\tfrac{1}{0.05}+1\cdot\log\tfrac1{0.6}+0\cdot\log\tfrac1{0.3}`)),
   at(3,eq(R`=-\log q(\text{cat})=${num(cl.loss_nats,2)}\ \text{nats}=${num(cl.loss_bits,2)}\ \text{bits}`))),
  lines:['The cross-entropy between the label p and the prediction q: the label supplies the weights.','Write out all four terms. Three are multiplied by zero.','What is left is −log q(cat): the model’s surprise at the true label. That is the loss you have been minimising all along.'],
  ask:['Which terms survive?','In words, what is the loss?','What loss would q(cat) = 1 give?'],
  expected:['Only the true class.','How surprised the model is by the right answer.','0: no surprise.'],
- source:HUANG,transition:'And where is the KL?'});
-S('ce-is-kl','kl','With a one-hot label, cross-entropy is exactly KL',{builds:3,nb:'cell-classifier',
+ source:HUANG,transition:'④ Where is the KL?'});
+S('ce-is-kl','kl','④ As KL: with a one-hot label, cross-entropy = KL',{builds:3,nb:'cell-classifier',
  body:stack(eq(R`\KL(p\,\|\,q)=H(p,q)-H(p)`),at(2,eq(R`H(p)=1\cdot\log\tfrac11+0+0+0=0`)),at(2,small('A one-hot label is certain, so it has no surprise (0 · log 1/0 counts as 0).')),
   at(3,`<div class="code-sm">${code('F.cross_entropy(logits, target)   # 0.511 nats: here equal to KL(p ‖ q)')}</div>`)),
  lines:['From Section 2.4: KL is cross-entropy minus entropy.','The entropy of a one-hot label is 0: a certain outcome carries no surprise.','So the classification loss is exactly KL(label ‖ prediction). PyTorch computes it in nats: 0.511 for our cat.'],
  ask:['What is H(p) for a one-hot label?','So what does training minimise?','Why does PyTorch compute cross-entropy rather than KL?'],
  expected:['0.','KL(label ‖ prediction): the bits the prediction wastes on the true labels.','They are equal here, and in general differ by H(p), which training cannot change. Cross-entropy avoids the log of the labels.'],
- demo:'Notebook 2.5: F.cross_entropy prints 0.511 nats, −log 0.6, the same number as KL(one-hot ‖ q).',
- source:HUANG,transition:'What the loss looks like as the prediction changes.'});
-S('loss-curve','kl','The loss curve is the surprise curve',{builds:2,nb:'cell-classifier',
+ demo:'Notebook 2.5.1: F.cross_entropy prints 0.511 nats, −log 0.6, the same number as KL(one-hot ‖ q).',
+ source:HUANG,transition:'⑤ Check: the loss as the prediction changes.'});
+S('loss-curve','kl','⑤ Check: the loss is the surprise curve',{builds:2,nb:'cell-classifier',
  body:cols(lossCurve(),stack(p('The loss is −ln q(true class): the surprise curve of Section 2.1, in nats.'),at(2,p('Confident and wrong is expensive: q(true) = 0.01 costs 4.6 nats; q(true) = 0.6 costs 0.51.'))),'1.2fr 1fr'),
  lines:['Plot the loss against the probability the model gives to the true class: it is the surprise curve again.','Training pushes q(true) up the curve towards 1. Being confidently wrong is punished hardest.'],
  ask:['Where is the curve steepest?','Why might a model learn to be confident?'],
  expected:['Near 0: almost-impossible true labels cost the most.','Each step towards q(true) = 1 lowers the loss; with no other pressure it heads there.'],
- transition:'Soft labels.'});
-S('soft-labels','kl','Soft labels: cross-entropy = entropy + KL',{builds:2,nb:'cell-classifier',
- body:cols(labelPair(cl.teacher),stack(eq(R`H(p,q)=\underbrace{H(p)}_{${num(cl.entropy_soft,2)}}+\underbrace{\KL(p\,\|\,q)}_{${num(cl.kl_soft,2)}}=${num(cl.ce_soft,2)}`),
-  at(2,p('In knowledge distillation a small student learns from a big teacher’s predictions. H(p) is fixed by the teacher, so lowering the cross-entropy lowers the KL by exactly as much.'))),'1fr 1.15fr'),
- lines:['A soft label: a teacher network says cat 0.75, dog 0.20, bear 0.03, ape 0.02. Now H(p) is not 0.','Training changes only the student q, so minimising cross-entropy is still minimising KL(teacher ‖ student).'],
- ask:['Which part can training change?','Can the cross-entropy reach 0 here?'],
- expected:['Only the KL; H(p) is fixed by the teacher.',`No: its minimum is H(p) = ${num(cl.entropy_soft,2)} nats, reached when the student copies the teacher.`],
- transition:'Section 2.6: real data.'});
-chap('2.6');
-S('mle-data','kl','The data: twenty days of weather',{builds:2,nb:'cell-mle',
- body:stack(dataGrid(),at(2,p('Counts: 10 sunny, 5 cloudy, 5 rainy. Frequencies p̂ = (½, ¼, ¼).'))),
- lines:['Now real data: twenty recorded days. We want a model q for the weather. Which q explains these days best?','Count them: 10 sunny, 5 cloudy, 5 rainy. Their frequencies are p̂ = (½, ¼, ¼).'],
+ transition:'2.5.2: maximum likelihood.'});
+subsec('2.5.2');
+S('app-mle','kl','2.5.2 Maximum likelihood: the plan',{nb:'sec-2-5-2',
+ body:planCard([['① the problem','Learn a probability model from data: from a record of the weather, how likely is each kind of day? Generative modelling in its simplest form.'],
+  ['② data and model','Twenty recorded days. The model q is three probabilities: sunny, cloudy, rainy.'],
+  ['③ the usual loss','Maximum likelihood: choose the q that makes the recorded days most probable.'],
+  ['④ the same loss as KL','Per day, minus the log-likelihood is H(p̂, q) = H(p̂) + KL(p̂ ‖ q), with p̂ the data’s frequencies.'],
+  ['⑤ check','The best q is the frequencies, and four formulations pick the same q.']]),
+ lines:['The second application: fitting a model to data. The same five steps; this time the “truth” is the data.'],
+ ask:['Where have you used maximum likelihood before?'],
+ expected:['Whenever a model is fitted by its likelihood: linear regression with Gaussian noise, logistic regression, the classifier of 2.5.1.'],
+ transition:'① The problem.'});
+S('mle-problem','kl','① The problem: learn a distribution from data',{builds:2,nb:'sec-2-5-2',
+ body:stack(mleProblemFig(),p('<b>Unknown</b>: the process p<sub>data</sub>. <b>Observed</b>: twenty days. <b>To choose</b>: the model q.')),
+ lines:['The weather comes from a process we cannot see: an unknown distribution, p<sub>data</sub>. What we have is a record of days drawn from it.','Choose a model q, fit it to the record, then use it: to predict tomorrow, or to simulate new days. Fitting a distribution to samples is generative modelling.'],
+ ask:['What is unknown here, and what is observed?','What could the fitted q be used for?'],
+ expected:['The distribution p<sub>data</sub> is unknown; the twenty days are observed.','Predicting tomorrow’s weather, or generating realistic new days: a generative model.'],
+ transition:'② The data and the model.'});
+S('mle-data','kl','② The data and the model: twenty days, three numbers',{builds:2,nb:'cell-mle',
+ body:stack(dataGrid(),at(2,p('<b>The model</b>: q = (q(sunny), q(cloudy), q(rainy)), three numbers that add to 1. <b>The counts</b>: 10, 5, 5, so the frequencies are p̂ = (½, ¼, ¼).'))),
+ lines:['The data: twenty recorded days, in order. They are draws from the unknown weather process.','The model: three probabilities that add to 1. Training means choosing them. The counts are 10, 5 and 5: frequencies p̂ = (½, ¼, ¼).'],
  ask:['What would you guess for tomorrow?','What should “explains the data best” mean?'],
  expected:['Sunny with probability ½: the frequency.','Gives the data the highest probability: maximum likelihood. Let us see why that is the frequency.'],
- transition:'How probable are these twenty days under a model q?'});
-S('mle-likelihood','kl','How probable are these twenty days under q?',{builds:3,nb:'cell-mle',
+ transition:'③ The usual loss: how probable are the twenty days under q?'});
+S('mle-likelihood','kl','③ The usual loss: how probable are the twenty days?',{builds:3,nb:'cell-mle',
  body:stack(eq(R`p(\mathcal D\mid q)=\prod_{i=1}^{20}q(x_i)=q(\text{sunny})^{10}\,q(\text{cloudy})^{5}\,q(\text{rainy})^{5}`),
   at(2,eq(R`q=(\tfrac14,\tfrac14,\tfrac12):\quad(\tfrac14)^{10}(\tfrac14)^{5}(\tfrac12)^{5}=2^{-35}\approx2.9\times10^{-11}`)),
   at(3,eq(R`\log_2 p(\mathcal D\mid q)=-35`))),
@@ -991,7 +1035,7 @@ S('mle-likelihood','kl','How probable are these twenty days under q?',{builds:3,
  ask:['Why a product?','Why is it so small?','Why work with the log?'],
  expected:['Independent days: probabilities multiply.','Any one particular sequence of 20 days is unlikely, even under the right model.','Products of many small numbers underflow; the log turns them into a sum.'],
  transition:'Per day, that is a familiar number.'});
-S('mle-surprise','kl','Per day: the data’s average surprise under q',{builds:3,nb:'cell-mle',
+S('mle-surprise','kl','③ Per day: the data’s average surprise under q',{builds:3,nb:'cell-mle',
  body:stack(eq(R`-\frac1{20}\log_2 p(\mathcal D\mid q)=\frac1{20}\sum_{i=1}^{20}\log_2\frac1{q(x_i)}=\frac{35}{20}=1.75\ \text{bits}`),
   at(2,p('Have we seen 1.75 before?')),
   at(3,`<p class="result" style="font-size:38px">It is the cross-entropy H(p, q) of Section 2.4.</p>`)),
@@ -999,7 +1043,7 @@ S('mle-surprise','kl','Per day: the data’s average surprise under q',{builds:3
  ask:['What is minus the log-likelihood per day, in words?','Where have we seen 1.75?','Coincidence?'],
  expected:['The average surprise of a recorded day under q.','H(p, q): the wrong code on our weather.','No. Next slide: group the days by weather.'],
  transition:'Group the days by weather.'});
-S('mle-group','kl','Why: group the days by weather',{builds:3,nb:'cell-mle',
+S('mle-group','kl','④ Rewrite it: group the days by weather',{builds:3,nb:'cell-mle',
  body:stack(eq(R`\frac1{20}\sum_{i=1}^{20}\log_2\frac1{q(x_i)}=\frac1{20}\Big[\,10\log_2\tfrac1{q(\text{sunny})}+5\log_2\tfrac1{q(\text{cloudy})}+5\log_2\tfrac1{q(\text{rainy})}\Big]`),
   at(2,eq(R`=\tfrac{10}{20}\log_2\tfrac1{q(\text{sunny})}+\tfrac5{20}\log_2\tfrac1{q(\text{cloudy})}+\tfrac5{20}\log_2\tfrac1{q(\text{rainy})}`)),
   at(3,eq(R`=\sum_x\hat p(x)\log_2\frac1{q(x)}=H(\hat p,\,q)`))),
@@ -1007,102 +1051,109 @@ S('mle-group','kl','Why: group the days by weather',{builds:3,nb:'cell-mle',
  ask:['How many sunny terms are there?','What do 10/20, 5/20 and 5/20 form?','So what is maximum likelihood minimising?'],
  expected:['Ten, all equal to log₂ 1/q(sunny).','The data’s frequencies p̂ = (½, ¼, ¼): the empirical distribution.','The cross-entropy H(p̂, q).'],
  transition:'Split it, as in 2.4.'});
-S('mle-split','kl','The data’s surprise = entropy of the data + KL',{builds:2,nb:'cell-mle',
+S('mle-split','kl','④ As KL: the data’s surprise = H(p̂) + KL(p̂ ‖ q)',{builds:2,nb:'cell-mle',
  body:stack(eq(R`H(\hat p,q)=\underbrace{H(\hat p)}_{\text{fixed by the data}}+\underbrace{\KL(\hat p\,\|\,q)}_{\text{depends on }q}`),
   at(2,eq(R`1.75=1.5+0.25\qquad\text{for }q=(\tfrac14,\tfrac14,\tfrac12)`))),
  lines:['Section 2.4’s split: cross-entropy = entropy + KL. The entropy of the data is fixed; only the KL depends on the model.','For q = (¼, ¼, ½): 1.75 = 1.5 + 0.25. The model can only remove the KL part.'],
  ask:['Which part can the model change?','What is the smallest possible average surprise?'],
  expected:['Only KL(p̂ ‖ q).','H(p̂) = 1.5 bits, when KL = 0, that is, q = p̂.'],
  transition:'Find the best q yourself.'});
-S('mle-fit','kl','Find the q that makes the data least surprising',{nb:'cell-mle-fit',
+S('mle-fit','kl','⑤ Check: find the least surprising q',{nb:'cell-mle-fit',
  body:widget('mlefit','Move q and watch the data’s average surprise split into entropy and KL'),
  lines:['Move q. The teal part, H(p̂), never changes; the red part, the KL, shrinks to zero exactly at q = p̂ = (½, ¼, ¼). Maximum likelihood matches the frequencies.'],
  ask:['Start from (⅓, ⅓, ⅓). Which way should q(sunny) move?'],
  expected:['Up, to ½: the data have more sun than q expects. At q = p̂ the data are 32 times more probable than under (¼, ¼, ½).'],
- demo:'Notebook 2.6: the second cell runs gradient descent on the data’s average surprise from equal logits and lands on (0.5, 0.25, 0.25) without being told.',
+ demo:'Notebook 2.5.2: the second cell runs gradient descent on the data’s average surprise from equal logits and lands on (0.5, 0.25, 0.25) without being told.',
+ transition:'⑤ Four formulations, one answer.'});
+S('mle-same-answer','kl','⑤ Four formulations, one answer',{builds:2,nb:'cell-mle',
+ body:stack(`<div class="table-sm">${table(['to fit the data …','q = (¼, ¼, ½)','q = p̂ = (½, ¼, ¼)'],[
+   ['maximise the likelihood p(𝒟 | q)','2⁻³⁵','2⁻³⁰: 32 times larger'],
+   ['minimise the average surprise, −(1/20) log₂ p(𝒟 | q)','1.75 bits','1.50 bits'],
+   ['minimise the cross-entropy H(p̂, q)','1.75 bits','1.50 bits'],
+   ['minimise KL(p̂ ‖ q)','0.25 bits','0 bits']])}</div>`,
+  at(2,p('Four ways to say “fit the data”, and the same winner, q = p̂. Maximum likelihood <b>is</b> minimum KL(data ‖ model).'))),
+ lines:['Score the two models four ways: likelihood, average surprise, cross-entropy and KL.','Every row prefers p̂, by the same margin: 0.25 bits per day, 5 bits over twenty days, a factor of 2⁵ = 32 in likelihood.'],
+ ask:['Why do all four rows agree?','How many times more probable are the data under p̂?'],
+ expected:['Each row rewrites the one above: take the log and divide by −20, group the days by weather, subtract the fixed H(p̂).','2⁵ = 32: twenty days times 0.25 bits per day.'],
  transition:'The general statement.'});
-S('mle-kl','kl','Maximum likelihood minimises KL(data ‖ model)',{builds:3,nb:'cell-mle',
+S('mle-kl','kl','In general: maximum likelihood = minimum KL(data ‖ model)',{builds:3,nb:'cell-mle',
  body:stack(eq(R`\max_\theta\ \frac1N\sum_{i=1}^N\log q_\theta(x_i)\iff\min_\theta\ H(\hat p,q_\theta)\iff\min_\theta\ \KL(\hat p\,\|\,q_\theta)`),
   at(2,p('Any model, any data: the average log-likelihood is minus the data’s cross-entropy, and the data’s entropy is fixed.')),
   at(3,p('A classifier’s training set does the same, label by label: each example costs −log q<sub>θ</sub>(y<sub>i</sub> | x<sub>i</sub>), the surprise at its label.'))),
- lines:['Nothing in the derivation was special to weather: maximising the likelihood minimises KL(data ‖ model), with the data first.','With more data p̂ approaches the true distribution of the data, so the model is pulled towards it in this KL.','The classification loss of 2.5 is the same story, averaged over a training set: training a classifier is maximum likelihood.'],
+ lines:['Nothing in the derivation was special to weather: maximising the likelihood minimises KL(data ‖ model), with the data first.','With more data p̂ approaches the true distribution of the data, so the model is pulled towards it in this KL.','The classification loss of 2.5.1 is the same story, averaged over a training set: training a classifier is maximum likelihood.'],
  ask:['Which distribution comes first in this KL?','What happens with more data?','What is a training set’s cross-entropy loss?'],
  expected:['The data’s, p̂.','p̂ gets closer to the true distribution of the data.','The average surprise at the true labels: minus the average log-likelihood.'],
- transition:'Collect the pattern.'});
-chap('2.7');
-S('kl-everywhere','kl','KL at work: the same quantity in many losses',{nb:'sec-2-7',
- body:`<div class="table-sm">${table(['training …','minimises','first argument','where'],[['a classifier with cross-entropy','KL(labels ‖ predictions)','the labels','2.5 ✓'],['a model by maximum likelihood','KL(data ‖ model)','the data','2.6 ✓'],['a small student from a big teacher','KL(teacher ‖ student)','the teacher','next'],['a chatbot with RLHF','reward − β KL(policy ‖ reference)','the policy','after that'],['an approximation by VI','KL(q ‖ posterior)','our approximation q','Parts 3–5']])}</div>`,
- lines:['We have met two uses already: classification and maximum likelihood. Two more, step by step: distilling a big model into a small one, and keeping a chatbot honest in RLHF. VI is the rest of the lecture.'],
- ask:['Which distribution comes first in each row?'],
- expected:['The one that supplies the weights: labels, data, teacher, policy, q. Section 3.6 shows why the order matters for VI.'],
- point:'The video opens with distillation, generative models and RLHF as motivation.',
- source:HUANG,transition:'Distillation: a big teacher and a small student.'});
-S('distill-why','kl','Knowledge distillation: a big teacher, a small student',{builds:2,nb:'cell-distill',
+ transition:'2.5.3: knowledge distillation.'});
+subsec('2.5.3');
+S('app-distill','kl','2.5.3 Knowledge distillation: the plan',{nb:'sec-2-5-3',
+ body:planCard([['① the problem','A big, accurate network is too slow and costly to deploy. We want a small network that behaves like it.'],
+  ['② data and model','Inputs, labelled or not, go to both networks. The teacher is frozen; only the student is trained.'],
+  ['③ the usual loss','Cross-entropy, with the teacher’s probabilities as soft labels in place of the one-hot label.'],
+  ['④ the same loss as KL','Cross-entropy = H(teacher) + KL(teacher ‖ student); the teacher is fixed, so this minimises the KL.'],
+  ['⑤ check',`For our cat ${num(cl.ce_soft,2)} = ${num(cl.entropy_soft,2)} + ${num(cl.kl_soft,2)} nats; a ${ds.student_params}-parameter student learns a ${ds.teacher_params.toLocaleString('en')}-parameter teacher.`]]),
+ lines:['The third application: compressing a big model into a small one. The same five steps; now the “truth” is the teacher.'],
+ ask:['Why would anyone want a smaller copy of a model?'],
+ expected:['Speed, memory and cost: phones, browsers, millions of requests a day.'],
+ transition:'① The problem.'});
+S('distill-why','kl','① The problem: a big teacher, a small student',{builds:2,nb:'cell-distill',
  body:`<div class="state-slot"><div data-only="1">${distillDiagram(1)}</div><div data-only="2">${distillDiagram(2)}</div></div>`,
  lines:['A big network, the teacher, is accurate but too slow and too expensive to run on a phone, or a million times a day.','We want a small network, the student, that behaves like it. Give both the same image: the teacher says cat 0.75, dog 0.20; the untrained student is vaguer.'],
  ask:['Why not just deploy the teacher?','How could the small model learn to behave like the big one?'],
  expected:['Cost and speed: memory, latency and energy grow with the number of parameters.','Copy its outputs: make the student’s distribution over labels match the teacher’s, input by input.'],
  point:'Hinton, Vinyals and Dean (2015), “Distilling the Knowledge in a Neural Network”. Smaller deployed models, such as DistilBERT, are trained this way.',
- transition:'Make the two distributions the same.'});
-S('distill-match','kl','Make the student’s distribution match the teacher’s',{builds:2,nb:'cell-distill',
+ transition:'② The data and the model.'});
+S('distill-match','kl','② The data and the model: same inputs, two networks',{builds:2,nb:'cell-distill',
  body:`<div class="state-slot"><div data-only="1">${distillDiagram(3)}</div><div data-only="2">${distillDiagram(4)}</div></div>`,
- lines:['For each input, measure how far the student’s distribution is from the teacher’s: KL(teacher ‖ student). Average it over many inputs.','Minimise it. The teacher is frozen; gradients flow only into the student. At KL = 0 the student answers like the teacher on every input, doubts included.'],
- ask:['Why does the teacher come first in the KL?','Does the student need the true labels?'],
- expected:['The teacher plays the truth: its distribution supplies the weights, exactly like the labels in 2.5.','Not for this term: the teacher labels every input, even unlabelled ones. In practice a small label term is often added.'],
- transition:'The loss, term by term.'});
-S('distill-loss','kl','The distillation loss, term by term',{builds:3,nb:'cell-distill',
- body:stack(eq(R`\min_{\text{student}}\ \frac1N\sum_{i=1}^{N}\KL\big(p_T(\cdot\mid x_i)\,\|\,q_S(\cdot\mid x_i)\big),\qquad\KL(p_T\,\|\,q_S)=H(p_T,q_S)-H(p_T)`),
-  at(2,eq(R`\text{teacher frozen}\ \Rightarrow\ H(p_T)\ \text{fixed}\ \Rightarrow\ \text{minimise }H(p_T,q_S)=-\sum_y p_T(y)\log q_S(y)`)),
-  at(3,eq(R`\mathcal L=(1-\alpha)\,H(y_{\text{true}},q_S)+\alpha\,\tau^2\,\KL\big(p_T^{(\tau)}\,\|\,q_S^{(\tau)}\big)`)),
-  at(3,small('p<sup>(τ)</sup> = softmax(logits / τ): a temperature τ > 1 softens both distributions; τ² keeps the gradient scale comparable. α blends in the true labels.'))),
- lines:['Write the KL out: it is the cross-entropy with the teacher’s soft labels, minus the teacher’s entropy.','The teacher is frozen, so its entropy is a constant: minimising the KL is minimising cross-entropy with soft labels, the soft-label slide of 2.5.','In practice both distributions are softened with a temperature τ, and a small term with the true labels is added. For our cat the KL is 0.05 nats.'],
- ask:['Which part can the student change?','How is this related to the ordinary classification loss?','What does a temperature τ > 1 do?'],
- expected:['Only q_S: H(p_T) is fixed by the frozen teacher.','It is the same cross-entropy loss, with the teacher’s soft distribution in place of the one-hot label.','It flattens the teacher’s distribution so its small probabilities, which carry the extra information, count for more.'],
- transition:'What do soft labels teach that a one-hot label cannot?'});
-S('distill-soft','kl','What soft labels teach: a cat looks a bit like a dog',{builds:2,nb:'cell-classifier',
- body:stack(softTemps(),at(2,p('A one-hot label says only “cat”. The teacher also says “a bit like a dog, not like an ape”: information about how classes relate, which Hinton called dark knowledge. Softening with τ = 4 makes it visible.'))),
- lines:['Compare what the student is shown. The label: all on cat. The teacher: mostly cat, some dog, almost no ape or bear.','The teacher’s small probabilities tell the student which mistakes are reasonable. A temperature τ = 4 turns them up, so they shape the loss.'],
+ lines:['The data: inputs only, such as images, labelled or not. Each goes through both networks; the teacher’s distribution is the target for the student’s.','The model: the student, the only network we train; the teacher is frozen. We need a loss that measures how far apart the two distributions are.'],
+ ask:['Does the student need the true labels?','What should the loss measure?'],
+ expected:['Not for this term: the teacher labels every input, even unlabelled ones. In practice a small label term is often added.','How far the student’s distribution is from the teacher’s, averaged over the inputs, with zero when they agree.'],
+ transition:'③ The usual loss.'});
+S('distill-soft','kl','③ The usual loss: cross-entropy with soft labels',{builds:2,nb:'sec-2-5-3',
+ body:stack(softTemps(),at(2,eq(R`\mathcal L=H(p_T,q_S)=-\sum_y p_T(y)\,\log q_S(y)`)),
+  at(2,small('The classification loss of 2.5.1, with the teacher’s probabilities in place of the one-hot label. Their small values say “a bit like a dog, not like an ape”: Hinton’s dark knowledge. A temperature τ = 4 turns them up.'))),
+ lines:['The usual loss, from Hinton’s paper: the classification loss of 2.5.1, but against the teacher’s probabilities instead of the one-hot label. Compare the two targets.','The loss is the cross-entropy H(p<sub>T</sub>, q<sub>S</sub>): the student’s surprise, weighted by the teacher’s probabilities. The small ones say which mistakes are reasonable.'],
  ask:['What does the student learn from the 0.20 on dog?','Why would τ = 1 hide that information?'],
  expected:['That cats and dogs look alike to the teacher, so confusing them is a small error, unlike cat versus ape.','The 0.02 and 0.03 barely change the loss; dividing the logits by τ evens the distribution out.'],
+ point:'Hinton, Vinyals and Dean (2015) train the student on the teacher’s soft targets at a raised temperature, plus a small weight on the true labels.',
+ transition:'④ The same loss as KL.'});
+S('distill-loss','kl','④ The same loss as KL, term by term',{builds:3,nb:'cell-distill',
+ body:stack(eq(R`H(p_T,q_S)=\underbrace{H(p_T)}_{\text{teacher only}}+\KL(p_T\,\|\,q_S)`),
+  at(2,eq(R`\text{teacher frozen}\ \Rightarrow\ \min_{\text{student}}\,H(p_T,q_S)\iff\min_{\text{student}}\,\KL(p_T\,\|\,q_S)`)),
+  at(3,eq(R`\mathcal L=(1-\alpha)\,H(y_{\text{true}},q_S)+\alpha\,\tau^2\,\KL\big(p_T^{(\tau)}\,\|\,q_S^{(\tau)}\big)`)),
+  at(3,small('In practice: p<sup>(τ)</sup> = softmax(logits / τ) softens both distributions, τ² keeps the gradient scale comparable, and α blends in the true labels. Each term is averaged over the inputs.'))),
+ lines:['Split the cross-entropy of step ③, as in Section 2.4: the teacher’s entropy plus KL(teacher ‖ student).','The teacher is frozen, so its entropy is a constant: minimising the cross-entropy is minimising the KL. Two formulations, one answer.','In practice both distributions are softened with a temperature τ, and a small term with the true labels is added.'],
+ ask:['Which part can the student change?','Why does the teacher come first in the KL?','What does a temperature τ > 1 do?'],
+ expected:['Only q_S: H(p_T) is fixed by the frozen teacher.','The teacher plays the truth, like the label in 2.5.1 and the data in 2.5.2: its distribution supplies the weights.','It flattens the teacher’s distribution so its small probabilities, which carry the extra information, count for more.'],
+ point:'Implementations often compute the second term with PyTorch’s KL loss, F.kl_div or nn.KLDivLoss.',
+ transition:'⑤ Check with numbers.'});
+S('soft-labels','kl','⑤ Check with numbers: cross-entropy = entropy + KL',{builds:2,nb:'cell-classifier',nbNum:'2.5.1',
+ body:cols(labelPair(cl.teacher),stack(eq(R`H(p,q)=\underbrace{H(p)}_{${num(cl.entropy_soft,2)}}+\underbrace{\KL(p\,\|\,q)}_{${num(cl.kl_soft,2)}}=${num(cl.ce_soft,2)}`),
+  at(2,p(`H(p) is fixed by the teacher, so lowering the cross-entropy lowers the KL by exactly as much. The best the student can reach is ${num(cl.entropy_soft,2)} nats: a copy of the teacher.`))),'1fr 1.15fr'),
+ lines:[`Our cat again. The teacher says cat ${num(cl.teacher[2],2)}, dog ${num(cl.teacher[3],2)}; the student predicts the q of 2.5.1. Cross-entropy ${num(cl.ce_soft,2)} = entropy ${num(cl.entropy_soft,2)} + KL ${num(cl.kl_soft,2)} nats.`,'Only the KL depends on the student, so lowering the cross-entropy lowers the KL by exactly as much.'],
+ ask:['Which part can training change?','Can the cross-entropy reach 0 here?'],
+ expected:['Only the KL; H(p) is fixed by the teacher.',`No: its minimum is H(p) = ${num(cl.entropy_soft,2)} nats, reached when the student copies the teacher.`],
  transition:'Watch a real student learn.'});
-S('distill-demo','kl','Press play: a tiny student learns a big teacher',{builds:2,nb:'cell-distill',
+S('distill-demo','kl','⑤ Check: a tiny student learns a big teacher',{builds:2,nb:'cell-distill',
  body:stack(widget('distill','A student network learning a teacher’s distribution, with the KL from teacher to student'),
   at(2,small(`Test accuracy: teacher ${num(100*ds.teacher_acc,1)}%, student ${num(100*ds.student_acc,1)}%; the student agrees with the teacher on ${num(100*ds.agree,1)}% of test points, with ${Math.round(ds.teacher_params/ds.student_params)}× fewer parameters.`))),
  lines:[`Three overlapping classes in the plane. The teacher has ${ds.teacher_params.toLocaleString('en')} parameters, the student ${ds.student_params}. Colours show each network’s class probabilities. Predict: can the student copy the teacher?`,`Press play. The student’s map turns into the teacher’s, uncertain boundaries included, and KL(teacher ‖ student) falls from ${num(ds.frames[0][1],2)} to ${num(ds.frames.at(-1)[1],3)} nats.`],
  ask:[`Predict: can a ${ds.student_params}-parameter network copy a ${ds.teacher_params.toLocaleString('en')}-parameter one?`,'Why do the boundaries stay blurred?'],
  expected:['On this problem, nearly: the classes need only gently curved boundaries.','The student copies the teacher’s uncertainty too: where classes overlap, the teacher is unsure, and so is the student.'],
- demo:'Notebook 2.7: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.',
- transition:'Second application: RLHF.'});
-S('rlhf-setup','kl','RLHF: reward a chatbot, but keep it close to where it started',{builds:3,nb:'cell-rlhf',
- body:`<div class="state-slot"><div data-only="1">${rlhfDiagram(1)}</div><div data-only="2">${rlhfDiagram(2)}</div><div data-only="3">${rlhfDiagram(3)}</div></div>`,
- lines:['Reinforcement learning from human feedback: the language model, called the policy, writes a reply; a reward model, trained on human preferences, scores it. Training raises the reward.','A frozen copy of the starting model, the reference, stays alongside. A KL penalty keeps the policy’s next-word distributions close to the reference’s.',`The objective: expected reward minus β times KL(${PIH} ‖ ${PIH}<sub>ref</sub>). β sets how long the leash is.`],
- ask:['What does the reward model reward?','Why keep a frozen copy?','What does β control?'],
- expected:['Replies people preferred, as learned from human comparisons.','To measure how far the policy has drifted from a model that writes fluent, sensible text.','The trade-off: small β chases reward, large β stays near the reference.'],
- point:'This KL penalty is part of InstructGPT/ChatGPT-style RLHF (PPO) and of GRPO; DPO optimises the same KL-regularised objective without a separate reward model.',
- transition:'What goes wrong without the leash?'});
-S('rlhf-hacking','kl','Without the KL: the policy fools the reward model',{builds:2,nb:'cell-rlhf',
- body:stack(`<div class="table-sm">${table(['reply to “Is the stove hot?”',m(R`\pi_{\text{ref}}`),'reward'],rl.replies.map((rep,i)=>[rep,num(rl.ref[i],2),(rl.reward[i]>0?'+':'')+num(rl.reward[i],1)]))}</div>`,
-  at(2,p(`Maximise reward alone and everything goes to “${rl.replies.at(-1)}”: <b>reward hacking</b>.`))),
- lines:['Five possible replies. The reference model, trained on human text, mostly says sensible things. The reward model is imperfect: it loves enthusiasm.',`Chase the reward with no leash and the policy puts everything on the worst reply. The KL term charges for moving away from the reference: the less likely a reply was under ${PIH}<sub>ref</sub>, the more it costs.`],
- ask:['Which reply does the reward model prefer?','Why is the KL term a defence?'],
- expected:['The shouting one, +2.0: a flaw in the learned reward.',`A reply the reference almost never writes has a large log ratio ${PIH}/${PIH}<sub>ref</sub>, so piling probability on it costs a lot of KL.`],
- transition:'Slide the leash.'});
-S('rlhf-beta','kl','Slide the leash: the best policy for each β',{builds:2,nb:'cell-rlhf',
- body:stack(widget('rlhfbeta','The best policy over five replies as beta changes'),at(2,small(`The best policy reweights the reference by the reward: ${PIH}*(y) ∝ ${PIH}<sub>ref</sub>(y) · e<sup>r(y)/β</sup>.`))),
- lines:['Move β. With a tight leash (large β) the policy stays the reference. Loosen it and probability flows to high-reward replies; with no leash it all goes to the hacked one.','The best policy has a closed form: reweight the reference by e<sup>r/β</sup>. KL keeps it a reweighting of what the model already says, never something new.'],
- ask:['At β = 1, which reply gains most?','What happens as β → 0? As β → ∞?'],
- expected:['“Yes, it is hot. Careful!”: probable under the reference and well rewarded.',`β → 0: all mass on the highest reward, the hacked reply. β → ∞: ${PIH}* = ${PIH}<sub>ref</sub>, no change.`],
- point:`Derivation: maximise Σ ${PIH} r − β Σ ${PIH} log(${PIH}/${PIH}<sub>ref</sub>) subject to Σ ${PIH} = 1; setting the derivative to zero gives log ${PIH} = log ${PIH}<sub>ref</sub> + r/β − const. The notebook checks it by gradient ascent.`,
- demo:`Notebook 2.7: the RLHF cell prints ${PIH}* for eight values of β and checks the closed form at β = 1 by gradient ascent.`,
- transition:'How is that KL computed for real text?'});
-S('rlhf-tokens','kl','In practice: the KL is estimated token by token, from samples',{builds:2,nb:'cell-rlhf',
- body:stack(eq(R`\KL(\pi\,\|\,\pi_{\text{ref}})\approx\sum_{t}\Big[\log\pi(y_t\mid y_{<t})-\log\pi_{\text{ref}}(y_t\mid y_{<t})\Big],\qquad y\sim\pi`),
-  at(2,p('A reply is a sequence of tokens, and there are far too many sequences to sum over. So sample replies from the policy and add the log ratios of the tokens: a Monte Carlo estimate (Section 2.9). GRPO uses the never-negative estimator r − 1 − log r from the appendix.'))),
- lines:[`For text, ${PIH} is a next-token distribution: the KL of a reply is the sum, over its tokens, of log ${PIH} − log ${PIH}<sub>ref</sub>.`,'There is no way to sum over all possible replies, so the KL is estimated from sampled replies, exactly the sampling idea of Section 2.9.'],
- ask:['Why not compute the KL exactly?','Which estimator can never be negative?'],
- expected:['Vocabulary^length possible replies: astronomically many.',`r − 1 − log r with r = ${PIH}<sub>ref</sub>/${PIH}: optional slide in the appendix; DeepSeek’s GRPO uses it.`],
+ demo:'Notebook 2.5.3: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.',
+ transition:'One principle in many disguises.'});
+subsec(null);
+S('apps-same','kl','One principle in many disguises',{builds:2,nb:'sec-2-5',
+ body:stack(`<div class="table-sm">${table(['application','the usual loss','is the same as minimising','the truth'],[
+  ['2.5.1 classification','cross-entropy','KL(label ‖ prediction)','the label'],
+  ['2.5.2 maximum likelihood','negative log-likelihood','KL(data ‖ model)','the data'],
+  ['2.5.3 distillation','cross-entropy with soft labels','KL(teacher ‖ student)','the teacher']])}</div>`,
+  at(2,p('Parts 3–5: variational inference minimises KL(q ‖ posterior), the same KL with the order flipped: our q comes first.')),
+  at(2,small('KL turns up in many other places too: for example, when chatbots are fine-tuned with human feedback (RLHF), a KL term keeps the model close to where it started.'))),
+ lines:['Three losses you may have met separately are one idea: make the model match the truth, measured by KL with the truth first.','Variational inference flips the order: q comes first, because we can sample from q but not from the posterior. Section 3.6 shows what that changes.'],
+ ask:['What is the same in the three applications?','What is different about VI?'],
+ expected:['Each minimises a KL from a known “truth” (label, data, teacher) to the model.','The order: q comes first. We cannot sample the posterior, so the weights must come from q.'],
  transition:'Back to continuous distributions: closed forms.'});
-chap('2.8');
+chap('2.6');
 S('densities','kl','From sums to integrals',{builds:2,
  body:stack(eq(R`\text{discrete:}\qquad\KL(p\|q)=\sum_x p(x)\log\frac{p(x)}{q(x)}`),eq(R`\text{continuous:}\qquad\KL(p\|q)=\int p(\theta)\log\frac{p(\theta)}{q(\theta)}\,d\theta`),
   at(2,small('Probabilities become densities and the sum becomes an integral; the recipe is the same weighted average of log ratios.'))),
@@ -1186,7 +1237,7 @@ S('torch-discrete','kl','The same formulas in PyTorch: Bernoulli and categorical
  expected:['t1: p.probs is a, and softplus(−q.logits) − softplus(−p.logits) = log a − log b.','Numerical stability: no log of probabilities that round to 0.'],
  point:'Shown as in PyTorch 2.13, with torch.nn.functional.softplus shortened to softplus and the lines handling probabilities of exactly 0 or 1 left out.',
  source:`PyTorch source: <a href="${TORCH_KL}">torch/distributions/kl.py</a>`,transition:'And the Gaussian.'});
-S('torch-normal','kl','The same formulas in PyTorch: Gaussian and diagonal',{nb:'cell-closed-forms',demo:'Switch to notebook 2.4 and run the closed-forms cell: it checks all four formulas against kl_divergence and prints PyTorch’s own source for the Normal and Independent cases.',builds:2,
+S('torch-normal','kl','The same formulas in PyTorch: Gaussian and diagonal',{nb:'cell-closed-forms',demo:'Switch to notebook 2.6 and run the closed-forms cell: it checks all four formulas against kl_divergence and prints PyTorch’s own source for the Normal and Independent cases.',builds:2,
  body:stack(`<div class="code-sm">${code('@register_kl(Normal, Normal)\ndef _kl_normal_normal(p, q):\n    var_ratio = (p.scale / q.scale).pow(2)\n    t1 = ((p.loc - q.loc) / q.scale).pow(2)\n    return 0.5 * (var_ratio + t1 - 1 - var_ratio.log())\n\n@register_kl(Independent, Independent)\ndef _kl_independent_independent(p, q):\n    result = kl_divergence(p.base_dist, q.base_dist)\n    return _sum_rightmost(result, p.reinterpreted_batch_ndims)')}</div>`,
   at(2,small('½(σ²/s² + (μ − m)²/s² − 1 − log σ²/s²) = log(s/σ) + (σ² + (μ − m)²)/(2s²) − ½. Independent: the one-dimensional KLs, summed over coordinates.'))),
  lines:['PyTorch’s Gaussian KL, and the rule for independent coordinates.','Expand the Normal line: it is our formula. Independent sums the per-coordinate KLs: the diagonal-Gaussian rule.'],
@@ -1210,7 +1261,7 @@ S('kl-area','kl','KL is an area you can watch',{nb:'cell-kl-area',
  expected:['KL(q‖p) stays moderate: q only visits places where p is reasonable. KL(p‖q) explodes: p’s tails land where q is nearly zero.'],
  point:'Click q₁, then q₂, then flip to KL(p‖q). Then shrink σ in each direction.',
  transition:'What if there is no formula at all?'});
-chap('2.9');
+chap('2.7');
 S('kl-expectation','kl','KL is an average: an expectation under p',{builds:2,
  body:stack(eq(R`\KL(p\,\|\,q)=\sum_x p(x)\log\frac{p(x)}{q(x)}`),at(2,eq(R`=\E_{x\sim p}\Big[\log\frac{p(x)}{q(x)}\Big]`)),
   at(2,small('E with x ~ p means: the average value when x is drawn from p.'))),
@@ -1234,7 +1285,7 @@ S('mc-weather','kl','Sample days and watch the average find the KL',{nb:'cell-we
  point:'The bits-per-day demo of 2.4 was already a Monte Carlo estimate: the wasted bits per day, averaged over simulated days.',
  demo:'Notebook 2.8: the weather-sampling cell draws 10,000 days and prints the running average at 10, 100, 1,000 and 10,000 days.',
  transition:'Back to our Gaussians, with the formula and with samples.'});
-S('kl-sampling','kl','No formula needed: estimate KL by sampling',{nb:'cell-kl-sampling',demo:'Switch to notebook 2.5, “The code on the slide, run”: run it, then set S to 100 and to 1,000,000 and rerun. Come back for the live version.',builds:2,
+S('kl-sampling','kl','No formula needed: estimate KL by sampling',{nb:'cell-kl-sampling',demo:'Switch to notebook 2.7, “The code on the slide, run”: run it, then set S to 100 and to 1,000,000 and rerun. Come back for the live version.',builds:2,
  body:stack(eq(R`\KL(q\|p)=\E_{\theta\sim q}\big[\log q(\theta)-\log p(\theta)\big]\approx\frac1S\sum_{i=1}^{S}\big[\log q(\theta_i)-\log p(\theta_i)\big]`),
   cols(code('theta = q.sample((S,))\nlog_q = q.log_prob(theta)\nlog_p = p.log_prob(theta)\nest = (log_q - log_p).mean()\nexact = kl_divergence(q, p)'),
   at(2,table(['','KL(q₂‖p)'],[['exact formula',num(mc.exact_kl,3)],['estimate, S = 10,000',num(mc.repeats[3].estimates[0],3)]])),'1fr 1fr')),
@@ -1259,7 +1310,7 @@ S('six-candidates','fit','Six candidates: which q is closest to p?',{builds:2,nb
  lines:['Six Gaussians against the same target p = N(1, 4²). Vote: which is closest?',`Smallest KL: N(1, 3²) at ${num(candKL[1])}, then N(2, 5²) at ${num(candKL[5])}. Could another q do better?`],
  ask:['Vote: which q is closest?','Could another (μ, σ) do better?'],
  expected:['Most pick N(1, 3²) or N(2, 5²). The formula says N(1, 3²), narrowly.','Yes: N(1, 4²), which is p itself, has KL 0. We need a way to search.'],
- point:'PAUSE. All six KLs come from the closed-form Gaussian formula of 2.4.',
+ point:'PAUSE. All six KLs come from the closed-form Gaussian formula of 2.6.',
  transition:'Search systematically: a grid.'});
 S('grid-search','fit','Search a grid of means and widths: hover over it',{builds:2,nb:'cell-grid',
  body:widget('klgrid','KL over a grid of means and widths; hover to see each q against p'),
@@ -1337,7 +1388,7 @@ S('mixture-sample','fit','Draw from the mixture yourself',{nb:'cell-mixture-samp
  transition:'How far is a Gaussian q from this mixture?'});
 S('mixture-no-formula','fit','PyTorch has no formula for this KL. The definition still works.',{builds:2,nb:'cell-mixture',
  body:stack(cols(mixChart(),stack(code('kl_divergence(q, mixture)'),at(2,code('NotImplementedError:\nNo KL(p || q) is implemented\nfor p type Normal and\nq type MixtureSameFamily','text'))),'1fr 1fr')),
- lines:['How far is a Gaussian q from this mixture? How would you compute KL(q ‖ p)? Then ask PyTorch.','No formula exists for a Gaussian against a mixture. But KL(q‖p) is an average under q, and averages can be estimated by sampling, as in 2.5.'],
+ lines:['How far is a Gaussian q from this mixture? How would you compute KL(q ‖ p)? Then ask PyTorch.','No formula exists for a Gaussian against a mixture. But KL(q‖p) is an average under q, and averages can be estimated by sampling, as in 2.7.'],
  ask:['How would you compute KL(q‖p) for this p?','Is the KL undefined, then?'],
  expected:['Sample θ from q and average log q(θ) − log p(θ). log p(θ) of a mixture is easy to evaluate.','No. It is a perfectly good integral; we just cannot write it in closed form.'],
  point:`Mixture: ½·N(−0.2, 0.4²) + ½·N(1, 0.5²), from the PML notebook. The full error text is saved in science.json (PyTorch ${d.provenance.torch}).`,
@@ -1391,7 +1442,7 @@ S('rsample-fit','fit','Change one word: rsample() fits the mixture',{builds:2,nb
  lines:['Same loop, same start, same seed, with q.rsample. Press play.',`q settles at N(${num(st.mixfit.rsample.at(-1)[1])}, ${num(st.mixfit.rsample.at(-1)[2])}²), KL = ${num(st.mixfit.rsample.at(-1)[4],3)}: the best single Gaussian for this mixture. No formula was needed.`],
  ask:['Predict where q settles.','Why doesn’t the KL reach 0?'],
  expected:['Over the mixture’s mass, between and around the two bumps.','No Gaussian equals a two-bump mixture. 0.056 is the best the family can do; the notebook confirms it with a direct numerical integral.'],
- point:'Same seed, learning rate and draws as the stuck run. Monte Carlo plus reparameterisation: the payoff of Sections 2.5 and 3.5.',
+ point:'Same seed, learning rate and draws as the stuck run. Monte Carlo plus reparameterisation: the payoff of Sections 2.7 and 3.5.',
  demo:'Notebook 3.5, “Change one word”: run it and compare the two fits in the figure.',
  transition:'Section 3.6: which direction of KL?'});
 chap('3.6');
@@ -1429,7 +1480,7 @@ S('elbo-step2','elbo','Step 2: substitute into the KL',{builds:3,
   at(3,small('E<sub>q</sub>[ · ] means: draw θ from q, evaluate the bracket, average. Rule used: −(a + b − c) = −a − b + c.'))),
  lines:['The KL we want: an average, under q, of log q minus log posterior.','Replace the log posterior by its three terms from step 1, in brackets.','Open the brackets: every sign flips, and log p(𝒟) now enters with a plus sign.'],
  ask:['What does E_q mean, in words?','What is inside the brackets now?','Which signs changed?'],
- expected:['Draw θ from q, evaluate, average: the Monte Carlo average of 2.5.','Step 1’s expression for log p(θ | 𝒟).','All three: the likelihood and prior become minus, the evidence becomes plus.'],
+ expected:['Draw θ from q, evaluate, average: the Monte Carlo average of 2.7.','Step 1’s expression for log p(θ | 𝒟).','All three: the likelihood and prior become minus, the evidence becomes plus.'],
  transition:'Step 3: the constant leaves the average.'});
 S('elbo-step3','elbo','Step 3: a constant comes out of an average',{builds:3,
  body:stack(eq(R`\E_q\big[f(\theta)+c\big]=\E_q\big[f(\theta)\big]+c\qquad\text{when }c\text{ does not depend on }\theta`),
@@ -1487,7 +1538,7 @@ S('elbo-two-terms','elbo','The ELBO in two terms: fit the data, stay near the pr
  body:stack(eq(R`\qcol{\ELBO(q)}=\E_q\big[\log p(\mathcal D\mid\theta)+\log p(\theta)-\log q(\theta)\big]`),
   at(2,eq(R`=\E_q\big[\log p(\mathcal D\mid\theta)\big]+\E_q\big[\log p(\theta)-\log q(\theta)\big]`)),
   at(3,eq(R`=\underbrace{\E_q\big[\log p(\mathcal D\mid\theta)\big]}_{\text{fit the data}}-\underbrace{\KL\big(q(\theta)\,\|\,p(\theta)\big)}_{\text{stay near the prior}}`))),
- lines:['Take the ELBO apart.','The average of a sum is the sum of the averages: a likelihood term and the rest.','The rest is minus a KL, from q to the prior. Fit the data, but stay near the prior. For our network the second term is the diagonal-Gaussian formula of 2.4; the first needs samples.'],
+ lines:['Take the ELBO apart.','The average of a sum is the sum of the averages: a likelihood term and the rest.','The rest is minus a KL, from q to the prior. Fit the data, but stay near the prior. For our network the second term is the diagonal-Gaussian formula of 2.6; the first needs samples.'],
  ask:['Which rule splits the average?','Why is the second average minus a KL?','Which term pulls q towards a narrow, well-fitting θ?'],
  expected:['Linearity: E[a + b] = E[a] + E[b].','E_q[log p − log q] = −E_q[log q − log p] = −KL(q ‖ prior).','The data term. The KL to the N(0, 1) prior pulls the other way: wide, near zero.'],
  transition:'Check the identity where p(𝒟) is known.'});
@@ -1596,7 +1647,7 @@ O('grades-f','What should a ratio count for? Find the function',{builds:3,
  expected:['No change in a grade should add any difference.','Adding up: f(2) + f(2) = 3, but f(4) = 3.75.','Up to its base, yes: a smooth f with f(a·b) = f(a) + f(b) must be a logarithm. The base sets the unit.'],
  source:RITVIK,transition:'Now combine the three log ratios.'});
 
-O('grades-kl','Weight each grade by this year’s share: that is KL',{nb:'cell-grades',demo:'Notebook 2.1: the grades cell computes the ratios, the logs and the weighted sum, and checks it against torch.distributions.kl_divergence.',builds:3,
+O('grades-kl','Weight each grade by this year’s share: that is KL',{nb:'cell-grades',demo:'Notebook appendix: the grades cell computes the ratios, the logs and the weighted sum, and checks it against torch.distributions.kl_divergence.',builds:3,
  body:cols(`<div class="state-slot"><div data-only="1">${gradeValueBars(gr.log_ratio,'log ratio of each grade, equal weights')}</div><div data-only="2-3">${gradeValueBars(gr.terms,'p(x) × log ratio, and their sum',gr.kl)}</div></div>`,
   stack(eq(R`\text{plain average: }\tfrac13\big(1.39-1.39+0\big)=0`),at(2,eq(R`\begin{aligned}\text{weighted: }&0.4(1.39)+0.1(-1.39)\\&+0.5(0)=${num(gr.kl,2)}\end{aligned}`)),
   at(3,eq(R`\KL(p\,\|\,q)=\sum_x p(x)\log\frac{p(x)}{q(x)}`))),'1fr 1.1fr'),
@@ -1629,7 +1680,7 @@ O('asymmetry-why','Why the reference matters',{nb:'cell-grades',builds:2,
  expected:['A from this year’s view; B from last year’s.','VI will put q first, KL(q ‖ p). Part 3 shows what that order does to the fit.'],
  transition:'Sample grades to estimate it.'});
 
-O('mc-grades','Sample grades and watch the average find the KL',{nb:'cell-grades-sampling',demo:'Notebook 2.5: the grades-sampling cell draws 10,000 grades and prints the running average at 10, 100, 1,000 and 10,000 draws.',
+O('mc-grades','Sample grades and watch the average find the KL',{nb:'cell-grades-sampling',demo:'Notebook appendix: the grades-sampling cell draws 10,000 grades and prints the running average at 10, 100, 1,000 and 10,000 draws.',
  body:widget('mcgrades','Grades drawn from this year’s distribution, and the running average of their log ratios'),
  lines:['Draw grades from this year’s distribution and average their log ratios. The counts approach 40%, 10%, 50%, and the average approaches the exact 0.42.'],
  ask:['After 10 draws, is the estimate close?'],
@@ -1766,9 +1817,9 @@ O('optional-beta-elbo','Check the sampled objective with analytic Beta moments',
  expected:['Expected log r and expected log(1−r).','ψ already denotes the variational parameters.','The ELBO is computed directly from these moments, then the separately computed KL is added and compared with the evidence.']});
 
 // ================================================================ Lecture map, filled in once every section knows its first slide
-S('contents','map','Lecture 1 at a glance: five parts, twenty-four sections',{nb:'top',
+S('contents','map','Lecture 1 at a glance: five parts, twenty-two sections',{nb:'top',
  body:'',
- lines:['Five parts, twenty-four numbered sections. The notebook uses the same numbers: the ▶ Notebook link at the top right of every slide opens its section in Colab.'],
+ lines:['Five parts, twenty-two numbered sections. The notebook uses the same numbers: the ▶ Notebook link at the top right of every slide opens its section in Colab.'],
  ask:['Which part do you expect to be hardest?'],
  expected:['Usually Part 4, the ELBO derivation, so we take it one rule per line.'],
  point:'Click a section to jump to its first slide; ▶ notebook opens the matching notebook section in Colab. Run the notebook top to bottom once before class.',
@@ -1777,5 +1828,6 @@ S('contents','map','Lecture 1 at a glance: five parts, twenty-four sections',{nb
 // The contents slide goes first, once every section knows its first slide.
 slides.unshift(slides.pop());
 slides[0].body=`<div class="toc toc-flow">${PARTS.map(([k,t])=>`<h3>Part ${k} · ${t}</h3><ol>${CHAPTERS.filter(([num])=>num.startsWith(k+'.')).map(([num,title])=>
- `<li><a href="#${firstOf[num]}/1">${num} ${title}</a><a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(num)}" target="_blank" rel="noopener" aria-label="notebook ${num}">▶</a></li>`).join('')}</ol>`).join('')}</div>`;
-for(const [num] of CHAPTERS)if(!firstOf[num])throw new Error('Section '+num+' has no slides');
+ `<li><a href="#${firstOf[num]}/1">${num} ${title}</a><a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(num)}" target="_blank" rel="noopener" aria-label="notebook ${num}">▶</a></li>`+
+ SUBS.filter(([sn])=>sn.startsWith(num+'.')).map(([sn,stt])=>`<li class="toc-sub"><a href="#${firstOf[sn]}/1">${sn} ${stt}</a><a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(sn)}" target="_blank" rel="noopener" aria-label="notebook ${sn}">▶</a></li>`).join('')).join('')}</ol>`).join('')}</div>`;
+for(const [num] of [...CHAPTERS,...SUBS])if(!firstOf[num])throw new Error('Section '+num+' has no slides');

@@ -42,12 +42,12 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 117,
+  "coreSlides": 119,
   "optionalSlides": 26,
   "slides": [
     {
       "id": "contents",
-      "title": "Lecture 1 at a glance: five parts, twenty-four sections",
+      "title": "Lecture 1 at a glance: five parts, twenty-two sections",
       "section": "map",
       "builds": 1,
       "optional": false
@@ -326,155 +326,169 @@
       "optional": false
     },
     {
+      "id": "apps-map",
+      "title": "KL at work: one recipe, three applications",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "app-classify",
+      "title": "2.5.1 Classification: the plan",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "classifier",
-      "title": "A classifier outputs a distribution",
+      "title": "①② A classifier outputs a distribution",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "ce-surprise",
-      "title": "The loss is the model’s surprise at the true label",
+      "title": "③ The usual loss: surprise at the true label",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
       "id": "ce-is-kl",
-      "title": "With a one-hot label, cross-entropy is exactly KL",
+      "title": "④ As KL: with a one-hot label, cross-entropy = KL",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
       "id": "loss-curve",
-      "title": "The loss curve is the surprise curve",
+      "title": "⑤ Check: the loss is the surprise curve",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "soft-labels",
-      "title": "Soft labels: cross-entropy = entropy + KL",
+      "id": "app-mle",
+      "title": "2.5.2 Maximum likelihood: the plan",
+      "section": "kl",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "mle-problem",
+      "title": "① The problem: learn a distribution from data",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "mle-data",
-      "title": "The data: twenty days of weather",
+      "title": "② The data and the model: twenty days, three numbers",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "mle-likelihood",
-      "title": "How probable are these twenty days under q?",
+      "title": "③ The usual loss: how probable are the twenty days?",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
       "id": "mle-surprise",
-      "title": "Per day: the data’s average surprise under q",
+      "title": "③ Per day: the data’s average surprise under q",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
       "id": "mle-group",
-      "title": "Why: group the days by weather",
+      "title": "④ Rewrite it: group the days by weather",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
       "id": "mle-split",
-      "title": "The data’s surprise = entropy of the data + KL",
+      "title": "④ As KL: the data’s surprise = H(p̂) + KL(p̂ ‖ q)",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "mle-fit",
-      "title": "Find the q that makes the data least surprising",
+      "title": "⑤ Check: find the least surprising q",
       "section": "kl",
       "builds": 1,
       "optional": false
     },
     {
+      "id": "mle-same-answer",
+      "title": "⑤ Four formulations, one answer",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "mle-kl",
-      "title": "Maximum likelihood minimises KL(data ‖ model)",
+      "title": "In general: maximum likelihood = minimum KL(data ‖ model)",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "kl-everywhere",
-      "title": "KL at work: the same quantity in many losses",
+      "id": "app-distill",
+      "title": "2.5.3 Knowledge distillation: the plan",
       "section": "kl",
       "builds": 1,
       "optional": false
     },
     {
       "id": "distill-why",
-      "title": "Knowledge distillation: a big teacher, a small student",
+      "title": "① The problem: a big teacher, a small student",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "distill-match",
-      "title": "Make the student’s distribution match the teacher’s",
+      "title": "② The data and the model: same inputs, two networks",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "distill-soft",
+      "title": "③ The usual loss: cross-entropy with soft labels",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "distill-loss",
-      "title": "The distillation loss, term by term",
+      "title": "④ The same loss as KL, term by term",
       "section": "kl",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "distill-soft",
-      "title": "What soft labels teach: a cat looks a bit like a dog",
+      "id": "soft-labels",
+      "title": "⑤ Check with numbers: cross-entropy = entropy + KL",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
       "id": "distill-demo",
-      "title": "Press play: a tiny student learns a big teacher",
+      "title": "⑤ Check: a tiny student learns a big teacher",
       "section": "kl",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "rlhf-setup",
-      "title": "RLHF: reward a chatbot, but keep it close to where it started",
-      "section": "kl",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "rlhf-hacking",
-      "title": "Without the KL: the policy fools the reward model",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "rlhf-beta",
-      "title": "Slide the leash: the best policy for each β",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "rlhf-tokens",
-      "title": "In practice: the KL is estimated token by token, from samples",
+      "id": "apps-same",
+      "title": "One principle in many disguises",
       "section": "kl",
       "builds": 2,
       "optional": false

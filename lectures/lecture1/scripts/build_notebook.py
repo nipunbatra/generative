@@ -41,7 +41,7 @@ This notebook computes every number, figure and animation in the Lecture 1 slide
 | Part | Sections |
 |---|---|
 | **1 · Bayes’ rule for a neural network** | [1.1 Bayes’ rule]({DECK}#bayes-rule/1) · [1.2 A tiny network and its prior]({DECK}#tiny-net/1) · [1.3 Likelihood and training]({DECK}#data-likelihood/1) · [1.4 The evidence is intractable]({DECK}#evidence-area/1) · [1.5 Approximating the posterior]({DECK}#predictive/1) |
-| **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 Classification loss]({DECK}#classifier/1) · [2.6 Maximum likelihood]({DECK}#mle-data/1) · [2.7 KL at work: distillation and RLHF]({DECK}#kl-everywhere/1) · [2.8 Closed forms and PyTorch]({DECK}#densities/1) · [2.9 KL by sampling]({DECK}#kl-expectation/1) |
+| **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 KL at work: 2.5.1 classification, 2.5.2 maximum likelihood, 2.5.3 distillation]({DECK}#apps-map/1) · [2.6 Closed forms and PyTorch]({DECK}#densities/1) · [2.7 KL by sampling]({DECK}#kl-expectation/1) |
 | **3 · Find the closest q** | [3.1 Search a grid]({DECK}#six-candidates/1) · [3.2 Gradient descent]({DECK}#walk-downhill/1) · [3.3 Covariance in 2-D]({DECK}#cov-families/1) · [3.4 Mixtures: no formula]({DECK}#mixture-what/1) · [3.5 The reparameterisation trick]({DECK}#missing-path/1) · [3.6 Which direction of KL?]({DECK}#fwdrev/1) |
 | **4 · Back to Bayes: the ELBO** | [4.1 Deriving the ELBO]({DECK}#can-we/1) · [4.2 Checking it on a coin]({DECK}#elbo-slider/1) |
 | **5 · Implement it** | [5.1 VI for the tiny network]({DECK}#bnn-elbo-code/1) · [5.2 Wrap-up]({DECK}#five-tools/1) |
@@ -556,12 +556,26 @@ fixtures["story"]["info"].update(kl=dict(terms=terms.tolist(), library_bits=libr
     asym=dict(q=sunny_town.tolist(), fwd=fwd, rev=rev, codeword_bits=[surprise(x) for x in sunny_town])))
 """, anchor="cell-cross-entropy")
 md(r"""
-### 2.5 Classification: the loss is the surprise at the true label
+### 2.5 KL at work in machine learning
 
-Slides: [2.5 A classifier outputs a distribution]({DECK}#classifier/1) · [the loss is a surprise]({DECK}#ce-surprise/1) · [cross-entropy is KL]({DECK}#ce-is-kl/1) · [soft labels]({DECK}#soft-labels/1)
+Slides: [2.5 One recipe, three applications]({DECK}#apps-map/1) · [one principle in many disguises]({DECK}#apps-same/1)
 
-A classifier outputs $q=(0.05,0.05,0.60,0.30)$ over ape, bear, cat and dog for a cat image. The label is a distribution too, one-hot $p=(0,0,1,0)$, with entropy 0. So the cross-entropy is $-\log q(\text{cat})$: **the model’s surprise at the true label**, and it equals $\mathrm{KL}(p\|q)$. PyTorch’s `F.cross_entropy` uses the natural log (nats). With soft labels, such as a teacher’s predictions in knowledge distillation, cross-entropy = $H(p)$ + KL, and $H(p)$ does not depend on the model.
+Three losses you may know separately are the same idea. Each application follows one recipe: **① the problem**, **② the data and the model**, **③ the usual loss**, **④ the same loss written as a KL**, **⑤ a check with numbers**.
+
+| | 2.5.1 Classification | 2.5.2 Maximum likelihood | 2.5.3 Knowledge distillation |
+|---|---|---|---|
+| usual loss | cross-entropy | negative log-likelihood | cross-entropy with soft labels |
+| the same as | KL(label ‖ prediction) | KL(data ‖ model) | KL(teacher ‖ student) |
+
+KL also appears in many other places, for example in fine-tuning chatbots with human feedback (RLHF), where a KL term keeps the model close to where it started; and in variational inference, Parts 3–5.
 """, anchor="sec-2-5")
+md(r"""
+#### 2.5.1 Classification: the loss is the surprise at the true label
+
+Slides: [2.5.1 A classifier outputs a distribution]({DECK}#classifier/1) · [the loss is a surprise]({DECK}#ce-surprise/1) · [cross-entropy is KL]({DECK}#ce-is-kl/1)
+
+A classifier outputs $q=(0.05,0.05,0.60,0.30)$ over ape, bear, cat and dog for a cat image. The label is a distribution too, one-hot $p=(0,0,1,0)$, with entropy 0. So the cross-entropy is $-\log q(\text{cat})$: **the model’s surprise at the true label**, and it equals $\mathrm{KL}(p\|q)$. PyTorch’s `F.cross_entropy` uses the natural log (nats).
+""", anchor="sec-2-5-1")
 code(r"""
 import torch.nn.functional as F
 classes = ["ape", "bear", "cat", "dog"]
@@ -585,14 +599,14 @@ fixtures["story"]["classify"] = dict(classes=classes, pred=q_pred.tolist(), labe
     curve={str(x): -math.log(x) for x in (1., .9, .6, .3, .05, .01)})
 """, anchor="cell-classifier")
 md(r"""
-### 2.6 Maximum likelihood is minimum KL: twenty days of data
+#### 2.5.2 Maximum likelihood: learn a distribution from twenty days
 
-Slides: [2.6 The data]({DECK}#mle-data/1) · [their likelihood]({DECK}#mle-likelihood/1) · [average surprise]({DECK}#mle-surprise/1) · [group the days]({DECK}#mle-group/1) · [find the best q]({DECK}#mle-fit/1) · [the general statement]({DECK}#mle-kl/1)
+Slides: [2.5.2 The problem]({DECK}#mle-problem/1) · [the data]({DECK}#mle-data/1) · [their likelihood]({DECK}#mle-likelihood/1) · [average surprise]({DECK}#mle-surprise/1) · [group the days]({DECK}#mle-group/1) · [find the best q]({DECK}#mle-fit/1) · [four formulations, one answer]({DECK}#mle-same-answer/1) · [the general statement]({DECK}#mle-kl/1)
 
-Twenty recorded days: 10 sunny, 5 cloudy, 5 rainy. A model $q$ gives these data the probability $\prod_i q(x_i)$. Per day, minus its log is the data’s average surprise under $q$. Grouping the days by weather turns it into a cross-entropy with the data’s own frequencies $\hat p$:
+**The problem:** the weather comes from a distribution we cannot see, and we have a record of days drawn from it. Fit a model $q$ to the record, to predict tomorrow or to simulate new days: generative modelling in its simplest form. Twenty recorded days: 10 sunny, 5 cloudy, 5 rainy. A model $q$ gives these data the probability $\prod_i q(x_i)$. Per day, minus its log is the data’s average surprise under $q$. Grouping the days by weather turns it into a cross-entropy with the data’s own frequencies $\hat p$:
 $$-\frac1N\sum_{i=1}^{N}\log_2 q(x_i)=\sum_x\hat p(x)\log_2\frac1{q(x)}=H(\hat p,q)=H(\hat p)+\mathrm{KL}(\hat p\,\|\,q).$$
 $H(\hat p)$ is fixed by the data, so **maximising the likelihood minimises $\mathrm{KL}(\hat p\|q)$**, and the best $q$ is $\hat p$, the frequencies. The second cell finds it by gradient descent on the average surprise, without being told.
-""", anchor="sec-2-6")
+""", anchor="sec-2-5-2")
 code(r"""
 rng = np.random.default_rng(2026)
 data = rng.permutation([0] * 10 + [1] * 5 + [2] * 5)            # 0 = sunny, 1 = cloudy, 2 = rainy
@@ -627,14 +641,12 @@ assert torch.allclose(fitted, torch.tensor(p_hat), atol=1e-3)
 fixtures["story"]["mle"]["fitted"] = fitted.tolist()
 """, anchor="cell-mle-fit")
 md(r"""
-### 2.7 KL at work: distillation and RLHF
+#### 2.5.3 Knowledge distillation: a small student learns a big teacher
 
-Slides: [2.7 The same quantity in many losses]({DECK}#kl-everywhere/1) · [a big teacher, a small student]({DECK}#distill-why/1) · [the distillation loss]({DECK}#distill-loss/1) · [a real student]({DECK}#distill-demo/1) · [RLHF]({DECK}#rlhf-setup/1) · [the KL leash]({DECK}#rlhf-beta/1)
+Slides: [2.5.3 The problem]({DECK}#distill-why/1) · [two networks]({DECK}#distill-match/1) · [the usual loss]({DECK}#distill-soft/1) · [the same loss as KL]({DECK}#distill-loss/1) · [a real student]({DECK}#distill-demo/1)
 
-**Knowledge distillation** ([Hinton, Vinyals and Dean, 2015](https://arxiv.org/abs/1503.02531)): a big, accurate *teacher* is too slow to deploy, so a small *student* learns to reproduce the teacher’s output distribution. The loss is $\mathrm{KL}(p_{\text{teacher}}\,\|\,q_{\text{student}})$ on the same inputs, with the teacher frozen. The teacher’s soft labels say more than a one-hot label: which wrong classes are plausible.
-
-**RLHF**: a language model, the *policy* $\pi$, is fine-tuned to maximise a learned reward, minus $\beta\,\mathrm{KL}(\pi\,\|\,\pi_{\text{ref}})$ to a frozen copy of where it started. Without that leash it drifts to whatever fools the reward model. Over a small set of replies the best policy has a closed form, $\pi^*(y)\propto\pi_{\text{ref}}(y)\,e^{r(y)/\beta}$, which the second cell checks by gradient ascent.
-""", anchor="sec-2-7")
+**Knowledge distillation** ([Hinton, Vinyals and Dean, 2015](https://arxiv.org/abs/1503.02531)): a big, accurate *teacher* is too slow to deploy, so a small *student* learns to reproduce the teacher’s output distribution. The usual loss is cross-entropy with the teacher’s probabilities as soft labels; since the teacher is fixed, that is $\mathrm{KL}(p_{\text{teacher}}\,\|\,q_{\text{student}})$ plus a constant. The teacher’s soft labels say more than a one-hot label: which wrong classes are plausible.
+""", anchor="sec-2-5-3")
 code(r"""
 # Knowledge distillation on a toy problem: three overlapping classes in the plane.
 centres = torch.tensor([[-1.3, -.4], [1.3, -.4], [0., 1.5]])
@@ -700,38 +712,10 @@ for ax, probs, title in [(axes[0], teacher_grid, f"teacher, {n_params(teacher_ne
     ax.set_title(title, loc="left")
 savefig("distillation")
 """, anchor="cell-distill")
-code(r"""
-# RLHF in miniature: five possible replies to one prompt, a frozen reference model and a reward model.
-replies = ["Yes, it is hot. Careful!", "Yes.", "It might be.", "No.", "YES!!! AMAZING STOVE!!!"]
-pi_ref = torch.tensor([.40, .30, .20, .09, .01])             # the pretrained model's probabilities
-reward = torch.tensor([1.0, .6, .3, -1.0, 2.0])               # a reward model that is fooled by enthusiasm
-def best_policy(beta):
-    "argmax over π of E_π[r] − β KL(π ‖ π_ref): π*(y) ∝ π_ref(y) exp(r(y)/β)"
-    w = pi_ref * torch.exp(reward / beta)
-    return w / w.sum()
-def kl_ref(pi_):
-    return number((pi_ * (pi_ / pi_ref).log()).sum())
-policies = {}
-for beta in [.05, .1, .2, .5, 1., 2., 5., 20.]:
-    pb = best_policy(beta)
-    policies[str(beta)] = dict(probs=pb.tolist(), reward=number((pb * reward).sum()), kl=kl_ref(pb))
-    print(f"β = {beta:5}: π* = {pb.numpy().round(3)}, expected reward {number((pb * reward).sum()):.3f}, KL(π*‖π_ref) = {kl_ref(pb):.3f}")
-# The closed form, checked by gradient ascent on the objective at β = 1
-logits_r = torch.nn.Parameter(pi_ref.log().clone())
-opt_r = torch.optim.Adam([logits_r], lr=.05)
-for step in range(3000):
-    pi_ = torch.softmax(logits_r, 0)
-    loss_r = -((pi_ * reward).sum() - 1. * (pi_ * (torch.log_softmax(logits_r, 0) - pi_ref.log())).sum())
-    opt_r.zero_grad(); loss_r.backward(); opt_r.step()
-assert torch.allclose(torch.softmax(logits_r.detach(), 0), best_policy(1.), atol=1e-4)
-print("gradient ascent at β = 1 lands on the closed form:", torch.softmax(logits_r.detach(), 0).numpy().round(4))
-fixtures["story"]["rlhf"] = dict(replies=replies, ref=pi_ref.tolist(), reward=reward.tolist(), policies=policies,
-    ref_reward=number((pi_ref * reward).sum()), gd_check=torch.softmax(logits_r.detach(), 0).tolist())
-""", anchor="cell-rlhf")
 md(r"""
-### 2.8 Closed forms, and what PyTorch computes
+### 2.6 Closed forms, and what PyTorch computes
 
-Slides: [2.8 From sums to integrals]({DECK}#densities/1) · [Bernoulli]({DECK}#bern-pmf/1) · [categorical]({DECK}#cat-pmf/1) · [Gaussian]({DECK}#gauss-pdf/1) · [diagonal Gaussian]({DECK}#diag-pdf/1) · [PyTorch’s source]({DECK}#torch-discrete/1)
+Slides: [2.6 From sums to integrals]({DECK}#densities/1) · [Bernoulli]({DECK}#bern-pmf/1) · [categorical]({DECK}#cat-pmf/1) · [Gaussian]({DECK}#gauss-pdf/1) · [diagonal Gaussian]({DECK}#diag-pdf/1) · [PyTorch’s source]({DECK}#torch-discrete/1)
 
 For continuous $\theta$ the sum becomes an integral, $\mathrm{KL}(p\|q)=\int p(\theta)\log\frac{p(\theta)}{q(\theta)}\,d\theta$. For four families the average has a formula:
 
@@ -743,7 +727,7 @@ For continuous $\theta$ the sum becomes an integral, $\mathrm{KL}(p\|q)=\int p(\
 | diagonal Gaussians | the sum of the one-dimensional KLs |
 
 The next cell checks each formula against `torch.distributions.kl_divergence` and prints PyTorch’s own implementation ([source on GitHub](https://github.com/pytorch/pytorch/blob/main/torch/distributions/kl.py)).
-""", anchor="sec-2-8")
+""", anchor="sec-2-6")
 code(r"""
 import inspect
 from torch.distributions import kl as torch_kl
@@ -828,12 +812,12 @@ print("Matched distributions: KL(p||p) =", number(dist.kl_divergence(p,p)))
 fixtures["normal"] = {"target": {"mu":1., "sigma":4.}, "candidates":normal_values}
 """, anchor="cell-kl-area")
 md(r"""
-### 2.9 KL by sampling
+### 2.7 KL by sampling
 
-Slides: [2.9 KL is an average]({DECK}#kl-expectation/1) · [two ways to compute an expectation]({DECK}#expectation-sampling/1) · [sample the weather]({DECK}#mc-weather/1) · [the code]({DECK}#kl-sampling/1) · [watch it settle]({DECK}#mc-live/1)
+Slides: [2.7 KL is an average]({DECK}#kl-expectation/1) · [two ways to compute an expectation]({DECK}#expectation-sampling/1) · [sample the weather]({DECK}#mc-weather/1) · [the code]({DECK}#kl-sampling/1) · [watch it settle]({DECK}#mc-live/1)
 
 KL is an **expectation**: $\mathrm{KL}(p\|q)=\mathbb E_{x\sim p}\big[\log\frac{p(x)}{q(x)}\big]$. An expectation can be computed three ways: a weighted sum $\sum_x p(x)f(x)$, an integral $\int p(\theta)f(\theta)\,d\theta$, or a **sample average** $\frac1S\sum_s f(x_s)$ with $x_s\sim p$. Draws land on each value in proportion to its probability, so the plain average weights each $f(x)$ by $p(x)$ by itself. First with the weather of 2.4, where the exact answer is 0.25 bits.
-""", anchor="sec-2-9")
+""", anchor="sec-2-7")
 code(r"""
 rng = np.random.default_rng(11)
 days8 = rng.choice(3, size=10_000, p=weather_p)                  # days drawn from our weather p
