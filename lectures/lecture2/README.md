@@ -1,53 +1,46 @@
-# Lecture 2: from generative models to autoencoders
+# Lecture 2: From fitting a distribution to the VAE
 
-A 65-minute main route with **54 core scenes and 3 optional scenes**. Each scene has two authored presentation states. The opening distinguishes copying, reconstruction and generation; the closing code-cloud frame is reused byte-for-byte in Lecture 3.
+A main route of 98 slides (about 150 minutes, two sessions) in six parts and twenty-nine numbered sections, with three optional slides after it. It follows the sequence of the PML 2023 recordings (Lectures 23–25: KL and VI, the ELBO and the coin, autoencoders and the VAE), rebuilt in the Lecture 1 style: one running example per part, one move per click, every number computed. The bottom bar carries the story line; questions, expected answers and **when to switch to the notebook** live in the speaker notes (press N).
 
-The lecture includes a fitted two-mode example, binary-pixel modelling, a PCA/linear-AE bridge, the same held handwritten 3, a four-pixel BCE calculation, an actual AE update, held-out bottleneck comparisons, prior decoding, interpolation and a separately fitted code density. Timing is planned, not classroom-rehearsed.
+**Running examples.** Part 2: the 272 eruptions of Old Faithful (wait and eruption length). Parts 3–6: grey-level MNIST, with test digit #90 (a 3) followed through PCA, the autoencoder and the VAE.
 
-| Episode | Minutes |
-|---|---:|
-| What counts as a new example? | 7 |
-| Fit, then sample | 10 |
-| What changes for images? | 8 |
-| Learn a compact representation | 10 |
-| One AE update | 12 |
-| Does this give us a sampler? | 11 |
-| Identify what is missing | 7 |
+| Part | Sections |
+|---|---|
+| 1 · Why generate? | 1.1 Things that do not exist (StyleGAN faces; six real and six generated digits, answer revealed) · 1.2 Text, pictures and sound (one prompt sampled three times from an LLM; real next-word probabilities from SmolLM2; one prompt sampled four times from a text-to-image model; pix2pix, SPADE, CycleGAN; text to speech) · 1.3 Beyond pictures (weather ensembles, proteins, materials, missing sensor data; what p(x) is good for) · 1.4 What they all share (random numbers in, network, sample out; conditions; score and sample; why not the average) |
+| 2 · Fit a distribution, then sample | 2.1 Old Faithful; the average is a poor sample · 2.2 One Gaussian: fit by formula, score, sample live · 2.3 Two kinds of eruption; a hidden step; scoring adds over both kinds · 2.4 Fit the mixture by gradient descent (replayed run); it recovers the eruption kinds; sample live · 2.5 Held-out data picks two bumps · 2.6 Two numbers per eruption: covariances, a 2-D mixture and its samples |
+| 3 · Images: PCA and Gaussians | 3.1 784 numbers per digit; random points are static · 3.2 Independent pixel Gaussians (1,568 numbers), neighbour correlations, a full Gaussian (308,504 numbers) · 3.3 PCA in 2-D on the eruptions, then on MNIST: eigen-digits, a live reconstruction slider, the variance curve, a hover map · 3.4 Sample a code, decode: one Gaussian, then a live mixture sampler over d PCA numbers; what limits the recipe |
+| 4 · Autoencoders | 4.1 PCA as an encoder–decoder; the autoencoder, its code and loss (our 3: 26.3 against PCA's 41.3) · 4.2 The untrained output, one training step, training replayed, train vs test, a linear autoencoder rediscovers PCA · 4.3 Code sizes 2–128, against PCA at every size · 4.4 Codes on a hover map, search by code, denoising |
+| 5 · Can an autoencoder generate? | 5.1 N(0, I) explained; random codes through 2-, 8- and 128-number autoencoders · 5.2 The overlay (PML L25 at 29–31 min), a live decoder explorer (random code, encoded digit, click anywhere), a decoded grid, codes spreading with size, interpolation · 5.3 A mixture fitted to the codes; what we want instead |
+| 6 · The VAE | 6.1 The generative story; σ = 0.2 and squared error as a likelihood; maximum likelihood needs an integral · 6.2 The exact posterior of our 3 on a grid, log p(x) = 244.07 (checked by importance sampling), naive Monte Carlo · 6.3 Lecture 1's ELBO with new roles; per-image VI replayed (ELBO 244.05) · 6.4 Amortisation: the encoder (one pass, 243.37); the VAE diagram · 6.5 The loss term by term, a worked step for our 3, PyTorch, training curves · 6.6 Samples, codes filling N(0, I), the explorer again, grid and interpolation · 6.7 β from 0 to 256: a live comparison, β = 0 and posterior collapse · 6.8 Wrap-up |
 
-## Open and run
+Nine slides carry live figures (`widgets.js`): sampling eruptions from one Gaussian and from the mixture, the mixture fit, the PCA reconstruction slider, the PCA mixture sampler, hover maps of codes, autoencoder training, the decoder explorer (the networks run in the browser from `data/nets.json`), per-image variational inference and the β comparison. Animations replay recorded runs: frame 0 until you advance, then they play. Print and PDF show static states.
 
-The shared runtime generates `index.html`, reading mode, notes and PDFs from `content.js`. Serve the series directory locally and open `/lecture2/`. The published series is available at <https://nipunbatra.github.io/generative/lectures/>.
+## Use
 
-Open `lecture2.ipynb` with this directory as its working directory. Use the Python environment described in the series README.
+Open `index.html` through the series HTTP server (`python3 -m http.server` in `lectures/`). The browser caches the slide modules; after editing, reload with the cache bypassed.
 
-The notebook is self-contained within this lecture folder: data, checkpoints and Python model definitions are bundled. No downloads, new packages or access to the old lecture repository are needed to run it. Torch, NumPy and Matplotlib are required. Saved outputs contain an executed training update and plots.
+The notebook `lecture2-generative-models.ipynb` has saved outputs and the same section numbers as the slides; every slide's ▶ Notebook link opens its section in Colab. It needs PyTorch, torchvision, NumPy and matplotlib, downloads MNIST in Colab, and loads the three trained networks from `models/` (or the repository).
 
-For repeatable execution of both notebooks from the series workspace:
+## Rebuild
+
+From `lectures/`, with a Python that has torch, torchvision and matplotlib, and MNIST in `$MNIST_ROOT/MNIST/raw/`:
 
 ```sh
-python lecture2/scripts/make_notebooks.py
+python lecture2/scripts/train.py            # 17 networks into lecture2/.cache/, about 15 minutes on an M-series Mac
+python lecture2/scripts/science.py          # data/science.json, digits.json, nets.json, models/*.pt (about 1 minute)
+python lecture2/scripts/build_notebook.py   # executes the notebook and writes data/notebook-anchors.json
+node scripts/verify.mjs 2                    # every state, layout checks, speaker-notes.md, manifest.json
+node scripts/export.mjs 2                    # exports/completed.pdf and exports/all-builds.pdf
 ```
 
-The script supplies a local kernel specification and records execution results under each lecture's `qa/`. Notebook cells may also be run directly in a Jupyter environment with the listed dependencies.
+## Files and evidence
 
-## Scientific conventions
+- `content.js`: all slides, builds, story lines, notes and static figures. `widgets.js`: live figures, the chart kit and the digit renderer.
+- `scripts/train.py`: every network (MLP, one hidden layer of 400 ReLU units each side; Adam, batch 128; autoencoders 30 epochs, VAEs 50; fixed seeds). σ = 0.2 for the VAE's Gaussian pixel noise.
+- `scripts/science.py`: every number and image set on the slides (PCA by eigendecomposition, mixtures by EM, the posterior grid, importance sampling, per-image VI, the β sweep).
+- `data/faithful.csv`: Old Faithful (Azzalini and Bowman, 1990), from R's `datasets` package via Rdatasets.
+- `assets/examples/`: text, image and speech samples generated for this lecture on 21 October 2026 (Gemini 3.5 Flash, Gemini 3 Pro Image, Gemini 3.8 Flash TTS) and next-word probabilities from SmolLM2-360M; prompts and settings in `provenance.json`.
+- `assets/gallery/`: published examples (StyleGAN, pix2pix, SPADE, CycleGAN, Context Encoders), attributed on their slides; see the repository's `assets/manifest.json`.
+- `qa/browser-checks.json`: the automated layout checks of every rendered state.
 
-- Fixed binary MNIST observations: `raw / 255 > 0.5`. Training snapshot is official train0–255; test snapshot is official test0–1999. These splits do not overlap.
-- The held 3 is official test index90, inherited from the previous lecture's deliberately selected illustrative example. It is not a random or representative performance estimate.
-- AE checkpoints are the existing `ae2` and `ae16` models. The recorded checkpoint training metadata and hashes are bundled. Replay is not fresh full training.
-- Decoder output is 784 logits. Displayed grey images are sigmoid probabilities; they are not binary observation draws.
-- BCE sums all 784 pixels per image and averages images. Reconstruction comparisons use identical binary test observations and reductions.
-- The inspected step copies `ae2`, uses eight training images, float64 and SGD with η=0.0001. Both parameter groups change. The measured loss is about 121.438 →121.087 nats/image.
-- The code-cloud/prior comparison keeps exactly the same axes. The Lecture 3 opening receives the same SVG bytes. The AE and VAE mean plots share these limits.
-- The additional code Gaussian is fitted on **training** codes only, with a small covariance jitter. Its sample grid is a qualitative diagnostic, not a generative benchmark.
-- Binary-image rasters use nearest display interpolation. Probability-image rasters use bilinear display interpolation. Underlying numerical arrays and model computations are unchanged.
-
-## Reproduction and evidence
-
-`notebooks/lab.py` contains the model architecture, loss terms and numerical checks. `scripts/build_evidence.py` replays checkpoints in both Lecture 2 and Lecture 3 and regenerates their figures and shared fixtures. Run it from anywhere with both lecture folders present. `scripts/prepare_data.py` is the original packaging step: it requires the old local MNIST and checkpoint sources and is not needed for ordinary notebook use.
-
-`data/provenance.json` records data/checkpoint origins and hashes. `data/original-training.json` preserves the recorded training histories. `data/figure-manifest.json` records generated figure hashes. `qa/science-checks.json` records BCE, gradient and parameter-update checks. `qa/notebook-execution.json` records the actual notebook execution. Browser and PDF checks are produced separately by the shared runtime tooling; numerical checks alone do not establish visual quality.
-
-## Teaching sources
-
-The sequence adapts Nipun Batra's [PML 2023 VAE notebook](https://github.com/nipunbatra/pml-teaching/blob/master/notebooks/vae.ipynb), especially reconstruction versus random-latent decoding. The progressive layout follows the [attention series](https://nipunbatra.github.io/attention/). Original topology drawings use the compact local-label approach reviewed in [Lilian Weng's AE/VAE article](https://lilianweng.github.io/posts/2018-08-12-vae/); no blog image is copied into the lecture. MNIST is the source dataset. The encoder/decoder diagrams and all current explanatory compositions are original teaching redraws.
+Adapted from Nipun Batra's PML 2023 Lectures 23–25 and the [VAE notebook](https://github.com/nipunbatra/pml-teaching/blob/master/notebooks/vae.ipynb). Differences: grey MNIST with an explicit Gaussian likelihood (σ = 0.2) instead of mean squared error plus an unscaled β; sums over pixels and means over images stated explicitly; the encoder's ELBO compared with per-image VI and with the exact evidence on a grid.

@@ -1,0 +1,61 @@
+{
+ "generated": "2026-10-21",
+ "items": [
+  {
+   "file": "llm-sample-1.txt",
+   "model": "gemini-3.5-flash",
+   "prompt": "Write one sentence that opens a short story about the first monsoon rain in Gandhinagar. Reply with the sentence only.",
+   "temperature": 1.0
+  },
+  {
+   "file": "llm-sample-2.txt",
+   "model": "gemini-3.5-flash",
+   "prompt": "Write one sentence that opens a short story about the first monsoon rain in Gandhinagar. Reply with the sentence only.",
+   "temperature": 1.0
+  },
+  {
+   "file": "llm-sample-3.txt",
+   "model": "gemini-3.5-flash",
+   "prompt": "Write one sentence that opens a short story about the first monsoon rain in Gandhinagar. Reply with the sentence only.",
+   "temperature": 1.0
+  },
+  {
+   "file": "t2i-sample-1.jpg",
+   "model": "gemini-3-pro-image",
+   "prompt": "A watercolour painting of a camel walking across the white salt desert of the Rann of Kutch at sunrise, soft light, wide view.",
+   "transformations": "Resized from 1024 to 480 px and saved as JPEG (quality 84)."
+  },
+  {
+   "file": "t2i-sample-2.jpg",
+   "model": "gemini-3-pro-image",
+   "prompt": "A watercolour painting of a camel walking across the white salt desert of the Rann of Kutch at sunrise, soft light, wide view.",
+   "transformations": "Resized from 1024 to 480 px and saved as JPEG (quality 84)."
+  },
+  {
+   "file": "t2i-sample-3.jpg",
+   "model": "gemini-3-pro-image",
+   "prompt": "A watercolour painting of a camel walking across the white salt desert of the Rann of Kutch at sunrise, soft light, wide view.",
+   "transformations": "Resized from 1024 to 480 px and saved as JPEG (quality 84)."
+  },
+  {
+   "file": "t2i-sample-4.jpg",
+   "model": "gemini-3-pro-image",
+   "prompt": "A watercolour painting of a camel walking across the white salt desert of the Rann of Kutch at sunrise, soft light, wide view.",
+   "transformations": "Resized from 1024 to 480 px and saved as JPEG (quality 84)."
+  },
+  {
+   "file": "tts-sample.mp3",
+   "model": "gemini-3.8-flash-tts",
+   "text": "A generative model turns a few random numbers into a new example: a sentence, a picture, or this voice.",
+   "voice": "Kore",
+   "rate": 24000,
+   "transformations": "Converted from 24 kHz 16-bit WAV to 64 kbit/s MP3 with ffmpeg; tts-wave.json holds the waveform envelope of the original."
+  },
+  {
+   "file": "next-word.json",
+   "model": "HuggingFaceTB/SmolLM2-360M-Instruct",
+   "prefix": "After months of heat, the first monsoon rain smelled of",
+   "note": "Next-token probabilities computed locally with the cached SmolLM2-360M-Instruct checkpoint (float32, CPU); samples at temperature 1 with seeds 1, 2, 3."
+  }
+ ]
+}

@@ -1,0 +1,44 @@
+{
+ "model": "HuggingFaceTB/SmolLM2-360M-Instruct",
+ "prefix": "After months of heat, the first monsoon rain smelled of",
+ "top": [
+  [
+   " wet",
+   0.1735
+  ],
+  [
+   " sweat",
+   0.056
+  ],
+  [
+   " damp",
+   0.0481
+  ],
+  [
+   " earth",
+   0.0402
+  ],
+  [
+   " the",
+   0.0338
+  ],
+  [
+   " salt",
+   0.0337
+  ],
+  [
+   " ozone",
+   0.0328
+  ],
+  [
+   " mud",
+   0.0305
+  ]
+ ],
+ "rest": 0.5513,
+ "samples": [
+  " melons and oranges.\nHow do you describe the origin",
+  " sweat and damp ruins. It was moist, it was s",
+  " desperation. What had occurred, and what transpired that its"
+ ]
+}

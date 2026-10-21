@@ -1,449 +1,762 @@
 {
   "id": "lecture2",
   "number": 2,
-  "title": "From generative models to autoencoders",
-  "subtitle": "A good reconstruction is only the beginning",
-  "minutes": 65,
-  "notebook": "lecture2.ipynb",
+  "title": "From fitting a distribution to the VAE",
+  "subtitle": "Why generate, fit and sample, PCA and Gaussians on MNIST, autoencoders, and the variational autoencoder",
+  "minutes": 150,
+  "notebook": "lecture2-generative-models.ipynb",
   "sections": [
     {
-      "id": "task",
-      "title": "What counts as a new example?",
-      "minutes": 7
+      "id": "map",
+      "title": "Lecture map",
+      "minutes": 1
+    },
+    {
+      "id": "why",
+      "title": "Part 1 · Why generate?",
+      "minutes": 16
     },
     {
       "id": "fit",
-      "title": "Fit, then sample",
-      "minutes": 10
+      "title": "Part 2 · Fit a distribution, then sample",
+      "minutes": 24
     },
     {
-      "id": "pixels",
-      "title": "What changes for images?",
-      "minutes": 8
+      "id": "pca",
+      "title": "Part 3 · Images: PCA and Gaussians",
+      "minutes": 24
     },
     {
-      "id": "code",
-      "title": "Learn a compact representation",
-      "minutes": 10
+      "id": "ae",
+      "title": "Part 4 · Autoencoders",
+      "minutes": 22
     },
     {
-      "id": "learn",
-      "title": "One autoencoder update",
-      "minutes": 12
+      "id": "gen",
+      "title": "Part 5 · Can an autoencoder generate?",
+      "minutes": 18
     },
     {
-      "id": "sample",
-      "title": "Does this give us a sampler?",
-      "minutes": 11
+      "id": "vae",
+      "title": "Part 6 · The variational autoencoder",
+      "minutes": 45
     },
     {
-      "id": "missing",
-      "title": "Name what is missing",
-      "minutes": 7
+      "id": "optional",
+      "title": "Optional depth",
+      "minutes": 0
     }
   ],
-  "coreSlides": 54,
+  "coreSlides": 98,
   "optionalSlides": 3,
   "slides": [
     {
-      "id": "new-example",
-      "title": "What would count as a new plausible example?",
-      "section": "task",
+      "id": "contents",
+      "title": "Lecture 2 at a glance: six parts, twenty-nine sections",
+      "section": "map",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "faces",
+      "title": "Who are these people?",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "copy-reconstruct-sample",
-      "title": "Three outputs can look similar",
-      "section": "task",
+      "id": "realfake",
+      "title": "Real or generated? Six of these twelve digits are fake",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "held-three",
-      "title": "Keep this handwritten 3 in view",
-      "section": "task",
+      "id": "llm",
+      "title": "A chatbot is a generative model: one prompt, three different answers",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "data-distribution",
-      "title": "We see examples, not the entire distribution",
-      "section": "task",
+      "id": "next-word",
+      "title": "Under the hood: a probability for every possible next word",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "quality-coverage",
-      "title": "One convincing example is not enough",
-      "section": "task",
+      "id": "t2i",
+      "title": "Text to image: one prompt, four samples",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "today-route",
-      "title": "Fit a distribution. Then challenge its samples.",
-      "section": "task",
+      "id": "img2img",
+      "title": "Image in, image out",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "two-bumps",
-      "title": "Twelve observations suggest two groups",
+      "id": "speech",
+      "title": "Sound: text in, 24,000 numbers per second out",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "science",
+      "title": "Beyond pictures: generative models in science",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "uses",
+      "title": "What a model of p(x) is good for",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "recipe",
+      "title": "What they share: random numbers in, a learned network, a sample out",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "conditions",
+      "title": "Conditions steer the sample; today we learn p(x) without one",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "two-jobs",
+      "title": "A model of p(x) can do two jobs: score and sample",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "why-not-mean",
+      "title": "Why not just output the average?",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "route",
+      "title": "Today’s route: six parts",
+      "section": "why",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "faithful",
+      "title": "Old Faithful: 272 eruptions, and the wait before each one",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "normal-fit",
-      "title": "Fit the mean and the spread",
+      "id": "task",
+      "title": "The task: examples in, a distribution out, new examples from it",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mean-bad",
+      "title": "The average wait, 70.9 minutes, is a poor sample",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "normal-curve",
-      "title": "The fitted centre is in the gap",
+      "id": "gauss-fit",
+      "title": "One Gaussian: the best μ and σ have a formula",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "gauss-score",
+      "title": "Score: how probable is each wait under the bell?",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "normal-sample",
-      "title": "Sampling is a separate computation",
+      "id": "gauss-sample",
+      "title": "Sample from the bell: the draws fill the empty dip",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "two-kinds",
+      "title": "The geyser has two kinds of eruption",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
       "id": "mixture-story",
-      "title": "First choose a group, then a value",
+      "title": "A recipe with a hidden step: pick a bump, then draw",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mixture-score",
+      "title": "To score a wait, add over both kinds",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mix-code",
+      "title": "Fit it by gradient descent, as Lecture 1 fitted q",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "mixture-density",
-      "title": "The hidden choice becomes a sum",
+      "id": "mix-fit",
+      "title": "Press play: the bumps separate onto the two clumps",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "mixture-fit",
-      "title": "A richer family can express both groups",
+      "id": "mix-result",
+      "title": "It found the two kinds of eruption without being told",
       "section": "fit",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "compare-draws",
-      "title": "Look at the samples the models produce",
+      "id": "mix-sample",
+      "title": "Sample: pick a bump, then a time",
       "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "how-many",
+      "title": "More bumps always fit the training waits better; new waits decide",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "two-d",
+      "title": "Two numbers per eruption: Gaussians need a covariance",
+      "section": "fit",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "recap-2",
+      "title": "Part 2 in one slide",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "mnist",
+      "title": "MNIST: 70,000 handwritten digits, 28 × 28 pixels each",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
       "id": "pixels",
-      "title": "An image is 784 observed values",
-      "section": "pixels",
+      "title": "Our 3 is 784 numbers between 0 and 1",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "binary-pixel",
-      "title": "One pixel has a simple distribution",
-      "section": "pixels",
+      "id": "random-points",
+      "title": "A random point in that space looks like static",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "average-image",
-      "title": "Fit one probability per pixel",
-      "section": "pixels",
+      "id": "indep",
+      "title": "First try: one Gaussian per pixel, all independent",
+      "section": "pca",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "neighbours",
+      "title": "Neighbouring pixels move together",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "independent-pixels",
-      "title": "Correct pixel frequencies can make poor images",
-      "section": "pixels",
+      "id": "full-gauss",
+      "title": "Second try: one 784-dimensional Gaussian with a full covariance",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "dependence",
-      "title": "Strokes are coordinated choices",
-      "section": "pixels",
+      "id": "pca-2d",
+      "title": "Idea: describe each example with fewer numbers. PCA in 2-D first",
+      "section": "pca",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "pca-mnist",
+      "title": "PCA on 60,000 digits: a mean image and directions",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "linear-compression",
-      "title": "A low-dimensional code can reconstruct a vector",
-      "section": "pixels",
+      "id": "pca-slider",
+      "title": "Rebuild our 3 from its first d PCA numbers",
+      "section": "pca",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "pca-variance",
+      "title": "How many numbers do we need?",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "pca-bridge",
-      "title": "PCA is a useful linear reference",
-      "section": "pixels",
+      "id": "pca-scatter",
+      "title": "Each digit as 2 numbers: PCA’s map of 1,000 test digits",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "encoder",
-      "title": "Let a network compute the code",
-      "section": "code",
+      "id": "pca-gen-recipe",
+      "title": "Generate in two steps: sample a few numbers, then rebuild an image",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "decoder",
-      "title": "A second network maps the code back",
-      "section": "code",
+      "id": "pca-gauss",
+      "title": "One Gaussian over d PCA numbers",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "roles",
-      "title": "Two kinds of quantities change",
-      "section": "code",
+      "id": "pca-mog",
+      "title": "A mixture of K Gaussians over d numbers: try it",
+      "section": "pca",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "pca-limits",
+      "title": "What limits the PCA recipe?",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "code-three",
-      "title": "Our 3 becomes two numbers",
-      "section": "code",
+      "id": "recap-3",
+      "title": "Part 3 in one slide",
+      "section": "pca",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "decode-three",
-      "title": "Decode the code that the encoder produced",
-      "section": "code",
+      "id": "pca-as-ae",
+      "title": "PCA is an encoder and a decoder",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "self-target",
-      "title": "The input supplies its own target",
-      "section": "code",
+      "id": "ae-arch",
+      "title": "An autoencoder: replace both maps with small neural networks",
+      "section": "ae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ae-code",
+      "title": "Two small networks in PyTorch",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-loss",
+      "title": "The loss: squared error, summed over pixels, averaged over images",
+      "section": "ae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ae-untrained",
+      "title": "Before training: always look at what the network outputs",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-step",
+      "title": "One training step: forward, loss, backward, update",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-train",
+      "title": "Press play: reconstructions sharpen as it trains",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-test",
+      "title": "Did it memorise? Compare training and test error",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "linear-ae",
+      "title": "Take out the ReLUs and the sigmoid: a linear autoencoder rediscovers PCA",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
       "id": "bottleneck",
-      "title": "Two values must carry enough information",
-      "section": "code",
+      "title": "Wider codes reconstruct better",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "predict-bottleneck",
-      "title": "Predict before looking at reconstructions",
-      "section": "code",
+      "id": "bottleneck-recon",
+      "title": "The same 8 test digits through codes of 2, 8, 32 and 128 numbers",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "one-pixel-loss",
-      "title": "Start with one observed pixel",
-      "section": "learn",
+      "id": "ae-vs-pca",
+      "title": "Autoencoder against PCA, at every code size",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "zero-pixel-loss",
-      "title": "A zero uses the other probability",
-      "section": "learn",
+      "id": "ae-scatter",
+      "title": "The 2-number codes of 1,000 test digits",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "bce",
-      "title": "One expression covers both outcomes",
-      "section": "learn",
+      "id": "search",
+      "title": "Search by code: the nearest digits to a query",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "four-pixel",
-      "title": "Compute a four-pixel reconstruction loss",
-      "section": "learn",
+      "id": "denoise",
+      "title": "Denoising: damage the input, ask for the clean image",
+      "section": "ae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "recap-4",
+      "title": "Part 4 in one slide",
+      "section": "ae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "loss-reductions",
-      "title": "Sum within an image; average over images",
-      "section": "learn",
+      "id": "gen-question",
+      "title": "Keep the decoder, throw away the encoder, feed it random numbers",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "ae-loss-code",
-      "title": "The code has the same two reductions",
-      "section": "learn",
+      "id": "std-normal",
+      "title": "N(0, I) in two dimensions: two independent standard bells",
+      "section": "gen",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ae-random",
+      "title": "Random codes through three autoencoders",
+      "section": "gen",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "overlay",
+      "title": "Put the random codes on top of the real ones",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "ae-gradient",
-      "title": "Both networks receive the reconstruction signal",
-      "section": "learn",
+      "id": "explore-ae",
+      "title": "Your turn: three ways to choose a code",
+      "section": "gen",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "ae-grid",
+      "title": "Decode a whole grid of codes",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "ae-update",
-      "title": "One actual SGD step changes both networks",
-      "section": "learn",
+      "id": "spread",
+      "title": "Wider codes spread out",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "heldout-recon",
-      "title": "Test the prediction on unseen images",
-      "section": "learn",
+      "id": "interp",
+      "title": "Walk in a straight line from a 1 to a 0",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "bottleneck-measure",
-      "title": "Measure reconstruction on the same test subset",
-      "section": "learn",
+      "id": "posthoc",
+      "title": "A fix we already know: fit a mixture to where the codes are",
+      "section": "gen",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "wishes",
+      "title": "What we would like instead",
+      "section": "gen",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-story",
+      "title": "Write the recipe first: pick a code, then draw an image",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "sigma",
+      "title": "The likelihood of an image, given its code, is a squared error",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-mle",
+      "title": "Train like Part 2: maximise log p(x) for every image",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "decoder-sampler",
-      "title": "The decoder can accept any two numbers",
-      "section": "sample",
+      "id": "posterior3",
+      "title": "For our 3: which codes could have made it?",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "evidence-grid",
+      "title": "With 2 numbers we can add up rectangles; with 16 we cannot",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "prior-experiment",
-      "title": "Try standard-normal codes anyway",
-      "section": "sample",
+      "id": "naive-mc",
+      "title": "Average p(x | z) over random codes? Most draws are wasted",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "code-cloud",
-      "title": "Where did the training objective place the codes?",
-      "section": "sample",
+      "id": "vi-recall",
+      "title": "Lecture 1’s tool: fit a simple q to the posterior",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vi3",
+      "title": "Fit q for our 3: press play",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "ae-failure-frame",
-      "title": "Our proposed prior misses the learned code geometry",
-      "section": "sample",
+      "id": "amortise",
+      "title": "60,000 images would mean 60,000 separate fits",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-arch",
+      "title": "The VAE: an encoder that outputs q, a code drawn from it, and the decoder",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "q3",
+      "title": "The encoder on our 3: one pass, almost as good as 1,200 steps",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "recon-vs-new",
-      "title": "Two inputs to the same decoder",
-      "section": "sample",
+      "id": "vae-loss",
+      "title": "The loss for one image is the negative ELBO",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-worked",
+      "title": "One step for our 3, with numbers",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-code",
+      "title": "The VAE in PyTorch: three changes to the autoencoder",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "interpolate-rule",
-      "title": "Interpolation supplies a different rule for z",
-      "section": "sample",
+      "id": "vae-curves",
+      "title": "While training: reconstruction falls, the KL settles",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "interpolation-result",
-      "title": "A smooth path can produce a smooth visual change",
-      "section": "sample",
+      "id": "vae-samples",
+      "title": "Now sample: z ~ N(0, I), then decode",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-scatter",
+      "title": "The codes now fill N(0, I)",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "fit-code-density",
-      "title": "A density fitted to codes is a legitimate extra model",
-      "section": "sample",
+      "id": "explore-vae",
+      "title": "Your turn again: the same three ways, now with the VAE",
+      "section": "vae",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "vae-grid",
+      "title": "Decode a grid of codes: digits everywhere",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "fitted-code-output",
-      "title": "A fitted Gaussian changes where codes are drawn",
-      "section": "sample",
+      "id": "beta-what",
+      "title": "Put a weight on the KL: β",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "objective-says",
-      "title": "Read what the objective actually asks for",
-      "section": "missing",
+      "id": "beta",
+      "title": "Seven VAEs, β from 0 to 256: try them",
+      "section": "vae",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "beta-zero",
+      "title": "β = 0: is it just an autoencoder? (An exam question)",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "three-claims",
-      "title": "Which claim have we earned?",
-      "section": "missing",
+      "id": "beta-collapse",
+      "title": "β = 256: every code decodes to the same blur",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "deterministic-code",
-      "title": "An AE code is a computed value",
-      "section": "missing",
+      "id": "arc",
+      "title": "The whole lecture in one table",
+      "section": "vae",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "next",
+      "title": "Next: can we drop the likelihood altogether?",
+      "section": "vae",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "next-model",
-      "title": "Choose a sampling story before learning inference",
-      "section": "missing",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "exit-three-tests",
-      "title": "Name the experiment from its input",
-      "section": "missing",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "bridge-vae",
-      "title": "Next: keep the sampling question visible",
-      "section": "missing",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "optional-gaussian-likelihood",
-      "title": "Optional: why squared error appears elsewhere",
-      "section": "missing",
+      "id": "sparse",
+      "title": "A sparse autoencoder: a KL between two coins",
+      "section": "optional",
       "builds": 2,
       "optional": true
     },
     {
-      "id": "optional-em",
-      "title": "Optional: what the mixture fitting step did",
-      "section": "fit",
-      "builds": 2,
+      "id": "heldout-mnist",
+      "title": "Held-out scores of the PCA mixtures",
+      "section": "optional",
+      "builds": 1,
       "optional": true
     },
     {
-      "id": "optional-code-change",
-      "title": "Optional: codes are not uniquely identified",
-      "section": "missing",
+      "id": "em",
+      "title": "EM in one slide: the classic way to fit a mixture",
+      "section": "optional",
       "builds": 2,
       "optional": true
     }
   ],
-  "totalStates": 114
+  "totalStates": 217
 }
