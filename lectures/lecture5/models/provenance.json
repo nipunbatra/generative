@@ -1,0 +1,72 @@
+{
+ "mnist-ddpm": {
+  "source": "dl-teaching/generative-modelling-ii/models/v2/uncond.pt",
+  "source_sha256": "7bda5520038ae83e3f86fa082d574dc27dc6932d938f87401b44f053f0a31134",
+  "sha256": "1d71a1be7bf663b854a507b55ccf0bf12a9801569bd39f118d146bdb0d702972",
+  "training": {
+   "name": "uncond",
+   "steps": 30000,
+   "batch": 128,
+   "lr": 0.0002,
+   "seed": 667,
+   "ema": 0.999,
+   "device": "mps",
+   "torch": "2.13.0",
+   "params": 814145,
+   "seconds": 2985.0
+  }
+ },
+ "mnist-cfg": {
+  "source": "dl-teaching/generative-modelling-ii/models/v2/cond.pt",
+  "source_sha256": "9bcad3cfe000e7bef18890774f195e960ea256d003f0f072d45d3669d9e9813c",
+  "sha256": "1b553495fee0aab265d56484121e49e8d546ccb01d4959830124e417175628fe",
+  "training": {
+   "name": "cond",
+   "steps": 30000,
+   "batch": 128,
+   "lr": 0.0002,
+   "seed": 667,
+   "ema": 0.999,
+   "device": "mps",
+   "torch": "2.13.0",
+   "params": 814849,
+   "seconds": 2981.3
+  }
+ },
+ "mnist-ae": {
+  "source": "dl-teaching/generative-modelling-ii/models/v2/ae.pt",
+  "source_sha256": "1303b72c864189b1475071efc5a852fdf14f047af35ac8068fee15fd2a35ac2c",
+  "sha256": "ed39f68c1299498f254cb75dba66f399a73c5014975b30be196a800156bfba7f",
+  "training": {
+   "epochs": 15,
+   "latent_std": 5.322185039520264,
+   "seconds": 143.6
+  }
+ },
+ "mnist-latent": {
+  "source": "dl-teaching/generative-modelling-ii/models/v2/latent.pt",
+  "source_sha256": "43b036b0afe71eadb55634d6cb3b3033aa6c105baf77a1ea2f8ef1058cd06057",
+  "sha256": "8acbf584aa92cc8d2becc113c83eb149a4d10e97105ab8f4a7f0ad1ee8dbeadf",
+  "training": {
+   "name": "latent",
+   "steps": 20000,
+   "batch": 256,
+   "lr": 0.0002,
+   "seed": 667,
+   "ema": 0.999,
+   "device": "mps",
+   "torch": "2.13.0",
+   "params": 1233668,
+   "seconds": 1293.0
+  }
+ },
+ "mnist-classifier": {
+  "source": "dl-teaching/generative-modelling-ii/models/v2/clf.pt",
+  "source_sha256": "3c4a3e11ae4587abd92d11d026f18e8f784ae23b6f428f821cccf40a0577dbb1",
+  "sha256": "69659c180e8787fe614c08d4ceb91ca0063d2b635c9ad380799f1b0f1d61ace2",
+  "training": {
+   "epochs": 3,
+   "test_accuracy": 0.9846000075340271
+  }
+ }
+}

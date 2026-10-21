@@ -1,0 +1,48 @@
+{
+ "pub/pub-cherries-1.png": {
+  "credit": "LDM, Rombach et al. (2022), Fig. 1: \u201ca basket of cherries\u201d",
+  "source": "dl-teaching/generative-modelling-ii/figures/data/pub-cherries-1.png",
+  "sha256": "35301bc673c684601466b308e949de5c5efd68a81f6908db9b547ec327cd4c02"
+ },
+ "pub/pub-repaint-1.png": {
+  "credit": "RePaint, Lugmayr et al. (2022), inpainting sample",
+  "source": "dl-teaching/generative-modelling-ii/figures/data/pub-repaint-1.png",
+  "sha256": "b77557943cc4751c1dd210a1b69d9dacd42c292e4aac8e2aa295b17f8c7bd1e6"
+ },
+ "pub/pub-sr3-face-3.png": {
+  "credit": "SR3, Saharia et al. (2022), 16\u00d716 \u2192 128\u00d7128 face",
+  "source": "dl-teaching/generative-modelling-ii/figures/data/pub-sr3-face-3.png",
+  "sha256": "6f8016c5ad860eeaaf2a96d89c8c58e8a398ae70c968756c435a500641c7b008"
+ },
+ "pub/pub-sdedit-out1.png": {
+  "credit": "SDEdit, Meng et al. (2022), stroke painting \u2192 image",
+  "source": "dl-teaching/generative-modelling-ii/figures/data/pub-sdedit-out1.png",
+  "sha256": "3fd9779934c8b43c2ff562e0005903f12735cf4d96b6a421285c59516ffd52af"
+ },
+ "pub/pub-control-2.png": {
+  "credit": "ControlNet, Zhang et al. (2023), Canny edges + \u201cbird\u201d",
+  "source": "dl-teaching/generative-modelling-ii/figures/data/pub-control-2.png",
+  "sha256": "6eb99b7e11a20d40b0e8f85a1fc63ee4e50250422ba002f437e6687ee272b462"
+ },
+ "pub/pub-dreambooth-acropolis.png": {
+  "credit": "DreamBooth, Ruiz et al. (2023), subject \u201cat the Acropolis\u201d",
+  "source": "dl-teaching/generative-modelling-ii/figures/data/pub-dreambooth-acropolis.png",
+  "sha256": "afeb468ca3537573ad68d240820d01b3255d883389de7ed1a794bbd56fa95758"
+ },
+ "vae-samples.png": {
+  "credit": "Lecture 3 VAE, prior samples (probability images)",
+  "source": "lectures/lecture3/figures/prior-probabilities.png"
+ },
+ "gan-samples.png": {
+  "credit": "Lecture 4 GAN, samples after 30 epochs (colours inverted to ink on paper)",
+  "source": "lectures/lecture4/figures/mnist-epoch-30.png"
+ },
+ "mnist-samples-16.png": {
+  "credit": "our DDPM, Part 4",
+  "source": "figures/mnist-samples-64.png"
+ },
+ "illustrations/ink-drop.jpg": {
+  "credit": "Illustration generated with Gemini (gemini-3-pro-image-preview), 21 Oct 2026, cropped",
+  "prompt": "five identical glasses of water, a drop of ink spreading until uniform; no text"
+ }
+}

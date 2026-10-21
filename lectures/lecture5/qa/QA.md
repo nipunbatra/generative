@@ -1,0 +1,7 @@
+# Lecture 5 · what was checked (21 October 2026)
+
+- **Browser** (`scripts/verify.mjs 5`, Chrome headless): all 230 authored states of the 94 slides (70 main, 24 optional) rendered with no console errors, no KaTeX errors and no layout faults (text outside a figure, code wider than its box, content taller than the slide); the mobile reading view has no horizontal overflow. Every build was also screenshotted at 1280 × 720 and inspected as contact sheets.
+- **Science** (`scripts/check-science.mjs`, 54 checks, all pass): the browser's one-pixel formulas (`math.mjs`) against `scripts/pixel.py` (ᾱ₂₅₀, x₂₅₀, P(ink | x), E[x₀ | x], E[ε | x], the score, the step-back means, the exact reverse densities, the unavoidable loss); the toy schedule's products and the toy forward run; the in-browser smiley network against PyTorch's outputs on fixed inputs (to 10⁻⁴).
+- **Notebook** (`scripts/build_notebook.py`): executed top to bottom on CPU in 172 s with no errors; its printed numbers match the slides (toy forward and reverse rows, x₂₅₀ = 0.379, P(ink) = 0.63, x̂₀ = 0.26, ε̂ = 0.276). 50 cell anchors, one per slide link.
+- **Exports** (`scripts/export.mjs 5`): `exports/completed.pdf` (94 pages) and `exports/all-builds.pdf` (230 pages), with the widgets' fixed print states.
+- **Not checked**: classroom timing (budgets are planned, not rehearsed); the notebook's Colab path (downloads of MNIST and the checkpoints from the published repository) until the lecture is published.
