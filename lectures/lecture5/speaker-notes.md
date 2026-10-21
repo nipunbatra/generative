@@ -1,22 +1,23 @@
 # Diffusion models: speaker notes
 
-Planned main route: 130 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 138 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
 | Lecture map | 1 |
-| Opening · Noise to a digit | 6 |
-| Part 1 · Destroying is easy | 20 |
-| Part 2 · Undoing it: one step back | 12 |
-| Part 3 · Training: labels for free | 18 |
-| Part 4 · Generating: walk back from noise | 18 |
-| Part 5 · Steering: labels, guidance and text | 20 |
-| Part 6 · Faster sampling | 12 |
-| Part 7 · What the network learns, and wrap-up | 16 |
+| Introduction · Destruction as creation | 7 |
+| Part 1 · The forward process | 22 |
+| Part 2 · The reverse process | 10 |
+| Part 3 · What the network learns, and training | 20 |
+| Part 4 · Sampling: birth of an image | 20 |
+| Part 5 · The score: arrows to the data | 8 |
+| Part 6 · Noise schedules and faster sampling | 14 |
+| Part 7 · Steering: labels, guidance and text | 28 |
+| Part 8 · Wrap-up | 8 |
 
-## contents: Lecture 5 at a glance: eight parts, numbered sections
+## contents: Lecture 5 at a glance: following Paras Chopra’s explainer
 
 **Build 1, ask:** Which part do you expect to be hardest?
 
@@ -24,21 +25,23 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Point here:** Click a section to jump to its first slide; ▶ opens the matching notebook section. Run the notebook top to bottom once before class.
 
-**Transition:** Opening: noise to a digit.
+**Transition:** Introduction: static in, a cat out.
 
-## hook: Static in, a handwritten digit out
+## hook: Static in, a cat out
 
-**Build 1, ask:** What could turn random numbers into a digit?
+**Build 1, ask:** What could turn random numbers into a photo?
 
 **Expected:** Collect guesses: a decoder (VAE), a generator (GAN)… Today: many small denoising steps.
 
-**Build 2, ask:** Is this digit copied from the training set?
+**Build 2, ask:** What has the network learned, if not the photos themselves?
 
-**Expected:** No. Part 7 measures it: our samples are as far from the nearest training image as real test digits are.
+**Expected:** How to remove a little noise from a noisy image, at every noise level. That is the whole lecture.
 
-**Point here:** Our model: a U-Net with 814,145 parameters, 30,000 training updates of batch 128. The film is sampling run 0, shown every 50 steps.
+**Point here:** Four of eight runs of google/ddpm-cat-256 (the original DDPM LSUN-cat checkpoint, 114 million parameters): 1,000 steps of ancestral sampling, shown every 50 steps. All eight runs, with the network’s guess at every step, are in 4.4.
 
-**Transition:** Before the how: what this same loop does at scale.
+**Transition:** What this same loop does today.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · Companion film “Diffusion models, from noise to images, step by step” (2026): google/ddpm-cat-256 run on the CC0 photo “Chelsea” (scikit-image)
 
 ## apps: The same loop runs today’s image generators
 
@@ -50,27 +53,9 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** Open question; return to it at the end.
 
-**Transition:** We have built two generators already. What was wrong with them?
+**Transition:** The idea in one sentence.
 
 **Source / evidence:** Published samples: LDM (Rombach et al. 2022) · RePaint (Lugmayr et al. 2022) · SR3 (Saharia et al. 2022) · SDEdit (Meng et al. 2022) · ControlNet (Zhang et al. 2023) · DreamBooth (Ruiz et al. 2023). Showcase after <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 1</a>
-
-## three-gens: Two generators so far, and a third idea
-
-**Build 1, ask:** Why are VAE samples blurry?
-
-**Expected:** The decoder predicts an average over the plausible images (a Gaussian or Bernoulli mean).
-
-**Build 2, ask:** What went wrong with GANs?
-
-**Expected:** Mode collapse and unstable alternating training; no likelihood to monitor.
-
-**Build 3, ask:** What might we pay for a thousand steps?
-
-**Expected:** Time: a thousand network calls per image. Part 6 cuts that.
-
-**Point here:** VAE: the β = 1 model of Lecture 3, prior samples (probabilities shown). GAN: Lecture 4’s MNIST GAN after 30 epochs. Diffusion: our model, Part 4.
-
-**Transition:** The idea in one sentence.
 
 ## core-idea: The idea in one sentence
 
@@ -88,7 +73,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> · <a href="https://arxiv.org/abs/1503.03585">Sohl-Dickstein et al., “Deep Unsupervised Learning using Nonequilibrium Thermodynamics” (2015)</a>
 
-## route: The plan: destroy, step back, train, generate
+## route: The plan: forwards, backwards, train, sample
 
 **Build 1, ask:** Which direction is easy?
 
@@ -98,7 +83,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** How to undo one small step of noise, at every noise level.
 
-**Transition:** Part 1: destroying is easy.
+**Transition:** Part 1: the forward process.
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a>
 
@@ -188,24 +173,6 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Transition:** Do we have to run every step?
 
-## shortcut-q: Do we need a 1,000-step loop for one noisy example?
-
-**Build 1, ask:** What kind of random variable is x₂?
-
-**Expected:** A constant times x₀ plus a sum of independent Gaussians.
-
-**Build 2, ask:** How many noise draws does x₁₀₀₀ involve?
-
-**Expected:** A thousand.
-
-**Build 3, ask:** Any way to collapse this?
-
-**Expected:** A sum of independent Gaussians is one Gaussian: next slide.
-
-**Transition:** Collapse two steps by hand.
-
-**Source / evidence:** <a href="https://www.youtube.com/watch?v=fbLgFrlTnGU">Ari Seff, “What are Diffusion Models?” (2022)</a>
-
 ## two-steps: Two steps by hand: two noises become one
 
 **Build 1, ask:** Why may we add the variances?
@@ -294,7 +261,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** The noise part √(1 − ᾱ)ε (here ε = −0.5) outweighs the shrunk signal.
 
-**Point here:** The bars are the two coefficients of 1.2, √ᾱₜ and √(1 − ᾱₜ). The film is computed live from the clean 3 and one fixed noise draw.
+**Point here:** The bars are the shortcut’s two coefficients (1.3), √ᾱₜ and √(1 − ᾱₜ). The film is computed live from the clean 3 and one fixed noise draw.
 
 **Transition:** Every image ends up in the same place.
 
@@ -312,9 +279,25 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Common misconception:** Explainers often credit the Central Limit Theorem. The forward noise is Gaussian by construction and the signal is shrunk away; no averaging of many non-Gaussian pieces is involved.
 
-**Transition:** Follow one pixel through all thousand steps.
+**Transition:** The same on a real photograph.
 
 **Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> · (endpoint argument corrected)
+
+## photo-jump: The same jump on a real photograph
+
+**Build 1, ask:** At what t can you no longer tell it is a cat?
+
+**Expected:** Around t = 500–700 with this schedule.
+
+**Build 2, ask:** Which survives longer: the fine fur, or the big dark patches?
+
+**Expected:** The big patches: fine detail is small and drowns first. Generation will work in the opposite order, coarse first.
+
+**Point here:** The photo is “Chelsea” from scikit-image (CC0), 256 × 256; the noise is one fixed draw and the schedule is the linear DDPM schedule of 1.4. Frames every 50 steps, made for the companion film.
+
+**Transition:** Part 1 in one table.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · Companion film “Diffusion models, from noise to images, step by step” (2026): google/ddpm-cat-256 run on the CC0 photo “Chelsea” (scikit-image)
 
 ## fwd-recap: Destroying is easy, and it hands us labels for free
 
@@ -328,41 +311,25 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Transition:** Part 2.
 
-## reverse-q: Going back: where was xₜ₋₁?
+## reverse-q: Run the film backwards: where was xₜ₋₁?
 
-**Build 1, ask:** Which term is the likelihood here?
+**Build 1, ask:** Why is going forwards easy?
 
-**Expected:** q(xₜ | xₜ₋₁): how the noisy value arises from the previous one.
+**Expected:** We chose the noising: one shrink and one Gaussian kick.
 
-**Build 2, ask:** Why is q(x_{t−1}) hard?
+**Build 2, ask:** What would we need to compute the step back exactly?
 
-**Expected:** It averages the noising over every image in the world.
+**Expected:** The distribution of every possible noisy image one step earlier: the very thing we are trying to learn.
 
-**Build 3, ask:** What do we know exactly about one pixel?
+**Build 3, ask:** Why might small steps help?
 
-**Expected:** Its distribution: ink with probability π, paper otherwise, so its noisy prior is a mixture of two Gaussians.
+**Expected:** Between two neighbouring frames almost nothing changes, so the earlier frame is almost pinned down by the later one.
 
-**Transition:** What if we jump all the way back at once?
+**Point here:** In symbols: p(xₜ₋₁ | xₜ) = q(xₜ | xₜ₋₁) q(xₜ₋₁) / q(xₜ). The likelihood is our noising step; the prior q(xₜ₋₁) averages the noising over every image in the world. Optional depth works through this Bayes calculation for one pixel (“We see x₂₅₀ = 0.38. Was the pixel ink?”).
 
-**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a>
+**Transition:** Shrink the jump, and watch the step back become one Gaussian.
 
-## big-jump: From pure noise straight back to the pixel: two spikes
-
-**Build 1, ask:** What does x_T tell us about the pixel?
-
-**Expected:** Nothing: at t = 1,000 the signal coefficient is 0.006.
-
-**Build 2, ask:** Why is the average a bad sample?
-
-**Expected:** It is not a value the data ever takes: no image is grey there.
-
-**Build 3, ask:** What did the VAE decoder output, and why was it blurry?
-
-**Expected:** A mean over the plausible images given z: the same averaging.
-
-**Transition:** So take smaller steps back.
-
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (the “100 cats” question)
+**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (V)
 
 ## reverse-explorer: Shrink the jump: the step back becomes one Gaussian
 
@@ -380,7 +347,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Point here:** Everything here is exact: q(x_s | xₜ) = Σ over ink/paper of P(x₀ | xₜ) · q(x_s | xₜ, x₀), each term a Gaussian (optional depth derives it for one step).
 
-**Transition:** Why a single step back is Gaussian, in general.
+**Transition:** So learn one Gaussian per step. What should the network guess?
 
 **Source / evidence:** <a href="https://www.youtube.com/watch?v=fbLgFrlTnGU">Ari Seff, “What are Diffusion Models?” (2022)</a> · (the 1-D picture, here computed exactly)
 
@@ -396,25 +363,11 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 3, ask:** Can its guess be exact?
 
-**Expected:** Not always: the same xₜ can come from different (x₀, ε) pairs, so it guesses an average (3.3).
+**Expected:** Not always: the same xₜ can come from different (x₀, ε) pairs, so it guesses an average (“The same noisy value can come from different noises”, optional depth).
 
-**Transition:** Three names for one guess.
+**Transition:** Put the guess into one step back.
 
 **Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (VI)
-
-## three-targets: Three ways to say the same guess
-
-**Build 1, ask:** Convert: given x̂₀ = 0.26, what is ε̂?
-
-**Expected:** ε̂ = (xₜ − √ᾱ x̂₀)/√(1 − ᾱ) = (0.379 − 0.724 × 0.26)/0.690 = 0.28.
-
-**Build 2, ask:** What is the network’s only job?
-
-**Expected:** Guess the noise in xₜ (equivalently the clean image), at every t.
-
-**Transition:** One step back.
-
-**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> · <a href="https://www.youtube.com/watch?v=HoKDTa5jHvg">Outlier, “Diffusion Models, Paper Explanation, Math Explained” (2022)</a> (4:48)
 
 ## reverse-step: One step back, in one line
 
@@ -436,103 +389,19 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> (Algorithm 2) · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (V)
 
-## tuple: A training example costs one line
+## three-targets: Three ways to say the same guess
 
-**Build 1, ask:** Which of these does the network see?
+**Build 1, ask:** Convert: given x̂₀ = 0.26, what is ε̂?
 
-**Expected:** Only xₜ and t.
+**Expected:** ε̂ = (xₜ − √ᾱ x̂₀)/√(1 − ᾱ) = (0.379 − 0.724 × 0.26)/0.690 = 0.28.
 
-**Build 2, ask:** Is this supervised learning?
+**Build 2, ask:** What is the network’s only job?
 
-**Expected:** Yes: input (xₜ, t), target ε. We manufactured the labels.
-
-**Build 3, ask:** How many training examples can we make from one image?
-
-**Expected:** As many as we like: every (t, ε) pair is a new example.
-
-**Transition:** Which noise exactly is the target?
-
-**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> (Algorithm 1)
-
-## total-noise: ε is all the noise since x₀, not the last step’s
-
-**Build 1, ask:** Why not predict the last step’s noise?
-
-**Expected:** Training never runs the steps: it jumps with the shortcut, so there is no “last step” noise to target.
-
-**Build 2, ask:** Then how do we take one step?
-
-**Expected:** From the total-noise guess we get the mean μ (2.4): Part 4.
-
-**Common misconception:** A common confusion: ε is not the small noise between xₜ₋₁ and xₜ.
-
-**Transition:** The network also needs t.
-
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (16:15)
-
-## why-t: One network for every noise level: tell it t
-
-**Build 1, ask:** Could one network without t work?
-
-**Expected:** Only by guessing the noise level from the image, which is hard at both ends. Feeding t is free.
-
-**Build 2, ask:** Why not feed t as a single number?
-
-**Expected:** A plain number is a poor input for a network to make many different behaviours from; sinusoids give it a rich, smooth code.
-
-**Build 3, ask:** Where have you seen these features before?
-
-**Expected:** Positional encodings in “Attention is all you need”.
-
-**Transition:** The loss, once by hand.
-
-**Source / evidence:** <a href="https://www.youtube.com/watch?v=HoKDTa5jHvg">Outlier, “Diffusion Models, Paper Explanation, Math Explained” (2022)</a> (7:01) · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 1</a> (22:21)
-
-## loss-hand: The loss: squared error between the noise and its guess
-
-**Build 1, ask:** Why squared error?
-
-**Expected:** Its minimiser is the conditional mean (next slide); and Part 7 shows it comes from the ELBO.
-
-**Build 2, ask:** Why is the best guess wrong for our pixel?
-
-**Expected:** The same xₜ could have come from paper with a different noise. Next slide.
-
-**Build 3, ask:** Why can the network do so much better on the image than we did on one pixel?
-
-**Expected:** It sees all 784 pixels: neighbours reveal whether this one is a stroke (3.6).
-
-**Transition:** Why even the best guess cannot be exact.
-
-## average: The same noisy value can come from different noises
-
-**Build 1, ask:** Why the average, again?
-
-**Expected:** Squared error is minimised by the mean (Lecture 1).
-
-**Build 2, ask:** At which t is the pixel’s unavoidable loss zero?
-
-**Expected:** At both ends: at small t the pixel is obvious; at large t the noise ≈ xₜ itself.
-
-**Build 3, ask:** Why is the network’s loss largest at small t?
-
-**Expected:** Tiny noise on grey stroke edges is hard to tell apart from the stroke itself: real pixels are not just ink or paper.
-
-**Point here:** Irreducible loss = E[Var(ε | xₜ)] = ᾱ/(1 − ᾱ) · E[1 − x̂₀²] for a ±1 pixel. Computed by numerical integration over xₜ.
+**Expected:** Guess the noise in xₜ (equivalently the clean image), at every t.
 
 **Transition:** What network makes the guess?
 
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (homework hint: the conditional expectation minimises squared error)
-
-## mlp: For points in 2-D: a small MLP
-
-**Build 1, ask:** What are the inputs and outputs?
-
-**Expected:** Inputs: x, y and 16 features of t. Outputs: the two components of ε̂.
-
-**Transition:** For images, a network that can look at the whole picture.
-
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 1</a> (2-D toy model) · smiley after <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a>
+**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> · <a href="https://www.youtube.com/watch?v=HoKDTa5jHvg">Outlier, “Diffusion Models, Paper Explanation, Math Explained” (2022)</a> (4:48)
 
 ## unet: For images: a U-Net, so every pixel can see the whole digit
 
@@ -550,9 +419,61 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Point here:** Channels 32 → 64 → 128 → 64 → 32, GroupNorm and SiLU, time features → MLP → a per-block projection added to the activations. The code is in scripts/diffusion.py and the notebook.
 
-**Transition:** The training step.
+**Transition:** The network also needs t.
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · <a href="https://www.youtube.com/watch?v=HoKDTa5jHvg">Outlier, “Diffusion Models, Paper Explanation, Math Explained” (2022)</a> (7:01)
+
+## why-t: One network for every noise level: tell it t
+
+**Build 1, ask:** Could one network without t work?
+
+**Expected:** Only by guessing the noise level from the image, which is hard at both ends. Feeding t is free.
+
+**Build 2, ask:** Why not feed t as a single number?
+
+**Expected:** A plain number is a poor input for a network to make many different behaviours from; sinusoids give it a rich, smooth code.
+
+**Build 3, ask:** Where have you seen these features before?
+
+**Expected:** Positional encodings in “Attention is all you need”.
+
+**Transition:** The training loop.
+
+**Source / evidence:** <a href="https://www.youtube.com/watch?v=HoKDTa5jHvg">Outlier, “Diffusion Models, Paper Explanation, Math Explained” (2022)</a> (7:01) · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 1</a> (22:21)
+
+## tuple: A training example costs one line
+
+**Build 1, ask:** Which of these does the network see?
+
+**Expected:** Only xₜ and t.
+
+**Build 2, ask:** Is this supervised learning?
+
+**Expected:** Yes: input (xₜ, t), target ε. We manufactured the labels.
+
+**Build 3, ask:** How many training examples can we make from one image?
+
+**Expected:** As many as we like: every (t, ε) pair is a new example.
+
+**Transition:** The loss, once by hand.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> (Algorithm 1)
+
+## loss-hand: The loss: squared error between the noise and its guess
+
+**Build 1, ask:** Why squared error?
+
+**Expected:** Squared error is minimised by the average (Lecture 1): the network learns the average noise that could have produced xₜ. It is also a reweighted ELBO (3.3).
+
+**Build 2, ask:** Why is the best guess wrong for our pixel?
+
+**Expected:** The same xₜ could have come from paper with a different noise (“The same noisy value can come from different noises”, optional depth).
+
+**Build 3, ask:** Why can the network do so much better on the image than we did on one pixel?
+
+**Expected:** It sees all 784 pixels: neighbours reveal whether this one is a stroke (3.5).
+
+**Transition:** The training step in code.
 
 ## train-code: The training step in eight lines
 
@@ -564,9 +485,21 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** Different images, each at its own random noise level.
 
-**Transition:** Watch it learn.
+**Point here:** Batch 128, laptop GPU. Why squared error on the noise: the ELBO is a sum of KL terms, each a weighted squared noise error; Ho et al. found that setting every weight to 1 gives better samples. Optional depth derives it (“Its ELBO is a weighted noise error”).
+
+**Transition:** Watch it learn, on points we can see.
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> (Algorithm 1)
+
+## mlp: For points in 2-D: a small MLP
+
+**Build 1, ask:** What are the inputs and outputs?
+
+**Expected:** Inputs: x, y and 16 features of t. Outputs: the two components of ε̂.
+
+**Transition:** Press play.
+
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 1</a> (2-D toy model) · smiley after <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a>
 
 ## playground: Press play: the network learns the smiley
 
@@ -576,7 +509,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** Why does the loss stay well above zero?
 
-**Expected:** 3.3: an unavoidable part remains.
+**Expected:** Some of the noise cannot be guessed: the same noisy point can come from different clean points (“The same noisy value can come from different noises”, optional depth).
 
 **Point here:** 40,000 Adam steps on fresh smiley points, batch 2048; frames at steps 0, 200, 500, 1k, 2k, 5k, 10k, 20k, 40k.
 
@@ -588,25 +521,29 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 1, ask:** Why is the guess blurry at high noise?
 
-**Expected:** It is an average over every digit that could hide under this much noise (2.2).
+**Expected:** It is an average over every digit that could hide under this much noise.
 
 **Build 2, ask:** Why is the network so much better than one pixel at a time?
 
-**Expected:** It sees all 784 pixels together: a stroke here makes a stroke there likely (next slide).
+**Expected:** It sees all 784 pixels together: a stroke here makes a stroke there likely (“One pixel alone gives a grey; all 784 together give a 3”, optional depth).
 
-**Transition:** The difference, at one noise level.
+**Transition:** The same on a real photo, with the original DDPM network.
 
-## coordinate: One pixel alone gives a grey; all 784 together give a 3
+## photo-guess: The original DDPM network on a real photograph
 
-**Build 1, ask:** Which is the per-pixel model of Lecture 2?
+**Build 1, ask:** Why can it guess the noise so well at t = 400?
 
-**Expected:** Each pixel alone: one probability per pixel, independent.
+**Expected:** Most of the photo is still there; noise and photo look very different; and it has seen millions of cat photos.
 
-**Build 2, ask:** Why can the network see the stroke?
+**Build 2, ask:** Why is the guess at t = 950 blurry?
 
-**Expected:** Its 7×7 layer sees the whole digit; neighbouring noisy pixels together are much less noisy than one.
+**Expected:** Many photos fit what is left. The best squared-error guess is their average: a blur.
 
-**Transition:** Recap of training.
+**Point here:** Error of the noise guess (mean squared, pixel values in [−1, 1]) at t = 100, 400, 950: 0.035, 0.0034, 0.00002, easier as the noise grows. Error of the photo guess: 0.004, 0.014, 0.18, harder as the noise grows, because a small noise error is divided by √ᾱₜ.
+
+**Transition:** Training in one table.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · Companion film “Diffusion models, from noise to images, step by step” (2026): google/ddpm-cat-256 run on the CC0 photo “Chelsea” (scikit-image)
 
 ## train-recap: Training: a regression problem we made ourselves
 
@@ -638,25 +575,9 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** Sharpen towards ink or paper as the noise disappears.
 
-**Transition:** The same step on a whole image.
+**Transition:** The toy, all the way back.
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> (Algorithm 2)
-
-## step-image: The same step on an image, at t = 600
-
-**Build 1, ask:** Can you see the 7 in x₆₀₀?
-
-**Expected:** No.
-
-**Build 2, ask:** Why do μ and x₅₉₉ look the same as x₆₀₀?
-
-**Expected:** One step changes each pixel by about 1%.
-
-**Build 3, ask:** So where is the progress?
-
-**Expected:** In x̂₀: the guess sharpens step by step (next slides).
-
-**Transition:** The loop.
 
 ## toy-reverse: The toy, all the way back: every number
 
@@ -732,9 +653,25 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** Early on, many digits are consistent with xₜ; each step’s fresh noise and new evidence can tip the balance.
 
-**Transition:** Why the fresh noise at every step?
+**Transition:** And on the real cat model.
 
 **Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 6</a> (coarse to fine) · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (“The Generator”)
+
+## cat-film: Eight runs of the real cat model: xₜ, and its guess of the end
+
+**Build 1, ask:** When is the layout of each photo decided?
+
+**Expected:** Early, by about t = 600: after that the guess changes only in detail.
+
+**Build 2, ask:** Which runs failed, and how?
+
+**Expected:** Usually one or two: a very dark image, or two half-cats. LSUN cats contains many odd photos.
+
+**Point here:** google/ddpm-cat-256, 1,000 steps of ancestral sampling (σₜ² = β̃ₜ, as in our MNIST runs), seed 2026, every 50th step shown. The second row is the clean-image guess x̂₀ computed from ε̂ at that step.
+
+**Transition:** Why the fresh noise at every step?
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · Companion film “Diffusion models, from noise to images, step by step” (2026): google/ddpm-cat-256 run on the CC0 photo “Chelsea” (scikit-image)
 
 ## why-noise: Take out the fresh noise, and every sample collapses
 
@@ -776,9 +713,157 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** Train step 2: the shortcut.
 
-**Transition:** Part 5: steering with labels and text.
+**Transition:** Part 5: the score.
 
 **Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (“derive it on a napkin”)
+
+## score-def: The score: an arrow at every point, pointing uphill
+
+**Build 1, ask:** Where is the score zero?
+
+**Expected:** At the peaks, and at the dip between them.
+
+**Build 2, ask:** Why does the normaliser not matter?
+
+**Expected:** log(p/Z) = log p − log Z, and log Z has no x: its gradient is zero.
+
+**Build 3, ask:** How could you sample using only arrows?
+
+**Expected:** Walk uphill with some noise: Langevin dynamics (5.2).
+
+**Point here:** Energy view (Vizuara): p ∝ exp(−E). The score is −∇E: downhill in energy, uphill in probability.
+
+**Transition:** The smiley’s arrows, from our network.
+
+**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (IX) · <a href="https://www.youtube.com/watch?v=bVrweqE-r38">Vizuara, “Principles of Diffusion Models”, Lecture 1 (2025)</a> (39:27) · <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a>
+
+## scorefield: The smiley’s arrows, at different noise levels
+
+**Build 1, ask:** Why does the arrow length grow far from the face?
+
+**Expected:** The arrow is √ᾱ x̂₀ − x: the further from the face, the further to go.
+
+**Build 2, ask:** Why use many noise levels?
+
+**Expected:** Low noise: precise but only near the data. High noise: defined everywhere but blurry. Start high and lower it: the schedule.
+
+**Transition:** Follow the arrows.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a> · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 1</a> (23:00)
+
+## langevin: Follow the arrows, with a little noise: Langevin sampling
+
+**Build 1, ask:** Why the random kick?
+
+**Expected:** Without it every particle climbs to a peak and stops: no spread, just like 4.5.
+
+**Build 2, ask:** How does this compare with Part 4’s loop?
+
+**Expected:** Same structure: a nudge along the network’s guess plus fresh noise, at decreasing noise levels.
+
+**Point here:** Step size here: η = 0.1 (1 − ᾱₜ), one step per level, every fourth level. DDPM’s step is a particular choice of this nudge and kick.
+
+**Transition:** Part 6: noise schedules and faster sampling.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (IX)
+
+## cosine: The schedule matters: linear destroys too early
+
+**Build 1, ask:** At which t does the 3 vanish under each?
+
+**Expected:** Linear about 600, cosine about 800–850.
+
+**Build 2, ask:** Why does that matter for training?
+
+**Expected:** Training samples t uniformly: with linear, about a third of the examples are nearly pure noise.
+
+**Point here:** Our models use the linear schedule (simpler, and enough for MNIST). The cosine schedule is ᾱₜ = cos²(((t/T) + s)/(1 + s) · π/2), s = 0.008.
+
+**Transition:** Even with a good schedule: a thousand steps. Can we take fewer?
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2102.09672">Nichol &amp; Dhariwal, “Improved Denoising Diffusion Probabilistic Models” (2021)</a> · <a href="https://www.youtube.com/watch?v=HoKDTa5jHvg">Outlier, “Diffusion Models, Paper Explanation, Math Explained” (2022)</a> (6:26)
+
+## slow: A thousand network calls per image
+
+**Build 1, ask:** Where does the time go?
+
+**Expected:** Into the network calls: everything else is arithmetic.
+
+**Build 2, ask:** Why not just use fewer DDPM steps?
+
+**Expected:** The step back is only Gaussian for small steps (2.2); big DDPM steps get the distribution wrong.
+
+**Transition:** Jump to the guess, then re-noise.
+
+## ddim-idea: DDIM: jump to the guess, then re-noise it to an earlier level
+
+**Build 1, ask:** Which formula is the second line?
+
+**Expected:** The shortcut xₜ = √ᾱ x₀ + √(1 − ᾱ) ε with the two guesses.
+
+**Build 2, ask:** Why reuse ε̂ rather than draw new noise?
+
+**Expected:** It keeps the noisy image consistent with the guess; DDIM shows these jumps keep the same marginals as the forward process.
+
+**Build 3, ask:** What do we lose?
+
+**Expected:** The randomness of each step: the same starting noise always gives the same sample.
+
+**Common misconception:** DDIM is not “DDPM with the noise term removed” (4.5 showed that collapses). It is a different update, with a non-Markov forward process that has the same marginals q(xₜ | x₀).
+
+**Transition:** See the paths.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2010.02502">Song, Meng &amp; Ermon, “Denoising Diffusion Implicit Models” (2021)</a> · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (24:35)
+
+## ddim-2d: Same network: DDPM paths jitter, DDIM paths glide
+
+**Build 1, ask:** Why are DDIM paths so straight?
+
+**Expected:** Each jump aims at the current guess of the clean point, and the guess changes slowly.
+
+**Build 2, ask:** Do the two samplers give the same final points?
+
+**Expected:** No: different particles end in different places, but both sets follow the data distribution.
+
+**Point here:** Mean distance to the face: DDPM 0.0034, DDIM 0.0083; fresh data points 0.0040.
+
+**Transition:** And on MNIST?
+
+## ddim-steps: Fewer steps, same network: from 1 to 1,000
+
+**Build 1, ask:** Why does one step give blobs, and how few steps can you get away with?
+
+**Expected:** One jump returns x̂₀ at t = 1,000: the average digit. Here about 20 steps suffice; distilled and consistency models get to 1–4 (6.3).
+
+**Transition:** Faster still, on a real image model.
+
+**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (XI, “Speed vs Quality”)
+
+## sd-speed: Stable Diffusion in fewer steps, and in one
+
+**Build 1, ask:** How many DDIM steps would you pay for?
+
+**Expected:** About 20–25: as good as 50 at half the cost. Our MNIST model needed about 20 as well (6.2).
+
+**Build 2, ask:** What did the consistency model learn that DDIM did not?
+
+**Expected:** To map a noisy point straight to the end of its path in one jump: a student trained to land where many small steps of the original model would.
+
+**Point here:** Stable Diffusion v1.5: DDIM (η = 0), guidance w = 7.5, seed 1, prompt “a red fox sitting in fresh snow, soft morning light, wildlife photograph”. LCM: the LCM-LoRA adapter for SD 1.5 with its own scheduler and w = 1. Run on a laptop GPU for the companion film.
+
+**Transition:** Where the field went.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2010.02502">Song, Meng &amp; Ermon, “Denoising Diffusion Implicit Models” (2021)</a> · <a href="https://arxiv.org/abs/2310.04378">Luo et al., “Latent Consistency Models” (2023)</a> · Stable Diffusion v1.5, run for the companion film “Diffusion models, from noise to images, step by step” (2026)
+
+## frontier: Where the field went: same idea, better parts
+
+**Build 1, ask:** Which of these would you try first for faster sampling?
+
+**Expected:** Distillation or consistency models for speed; flow matching for simpler training and straighter paths.
+
+**Transition:** Part 7: steering with labels and text.
+
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 6</a> · Peebles &amp; Xie (2023) · Lipman et al. (2023) · Liu et al. (2023) · Song et al. (2023)
 
 ## label: A 3 on demand: give the network the label
 
@@ -792,7 +877,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 3, ask:** How would you push towards “more 3-like”?
 
-**Expected:** Add a push towards images a classifier is confident are 3s: next slide.
+**Expected:** Ask the network twice, with and without the label, and push along the difference: next slide.
 
 **Transition:** Push harder: guidance.
 
@@ -868,9 +953,25 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Point here:** Our autoencoder: convolutions down to 4 × 7 × 7, codes scaled by their standard deviation (5.32) before diffusion. Latent DDPM: 4 time-conditioned blocks, 20,000 updates.
 
-**Transition:** From a label to a sentence.
+**Transition:** The real thing: Stable Diffusion’s autoencoder.
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2112.10752">Rombach et al., “High-Resolution Image Synthesis with Latent Diffusion Models” (2022)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (XII)
+
+## sd-vae: Stable Diffusion’s autoencoder: 48 times fewer numbers
+
+**Build 1, ask:** Why does the code still look like a cat?
+
+**Expected:** Each code position summarises an 8 × 8 patch of the photo, so the layout survives: the code is a small, strange image.
+
+**Build 2, ask:** What does the decoder have to invent?
+
+**Expected:** Fine texture such as fur and sharp edges: restored plausibly, not exactly.
+
+**Point here:** The encoder’s mean, times the scaling factor 0.18215; each channel stretched to its 1–99% range for display. Autoencoder: 83.7M parameters (34.2M encoder, 49.5M decoder). Round trip: 30.9 dB PSNR.
+
+**Transition:** From a label to a sentence.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2112.10752">Rombach et al., “High-Resolution Image Synthesis with Latent Diffusion Models” (2022)</a> · Stable Diffusion v1.5, run for the companion film “Diffusion models, from noise to images, step by step” (2026)
 
 ## text: Text in, through cross-attention
 
@@ -884,191 +985,59 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 3, ask:** What does guidance do to a text prompt?
 
-**Expected:** Pushes images to match the caption more strongly, at the cost of variety (5.3).
+**Expected:** Pushes images to match the caption more strongly, at the cost of variety (7.6).
 
-**Transition:** Part 6: faster sampling.
+**Transition:** Which words go where, in the real model.
 
-**Source / evidence:** <a href="https://arxiv.org/abs/2112.10752">Rombach et al., “High-Resolution Image Synthesis with Latent Diffusion Models” (2022)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (XII)
+**Source / evidence:** <a href="https://arxiv.org/abs/2112.10752">Rombach et al., “High-Resolution Image Synthesis with Latent Diffusion Models” (2022)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (XII) · the fox: Stable Diffusion v1.5
 
-## slow: A thousand network calls per image
+## sd-attn: Which words go where: the real cross-attention
 
-**Build 1, ask:** Where does the time go?
+**Build 1, ask:** Which part of the picture attends to “snow”?
 
-**Expected:** Into the network calls: everything else is arithmetic.
+**Expected:** Everything except the fox: on average 0.26 off the fox and 0.04 on it, on a 0–1 scale.
 
-**Build 2, ask:** Why not just use fewer DDPM steps?
+**Build 2, ask:** How can different regions read different words?
 
-**Expected:** The step back is only Gaussian for small steps (2.2); big DDPM steps get the distribution wrong.
+**Expected:** Each image position sends its own query, so it gets its own attention weights over the words: cross-attention.
 
-**Transition:** Jump to the guess, then re-noise.
+**Point here:** U-Net cross-attention at 16 × 16, the conditional half, mean over heads, layers and the 50 steps; each word’s map scaled to its own 0–1 range. Mean on the fox (its orange and dark pixels) / elsewhere: “fox” 0.50 / 0.14, “red” 0.39 / 0.17, “sitting” 0.64 / 0.27, “snow” 0.04 / 0.26. The small words “in” and “the” also light up the fox (0.61 / 0.18 and 0.51 / 0.19), so a single word’s map should not be over-read.
 
-## ddim-idea: DDIM: jump to the guess, then re-noise it to an earlier level
+**Transition:** Watch whole sentences become pictures.
 
-**Build 1, ask:** Which formula is the second line?
+**Source / evidence:** <a href="https://arxiv.org/abs/2208.01626">Hertz et al., “Prompt-to-Prompt Image Editing with Cross Attention Control” (2022)</a> · Stable Diffusion v1.5, run for the companion film “Diffusion models, from noise to images, step by step” (2026)
 
-**Expected:** The shortcut xₜ = √ᾱ x₀ + √(1 − ᾱ) ε with the two guesses.
+## sd-film: A sentence in, a picture out: 50 steps
 
-**Build 2, ask:** Why reuse ε̂ rather than draw new noise?
+**Build 1, ask:** Why do the first frames look like coloured blotches rather than grey static?
 
-**Expected:** It keeps the noisy image consistent with the guess; DDIM shows these jumps keep the same marginals as the forward process.
+**Expected:** They are pure noise in the 4 × 64 × 64 code, passed through the decoder: decoded noise is blotchy and colourful.
 
-**Build 3, ask:** What do we lose?
+**Build 2, ask:** When is each layout decided?
 
-**Expected:** The randomness of each step: the same starting noise always gives the same sample.
+**Expected:** Early: the network’s guess of the final picture shows each layout within the first ten or fifteen of the 50 steps; the rest adds detail.
 
-**Common misconception:** DDIM is not “DDPM with the noise term removed” (4.5 showed that collapses). It is a different update, with a non-Markov forward process that has the same marginals q(xₜ | x₀).
+**Point here:** Prompts: “a red fox sitting in fresh snow, soft morning light, wildlife photograph” · “a peacock with its tail feathers open in a garden, golden hour, photograph” · “a lighthouse on a rocky cliff at sunset, oil painting” · “a watercolor painting of a hummingbird and red flowers” · “glowing jellyfish in the deep ocean, underwater photograph”. Stable Diffusion v1.5, DDIM (η = 0), 50 steps, w = 7.5; every second step shown, decoded to pixels.
 
-**Transition:** See the paths.
+**Transition:** Turn the guidance dial on a sentence.
 
-**Source / evidence:** <a href="https://arxiv.org/abs/2010.02502">Song, Meng &amp; Ermon, “Denoising Diffusion Implicit Models” (2021)</a> · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (24:35)
+**Source / evidence:** <a href="https://arxiv.org/abs/2112.10752">Rombach et al., “High-Resolution Image Synthesis with Latent Diffusion Models” (2022)</a> · Stable Diffusion v1.5, run for the companion film “Diffusion models, from noise to images, step by step” (2026)
 
-## ddim-2d: Same network: DDPM paths jitter, DDIM paths glide
+## sd-guidance: The guidance dial on a sentence: w = 0 to 15
 
-**Build 1, ask:** Why are DDIM paths so straight?
+**Build 1, ask:** Why is w = 0 not a fox at all?
 
-**Expected:** Each jump aims at the current guess of the clean point, and the guess changes slowly.
+**Expected:** w = 0 keeps only the guess for the empty sentence: the unconditional model, which can draw anything.
 
-**Build 2, ask:** Do the two samplers give the same final points?
+**Build 2, ask:** Which w would you ship?
 
-**Expected:** No: different particles end in different places, but both sets follow the data distribution.
+**Expected:** Somewhere around 5–8. Paras Chopra’s explainer notes that most users settle around 7.5.
 
-**Point here:** Mean distance to the face: DDPM 0.0034, DDIM 0.0083; fresh data points 0.0040.
+**Point here:** Stable Diffusion v1.5, DDIM 50 steps, seed 1. The guided noise is our formula of 7.2, with the sentence as the label and the empty sentence as “no label”; w = 1 uses only the conditional guess.
 
-**Transition:** And on MNIST?
+**Transition:** Part 8: wrap-up.
 
-## ddim-steps: Fewer steps, same network: from 1 to 1,000
-
-**Build 1, ask:** Why does one step give blobs, and how few steps can you get away with?
-
-**Expected:** One jump returns x̂₀ at t = 1,000: the average digit. Here about 20 steps suffice; distilled and consistency models get to 1–4 (7.4).
-
-**Transition:** One more design choice: how fast the noise grows.
-
-**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (XI, “Speed vs Quality”)
-
-## cosine: The schedule matters: linear destroys too early
-
-**Build 1, ask:** At which t does the 3 vanish under each?
-
-**Expected:** Linear about 600, cosine about 800–850.
-
-**Build 2, ask:** Why does that matter for training?
-
-**Expected:** Training samples t uniformly: with linear, about a third of the examples are nearly pure noise.
-
-**Point here:** Our models use the linear schedule (simpler, and enough for MNIST). The cosine schedule is ᾱₜ = cos²(((t/T) + s)/(1 + s) · π/2), s = 0.008.
-
-**Transition:** Part 7: what the network learns.
-
-**Source / evidence:** <a href="https://arxiv.org/abs/2102.09672">Nichol &amp; Dhariwal, “Improved Denoising Diffusion Probabilistic Models” (2021)</a> · <a href="https://www.youtube.com/watch?v=HoKDTa5jHvg">Outlier, “Diffusion Models, Paper Explanation, Math Explained” (2022)</a> (6:26)
-
-## score-def: The score: an arrow at every point, pointing uphill
-
-**Build 1, ask:** Where is the score zero?
-
-**Expected:** At the peaks, and at the dip between them.
-
-**Build 2, ask:** Why does the normaliser not matter?
-
-**Expected:** log(p/Z) = log p − log Z, and log Z has no x: its gradient is zero.
-
-**Build 3, ask:** How could you sample using only arrows?
-
-**Expected:** Walk uphill with some noise: Langevin dynamics, next.
-
-**Point here:** Energy view (Vizuara): p ∝ exp(−E). The score is −∇E: downhill in energy, uphill in probability.
-
-**Transition:** The smiley’s arrows, from our network.
-
-**Source / evidence:** <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (IX) · <a href="https://www.youtube.com/watch?v=bVrweqE-r38">Vizuara, “Principles of Diffusion Models”, Lecture 1 (2025)</a> (39:27) · <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a>
-
-## scorefield: The smiley’s arrows, at different noise levels
-
-**Build 1, ask:** Why does the arrow length grow far from the face?
-
-**Expected:** The arrow is √ᾱ x̂₀ − x: the further from the face, the further to go.
-
-**Build 2, ask:** Why use many noise levels?
-
-**Expected:** Low noise: precise but only near the data. High noise: defined everywhere but blurry. Start high and lower it: the schedule.
-
-**Transition:** Diffusion is also a VAE.
-
-**Source / evidence:** <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a> · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 1</a> (23:00)
-
-## vae-map: Diffusion is a VAE with a fixed encoder
-
-**Build 1, ask:** What plays z?
-
-**Expected:** All of x₁ … x_T.
-
-**Build 2, ask:** What is unusual about this encoder?
-
-**Expected:** It has no parameters: q is chosen, not learned. And the latents are as big as the image.
-
-**Build 3, ask:** What should the training objective be, then?
-
-**Expected:** The ELBO, as in Lectures 1 and 3.
-
-**Transition:** Its ELBO, in one line.
-
-**Source / evidence:** <a href="https://www.youtube.com/watch?v=fbLgFrlTnGU">Ari Seff, “What are Diffusion Models?” (2022)</a> (6:28) · <a href="https://arxiv.org/abs/2208.11970">Calvin Luo, “Understanding Diffusion Models: A Unified Perspective” (2022)</a>
-
-## elbo-simple: Its ELBO is a weighted noise error
-
-**Build 1, ask:** What are the latents and the encoder here?
-
-**Expected:** x₁ … x_T; the fixed noising.
-
-**Build 2, ask:** Why drop the weights?
-
-**Expected:** Empirically better samples: the true weights concentrate on the almost-clean steps.
-
-**Transition:** Does it just copy its training set?
-
-**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · §3.4
-
-## ideal: The best possible denoiser only copies its training set
-
-**Build 1, ask:** Why is this the best possible guess?
-
-**Expected:** Bayes with N equally likely clean images: the ink-or-paper calculation of optional depth, with N choices instead of two.
-
-**Build 2, ask:** So is a lower training loss always better?
-
-**Expected:** No: the global optimum memorises.
-
-**Build 3, ask:** What stops our network from copying?
-
-**Expected:** Its architecture and training: a smooth function cannot pick out 60,000 exact points (but very small datasets or huge models can memorise).
-
-**Transition:** See it in 2-D.
-
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 4</a> (13:04)
-
-## copy-2d: In 2-D: the perfect denoiser copies, a network fills in
-
-**Build 1, ask:** Is the ideal denoiser wrong?
-
-**Expected:** No: it is optimal for these 40 points. It is a bad generator.
-
-**Build 2, ask:** What did the network assume?
-
-**Expected:** That nearby points behave alike: smoothness. That bias is what makes new samples.
-
-**Transition:** Where the field went.
-
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 4</a> (20:47)
-
-## frontier: Where the field went: same idea, better parts
-
-**Build 1, ask:** Which of these would you try first for faster sampling?
-
-**Expected:** Distillation or consistency models for speed; flow matching for simpler training and straighter paths.
-
-**Transition:** Wrap-up.
-
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> · <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 6</a> · Peebles &amp; Xie (2023) · Lipman et al. (2023) · Liu et al. (2023) · Song et al. (2023)
+**Source / evidence:** <a href="https://arxiv.org/abs/2207.12598">Ho &amp; Salimans, “Classifier-Free Diffusion Guidance” (2022)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (XII) · Stable Diffusion v1.5, run for the companion film “Diffusion models, from noise to images, step by step” (2026)
 
 ## compare: Three generators, side by side
 
@@ -1098,7 +1067,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 5, ask:** Q5.
 
-**Expected:** Bayes with N training images: the guess is their weighted average.
+**Expected:** Cross-attention for the words, guidance for the push.
 
 **Transition:** References.
 
@@ -1110,6 +1079,56 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Transition:** End of the main route.
 
+## three-gens: Two generators so far, and a third idea (optional)
+
+**Build 1, ask:** Why are VAE samples blurry?
+
+**Expected:** The decoder predicts an average over the plausible images (a Gaussian or Bernoulli mean).
+
+**Build 2, ask:** What went wrong with GANs?
+
+**Expected:** Mode collapse and unstable alternating training; no likelihood to monitor.
+
+**Build 3, ask:** What might we pay for a thousand steps?
+
+**Expected:** Time: a thousand network calls per image. Part 6 cuts that.
+
+**Point here:** VAE: the β = 1 model of Lecture 3, prior samples (probabilities shown). GAN: Lecture 4’s MNIST GAN after 30 epochs. Diffusion: our model, Part 4.
+
+**Transition:** The idea in one sentence.
+
+## river: One pixel, a thousand steps: the density flows (optional)
+
+**Build 1, ask:** Where is the density at t = 0?
+
+**Expected:** Two spikes: at −1 with probability 0.65 and at +1 with 0.35.
+
+**Build 2, ask:** Pick one path at t = 1,000. Did it start at ink or paper?
+
+**Expected:** You cannot tell. That is the problem Part 2 faces.
+
+**Transition:** Do we need all thousand steps to make one noisy example?
+
+**Source / evidence:** <a href="https://www.youtube.com/watch?v=EhndHhIvWWw">Deepia, “Diffusion Models: DDPM, Generative AI Animated” (2025)</a>
+
+## shortcut-q: Do we need a 1,000-step loop for one noisy example? (optional)
+
+**Build 1, ask:** What kind of random variable is x₂?
+
+**Expected:** A constant times x₀ plus a sum of independent Gaussians.
+
+**Build 2, ask:** How many noise draws does x₁₀₀₀ involve?
+
+**Expected:** A thousand.
+
+**Build 3, ask:** Any way to collapse this?
+
+**Expected:** A sum of independent Gaussians is one Gaussian: 1.3.
+
+**Transition:** Collapse two steps by hand.
+
+**Source / evidence:** <a href="https://www.youtube.com/watch?v=fbLgFrlTnGU">Ari Seff, “What are Diffusion Models?” (2022)</a>
+
 ## pixel-prior: One pixel: paper or ink (optional)
 
 **Build 1, ask:** Why is this pixel ink so often?
@@ -1118,7 +1137,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** Is a coin a good model of one pixel?
 
-**Expected:** For one pixel, yes, up to the greys. Lecture 2: one probability per pixel gets each pixel right but makes poor images, because strokes are coordinated. Remember that for 3.7.
+**Expected:** For one pixel, yes, up to the greys. Lecture 2: one probability per pixel gets each pixel right but makes poor images, because strokes are coordinated. Remember that for “One pixel alone gives a grey; all 784 together give a 3”.
 
 **Transition:** We observe the noisy pixel. Was it ink?
 
@@ -1152,19 +1171,23 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Transition:** What if we jump all the way back in one step?
 
-## river: One pixel, a thousand steps: the density flows (optional)
+## big-jump: From pure noise straight back to the pixel: two spikes (optional)
 
-**Build 1, ask:** Where is the density at t = 0?
+**Build 1, ask:** What does x_T tell us about the pixel?
 
-**Expected:** Two spikes: at −1 with probability 0.65 and at +1 with 0.35.
+**Expected:** Nothing: at t = 1,000 the signal coefficient is 0.006.
 
-**Build 2, ask:** Pick one path at t = 1,000. Did it start at ink or paper?
+**Build 2, ask:** Why is the average a bad sample?
 
-**Expected:** You cannot tell. That is the problem Part 2 faces.
+**Expected:** It is not a value the data ever takes: no image is grey there.
 
-**Transition:** Do we need all thousand steps to make one noisy example?
+**Build 3, ask:** What did the VAE decoder output, and why was it blurry?
 
-**Source / evidence:** <a href="https://www.youtube.com/watch?v=EhndHhIvWWw">Deepia, “Diffusion Models: DDPM, Generative AI Animated” (2025)</a>
+**Expected:** A mean over the plausible images given z: the same averaging.
+
+**Transition:** So take smaller steps back.
+
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (the “100 cats” question)
 
 ## why-gaussian: Why: a narrow likelihood times a smooth prior (optional)
 
@@ -1174,11 +1197,11 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** What if β were large?
 
-**Expected:** The likelihood would be wide and the product would inherit the prior’s two bumps: 2.4 with a big jump.
+**Expected:** The likelihood would be wide and the product would inherit the prior’s two bumps: “From pure noise straight back to the pixel: two spikes”.
 
 **Build 3, ask:** Which part needs learning: the mean or the width?
 
-**Expected:** The mean. DDPM fixes σₜ² to βₜ or to β̃ₜ of the next slide.
+**Expected:** The mean. DDPM fixes σₜ² to βₜ or to β̃ₜ of “Complete the square: the mean and the width”.
 
 **Point here:** The general result is old (Feller 1949): for small steps, the reverse of a Gaussian diffusion has the same Gaussian form. Sohl-Dickstein et al. (2015) built on it.
 
@@ -1242,7 +1265,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 1, ask:** What should the network output, ideally?
 
-**Expected:** E[x₀ | xₜ]: the posterior mean, as in 2.2.
+**Expected:** E[x₀ | xₜ]: the posterior mean, as in “We see x₂₅₀ = 0.38. Was the pixel ink?”.
 
 **Build 2, ask:** Is a small error per step harmless?
 
@@ -1250,7 +1273,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 3, ask:** Why might guessing ε be easier than guessing x₀?
 
-**Expected:** ε always has mean 0 and variance 1 at every t: a well-scaled target. Part 5 shows the choice reweights the loss.
+**Expected:** ε always has mean 0 and variance 1 at every t: a well-scaled target. “Drop the weights: the simple loss we trained in Part 3” shows the choice reweights the loss.
 
 **Transition:** Write the mean directly in terms of ε.
 
@@ -1271,6 +1294,140 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 **Transition:** Three names for one guess.
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · eq. 11
+
+## total-noise: ε is all the noise since x₀, not the last step’s (optional)
+
+**Build 1, ask:** Why not predict the last step’s noise?
+
+**Expected:** Training never runs the steps: it jumps with the shortcut, so there is no “last step” noise to target.
+
+**Build 2, ask:** Then how do we take one step?
+
+**Expected:** From the total-noise guess we get the mean μ (2.4): Part 4.
+
+**Common misconception:** A common confusion: ε is not the small noise between xₜ₋₁ and xₜ.
+
+**Transition:** The network also needs t.
+
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (16:15)
+
+## average: The same noisy value can come from different noises (optional)
+
+**Build 1, ask:** Why the average, again?
+
+**Expected:** Squared error is minimised by the mean (Lecture 1).
+
+**Build 2, ask:** At which t is the pixel’s unavoidable loss zero?
+
+**Expected:** At both ends: at small t the pixel is obvious; at large t the noise ≈ xₜ itself.
+
+**Build 3, ask:** Why is the network’s loss largest at small t?
+
+**Expected:** Tiny noise on grey stroke edges is hard to tell apart from the stroke itself: real pixels are not just ink or paper.
+
+**Point here:** Irreducible loss = E[Var(ε | xₜ)] = ᾱ/(1 − ᾱ) · E[1 − x̂₀²] for a ±1 pixel. Computed by numerical integration over xₜ.
+
+**Transition:** What network makes the guess?
+
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (homework hint: the conditional expectation minimises squared error)
+
+## coordinate: One pixel alone gives a grey; all 784 together give a 3 (optional)
+
+**Build 1, ask:** Which is the per-pixel model of Lecture 2?
+
+**Expected:** Each pixel alone: one probability per pixel, independent.
+
+**Build 2, ask:** Why can the network see the stroke?
+
+**Expected:** Its 7×7 layer sees the whole digit; neighbouring noisy pixels together are much less noisy than one.
+
+**Transition:** Recap of training.
+
+## step-image: The same step on an image, at t = 600 (optional)
+
+**Build 1, ask:** Can you see the 7 in x₆₀₀?
+
+**Expected:** No.
+
+**Build 2, ask:** Why do μ and x₅₉₉ look the same as x₆₀₀?
+
+**Expected:** One step changes each pixel by about 1%.
+
+**Build 3, ask:** So where is the progress?
+
+**Expected:** In x̂₀: the guess sharpens step by step (4.4).
+
+**Transition:** The loop.
+
+## tweedie: The noise predictor is a score estimator (optional)
+
+**Build 1, ask:** Where does the minus sign come from?
+
+**Expected:** Gaussian log density: −(x − mean)²/(2 var), whose gradient is −(x − mean)/var.
+
+**Build 2, ask:** Why may the gradient move inside the average?
+
+**Expected:** ∇q_t = ∫ p(x₀) ∇q(x | x₀) dx₀; divide by q_t and Bayes turns p(x₀) q(x | x₀)/q_t(x) into p(x₀ | x).
+
+**Build 3, ask:** So what does the network estimate?
+
+**Expected:** The score of the noisy data distribution at every noise level, scaled by −√(1 − ᾱ).
+
+**Build 4, ask:** Why do the two numbers differ?
+
+**Expected:** One uses the true noise, unknown at generation time; the score averages over both stories, ink and paper.
+
+**Common misconception:** Paras Chopra’s explainer writes ∇ log p(xₜ) = −ε/√(1 − ᾱₜ). That is the score of q(xₜ | x₀), for a known clean image. The score of the noisy data needs the posterior average E[ε | xₜ], which is what the network learns.
+
+**Transition:** Four ways to use the same trained network.
+
+**Source / evidence:** <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a> · <a href="https://arxiv.org/abs/2208.11970">Calvin Luo, “Understanding Diffusion Models: A Unified Perspective” (2022)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (IX, corrected)
+
+## map-2x2: Four ways to run the same trained network (optional)
+
+**Build 1, ask:** Which of these is the DDPM loop?
+
+**Expected:** Discrete and random.
+
+**Build 2, ask:** Does changing the sampler need retraining?
+
+**Expected:** No: all four use the same ε̂-network.
+
+**Transition:** Diffusion is also a VAE.
+
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (39:04) · <a href="https://arxiv.org/abs/2011.13456">Song et al., “Score-Based Generative Modeling through SDEs” (2021)</a>
+
+## vae-map: Diffusion is a VAE with a fixed encoder (optional)
+
+**Build 1, ask:** What plays z?
+
+**Expected:** All of x₁ … x_T.
+
+**Build 2, ask:** What is unusual about this encoder?
+
+**Expected:** It has no parameters: q is chosen, not learned. And the latents are as big as the image.
+
+**Build 3, ask:** What should the training objective be, then?
+
+**Expected:** The ELBO, as in Lectures 1 and 3.
+
+**Transition:** Its ELBO, in one line.
+
+**Source / evidence:** <a href="https://www.youtube.com/watch?v=fbLgFrlTnGU">Ari Seff, “What are Diffusion Models?” (2022)</a> (6:28) · <a href="https://arxiv.org/abs/2208.11970">Calvin Luo, “Understanding Diffusion Models: A Unified Perspective” (2022)</a>
+
+## elbo-simple: Its ELBO is a weighted noise error (optional)
+
+**Build 1, ask:** What are the latents and the encoder here?
+
+**Expected:** x₁ … x_T; the fixed noising.
+
+**Build 2, ask:** Why drop the weights?
+
+**Expected:** Empirically better samples: the true weights concentrate on the almost-clean steps.
+
+**Transition:** Does it just copy its training set?
+
+**Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · §3.4
 
 ## elbo-chain: The same bound as Lecture 1 (optional)
 
@@ -1320,7 +1477,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Build 3, ask:** What are the two Gaussians in L_{t−1}?
 
-**Expected:** N(μ̃ₜ(xₜ, x₀), β̃ₜ) from 2.5, and N(μ_θ(xₜ, t), σₜ²) with σₜ² = β̃ₜ.
+**Expected:** N(μ̃ₜ(xₜ, x₀), β̃ₜ) from “Complete the square: the mean and the width”, and N(μ_θ(xₜ, t), σₜ²) with σₜ² = β̃ₜ.
 
 **Point here:** The KL form appears by grouping log p_θ(xₜ₋₁ | xₜ) − log q(xₜ₋₁ | xₜ, x₀) under the expectation; the two leftover ends make L_T and L₀.
 
@@ -1356,7 +1513,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** Only ε̂: the weight is fixed by the schedule.
 
-**Build 3, ask:** Check the number against 5.3.
+**Build 3, ask:** Check the number against “Lecture 1’s formula: two Gaussians of the same width”.
 
 **Expected:** 0.0032 = 0.0032: the same.
 
@@ -1378,59 +1535,37 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** <a href="https://arxiv.org/abs/2006.11239">Ho, Jain &amp; Abbeel, “Denoising Diffusion Probabilistic Models” (2020)</a> · §3.4
 
-## tweedie: The noise predictor is a score estimator (optional)
+## ideal: The best possible denoiser only copies its training set (optional)
 
-**Build 1, ask:** Where does the minus sign come from?
+**Build 1, ask:** Why is this the best possible guess?
 
-**Expected:** Gaussian log density: −(x − mean)²/(2 var), whose gradient is −(x − mean)/var.
+**Expected:** Bayes with N equally likely clean images: the ink-or-paper calculation of optional depth, with N choices instead of two.
 
-**Build 2, ask:** Why may the gradient move inside the average?
+**Build 2, ask:** So is a lower training loss always better?
 
-**Expected:** ∇q_t = ∫ p(x₀) ∇q(x | x₀) dx₀; divide by q_t and Bayes turns p(x₀) q(x | x₀)/q_t(x) into p(x₀ | x).
+**Expected:** No: the global optimum memorises.
 
-**Build 3, ask:** So what does the network estimate?
+**Build 3, ask:** What stops our network from copying?
 
-**Expected:** The score of the noisy data distribution at every noise level, scaled by −√(1 − ᾱ).
+**Expected:** Its architecture and training: a smooth function cannot pick out 60,000 exact points (but very small datasets or huge models can memorise).
 
-**Build 4, ask:** Why do the two numbers differ?
+**Transition:** See it in 2-D.
 
-**Expected:** One uses the true noise, unknown at generation time; the score averages over both stories, ink and paper.
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 4</a> (13:04)
 
-**Common misconception:** Paras Chopra’s explainer writes ∇ log p(xₜ) = −ε/√(1 − ᾱₜ). That is the score of q(xₜ | x₀), for a known clean image. The score of the noisy data needs the posterior average E[ε | xₜ], which is what the network learns.
+## copy-2d: In 2-D: the perfect denoiser copies, a network fills in (optional)
 
-**Transition:** Four ways to use the same trained network.
+**Build 1, ask:** Is the ideal denoiser wrong?
 
-**Source / evidence:** <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a> · <a href="https://arxiv.org/abs/2208.11970">Calvin Luo, “Understanding Diffusion Models: A Unified Perspective” (2022)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (IX, corrected)
+**Expected:** No: it is optimal for these 40 points. It is a bad generator.
 
-## langevin: Follow the arrows, with a little noise: Langevin sampling (optional)
+**Build 2, ask:** What did the network assume?
 
-**Build 1, ask:** Why the random kick?
+**Expected:** That nearby points behave alike: smoothness. That bias is what makes new samples.
 
-**Expected:** Without it every particle climbs to a peak and stops: no spread, just like 4.4.
+**Transition:** Where the field went.
 
-**Build 2, ask:** How does this compare with Part 4’s loop?
-
-**Expected:** Same structure: a nudge along the network’s guess plus fresh noise, at decreasing noise levels.
-
-**Point here:** Step size here: η = 0.1 (1 − ᾱₜ), one step per level, every fourth level. DDPM’s step is a particular choice of this nudge and kick.
-
-**Transition:** Connect the arrows to the noise predictor.
-
-**Source / evidence:** <a href="https://arxiv.org/abs/1907.05600">Song &amp; Ermon, “Generative Modeling by Estimating Gradients of the Data Distribution” (2019)</a> · <a href="https://paraschopra.github.io/explainers/diffusion/index.html">Paras Chopra, “Diffusion Models from First Principles” (2025)</a> (IX)
-
-## map-2x2: Four ways to run the same trained network (optional)
-
-**Build 1, ask:** Which of these is the DDPM loop?
-
-**Expected:** Discrete and random.
-
-**Build 2, ask:** Does changing the sampler need retraining?
-
-**Expected:** No: all four use the same ε̂-network.
-
-**Transition:** Part 6.
-
-**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 2</a> (39:04) · <a href="https://arxiv.org/abs/2011.13456">Song et al., “Score-Based Generative Modeling through SDEs” (2021)</a>
+**Source / evidence:** <a href="https://www.youtube.com/playlist?list=PL_1TbuIu65A_G908tHHvTnyQsueR17rMh">MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lecture 4</a> (20:47)
 
 ## cg: Classifier guidance: Bayes’ rule on scores (optional)
 

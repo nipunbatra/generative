@@ -51,16 +51,19 @@ md(r"""
 
 This notebook follows the slides **section by section, with the same numbers**: every slide has a **▶ Notebook** link that opens its section here. Run everything once from the top (*Runtime → Run all*); later cells use earlier ones. CPU is enough (about five minutes); a GPU makes the MNIST parts faster.
 
+The order follows Paras Chopra's explainer *Diffusion Models from First Principles*.
+
 | Part | Sections |
 |---|---|
-| **0 · Opening** | [0.1 Noise to a digit]({DECK}#hook/1) · [0.2 Three generators]({DECK}#three-gens/1) · [0.3 The idea]({DECK}#core-idea/1) |
-| **1 · Destroying is easy** | [1.1 One noising step]({DECK}#one-step/1) · [1.2 A toy schedule, by hand]({DECK}#toy-schedule/1) · [1.3 The shortcut]({DECK}#shortcut-q/1) · [1.4 The real schedule]({DECK}#schedule/1) · [1.5 Watch our 3 dissolve]({DECK}#film/1) |
-| **2 · Undoing it** | [2.1 What we want]({DECK}#reverse-q/1) · [2.2 Big jumps back are hard]({DECK}#big-jump/1) · [2.3 Guess the noise]({DECK}#guess-noise/1) · [2.4 One step back]({DECK}#reverse-step/1) |
-| **3 · Training** | [3.1 The training example]({DECK}#tuple/1) · [3.2 Why t]({DECK}#why-t/1) · [3.3 The loss]({DECK}#loss-hand/1) · [3.4 The network]({DECK}#mlp/1) · [3.5 Training, live]({DECK}#train-code/1) · [3.6 What the network believes]({DECK}#x0film/1) |
-| **4 · Generating** | [4.1 One step back, by hand]({DECK}#step-hand/1) · [4.2 The toy, all the way back]({DECK}#toy-reverse/1) · [4.3 The loop]({DECK}#sample-code/1) · [4.4 Watch it]({DECK}#sampler2d/1) · [4.5 Why the fresh noise?]({DECK}#why-noise/1) · [4.6 New digits]({DECK}#samples64/1) |
-| **5 · Steering** | [5.1 A 3 on demand]({DECK}#label/1) · [5.2 Guidance]({DECK}#cfg/1) · [5.3 The dial]({DECK}#dial/1) · [5.4 Latent diffusion]({DECK}#latent/1) · [5.5 Text in]({DECK}#text/1) |
-| **6 · Faster** | [6.1 DDIM]({DECK}#slow/1) · [6.2 The schedule matters]({DECK}#cosine/1) |
-| **7 · What it learns** | [7.1 Arrows to the data]({DECK}#score-def/1) · [7.2 It is a VAE]({DECK}#vae-map/1) · [7.3 Does it just copy?]({DECK}#ideal/1) · [7.4 Wrap-up]({DECK}#frontier/1) |
+| **0 · Introduction** | [0.1 Static in, a cat out]({DECK}#hook/1) · [0.2 Destruction as creation]({DECK}#core-idea/1) |
+| **1 · The forward process** | [1.1 One noising step]({DECK}#one-step/1) · [1.2 A toy schedule, by hand]({DECK}#toy-schedule/1) · [1.3 A beautiful shortcut]({DECK}#two-steps/1) · [1.4 The real schedule]({DECK}#schedule/1) · [1.5 Watch it dissolve]({DECK}#film/1) |
+| **2 · The reverse process** | [2.1 Run the film backwards]({DECK}#reverse-q/1) · [2.2 Small steps back are simple]({DECK}#reverse-explorer/1) · [2.3 Guess the noise]({DECK}#guess-noise/1) · [2.4 One step back]({DECK}#reverse-step/1) |
+| **3 · What the network learns, and training** | [3.1 What does the network learn?]({DECK}#three-targets/1) · [3.2 The network]({DECK}#unet/1) · [3.3 The training loop]({DECK}#tuple/1) · [3.4 Training, live]({DECK}#mlp/1) · [3.5 What the network believes]({DECK}#x0film/1) |
+| **4 · Sampling** | [4.1 One step back, by hand]({DECK}#step-hand/1) · [4.2 The toy, all the way back]({DECK}#toy-reverse/1) · [4.3 The sampling loop]({DECK}#sample-code/1) · [4.4 Watch it]({DECK}#sampler2d/1) · [4.5 Why the fresh noise?]({DECK}#why-noise/1) · [4.6 New digits]({DECK}#samples64/1) |
+| **5 · The score** | [5.1 Arrows to the data]({DECK}#score-def/1) · [5.2 Follow the arrows]({DECK}#langevin/1) |
+| **6 · Schedules and speed** | [6.1 Noise schedules]({DECK}#cosine/1) · [6.2 DDIM: fewer steps]({DECK}#slow/1) · [6.3 Faster still]({DECK}#frontier/1) |
+| **7 · Steering** | [7.1 A 3 on demand]({DECK}#label/1) · [7.2 Classifier-free guidance]({DECK}#cfg/1) · [7.3 The guidance dial]({DECK}#dial/1) · [7.4 From pixels to latents]({DECK}#latent/1) · [7.5 Text in]({DECK}#text/1) · [7.6 A sentence in, a picture out]({DECK}#sd-film/1) |
+| **8 · Wrap-up** | [8.1 Wrap-up]({DECK}#compare/1), then optional depth: the ELBO, and does it just copy? |
 
 **Conventions.** Images are scaled to [−1, 1]: paper is −1, ink is +1. The schedule is linear, $\beta_t$ from $10^{-4}$ to $0.02$, $T=1000$, with $\alpha_t=1-\beta_t$ and $\bar\alpha_t=\alpha_1\cdots\alpha_t$. The network always predicts the noise $\varepsilon$.
 """, anchor="top")
@@ -124,9 +127,8 @@ def checkpoint(name):
 """)
 
 # ---------------------------------------------------------------- Part 0
-sec("0.1", "Noise to a digit", "hook", "The film on the first slide is one sampling run of the MNIST model we load in Part 3. By the end of Part 4 you will have run that loop yourself.")
-sec("0.2", "Three generators", "three-gens", "VAE (Lecture 3) and GAN (Lecture 4) make a digit in one network call; diffusion takes many small steps, each an easy regression.")
-sec("0.3", "The idea", "core-idea", "*If you learn to undo each tiny step of a destruction process, you can create from scratch* (Paras Chopra). Like ink spreading in water: forwards is easy; we learn to run the film backwards.")
+sec("0.1", "Static in, a cat out", "hook", "The film on the first slide is the network of the original DDPM paper, trained on photos of cats. Here we build the same method on MNIST, small enough to follow every number; by the end of Part 4 you will have run the sampling loop yourself.")
+sec("0.2", "Destruction as creation", "core-idea", "*If you learn to undo each tiny step of a destruction process, you can create from scratch* (Paras Chopra). Like ink spreading in water: forwards is easy; we learn to run the film backwards.")
 
 # ---------------------------------------------------------------- Part 1
 sec("1.1", "One noising step", "one-step", "One step shrinks the value by $\\sqrt{\\alpha_t}$ and adds a kick of size $\\sqrt{\\beta_t}$.")
@@ -172,7 +174,7 @@ for t, (b, e) in enumerate(zip(toy_beta, toy_eps), 1):
 toy_x5 = x
 """, anchor="cell-toy")
 
-sec("1.3", "The shortcut", "shortcut-q", "$x_t=\\sqrt{\\bar\\alpha_t}\\,x_0+\\sqrt{1-\\bar\\alpha_t}\\,\\varepsilon$: any step in one line.")
+sec("1.3", "A beautiful shortcut", "two-steps", "$x_t=\\sqrt{\\bar\\alpha_t}\\,x_0+\\sqrt{1-\\bar\\alpha_t}\\,\\varepsilon$: any step in one line.")
 code(r"""
 def q_sample(x0, t, eps):
     a = alpha_bar[t]
@@ -204,7 +206,7 @@ a = alpha_bar[250]
 print(f'alpha_bar[250] = {a:.4f} (a product of 250 alphas); x_250 = {a.sqrt():.3f} * 1 + {(1 - a).sqrt():.3f} * (-0.5) = {q_sample(1.0, 250, -0.5):.3f}')
 """)
 
-sec("1.5", "Watch our 3 dissolve", "film", "Every image ends as $\\mathcal N(0, I)$: the signal is shrunk to zero, and what is left is Gaussian because we made it so.")
+sec("1.5", "Watch it dissolve", "film", "Every image ends as $\\mathcal N(0, I)$: the signal is shrunk to zero, and what is left is Gaussian because we made it so. The slides do the same to a real photograph.")
 code(r"""
 torch.manual_seed(2026)
 eps_fixed = torch.randn(784)
@@ -215,7 +217,7 @@ print(f'at t = 1000 the 784 values have mean {x_end.mean():.2f} and sd {x_end.st
 """)
 
 # ---------------------------------------------------------------- Part 2
-sec("2.1", "What we want", "reverse-q", "Going back needs $q(x_{t-1}\\mid x_t)\\propto q(x_t\\mid x_{t-1})\\,q(x_{t-1})$, and the prior over noisy images is unknown. For one pixel it is known.")
+sec("2.1", "Run the film backwards", "reverse-q", "Going back needs $q(x_{t-1}\\mid x_t)\\propto q(x_t\\mid x_{t-1})\\,q(x_{t-1})$, and the distribution of all noisy images is unknown. For one pixel it is known: ink or paper. We use it to check every number.")
 code(r"""
 # One pixel of our 3, across the training set: how often is it ink?
 x_train, y_train = mnist('train')
@@ -237,7 +239,7 @@ xt = q_sample(1.0, 250, -0.5)
 print(f'x_250 = {xt:.3f}: P(ink) = {p_ink(xt, 250):.2f}, best guess x0 = {2 * p_ink(xt, 250) - 1:.2f}, best noise guess = {best_eps(xt, 250):.3f}')
 """, anchor="cell-inkpaper")
 
-sec("2.2", "Big jumps back are hard, small ones easy", "big-jump", "The exact distribution of the pixel some steps back is a mixture of two Gaussians: two bumps for a big jump, one bell for a small step.")
+sec("2.2", "Small steps back are simple", "reverse-explorer", "The exact distribution of the pixel some steps back is a mixture of two Gaussians: two bumps for a big jump, one bell for a small step.")
 code(r"""
 def reverse_density(xt, t, s, grid):
     # q(x_s | x_t) = sum over ink/paper of P(x0 | x_t) q(x_s | x_t, x0), for s < t
@@ -271,13 +273,16 @@ def reverse_step(xt, t, eps_hat, z, beta, alpha, alpha_bar):
 """)
 
 # ---------------------------------------------------------------- Part 3
-sec("3.1", "The training example", "tuple", "Pick $x_0$, $t$ and $\\varepsilon$; make $x_t$. The network sees $(x_t,t)$; the target is the $\\varepsilon$ we drew.")
+sec("3.1", "What does the network learn?", "three-targets", "One guess, three names: the noise $\\hat\\varepsilon$, the clean image $\\hat x_0$, or the score. Each converts into the others with the shortcut; DDPM predicts the noise.")
 code(r"""
-t = 250
-eps = torch.randn(784)
-show([three, eps, q_sample(three, t, eps)], title='x0, the noise eps, x_t at t = 250', vmin=-2.5, vmax=2.5)
+# our pixel at t = 250, with the best possible noise guess, said three ways
+e_hat = best_eps(xt, 250)
+x0_hat = (xt - (1 - alpha_bar[250]).sqrt() * e_hat) / alpha_bar[250].sqrt()
+score = -e_hat / (1 - alpha_bar[250]).sqrt()
+print(f'noise eps_hat = {e_hat:.2f} · clean value x0_hat = {x0_hat:.2f} · score = {score:.2f}')
 """)
-sec("3.2", "Why the network needs t", "why-t", "The same pixel value means different things at different noise levels.")
+
+sec("3.2", "The network", "unet", "A U-Net for images: shrink to 7 × 7 to see the whole digit, grow back with skip connections. The same pixel value means different things at different noise levels, so the network is told $t$, as time features added in every block.")
 code(r"""
 for t in [50, 250, 900]:
     print(f't = {t}: best guess of x0 for x_t = 0.38 is {2 * p_ink(0.38, t) - 1:+.2f}')
@@ -287,30 +292,7 @@ def time_features(t, dim=64):
     return torch.cat([ang.sin(), ang.cos()], 1)
 plt.figure(figsize=(8, 1.6)); plt.imshow(time_features(torch.arange(1, T + 1), 16).T, aspect='auto', cmap='PuOr'); plt.xlabel('t'); plt.show()
 """)
-sec("3.3", "The loss", "loss-hand", "Squared error between the noise and its guess. The same $x_t$ can come from different noises, so the best guess is their average and the loss cannot reach zero.")
 code(r"""
-eps_ink = -0.5
-eps_paper = (xt + alpha_bar[250].sqrt()) / (1 - alpha_bar[250]).sqrt()
-P = p_ink(xt, 250)
-print(f'ink with eps = {eps_ink}, or paper with eps = {eps_paper:.2f}; best guess = {P:.2f} x {eps_ink} + {1 - P:.2f} x {eps_paper:.2f} = {best_eps(xt, 250):.3f}')
-print(f'squared error for our draw: ({eps_ink} - {best_eps(xt, 250):.3f})^2 = {(eps_ink - best_eps(xt, 250)) ** 2:.2f}')
-""")
-
-sec("3.4", "The network", "mlp", "An MLP for 2-D points; a U-Net (with the time embedding in every block) for images.")
-code(r"""
-class ToyDenoiser(nn.Module):
-    # eps_hat(x, t[, c]): [x, y, 16 time features (, one-hot part)] -> 3 x 128 SiLU -> 2
-    def __init__(self, n_parts=0, width=128, tdim=16):
-        super().__init__()
-        self.n_parts, self.tdim = n_parts, tdim
-        din = 2 + tdim + (n_parts + 1 if n_parts else 0)
-        self.net = nn.Sequential(nn.Linear(din, width), nn.SiLU(), nn.Linear(width, width), nn.SiLU(),
-                                 nn.Linear(width, width), nn.SiLU(), nn.Linear(width, 2))
-    def forward(self, x, t, c=None):
-        parts = [x, time_features(t, self.tdim)]
-        if self.n_parts: parts.append(F.one_hot(c, self.n_parts + 1).float())
-        return self.net(torch.cat(parts, 1))
-
 class TimeBlock(nn.Module):
     def __init__(self, cin, cout, temb=64):
         super().__init__()
@@ -343,20 +325,23 @@ class TinyUNet(nn.Module):
         d2 = self.decoder2(torch.cat([self.up2(F.interpolate(d1, size=e1.shape[-2:])), e1], 1), h)
         return self.head(d2)
 
-print('MLP parameters', sum(p.numel() for p in ToyDenoiser().parameters()), '· U-Net parameters', sum(p.numel() for p in TinyUNet().parameters()))
+print('U-Net parameters', sum(p.numel() for p in TinyUNet().parameters()))
 """)
 
-sec("3.5", "Training, live", "train-code", "The training step is eight lines. We train the 2-D smiley here (fewer steps than the slides' model) and take one real step on the MNIST network.")
+sec("3.3", "The training loop", "tuple", "Pick $x_0$, $t$ and $\\varepsilon$; make $x_t$ with the shortcut. The network sees $(x_t,t)$; the target is the $\\varepsilon$ we drew, and the loss is the squared error. The same $x_t$ can come from different noises, so even the best guess is an average and the loss cannot reach zero.")
 code(r"""
-def smiley(n, seed=0):
-    # points of a smiley face, with part labels: 0 outline, 1 eyes, 2 mouth
-    g = np.random.default_rng(seed)
-    part = g.choice(3, size=n, p=[0.5, 0.2, 0.3]); x = np.zeros((n, 2))
-    k = part == 0; a = g.uniform(0, 2 * np.pi, k.sum()); r = 1 + 0.025 * g.standard_normal(k.sum()); x[k] = np.c_[r * np.cos(a), r * np.sin(a)]
-    k = part == 1; side = g.choice([-1, 1], size=k.sum()); x[k] = np.c_[0.38 * side + 0.06 * g.standard_normal(k.sum()), 0.32 + 0.09 * g.standard_normal(k.sum())]
-    k = part == 2; a = g.uniform(np.pi + 0.45, 2 * np.pi - 0.45, k.sum()); r = 0.58 + 0.025 * g.standard_normal(k.sum()); x[k] = np.c_[r * np.cos(a), 0.08 + r * np.sin(a)]
-    return torch.tensor(x, dtype=torch.float32), torch.tensor(part)
-
+t = 250
+eps = torch.randn(784)
+show([three, eps, q_sample(three, t, eps)], title='x0, the noise eps, x_t at t = 250', vmin=-2.5, vmax=2.5)
+""")
+code(r"""
+eps_ink = -0.5
+eps_paper = (xt + alpha_bar[250].sqrt()) / (1 - alpha_bar[250]).sqrt()
+P = p_ink(xt, 250)
+print(f'ink with eps = {eps_ink}, or paper with eps = {eps_paper:.2f}; best guess = {P:.2f} x {eps_ink} + {1 - P:.2f} x {eps_paper:.2f} = {best_eps(xt, 250):.3f}')
+print(f'squared error for our draw: ({eps_ink} - {best_eps(xt, 250):.3f})^2 = {(eps_ink - best_eps(xt, 250)) ** 2:.2f}')
+""")
+code(r"""
 def train_step(model, x0, opt, c=None, null=None, p_drop=0.3):
     t = torch.randint(1, T + 1, (x0.shape[0],))               # a level per example
     eps = torch.randn_like(x0)                                # the noise: also the target
@@ -369,6 +354,39 @@ def train_step(model, x0, opt, c=None, null=None, p_drop=0.3):
     opt.zero_grad(); loss.backward(); opt.step()
     return loss.item()
 
+# The MNIST U-Net we use from here on (30,000 such steps on a laptop GPU), and one real training step on a copy
+unet = TinyUNet(); unet.load_state_dict(checkpoint('mnist-ddpm')['model']); unet.eval()
+copy = TinyUNet(); copy.load_state_dict(unet.state_dict())
+opt = torch.optim.Adam(copy.parameters(), lr=2e-4)
+batch = x_train[:64]
+torch.manual_seed(3)
+print(f'one training step on 64 images: loss {train_step(copy, batch, opt):.4f}')
+""", anchor="cell-train-step")
+
+sec("3.4", "Training, live", "mlp", "Points on a smiley face, and a small MLP that guesses their noise. We train it here, with fewer steps than the slides' model.")
+code(r"""
+class ToyDenoiser(nn.Module):
+    # eps_hat(x, t[, c]): [x, y, 16 time features (, one-hot part)] -> 3 x 128 SiLU -> 2
+    def __init__(self, n_parts=0, width=128, tdim=16):
+        super().__init__()
+        self.n_parts, self.tdim = n_parts, tdim
+        din = 2 + tdim + (n_parts + 1 if n_parts else 0)
+        self.net = nn.Sequential(nn.Linear(din, width), nn.SiLU(), nn.Linear(width, width), nn.SiLU(),
+                                 nn.Linear(width, width), nn.SiLU(), nn.Linear(width, 2))
+    def forward(self, x, t, c=None):
+        parts = [x, time_features(t, self.tdim)]
+        if self.n_parts: parts.append(F.one_hot(c, self.n_parts + 1).float())
+        return self.net(torch.cat(parts, 1))
+
+def smiley(n, seed=0):
+    # points of a smiley face, with part labels: 0 outline, 1 eyes, 2 mouth
+    g = np.random.default_rng(seed)
+    part = g.choice(3, size=n, p=[0.5, 0.2, 0.3]); x = np.zeros((n, 2))
+    k = part == 0; a = g.uniform(0, 2 * np.pi, k.sum()); r = 1 + 0.025 * g.standard_normal(k.sum()); x[k] = np.c_[r * np.cos(a), r * np.sin(a)]
+    k = part == 1; side = g.choice([-1, 1], size=k.sum()); x[k] = np.c_[0.38 * side + 0.06 * g.standard_normal(k.sum()), 0.32 + 0.09 * g.standard_normal(k.sum())]
+    k = part == 2; a = g.uniform(np.pi + 0.45, 2 * np.pi - 0.45, k.sum()); r = 0.58 + 0.025 * g.standard_normal(k.sum()); x[k] = np.c_[r * np.cos(a), 0.08 + r * np.sin(a)]
+    return torch.tensor(x, dtype=torch.float32), torch.tensor(part)
+
 torch.manual_seed(667)
 data, parts = smiley(100_000)
 toy = ToyDenoiser()
@@ -380,17 +398,8 @@ for step in range(1, 6001):
 print(f'6,000 steps in {time.time() - t0:.0f} s; loss {np.mean(history[:100]):.3f} -> {np.mean(history[-500:]):.3f}')
 plt.figure(figsize=(5, 2.4)); plt.semilogx(np.convolve(history, np.ones(50) / 50, 'valid')); plt.xlabel('step'); plt.ylabel('loss'); plt.show()
 """, anchor="cell-toy-train")
-code(r"""
-# The MNIST U-Net we use from here on (30,000 such steps on a laptop GPU), and one real training step on a copy
-unet = TinyUNet(); unet.load_state_dict(checkpoint('mnist-ddpm')['model']); unet.eval()
-copy = TinyUNet(); copy.load_state_dict(unet.state_dict())
-opt = torch.optim.Adam(copy.parameters(), lr=2e-4)
-batch = x_train[:64]
-torch.manual_seed(3)
-print(f'one training step on 64 images: loss {train_step(copy, batch, opt):.4f}')
-""", anchor="cell-train-step")
 
-sec("3.6", "What the network believes", "x0film", "From $\\hat\\varepsilon$ we get the network's guess of the clean image, $\\hat x_0$: a blurry average at high noise, sharp at low noise.")
+sec("3.5", "What the network believes", "x0film", "From $\\hat\\varepsilon$ we get the network's guess of the clean image, $\\hat x_0$: a blurry average at high noise, sharp at low noise. The slides show the same for the original DDPM network on a photo.")
 code(r"""
 @torch.no_grad()
 def x0_guess(model, xt, t):
@@ -426,7 +435,7 @@ for t in range(5, 0, -1):
 print(f'2,000 runs from noise: {(runs > 0).float().mean():.1%} end as ink (the data: {pi:.1%})')
 """, anchor="cell-toy-reverse")
 
-sec("4.3", "The loop", "sample-code", "Start from pure noise; guess, step, repeat a thousand times.")
+sec("4.3", "The sampling loop", "sample-code", "Start from pure noise; guess, step, repeat a thousand times.")
 code(r"""
 @torch.no_grad()
 def sample(model, n, seed=0, eps_fn=None, sigma=True, keep=()):
@@ -446,7 +455,7 @@ print(f'16 digits, 1,000 steps: {time.time() - t0:.0f} s on {device}')
 show(digits.clamp(-1, 1), n_rows=2)
 """, anchor="cell-sample")
 
-sec("4.4", "Watch it", "sampler2d", "The same loop on the 2-D smiley, and the MNIST network's guess of the finished digit along one run.")
+sec("4.4", "Watch it", "sampler2d", "The same loop on the 2-D smiley, and the MNIST network's guess of the finished digit along one run. The slides also show eight runs of the original DDPM cat model.")
 code(r"""
 @torch.no_grad()
 def sample_2d(model, n, seed=0, c=None, w=0.0):
@@ -473,7 +482,39 @@ show(same_starts.clamp(-1, 1), title='the same starting noises, no fresh noise')
 sec("4.6", "New digits", "samples64", "Sixty-four samples, and the whole method on a napkin: train with the shortcut and a squared error; sample with the loop.")
 
 # ---------------------------------------------------------------- Part 5
-sec("5.1", "A 3 on demand", "label", "One added line: a label embedding next to the time embedding. To save time we sample with 50 DDIM steps (Part 6) in this part.")
+sec("5.1", "Arrows to the data", "score-def", "The score is an arrow at every point, pointing uphill in probability. The noise predictor gives it: flip and scale the guessed noise, $\\nabla_x\\log q_t(x)\\approx-\\hat\\varepsilon/\\sqrt{1-\\bar\\alpha_t}$.")
+code(r"""
+g = torch.linspace(-1.6, 1.6, 19); X, Y = torch.meshgrid(g, g, indexing='xy'); P = torch.stack([X.flatten(), Y.flatten()], 1)
+fig, axes = plt.subplots(1, 3, figsize=(10, 3.4))
+for ax, t in zip(axes, [10, 100, 500]):
+    with torch.no_grad(): e = toy(P, torch.full((len(P),), t))
+    arrow = -(1 - alpha_bar[t]).sqrt() * e                     # (1 - alpha_bar) x score
+    ax.scatter(*data[:1500].T, s=1, c='lightblue'); ax.quiver(P[:, 0], P[:, 1], arrow[:, 0], arrow[:, 1], color='purple', angles='xy', scale_units='xy', scale=1, width=.004)
+    ax.set_title(f't = {t}'); ax.set_aspect('equal')
+plt.show()
+""", anchor="cell-score")
+sec("5.2", "Follow the arrows", "langevin", "Langevin dynamics: a small step along the score plus a small random kick. Run from high noise to low, it has the shape of DDPM's sampler.")
+code(r"""
+# Annealed Langevin with the learned score: x <- x + (eta/2) score + sqrt(eta) z, with eta = 0.1 (1 - alpha_bar)
+g = torch.Generator().manual_seed(9)
+x = torch.randn(1500, 2, generator=g)
+with torch.no_grad():
+    for t in range(T, 0, -4):
+        a = alpha_bar[t]
+        score = -toy(x, torch.full((len(x),), t)) / (1 - a).sqrt()
+        eta = 0.1 * (1 - a)
+        x = x + eta / 2 * score + eta.sqrt() * torch.randn(x.shape, generator=g)
+plt.figure(figsize=(3.4, 3.4)); plt.scatter(*x.T, s=2); plt.axis('equal'); plt.title('annealed Langevin with the learned score'); plt.show()
+""", anchor="cell-langevin")
+
+# ---------------------------------------------------------------- Part 6
+sec("6.1", "Noise schedules", "cosine", "The linear schedule destroys the image early; the cosine schedule spreads the destruction out.")
+code(r"""
+_, _, ab_cos = schedule('cosine')
+plt.figure(figsize=(6, 2.6)); plt.plot(alpha_bar.sqrt(), label='linear'); plt.plot(ab_cos.sqrt(), label='cosine'); plt.legend(); plt.ylabel('signal sqrt(alpha_bar)'); plt.xlabel('t'); plt.show()
+show([alpha_bar[600].sqrt() * three + (1 - alpha_bar[600]).sqrt() * eps_fixed, ab_cos[600].sqrt() * three + (1 - ab_cos[600]).sqrt() * eps_fixed], title='t = 600: linear, cosine')
+""")
+sec("6.2", "DDIM: fewer steps", "slow", "Jump to the guess, then re-noise it to an earlier level with the same guessed noise: the same network, far fewer calls, no fresh noise.")
 code(r"""
 @torch.no_grad()
 def ddim(eps_fn, n, steps, seed=0, shape=(1, 28, 28), ab=alpha_bar):
@@ -485,6 +526,17 @@ def ddim(eps_fn, n, steps, seed=0, shape=(1, 28, 28), ab=alpha_bar):
         x0_hat = (x - (1 - ab[t]).sqrt() * eps_hat) / ab[t].sqrt()     # jump to the guess...
         x = ab[t_next].sqrt() * x0_hat + (1 - ab[t_next]).sqrt() * eps_hat   # ...re-noise to the next level
     return x
+
+for steps in [1, 5, 20, 50]:
+    t0 = time.time()
+    xs = ddim(lambda x, t: unet(x, torch.full((len(x),), t)), 8, steps, seed=8)
+    show(xs.clamp(-1, 1), title=f'DDIM, {steps} steps, {time.time() - t0:.2f} s')
+""", anchor="cell-ddim")
+sec("6.3", "Faster still", "sd-speed", "On Stable Diffusion, DDIM gives a clean picture from about 5 steps, and a distilled latent consistency model (LCM) from 1. The field: better solvers (DPM-Solver: 10–20 steps), distillation and consistency models (1–4 steps), straight paths (flow matching, rectified flow), and transformers as denoisers (DiT).")
+
+# ---------------------------------------------------------------- Part 7
+sec("7.1", "A 3 on demand", "label", "One added line: a label embedding next to the time embedding. To save time we sample with 50 DDIM steps (6.2) from here on.")
+code(r"""
 cond = TinyUNet(n_classes=10); cond.load_state_dict(checkpoint('mnist-cfg')['model']); cond.eval()
 def guided(c, w):
     def fn(x, t):
@@ -494,12 +546,12 @@ def guided(c, w):
     return fn
 show(ddim(guided(3, 1.0), 8, 50, seed=5).clamp(-1, 1), title='asked for a 3 (w = 1)')
 """)
-sec("5.2", "Classifier-free guidance", "cfg", "$\\hat\\varepsilon_{guided}=\\hat\\varepsilon(\\varnothing)+w\\,(\\hat\\varepsilon(c)-\\hat\\varepsilon(\\varnothing))$.")
+sec("7.2", "Classifier-free guidance", "cfg", "$\\hat\\varepsilon_{guided}=\\hat\\varepsilon(\\varnothing)+w\\,(\\hat\\varepsilon(c)-\\hat\\varepsilon(\\varnothing))$.")
 code(r"""
 for w in [0, 1, 3, 7]:
     show(ddim(guided(3, w), 8, 50, seed=5).clamp(-1, 1), title=f'w = {w}')
 """, anchor="cell-cfg")
-sec("5.3", "The guidance dial", "dial", "More $w$: more 3-like, less variety. A separate classifier measures it.")
+sec("7.3", "The guidance dial", "dial", "More $w$: more 3-like, less variety. A separate classifier measures it.")
 code(r"""
 class Classifier(nn.Module):
     def __init__(self):
@@ -514,7 +566,7 @@ for w in [0, 1, 2, 5]:
     spread = torch.cdist(xs.flatten(1), xs.flatten(1)).sum() / (32 * 31)
     print(f'w = {w}: {is3:.0%} classified as 3, variety (mean pairwise distance) {spread:.1f}')
 """)
-sec("5.4", "Latent diffusion", "latent", "Diffuse a 4 × 7 × 7 code instead of 784 pixels, then decode.")
+sec("7.4", "From pixels to latents", "latent", "Diffuse a 4 × 7 × 7 code instead of 784 pixels, then decode. Stable Diffusion does the same at scale: its autoencoder turns a 512 × 512 × 3 photo into a 4 × 64 × 64 code, 48 times fewer numbers.")
 code(r"""
 class ConvAE(nn.Module):
     def __init__(self):
@@ -536,42 +588,43 @@ with torch.no_grad():
     z = ddim(lambda x, t: lat(x, torch.full((len(x),), t)), 8, 50, seed=7, shape=(4, 7, 7)) * ck['latent_std']
     show(ae.dec(z), title='diffusion on 196-number codes, then the decoder')
 """)
-sec("5.5", "Text in", "text", "A sentence becomes word vectors (CLIP or T5); cross-attention lets each image position attend to them. Training is unchanged: image latents and captions instead of digits and labels.")
-
-# ---------------------------------------------------------------- Part 6
-sec("6.1", "DDIM: fewer steps", "slow", "Jump to the guess, then re-noise it to an earlier level: the same network, far fewer calls.")
-code(r"""
-for steps in [1, 5, 20, 50]:
-    t0 = time.time()
-    xs = ddim(lambda x, t: unet(x, torch.full((len(x),), t)), 8, steps, seed=8)
-    show(xs.clamp(-1, 1), title=f'DDIM, {steps} steps, {time.time() - t0:.2f} s')
-""", anchor="cell-ddim")
-sec("6.2", "The schedule matters", "cosine", "The linear schedule destroys the image early; the cosine schedule spreads it out.")
-code(r"""
-_, _, ab_cos = schedule('cosine')
-plt.figure(figsize=(6, 2.6)); plt.plot(alpha_bar.sqrt(), label='linear'); plt.plot(ab_cos.sqrt(), label='cosine'); plt.legend(); plt.ylabel('signal sqrt(alpha_bar)'); plt.xlabel('t'); plt.show()
-show([alpha_bar[600].sqrt() * three + (1 - alpha_bar[600]).sqrt() * eps_fixed, ab_cos[600].sqrt() * three + (1 - ab_cos[600]).sqrt() * eps_fixed], title='t = 600: linear, cosine')
+sec("7.5", "Text in", "text", "A sentence becomes word vectors (CLIP or T5); cross-attention lets each image position attend to them. Training is unchanged: image latents and captions instead of digits and labels. The slides show Stable Diffusion's real attention maps: the fox attends to “fox”, the snow to “snow”.")
+sec("7.6", "A sentence in, a picture out", "sd-film", "Stable Diffusion v1.5 runs the loop of Part 4 on 4 × 64 × 64 codes, with a text encoder and the guidance of 7.2. It needs a GPU and a 4 GB download, so the cell below is not run here; the slides show runs made for the companion film.")
+md(r"""
+```python
+# On a GPU runtime: pip install diffusers transformers accelerate
+import torch
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+pipe = StableDiffusionPipeline.from_pretrained('stable-diffusion-v1-5/stable-diffusion-v1-5', torch_dtype=torch.float16).to('cuda')
+pipe.scheduler = DDIMScheduler.from_config(pipe.scheduler.config)       # the sampler of 6.2
+prompt = 'a red fox sitting in fresh snow, soft morning light, wildlife photograph'
+for w in [1, 3, 7.5, 15]:                                                # the guidance dial of 7.3
+    g = torch.Generator('cpu').manual_seed(1)
+    pipe(prompt, num_inference_steps=50, guidance_scale=w, generator=g).images[0].save(f'fox_w{w}.png')
+```
 """)
 
-# ---------------------------------------------------------------- Part 7
-sec("7.1", "Arrows to the data", "score-def", "The noise predictor is a score: $\\hat\\varepsilon\\approx-\\sqrt{1-\\bar\\alpha_t}\\,\\nabla_x\\log q_t(x)$.")
-code(r"""
-g = torch.linspace(-1.6, 1.6, 19); X, Y = torch.meshgrid(g, g, indexing='xy'); P = torch.stack([X.flatten(), Y.flatten()], 1)
-fig, axes = plt.subplots(1, 3, figsize=(10, 3.4))
-for ax, t in zip(axes, [10, 100, 500]):
-    with torch.no_grad(): e = toy(P, torch.full((len(P),), t))
-    arrow = -(1 - alpha_bar[t]).sqrt() * e                     # (1 - alpha_bar) x score
-    ax.scatter(*data[:1500].T, s=1, c='lightblue'); ax.quiver(P[:, 0], P[:, 1], arrow[:, 0], arrow[:, 1], color='purple', angles='xy', scale_units='xy', scale=1, width=.004)
-    ax.set_title(f't = {t}'); ax.set_aspect('equal')
-plt.show()
-""", anchor="cell-score")
-sec("7.2", "It is a VAE", "vae-map", "Latents $x_1,\\dots,x_T$; the encoder is the fixed noising; each ELBO term is a KL between two Gaussians, which is a weighted squared noise error. Dropping the weights gives the loss we trained.")
+# ---------------------------------------------------------------- Part 8
+sec("8.1", "Wrap-up", "compare", r"""
+**Exercises.** (1) Change the toy schedule to ten steps of β = 0.1 and redo 1.2 and 4.2 by hand. (2) Train the smiley without the shrink (noise only) and see what sampling does. (3) Sample the MNIST model with σ = 0 for only the last 100 steps. (4) Plot the classifier's 3-probability against w from 0 to 10.
+
+**References.** Paras Chopra, *Diffusion Models from First Principles*; Ari Seff, *What are Diffusion Models?*; Deepia, *DDPM, Generative AI Animated*; Outlier, *Diffusion Models, Math Explained*; MIT 6.S183 *A Practical Introduction to Diffusion Models*; Ho et al. (2020); Song & Ermon (2019); Song, Meng & Ermon (2021); Ho & Salimans (2022); Rombach et al. (2022).
+""")
+
+# ---------------------------------------------------------------- Optional depth
+md(r"""
+## Optional depth
+
+**It is a VAE.** Latents $x_1,\dots,x_T$; the encoder is the fixed noising; each ELBO term is a KL between two Gaussians, which is a weighted squared noise error. Dropping the weights gives the loss we trained. The weights are huge at small $t$:
+""")
 code(r"""
 btil = beta[1:] * (1 - alpha_bar[:-1]) / (1 - alpha_bar[1:])
 w = beta[2:] ** 2 / (2 * btil[1:] * alpha[2:] * (1 - alpha_bar[2:]))
 plt.figure(figsize=(6, 2.4)); plt.semilogy(range(2, T + 1), w); plt.xlabel('t'); plt.ylabel('ELBO weight w_t'); plt.show()
 """)
-sec("7.3", "Does it just copy?", "ideal", "The best possible denoiser of a finite training set is a weighted average of its points, and sampling with it returns them.")
+md(r"""
+**Does it just copy?** The best possible denoiser of a finite training set is a weighted average of its points, and sampling with it returns them. A network trained on the same 40 points fills in the face between them.
+""")
 code(r"""
 pts40, _ = smiley(40, seed=3)
 def ideal_eps(x, t):
@@ -593,11 +646,6 @@ for ax, s, title in zip(axes, [x, y], ['the best possible denoiser', 'a network 
     ax.scatter(*s.T, s=3); ax.scatter(*pts40.T, s=30, facecolors='none', edgecolors='k'); ax.set_title(title); ax.set_aspect('equal')
 plt.show()
 """, anchor="cell-copy")
-sec("7.4", "Wrap-up", "frontier", r"""
-**Exercises.** (1) Change the toy schedule to ten steps of β = 0.1 and redo 1.2 and 4.2 by hand. (2) Train the smiley without the shrink (noise only) and see what sampling does. (3) Sample the MNIST model with σ = 0 for only the last 100 steps. (4) Plot the classifier's 3-probability against w from 0 to 10.
-
-**References.** Paras Chopra, *Diffusion Models from First Principles*; Ari Seff, *What are Diffusion Models?*; Deepia, *DDPM, Generative AI Animated*; Outlier, *Diffusion Models, Math Explained*; MIT 6.S183 *A Practical Introduction to Diffusion Models*; Ho et al. (2020); Song & Ermon (2019); Song, Meng & Ermon (2021); Ho & Salimans (2022); Rombach et al. (2022).
-""")
 
 nb = nbf.v4.new_notebook()
 nb.cells = cells

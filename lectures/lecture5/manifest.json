@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Diffusion models",
   "subtitle": "Create by learning to undo noise",
-  "minutes": 130,
+  "minutes": 138,
   "notebook": "lecture5-diffusion.ipynb",
   "sections": [
     {
@@ -13,43 +13,48 @@
     },
     {
       "id": "open",
-      "title": "Opening · Noise to a digit",
-      "minutes": 6
+      "title": "Introduction · Destruction as creation",
+      "minutes": 7
     },
     {
       "id": "fwd",
-      "title": "Part 1 · Destroying is easy",
-      "minutes": 20
+      "title": "Part 1 · The forward process",
+      "minutes": 22
     },
     {
       "id": "back",
-      "title": "Part 2 · Undoing it: one step back",
-      "minutes": 12
+      "title": "Part 2 · The reverse process",
+      "minutes": 10
     },
     {
       "id": "train",
-      "title": "Part 3 · Training: labels for free",
-      "minutes": 18
-    },
-    {
-      "id": "gen",
-      "title": "Part 4 · Generating: walk back from noise",
-      "minutes": 18
-    },
-    {
-      "id": "steer",
-      "title": "Part 5 · Steering: labels, guidance and text",
+      "title": "Part 3 · What the network learns, and training",
       "minutes": 20
     },
     {
-      "id": "fast",
-      "title": "Part 6 · Faster sampling",
-      "minutes": 12
+      "id": "gen",
+      "title": "Part 4 · Sampling: birth of an image",
+      "minutes": 20
     },
     {
-      "id": "learn",
-      "title": "Part 7 · What the network learns, and wrap-up",
-      "minutes": 16
+      "id": "score",
+      "title": "Part 5 · The score: arrows to the data",
+      "minutes": 8
+    },
+    {
+      "id": "fast",
+      "title": "Part 6 · Noise schedules and faster sampling",
+      "minutes": 14
+    },
+    {
+      "id": "steer",
+      "title": "Part 7 · Steering: labels, guidance and text",
+      "minutes": 28
+    },
+    {
+      "id": "wrap",
+      "title": "Part 8 · Wrap-up",
+      "minutes": 8
     },
     {
       "id": "optional",
@@ -57,19 +62,19 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 70,
-  "optionalSlides": 24,
+  "coreSlides": 68,
+  "optionalSlides": 34,
   "slides": [
     {
       "id": "contents",
-      "title": "Lecture 5 at a glance: eight parts, numbered sections",
+      "title": "Lecture 5 at a glance: following Paras Chopra’s explainer",
       "section": "map",
       "builds": 1,
       "optional": false
     },
     {
       "id": "hook",
-      "title": "Static in, a handwritten digit out",
+      "title": "Static in, a cat out",
       "section": "open",
       "builds": 2,
       "optional": false
@@ -82,13 +87,6 @@
       "optional": false
     },
     {
-      "id": "three-gens",
-      "title": "Two generators so far, and a third idea",
-      "section": "open",
-      "builds": 3,
-      "optional": false
-    },
-    {
       "id": "core-idea",
       "title": "The idea in one sentence",
       "section": "open",
@@ -97,7 +95,7 @@
     },
     {
       "id": "route",
-      "title": "The plan: destroy, step back, train, generate",
+      "title": "The plan: forwards, backwards, train, sample",
       "section": "open",
       "builds": 2,
       "optional": false
@@ -133,13 +131,6 @@
     {
       "id": "toy-forward",
       "title": "Forward, step by step: every number",
-      "section": "fwd",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "shortcut-q",
-      "title": "Do we need a 1,000-step loop for one noisy example?",
       "section": "fwd",
       "builds": 3,
       "optional": false
@@ -194,6 +185,13 @@
       "optional": false
     },
     {
+      "id": "photo-jump",
+      "title": "The same jump on a real photograph",
+      "section": "fwd",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "fwd-recap",
       "title": "Destroying is easy, and it hands us labels for free",
       "section": "fwd",
@@ -202,14 +200,7 @@
     },
     {
       "id": "reverse-q",
-      "title": "Going back: where was xₜ₋₁?",
-      "section": "back",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "big-jump",
-      "title": "From pure noise straight back to the pixel: two spikes",
+      "title": "Run the film backwards: where was xₜ₋₁?",
       "section": "back",
       "builds": 3,
       "optional": false
@@ -229,13 +220,6 @@
       "optional": false
     },
     {
-      "id": "three-targets",
-      "title": "Three ways to say the same guess",
-      "section": "back",
-      "builds": 2,
-      "optional": false
-    },
-    {
       "id": "reverse-step",
       "title": "One step back, in one line",
       "section": "back",
@@ -243,22 +227,29 @@
       "optional": false
     },
     {
-      "id": "tuple",
-      "title": "A training example costs one line",
-      "section": "train",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "total-noise",
-      "title": "ε is all the noise since x₀, not the last step’s",
+      "id": "three-targets",
+      "title": "Three ways to say the same guess",
       "section": "train",
       "builds": 2,
       "optional": false
     },
     {
+      "id": "unet",
+      "title": "For images: a U-Net, so every pixel can see the whole digit",
+      "section": "train",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "why-t",
       "title": "One network for every noise level: tell it t",
+      "section": "train",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "tuple",
+      "title": "A training example costs one line",
       "section": "train",
       "builds": 3,
       "optional": false
@@ -271,10 +262,10 @@
       "optional": false
     },
     {
-      "id": "average",
-      "title": "The same noisy value can come from different noises",
+      "id": "train-code",
+      "title": "The training step in eight lines",
       "section": "train",
-      "builds": 3,
+      "builds": 2,
       "optional": false
     },
     {
@@ -282,20 +273,6 @@
       "title": "For points in 2-D: a small MLP",
       "section": "train",
       "builds": 1,
-      "optional": false
-    },
-    {
-      "id": "unet",
-      "title": "For images: a U-Net, so every pixel can see the whole digit",
-      "section": "train",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "train-code",
-      "title": "The training step in eight lines",
-      "section": "train",
-      "builds": 2,
       "optional": false
     },
     {
@@ -313,8 +290,8 @@
       "optional": false
     },
     {
-      "id": "coordinate",
-      "title": "One pixel alone gives a grey; all 784 together give a 3",
+      "id": "photo-guess",
+      "title": "The original DDPM network on a real photograph",
       "section": "train",
       "builds": 2,
       "optional": false
@@ -331,13 +308,6 @@
       "title": "One step back, by hand, on the real schedule",
       "section": "gen",
       "builds": 4,
-      "optional": false
-    },
-    {
-      "id": "step-image",
-      "title": "The same step on an image, at t = 600",
-      "section": "gen",
-      "builds": 3,
       "optional": false
     },
     {
@@ -376,6 +346,13 @@
       "optional": false
     },
     {
+      "id": "cat-film",
+      "title": "Eight runs of the real cat model: xₜ, and its guess of the end",
+      "section": "gen",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "why-noise",
       "title": "Take out the fresh noise, and every sample collapses",
       "section": "gen",
@@ -394,6 +371,76 @@
       "title": "The whole method on a napkin",
       "section": "gen",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "score-def",
+      "title": "The score: an arrow at every point, pointing uphill",
+      "section": "score",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "scorefield",
+      "title": "The smiley’s arrows, at different noise levels",
+      "section": "score",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "langevin",
+      "title": "Follow the arrows, with a little noise: Langevin sampling",
+      "section": "score",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "cosine",
+      "title": "The schedule matters: linear destroys too early",
+      "section": "fast",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "slow",
+      "title": "A thousand network calls per image",
+      "section": "fast",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ddim-idea",
+      "title": "DDIM: jump to the guess, then re-noise it to an earlier level",
+      "section": "fast",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ddim-2d",
+      "title": "Same network: DDPM paths jitter, DDIM paths glide",
+      "section": "fast",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ddim-steps",
+      "title": "Fewer steps, same network: from 1 to 1,000",
+      "section": "fast",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "sd-speed",
+      "title": "Stable Diffusion in fewer steps, and in one",
+      "section": "fast",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "frontier",
+      "title": "Where the field went: same idea, better parts",
+      "section": "fast",
+      "builds": 1,
       "optional": false
     },
     {
@@ -439,6 +486,13 @@
       "optional": false
     },
     {
+      "id": "sd-vae",
+      "title": "Stable Diffusion’s autoencoder: 48 times fewer numbers",
+      "section": "steer",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "text",
       "title": "Text in, through cross-attention",
       "section": "steer",
@@ -446,109 +500,67 @@
       "optional": false
     },
     {
-      "id": "slow",
-      "title": "A thousand network calls per image",
-      "section": "fast",
+      "id": "sd-attn",
+      "title": "Which words go where: the real cross-attention",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "ddim-idea",
-      "title": "DDIM: jump to the guess, then re-noise it to an earlier level",
-      "section": "fast",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "ddim-2d",
-      "title": "Same network: DDPM paths jitter, DDIM paths glide",
-      "section": "fast",
+      "id": "sd-film",
+      "title": "A sentence in, a picture out: 50 steps",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "ddim-steps",
-      "title": "Fewer steps, same network: from 1 to 1,000",
-      "section": "fast",
-      "builds": 1,
-      "optional": false
-    },
-    {
-      "id": "cosine",
-      "title": "The schedule matters: linear destroys too early",
-      "section": "fast",
+      "id": "sd-guidance",
+      "title": "The guidance dial on a sentence: w = 0 to 15",
+      "section": "steer",
       "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "score-def",
-      "title": "The score: an arrow at every point, pointing uphill",
-      "section": "learn",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "scorefield",
-      "title": "The smiley’s arrows, at different noise levels",
-      "section": "learn",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "vae-map",
-      "title": "Diffusion is a VAE with a fixed encoder",
-      "section": "learn",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "elbo-simple",
-      "title": "Its ELBO is a weighted noise error",
-      "section": "learn",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "ideal",
-      "title": "The best possible denoiser only copies its training set",
-      "section": "learn",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "copy-2d",
-      "title": "In 2-D: the perfect denoiser copies, a network fills in",
-      "section": "learn",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "frontier",
-      "title": "Where the field went: same idea, better parts",
-      "section": "learn",
-      "builds": 1,
       "optional": false
     },
     {
       "id": "compare",
       "title": "Three generators, side by side",
-      "section": "learn",
+      "section": "wrap",
       "builds": 1,
       "optional": false
     },
     {
       "id": "exit",
       "title": "Exit questions",
-      "section": "learn",
+      "section": "wrap",
       "builds": 5,
       "optional": false
     },
     {
       "id": "references",
       "title": "References and credits",
-      "section": "learn",
+      "section": "wrap",
       "builds": 1,
       "optional": false
+    },
+    {
+      "id": "three-gens",
+      "title": "Two generators so far, and a third idea",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "river",
+      "title": "One pixel, a thousand steps: the density flows",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "shortcut-q",
+      "title": "Do we need a 1,000-step loop for one noisy example?",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
     },
     {
       "id": "pixel-prior",
@@ -572,10 +584,10 @@
       "optional": true
     },
     {
-      "id": "river",
-      "title": "One pixel, a thousand steps: the density flows",
+      "id": "big-jump",
+      "title": "From pure noise straight back to the pixel: two spikes",
       "section": "optional",
-      "builds": 2,
+      "builds": 3,
       "optional": true
     },
     {
@@ -621,6 +633,62 @@
       "optional": true
     },
     {
+      "id": "total-noise",
+      "title": "ε is all the noise since x₀, not the last step’s",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "average",
+      "title": "The same noisy value can come from different noises",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "coordinate",
+      "title": "One pixel alone gives a grey; all 784 together give a 3",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "step-image",
+      "title": "The same step on an image, at t = 600",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "tweedie",
+      "title": "The noise predictor is a score estimator",
+      "section": "optional",
+      "builds": 4,
+      "optional": true
+    },
+    {
+      "id": "map-2x2",
+      "title": "Four ways to run the same trained network",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "vae-map",
+      "title": "Diffusion is a VAE with a fixed encoder",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "elbo-simple",
+      "title": "Its ELBO is a weighted noise error",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
       "id": "elbo-chain",
       "title": "The same bound as Lecture 1",
       "section": "optional",
@@ -663,22 +731,15 @@
       "optional": true
     },
     {
-      "id": "tweedie",
-      "title": "The noise predictor is a score estimator",
+      "id": "ideal",
+      "title": "The best possible denoiser only copies its training set",
       "section": "optional",
-      "builds": 4,
+      "builds": 3,
       "optional": true
     },
     {
-      "id": "langevin",
-      "title": "Follow the arrows, with a little noise: Langevin sampling",
-      "section": "optional",
-      "builds": 2,
-      "optional": true
-    },
-    {
-      "id": "map-2x2",
-      "title": "Four ways to run the same trained network",
+      "id": "copy-2d",
+      "title": "In 2-D: the perfect denoiser copies, a network fills in",
       "section": "optional",
       "builds": 2,
       "optional": true
@@ -719,5 +780,5 @@
       "optional": true
     }
   ],
-  "totalStates": 230
+  "totalStates": 246
 }

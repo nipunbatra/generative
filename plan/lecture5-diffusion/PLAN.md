@@ -10,6 +10,16 @@ Nipun's feedback on this plan: *not too complicated; follow Paras Chopra's artic
 - **New "every number" material**: a toy schedule of five big steps (β = 0.1, 0.2, 0.3, 0.5, 0.8) with the table β → α → ᾱ; the ink pixel pushed forward step by step and walked back step by step; forward and reverse calculators (toy or real schedule) showing every substitution; one-step diagrams; guidance drawn as arrows from the live network.
 - **Moved to optional depth**: the one-pixel Bayes slides, the posterior by completing the square, the mean-in-noise substitution, the full ELBO derivation and KL-to-MSE, Tweedie, Langevin, the 2×2 map of samplers, classifier guidance from Bayes, SDEs, other targets, score distillation.
 
+## Second revision, 21 October: Paras Chopra's order, and the companion film's real photos
+
+Nipun's feedback: *still not too complicated; teach it the way Paras Chopra does; use whatever is possible from the companion film.* So the main route now follows the explainer's sections one for one, and the film's real image-model outputs replace or join our toy examples where they help.
+
+- **Main route** (63 slides, 9 parts): 0 Introduction: destruction as creation · 1 The forward process (one step, the toy schedule by hand, a beautiful shortcut, the real schedule) · 2 The reverse process (run the film backwards; small steps back are one Gaussian; guess the noise; one step back) · 3 What the network learns, and training · 4 Sampling: birth of an image · 5 The score: arrows to the data (and Langevin) · 6 Noise schedules and faster sampling (cosine, DDIM, the frontier) · 7 Steering: labels, guidance, latents and text · 8 Wrap-up.
+- **From the film** (`figures/film/`, made by `scripts/film_assets.py` from `dl-summaries/diffusion`): the original DDPM cat checkpoint (google/ddpm-cat-256) sampling cats from static (the opening hook, and eight runs with the network's guess at every step in 4.4); the CC0 photo "Chelsea" jumping to any noise level with the shortcut (1.5); and the real network's noise guess at t = 400 and its x̂₀ guesses from t = 950 to 100 (3.5).
+- **Simplified**: the reverse process opens with one picture (x₂₅₀ seen, x₂₄₉ unknown) instead of the Bayes table; the ELBO is one sentence on the training-code slide, with the derivation in optional depth.
+- **Moved to optional depth** as well: two generators so far, the one-pixel density river, the nested three-step expansion, the big jump back, the total-noise and average-noise slides, the per-pixel comparison, the one-step image, the VAE and ELBO summary, and the memorisation pair. Cross-references between slides are now resolved from the route (`§{id}`, `¶{id}` in `content.js`), so renumbering cannot leave stale section numbers.
+- **Stable Diffusion, from the film** (same day, once its runs finished): 6.3 shows DDIM at 1–50 steps and a latent consistency model in 1 step; 7.4 the real autoencoder (48× fewer numbers, 30.9 dB); 7.5 measured cross-attention maps; a new 7.6 samples five prompts and turns the guidance dial on a sentence (w = 0 to 15, Paras Chopra's “most users settle around 7.5”). The film's run whose prompt contains an egg is not used.
+
 ## The one-sentence version
 
 > **If you learn to undo each tiny step of a destruction process, you can create from scratch.** (Paras Chopra)

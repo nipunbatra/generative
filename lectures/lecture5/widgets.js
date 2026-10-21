@@ -38,7 +38,7 @@ export function panel(o){
 export const label=(tx,ty,s,{fill=MUTED,size=22,anchor='start',weight=''}={})=>`<text x="${(+tx).toFixed(1)}" y="${(+ty).toFixed(1)}" fill="${fill}" font-size="${size}" text-anchor="${anchor}"${weight?` font-weight="${weight}"`:''}>${s}</text>`;
 export const svg=(W,H,inner,alt)=>`<svg class="plot wsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(alt)}">${inner}</svg>`;
 export const fig=(W,H,inner,alt)=>`<div class="diagram-scroll">${svg(W,H,inner,alt)}</div>`;
-export const widget=(name,alt)=>`<div class="widget" data-widget="${name}" role="group" aria-label="${esc(alt)}"></div>`;
+export const widget=(name,alt,data={})=>`<div class="widget" data-widget="${name}"${Object.entries(data).map(([k,v])=>` data-${k}="${esc(String(v))}"`).join('')} role="group" aria-label="${esc(alt)}"></div>`;
 export const legend=(x0,y0,items,size=21)=>{let x=x0,s='';for(const [text,color,dashed] of items){s+=`<line x1="${x}" y1="${y0-7}" x2="${x+26}" y2="${y0-7}" stroke="${color}" stroke-width="3"${dashed?' stroke-dasharray="7 4"':''}/>`+label(x+34,y0,text,{fill:color,size});x+=56+text.replace(/<[^>]+>/g,'').length*size*.52;}return s;};
 export const arrowHead=(id,color)=>`<marker id="${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="${color}"/></marker>`;
 
@@ -140,19 +140,6 @@ function onBuild(el,ctx,cb){
  new MutationObserver(()=>cb(Number(scene.dataset.build||1))).observe(scene,{attributes:true,attributeFilter:['data-build']});
 }
 const buildOf=(el,ctx)=>ctx.reading?99:Number(el.closest('.scene')?.dataset.build||1);
-
-// ================================================================ Part 0: the opening film
-function hookfilm(el,ctx,d){
- const ts=d.mn.trajectory_t,n=ts.length,seed=0,W=1150,H=360;
- const render=i=>{
-  const big=svgFrame(`mnist-traj-${seed}-x.png`,i,n,0,10,330);
-  let strip='';for(let k=0;k<n;k+=3)strip+=svgFrame(`mnist-traj-${seed}-x.png`,k,n,380+(k/3)*96,40,88,k<=i?'':'opacity=".25"')+label(380+(k/3)*96+44,158,`t = ${ts[k]}`,{size:17,anchor:'middle',fill:k<=i?palette.ink:MUTED});
-  return svg(W,H,big+strip+label(380,240,`step ${T-ts[i]} of 1,000`,{fill:palette.q,size:30,weight:650})+
-   label(380,285,ts[i]>0?'each step: predict the noise, remove a little of it':'a digit that is not in the training set',{size:23})+
-   label(380,320,'our network: 814,145 parameters, trained on MNIST',{size:19}),'Our trained diffusion model turning static into a digit, step by step.');
- };
- animated(el,ctx,{count:n,render,step:i=>`t = ${ts[i]}`,alt:'From noise to a digit',duration:5200});
-}
 
 // ================================================================ Part 1: destroying is easy
 /** 1-D noising of our 3's 784 pixel values: add noise only, or shrink then add. */
@@ -403,16 +390,16 @@ function scorefield(el,ctx,d){
 
 /** Langevin dynamics with the learned score: at one noise level, or annealed from t = 1000 down to 1. */
 function langevin(el,ctx,d){
- const net=toyNet(d.W.uncond),data=d.toy.data.x,S=LIN,W=1150,H=440,N=220,state={t:10};
- const Q={x:v=>20+(v+1.7)/3.4*400,y:v=>20+(1.7-v)/3.4*400};
+ const net=toyNet(d.W.uncond),data=d.toy.data.x,S=LIN,W=1150,H=345,N=220,state={t:10};
+ const Q={x:v=>20+(v+1.7)/3.4*330,y:v=>8+(1.7-v)/3.4*330};
  let pts=[],raf=0,status='';
  const reset=()=>{const r=randn(77);pts=Array.from({length:N},()=>[r(),r()]);status='start: pure noise';};
  const eta=t=>.1*(1-S.ab[t]);
  const step=(t,eta,r)=>{const s1=Math.sqrt(1-S.ab[t]);for(const p of pts){const [ex,ey]=net(p[0],p[1],t);p[0]+=eta/2*(-ex/s1)+Math.sqrt(eta)*r();p[1]+=eta/2*(-ey/s1)+Math.sqrt(eta)*r();}};
- const render=()=>{let g=`<rect x="20" y="20" width="400" height="400" fill="#FFFFFF" stroke="#E5E7EB"/>`+data.filter((_,k)=>k%3===0).map(([x,y])=>`<circle cx="${Q.x(x).toFixed(1)}" cy="${Q.y(y).toFixed(1)}" r="1.7" fill="${palette.data}" fill-opacity=".25"/>`).join('');
+ const render=()=>{let g=`<rect x="20" y="8" width="330" height="330" fill="#FFFFFF" stroke="#E5E7EB"/>`+data.filter((_,k)=>k%3===0).map(([x,y])=>`<circle cx="${Q.x(x).toFixed(1)}" cy="${Q.y(y).toFixed(1)}" r="1.7" fill="${palette.data}" fill-opacity=".25"/>`).join('');
   g+=pts.map(([x,y])=>`<circle cx="${Q.x(Math.max(-1.75,Math.min(1.75,x))).toFixed(1)}" cy="${Q.y(Math.max(-1.75,Math.min(1.75,y))).toFixed(1)}" r="3" fill="${palette.loss}" fill-opacity=".8"/>`).join('');
-  return svg(W,H,g+label(460,60,status,{fill:palette.ink,size:28,weight:650})+label(460,110,'x ← x + (η/2) · score(x) + √η · z',{fill:palette.loss,size:22})+
-   label(460,165,'One level: follow the arrows of that noise level.',{size:21})+label(460,200,'Annealed: start at t = 1000, lower the noise',{size:21})+label(460,228,'step by step, as DDPM does.',{size:21}),'Particles moved by Langevin dynamics with the learned score.');};
+  return svg(W,H,g+label(410,60,status,{fill:palette.ink,size:28,weight:650})+label(410,110,'x ← x + (η/2) · score(x) + √η · z',{fill:palette.loss,size:22})+
+   label(410,165,'One level: follow the arrows of that noise level.',{size:21})+label(410,200,'Annealed: start at t = 1000, lower the noise',{size:21})+label(410,228,'step by step, as DDPM does.',{size:21}),'Particles moved by Langevin dynamics with the learned score.');};
  reset();
  if(ctx.printing){const r=randn(3);for(let t=1000;t>=1;t-=4)step(t,eta(t),r);status='annealed, t = 1000 → 1';el.innerHTML=render();return;}
  const draw=interactive(el,ctx,{controls:slider('t','noise level t',1,300,1,10,'int')+`<button type="button" data-run>▶ 300 steps at this level</button><button type="button" data-anneal>▶ Annealed: t = 1000 → 1</button><button type="button" data-reset>Reset</button>`,render});
@@ -481,6 +468,30 @@ function copy(el,ctx,d){
  const render=b=>svg(W,H,box(40,C.ideal,palette.noise,'the best possible denoiser',`400 samples, mean distance to a training point ${num(C.ideal_to_train,4)}`)+(b>=2?box(600,C.net,palette.q,'our network, trained on the same 40',`mean distance to a training point ${num(C.net_to_train,3)}; to the face ${num(C.net_to_shape,3)}`):''),'Samples from the ideal denoiser of 40 training points, and from a network trained on them.');
  if(ctx.printing){el.innerHTML=`<div class="state-slot"><div data-only="1" class="diagram-scroll">${render(1)}</div><div data-only="2-99" class="diagram-scroll">${render(2)}</div></div>`;return;}
  const draw=b=>{el.innerHTML=`<div class="diagram-scroll">${render(b)}</div>`;};draw(buildOf(el,ctx));onBuild(el,ctx,draw);
+}
+
+// ================================================================ real photographs, from the companion film
+export const photo=(k,n,size,src)=>`<span class="photo" style="width:${size}px;height:${size}px;background-image:url(figures/film/${src});background-size:${n*100}% 100%;background-position:${n>1?(k/(n-1)*100).toFixed(4):0}% 0"></span>`;
+/** Chelsea through the shortcut with one fixed noise draw: photo × √ᾱ + noise × √(1 − ᾱ) = xₜ, for any t. */
+function photojump(el,ctx){
+ const ts=lin(0,1000,21).map(Math.round),state={k:10};
+ const render=()=>{const k=Math.round(state.k),t=ts[k],a=LIN.ab[t],sa=Math.sqrt(a),sn=Math.sqrt(1-a);
+  const box=(inner,cap,col)=>`<figure class="eqimg-f">${inner}<figcaption style="color:${col}">${cap}</figcaption></figure>`;
+  return `<div class="eqimg">${box(photo(0,1,190,'chelsea.jpg'),'the photo x₀',palette.data)}<span class="op">× ${num(sa,3)}</span><span class="op">+</span>${box(photo(0,1,190,'eps.jpg'),'one noise draw ε',palette.noise)}<span class="op">× ${num(sn,3)}</span><span class="op">=</span>${box(photo(k,21,190,'cat-jump.jpg'),`x<sub>t</sub> at t = ${t}`,palette.ink)}</div><p class="caption" style="margin-top:10px">${t===0?'At t = 0 the image is all photo.':t<400?'Mostly photo, a little noise.':t<700?'The noise is winning: only the layout survives.':'Almost pure noise.'} √ᾱ<sub>t</sub> = ${num(sa,3)}, √(1 − ᾱ<sub>t</sub>) = ${num(sn,3)}.</p>`;};
+ const print=()=>{state.k=10;return render();};
+ const draw=interactive(el,ctx,{controls:`<label>noise level t<input type="range" min="0" max="20" step="1" value="10" data-k="k" aria-label="noise level"><span class="w-readout" data-o="k" data-f="tjump"></span></label>`,render,print});
+ if(!draw)return;fmts.tjump=v=>`t = ${ts[Math.round(v)]}`;bindSliders(el,state,draw);
+}
+/** Real sampling runs from the companion film, cut from strips of frames: xₜ, and optionally the network's guess of the end.
+ * cat: the original DDPM cat model, 1,000 steps, every 50th shown; sd: Stable Diffusion v1.5, 50 DDIM steps, every 2nd. */
+const FILMS={
+ cat:{n:21,file:(k,row)=>`cat-run${k}-${row}.jpg`,at:i=>`t = ${1000-50*i}`,long:i=>`t = ${1000-50*i} · step ${50*i} of 1,000`,alt:'Real DDPM samples, from noise to cats'},
+ sd:{n:26,file:k=>`sd/run${k}-xt.jpg`,at:i=>`step ${2*i} of 50`,long:i=>`step ${2*i} of 50`,alt:'Stable Diffusion samples, from noise to pictures'}};
+function filmstrip(el,ctx,d){
+ const F=FILMS[el.dataset.film||'cat'],runs=el.dataset.runs.split(','),both=el.dataset.both==='1',sz=Number(el.dataset.size)||(both?150:210),caps=el.dataset.caps?el.dataset.caps.split('|'):[];
+ const render=i=>`<div class="catgrid">${runs.map((k,j)=>`<div class="catcol" style="width:${sz}px">${photo(i,F.n,sz,F.file(k,'xt'))}${both?photo(i,F.n,sz,F.file(k,'x0')):''}${caps[j]?`<span class="filmcap">${caps[j]}</span>`:''}</div>`).join('')}</div>`+
+  `<p class="caption" style="margin-top:8px">${both?'Top: xₜ. Bottom: the network’s guess of the finished image. ':''}${F.long(i)}</p>`;
+ animated(el,ctx,{count:F.n,render,step:F.at,alt:F.alt,duration:6000});
 }
 
 // ================================================================ calculators: every number of the forward and reverse steps
@@ -597,6 +608,9 @@ export const CSS=`
 .calc-table{border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums;width:100%}.calc-table th,.calc-table td{padding:2px 7px;text-align:right;border-bottom:1px solid #E5E7EB}
 .calc-table th{font-weight:600;color:var(--muted)}.calc-table tr.now td{background:#8B2CDE1A;color:var(--ink);font-weight:650}.calc-table tr.gap td{text-align:center;color:var(--muted);border:0;padding:0}
 .eq-sm .display{font-size:25px}
+.photo{display:inline-block;background-repeat:no-repeat;border-radius:6px;vertical-align:middle;background-color:#EEF0F3}
+.eqimg{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.eqimg .op{font-size:30px;color:var(--ink);white-space:nowrap}.eqimg-f{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}.eqimg-f figcaption{font-size:18px}
+.catgrid{display:flex;gap:16px;flex-wrap:wrap}.catcol{display:flex;flex-direction:column;gap:8px}.filmcap{font-size:17px;line-height:1.3;color:var(--muted)}
 .hand td,.hand th{font-size:21px;padding:6px 12px;text-align:right}.hand td:first-child,.hand th:first-child{text-align:center}
 .hand tr.done td{color:var(--ink)}.hand .hl{color:var(--q);font-weight:650}`;
 
@@ -619,7 +633,7 @@ img.pix{image-rendering:pixelated;display:block;border-radius:4px;max-width:100%
 `;
 
 export function mount(stage,ctx,d){
- const make={hookfilm,explode,film,pixhist,river,shortcut,inkpaper,reverse,playground,x0film,sampler2d,trajectories,scorefield,langevin,paths,ddimsteps,schedules,guidance,copy,cfgvec,'calc-forward':calcForward,'calc-reverse':calcReverse};
+ const make={explode,film,pixhist,river,shortcut,inkpaper,reverse,playground,x0film,sampler2d,trajectories,scorefield,langevin,paths,ddimsteps,schedules,guidance,copy,cfgvec,photojump,filmstrip,'calc-forward':calcForward,'calc-reverse':calcReverse};
  for(const el of stage.querySelectorAll('[data-widget]')){
   const f=make[el.dataset.widget];if(!f)throw new Error('Unknown widget '+el.dataset.widget);f(el,ctx,d);
  }

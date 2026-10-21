@@ -1,5 +1,5 @@
 import {m,eq,at,only,cols,code,table,palette,esc} from '../shared/author.js';
-import {panel,label,legend,fig,svg,widget,num,lin,TINT,MUTED,AX,digitSVG,svgFrame,pic,arrowHead,CSS,CSS_BASE,mount as mountWidgets} from './widgets.js';
+import {panel,label,legend,fig,svg,widget,num,lin,TINT,MUTED,AX,digitSVG,svgFrame,pic,photo,arrowHead,CSS,CSS_BASE,mount as mountWidgets} from './widgets.js';
 import {LIN,COS,T,TOY,TOY_EPS,TOY_Z,npdf,pInk,epsStar,reverseKernel,irreducible,forwardStep,reverseStep} from './math.mjs';
 
 const load=f=>fetch(new URL(`./data/${f}`,import.meta.url),{cache:'no-cache'}).then(r=>r.json());
@@ -17,34 +17,36 @@ const r=px.run,two=px.two_steps,PIX=px.pixel,PI=px.pi;
 const fr=k=>mn.film.rows[mn.film.t.indexOf(k)];
 export const meta={
  id:'lecture5',number:5,title:'Diffusion models',
- subtitle:'Create by learning to undo noise',minutes:130,
+ subtitle:'Create by learning to undo noise',minutes:138,
  notebook:'lecture5-diffusion.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
-  {id:'open',title:'Opening · Noise to a digit',minutes:6},
-  {id:'fwd',title:'Part 1 · Destroying is easy',minutes:20},
-  {id:'back',title:'Part 2 · Undoing it: one step back',minutes:12},
-  {id:'train',title:'Part 3 · Training: labels for free',minutes:18},
-  {id:'gen',title:'Part 4 · Generating: walk back from noise',minutes:18},
-  {id:'steer',title:'Part 5 · Steering: labels, guidance and text',minutes:20},
-  {id:'fast',title:'Part 6 · Faster sampling',minutes:12},
-  {id:'learn',title:'Part 7 · What the network learns, and wrap-up',minutes:16},
+  {id:'open',title:'Introduction · Destruction as creation',minutes:7},
+  {id:'fwd',title:'Part 1 · The forward process',minutes:22},
+  {id:'back',title:'Part 2 · The reverse process',minutes:10},
+  {id:'train',title:'Part 3 · What the network learns, and training',minutes:20},
+  {id:'gen',title:'Part 4 · Sampling: birth of an image',minutes:20},
+  {id:'score',title:'Part 5 · The score: arrows to the data',minutes:8},
+  {id:'fast',title:'Part 6 · Noise schedules and faster sampling',minutes:14},
+  {id:'steer',title:'Part 7 · Steering: labels, guidance and text',minutes:28},
+  {id:'wrap',title:'Part 8 · Wrap-up',minutes:8},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
 };
 export const slides=[];
-/** Numbered sections. The notebook uses the same numbers, with anchors sec-0-1 … sec-7-4. */
+/** Numbered sections, in the order of Paras Chopra's explainer. The notebook uses the same numbers, with anchors sec-0-1 … sec-8-1. */
 const CHAPTERS=[
- ['0.1','Noise to a digit'],['0.2','Three generators'],['0.3','The idea'],
- ['1.1','One noising step'],['1.2','A toy schedule, by hand'],['1.3','The shortcut'],['1.4','The real schedule'],['1.5','Watch our 3 dissolve'],
- ['2.1','What we want'],['2.2','Big jumps back are hard, small ones easy'],['2.3','Guess the noise'],['2.4','One step back'],
- ['3.1','The training example'],['3.2','Why the network needs t'],['3.3','The loss'],['3.4','The network'],['3.5','Training, live'],['3.6','What the network believes'],
- ['4.1','One step back, by hand'],['4.2','The toy, all the way back'],['4.3','The loop'],['4.4','Watch it'],['4.5','Why the fresh noise?'],['4.6','New digits'],
- ['5.1','A 3 on demand'],['5.2','Classifier-free guidance'],['5.3','The guidance dial'],['5.4','Latent diffusion'],['5.5','Text in'],
- ['6.1','DDIM: fewer steps'],['6.2','The schedule matters'],
- ['7.1','Arrows to the data'],['7.2','It is a VAE'],['7.3','Does it just copy?'],['7.4','Wrap-up'],
+ ['0.1','Static in, a cat out'],['0.2','Destruction as creation'],
+ ['1.1','One noising step'],['1.2','A toy schedule, by hand'],['1.3','A beautiful shortcut'],['1.4','The real schedule'],['1.5','Watch it dissolve'],
+ ['2.1','Run the film backwards'],['2.2','Small steps back are simple'],['2.3','Guess the noise'],['2.4','One step back'],
+ ['3.1','What does the network learn?'],['3.2','The network'],['3.3','The training loop'],['3.4','Training, live'],['3.5','What the network believes'],
+ ['4.1','One step back, by hand'],['4.2','The toy, all the way back'],['4.3','The sampling loop'],['4.4','Watch it'],['4.5','Why the fresh noise?'],['4.6','New digits'],
+ ['5.1','Arrows to the data'],['5.2','Follow the arrows'],
+ ['6.1','Noise schedules'],['6.2','DDIM: fewer steps'],['6.3','Faster still'],
+ ['7.1','A 3 on demand'],['7.2','Classifier-free guidance'],['7.3','The guidance dial'],['7.4','From pixels to latents'],['7.5','Text in'],['7.6','A sentence in, a picture out'],
+ ['8.1','Wrap-up'],
 ];
-const PARTS=[['0','Opening: noise to a digit'],['1','Destroying is easy'],['2','Undoing it: one step back'],['3','Training: labels for free'],['4','Generating: walk back from noise'],['5','Steering: labels, guidance and text'],['6','Faster sampling'],['7','What the network learns, and wrap-up']];
+const PARTS=[['0','Introduction: destruction as creation'],['1','The forward process'],['2','The reverse process'],['3','What the network learns, and training'],['4','Sampling: birth of an image'],['5','The score: arrows to the data'],['6','Noise schedules and faster sampling'],['7','Steering: labels, guidance and text'],['8','Wrap-up']];
 const COLAB='https://colab.research.google.com/github/nipunbatra/generative/blob/main/lectures/lecture5/lecture5-diffusion.ipynb';
 const secAnchor=k=>`sec-${k.replace('.','-')}`;
 const firstOf={};
@@ -65,10 +67,10 @@ function S(id,section,title,o){
   notes:{ask:o.ask,expected:o.expected,point:o.point||'',misconception:o.misconception||'',transition:o.transition||'',demo:o.demo||''},
   source:o.source||'',optional:!!o.optional});
 }
-const ACTS=['Destroy','Undo','Train','Generate','Steer','Faster','What it learns'];
-const acts=k=>`<div class="act-strip" role="img" aria-label="Lecture map: part ${k} of 7">${ACTS.map((a,i)=>`<span class="${i+1<k?'done':i+1===k?'now':''}">${i+1} · ${a}</span>`).join('')}</div>`;
+const ACTS=['Forward','Reverse','Train','Sample','Score','Faster','Steer','Wrap-up'];
+const acts=k=>`<div class="act-strip" role="img" aria-label="Lecture map: part ${k} of ${ACTS.length}">${ACTS.map((a,i)=>`<span class="${i+1<k?'done':i+1===k?'now':''}">${i+1} · ${a}</span>`).join('')}</div>`;
 const act=(k,...a)=>`${acts(k)}<div class="act-body">${a.join('')}</div>`;
-const tags={pub:['published',palette.d],ours:['our model',palette.q],exact:['exact',palette.p],illus:['illustration',MUTED]};
+const tags={pub:['published',palette.d],ddpm:['the original DDPM model',palette.d],ours:['our model',palette.q],exact:['exact',palette.p],illus:['illustration',MUTED]};
 const tag=k=>`<span class="tag" style="color:${tags[k][1]}">${tags[k][0]}</span>`;
 
 // ---------------------------------------------------------------- sources, credited on the slides that use them
@@ -90,6 +92,10 @@ const SRC={
  ldm:'<a href="https://arxiv.org/abs/2112.10752">Rombach et al., “High-Resolution Image Synthesis with Latent Diffusion Models” (2022)</a>',
  weng:'<a href="https://lilianweng.github.io/posts/2021-07-11-diffusion-models/">Lilian Weng, “What are Diffusion Models?” (2021)</a>',
  luo:'<a href="https://arxiv.org/abs/2208.11970">Calvin Luo, “Understanding Diffusion Models: A Unified Perspective” (2022)</a>',
+ film:'Companion film “Diffusion models, from noise to images, step by step” (2026): google/ddpm-cat-256 run on the CC0 photo “Chelsea” (scikit-image)',
+ sd:'Stable Diffusion v1.5, run for the companion film “Diffusion models, from noise to images, step by step” (2026)',
+ lcm:'<a href="https://arxiv.org/abs/2310.04378">Luo et al., “Latent Consistency Models” (2023)</a>',
+ p2p:'<a href="https://arxiv.org/abs/2208.01626">Hertz et al., “Prompt-to-Prompt Image Editing with Cross Attention Control” (2022)</a>',
 };
 const by=(...k)=>k.join(' · ');
 
@@ -213,6 +219,26 @@ function toyReverseTable(){
  const rows=toyR.map((r,k)=>[String(r.t),cellAt(k+1,f3(r.x)),cellAt(k+1,f3(r.e)),cellAt(k+1,`(${f3(r.x)} − ${num(r.c,3)} × ${fp(r.e)}) / ${f3(Math.sqrt(TOY.alpha[r.t]))} = ${f3(r.mu)}`),cellAt(k+1,r.t>1?`${f3(r.sigma)} × ${fp(r.z,1)}`:'none'),cellAt(k+1,`<b>${f3(r.next)}</b>`)]);
  return `<div class="hand">${table(['t','x<sub>t</sub>','ε̂ (network)','mean μ = (x<sub>t</sub> − c<sub>t</sub> ε̂) / √α<sub>t</sub>','fresh noise √β<sub>t</sub> z','x<sub>t−1</sub>'],rows)}</div>`;
 }
+/** One step of the film: forwards is easy, backwards is the question. */
+function backFig(){
+ const W=760,H=290,sz=190;let s=`<defs>${arrowHead('bk-f',palette.noise)}${arrowHead('bk-r',palette.q)}</defs>`;
+ s+=`<rect x="20" y="50" width="${sz}" height="${sz}" rx="8" fill="#F3F4F6" stroke="#D7DCE1"/>`+label(20+sz/2,50+sz/2+34,'?',{fill:palette.q,size:100,anchor:'middle',weight:700})+label(20,34,'x₂₄₉: one step earlier',{fill:palette.q,size:25,weight:600});
+ s+=digitSVG(xtOf(250),{size:sz,x:550,y:50})+label(550,34,'x₂₅₀: what we see',{fill:palette.ink,size:25,weight:600});
+ s+=`<path d="M225,112 H535" stroke="${palette.noise}" stroke-width="2.8" marker-end="url(#bk-f)"/>`+label(380,98,'add noise: easy',{fill:palette.noise,size:25,anchor:'middle',weight:600});
+ s+=`<path d="M535,184 H225" stroke="${palette.q}" stroke-width="2.8" stroke-dasharray="9 6" marker-end="url(#bk-r)"/>`+label(380,222,'remove noise: ?',{fill:palette.q,size:25,anchor:'middle',weight:600});
+ return fig(W,H,s,'One step of the film: adding noise from step 249 to 250 is easy; going back is the question.');
+}
+/** Real outputs of the original DDPM cat network on one photo, from the companion film. */
+const photoRow=(items,sz)=>`<div class="eqimg" style="gap:22px">${items.map(([f,c,col])=>`<figure class="eqimg-f">${photo(0,1,sz,f)}<figcaption style="color:${col}">${c}</figcaption></figure>`).join('')}</div>`;
+function guessGrid(){
+ const ts=[950,800,600,400,250,100],sz=150,cap=(t,c)=>`<span class="caption" style="color:${c};text-align:right">${t}</span>`;
+ return `<div class="diagram-scroll"><div style="display:grid;grid-template-columns:auto repeat(6,${sz}px);gap:8px 12px;align-items:center"><span></span>${ts.map(t=>`<span class="caption" style="text-align:center">t = ${t}</span>`).join('')}`+
+  cap('input xₜ',palette.ink)+ts.map((t,k)=>photo(k,6,sz,'cat-guess-xt.jpg')).join('')+cap('its guess x̂₀',palette.data)+ts.map((t,k)=>photo(k,6,sz,'cat-guess-x0.jpg')).join('')+'</div></div>';
+}
+/** A row of frames cut from one strip of the companion film, each with its caption; optionally labelled on the left. */
+const stripRow=(file,n,caps,sz)=>`<div class="eqimg" style="gap:14px">${caps.map((c,k)=>`<figure class="eqimg-f">${photo(k,n,sz,file)}<figcaption>${c}</figcaption></figure>`).join('')}</div>`;
+const stripLine=(lab,col,row)=>`<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><span class="caption" style="width:150px;flex:none;color:${col};font-weight:650">${lab}</span>${row}</div>`;
+const sdArrow=t=>`<span class="op" style="display:flex;flex-direction:column;align-items:center;font-size:20px;gap:2px">${t}<span style="font-size:34px;line-height:1">→</span></span>`;
 /** One forward step as a flow of numbers: x0 → × √α → + √β ε → x1. */
 function stepFig(){
  const W=700,H=170,x1=Math.sqrt(TOY.alpha[1]),k1=Math.sqrt(TOY.beta[1])*TOY_EPS[1];let s=`<defs>${arrowHead('sf1',palette.ink)}</defs>`;
@@ -234,13 +260,14 @@ function reverseFig(){
 
 // ================================================================ Opening
 chap('0.1');
-S('hook','open','Static in, a handwritten digit out',{builds:2,nb:'sec-0-1',
- body:widget('hookfilm','Our trained model turning static into a digit'),
- lines:['A network we trained on MNIST starts from pure static, 784 random numbers…','…and a thousand small steps later there is a digit, which is not in the training set. Today: how, and why it works.'],
- ask:['What could turn random numbers into a digit?','Is this digit copied from the training set?'],
- expected:['Collect guesses: a decoder (VAE), a generator (GAN)… Today: many small denoising steps.','No. Part 7 measures it: our samples are as far from the nearest training image as real test digits are.'],
- point:`Our model: a U-Net with ${mn.model.params.toLocaleString('en')} parameters, ${mn.model.steps.toLocaleString('en')} training updates of batch ${mn.model.batch}. The film is sampling run 0, shown every 50 steps.`,
- transition:'Before the how: what this same loop does at scale.'});
+S('hook','open','Static in, a cat out',{builds:2,nb:'sec-0-1',
+ body:widget('filmstrip','Four sampling runs of the original DDPM cat model, from static to cats',{runs:'1,3,4,5',size:220})+at(2,small(`${tag('ddpm')} Real samples from the network of the original DDPM paper (Ho, Jain &amp; Abbeel 2020), trained on photos of cats.`)),
+ lines:['The network of the original DDPM paper, trained on photos of cats, starts from pure static: 196,608 random numbers per image…','…and a thousand small steps later there is a cat. Today: how it works, built from scratch on handwritten digits, where we can see every number.'],
+ ask:['What could turn random numbers into a photo?','What has the network learned, if not the photos themselves?'],
+ expected:['Collect guesses: a decoder (VAE), a generator (GAN)… Today: many small denoising steps.','How to remove a little noise from a noisy image, at every noise level. That is the whole lecture.'],
+ point:'Four of eight runs of google/ddpm-cat-256 (the original DDPM LSUN-cat checkpoint, 114 million parameters): 1,000 steps of ancestral sampling, shown every 50 steps. All eight runs, with the network’s guess at every step, are in §{cat-film}.',
+ source:by(SRC.ddpm,SRC.film),
+ transition:'What this same loop does today.'});
 S('apps','open','The same loop runs today’s image generators',{builds:2,
  body:`<div class="thumbs">${[['pub-cherries-1.png','“a basket of cherries”'],['pub-repaint-1.png','fill a hole'],['pub-sr3-face-3.png','sharpen a blurry face'],['pub-sdedit-out1.png','a sketch → a scene'],['pub-control-2.png','edges → a bird'],['pub-dreambooth-acropolis.png','your dog, at the Acropolis']].map(([f,c],k)=>`<figure>${`<img src="figures/pub/${f}" alt="${esc(c)}" style="width:150px;height:150px;object-fit:cover;border-radius:6px">`}<figcaption>${c}</figcaption></figure>`).join('')}</div>`+
   at(2,small(`${tag('pub')} Video, audio, 3-D shapes, protein structures and robot motions are made the same way.`)),
@@ -248,7 +275,7 @@ S('apps','open','The same loop runs today’s image generators',{builds:2,
  ask:['What is the same across all six?','Which of them do you think is hardest?'],
  expected:['Each starts from noise and removes it step by step, steered by a different input.','Open question; return to it at the end.'],
  source:'Published samples: LDM (Rombach et al. 2022) · RePaint (Lugmayr et al. 2022) · SR3 (Saharia et al. 2022) · SDEdit (Meng et al. 2022) · ControlNet (Zhang et al. 2023) · DreamBooth (Ruiz et al. 2023). Showcase after '+SRC.mit(1),
- transition:'We have built two generators already. What was wrong with them?'});
+ transition:'The idea in one sentence.'});
 chap('0.2');
 S('three-gens','open','Two generators so far, and a third idea',{builds:3,
  body:`<div class="columns" style="grid-template-columns:1fr 1fr 1fr;gap:28px;align-items:start">${[
@@ -257,8 +284,8 @@ S('three-gens','open','Two generators so far, and a third idea',{builds:3,
   ['Diffusion (today)','mnist-samples-16.png','a thousand small denoising steps, each one an easy regression',palette.q,3]].map(([h,f,c,col,b])=>at(b,`<div><p class="lead" style="color:${col};font-weight:650">${h}</p>${pic(f,330,h)}<p class="caption" style="margin-top:8px">${c}</p></div>`)).join('')}</div>`,
  lines:['The VAE decodes a random code in one step: it has a likelihood and trains stably, but its digits are blurry.','The GAN also makes a digit in one step: sharp, but training is a game that can collapse.','Diffusion makes a digit in a thousand small steps. Each step is a simple regression problem, and the result is sharp.'],
  ask:['Why are VAE samples blurry?','What went wrong with GANs?','What might we pay for a thousand steps?'],
- expected:['The decoder predicts an average over the plausible images (a Gaussian or Bernoulli mean).','Mode collapse and unstable alternating training; no likelihood to monitor.','Time: a thousand network calls per image. Part 6 cuts that.'],
- point:'VAE: the β = 1 model of Lecture 3, prior samples (probabilities shown). GAN: Lecture 4’s MNIST GAN after 30 epochs. Diffusion: our model, Part 4.',
+ expected:['The decoder predicts an average over the plausible images (a Gaussian or Bernoulli mean).','Mode collapse and unstable alternating training; no likelihood to monitor.','Time: a thousand network calls per image. Part ¶{slow} cuts that.'],
+ point:'VAE: the β = 1 model of Lecture 3, prior samples (probabilities shown). GAN: Lecture 4’s MNIST GAN after 30 epochs. Diffusion: our model, Part ¶{samples64}.',
  transition:'The idea in one sentence.'});
 chap('0.3');
 S('core-idea','open','The idea in one sentence',{builds:2,
@@ -266,19 +293,19 @@ S('core-idea','open','The idea in one sentence',{builds:2,
   at(2,`<figure class="illus">${`<img src="figures/illustrations/ink-drop.jpg" style="max-height:215px;object-fit:contain" alt="A drop of ink spreading through five glasses of water until the water is a uniform faint blue.">`}<figcaption>${tag('illus')} Generated with Gemini. A drop of ink spreads until the water is uniform; nothing pulls it back together.</figcaption></figure>`)),
  lines:['Destroying is easy; creating is hard. The trick is to connect them.','Film a drop of ink spreading through water. Played forwards, structure disappears. Between two neighbouring frames the change is tiny, and tiny changes can be predicted. Learn to undo each one, and you can run the film backwards.'],
  ask:['Can you un-mix ink from water?','Why would small steps be easier to undo than one big one?'],
- expected:['Not physically: diffusion only runs forwards.','Between neighbouring frames almost nothing changes, so the previous frame is almost determined by the next one. Part 2 makes this exact.'],
+ expected:['Not physically: diffusion only runs forwards.','Between neighbouring frames almost nothing changes, so the previous frame is almost determined by the next one. Part ¶{reverse-explorer} makes this exact.'],
  point:'This physical process gave the method its name: Sohl-Dickstein et al. (2015) borrowed it from non-equilibrium thermodynamics. Paras Chopra’s explainer uses a different everyday example; we use ink in water throughout.',
  source:by(SRC.paras,SRC.sohl),
  transition:'The plan for today.'});
-S('route','open','The plan: destroy, step back, train, generate',{builds:2,
+S('route','open','The plan: forwards, backwards, train, sample',{builds:2,
  body:`<div class="state-slot"><div data-only="1">${chainFig(1)}</div><div data-only="2">${chainFig(2)}</div></div>`,
- lines:['Left to right: add a little noise, a thousand times, until our 3 is pure static. That direction is fixed and needs no learning (Part 1).','Right to left: remove a little noise at a time. That direction is learned (Parts 2–4). Then: steering with labels and text (5), faster sampling (6), and what the network really learns (7).'],
+ lines:['Left to right: add a little noise, a thousand times, until our 3 is pure static. That direction is fixed and needs no learning (Part 1).','Right to left: remove a little noise at a time. That direction is learned (Parts 2–4). Then the score view (5), faster sampling (6), and steering with labels and text (7).'],
  ask:['Which direction is easy?','What does the network have to learn?'],
  expected:['Adding noise: one line of code.','How to undo one small step of noise, at every noise level.'],
  source:SRC.ddpm,
- transition:'Part 1: destroying is easy.'});
+ transition:'Part 1: the forward process.'});
 
-// ================================================================ Part 1 · Destroying is easy
+// ================================================================ Part 1 · The forward process
 chap('1.1');
 S('one-step','fwd','One noising step: shrink a little, add a little noise',{builds:3,
  body:act(1,cols(pixelFig(),stack(eq(R`x_t=\sqrt{\alpha_t}\;x_{t-1}+\sqrt{\beta_t}\;\ncol{\varepsilon_t}`),eq(R`\alpha_t=1-\beta_t,\qquad \ncol{\varepsilon_t}\sim\N(0,1)`),
@@ -314,7 +341,7 @@ S('film','fwd','Slide t: watch our 3 dissolve',{builds:2,
  lines:['Move t. The image is a mix of two things: the signal, our 3 scaled by √ᾱₜ, and noise scaled by √(1 − ᾱₜ). The pixel we follow is outlined.',`Around t = 600 the 3 is gone: √ᾱ has fallen to ${num(Math.sqrt(LIN.ab[600]),2)}. Our ink pixel (+1) reads ${num(xtOf(500)[pixIdx],2)} at t = 500: from the value alone you can no longer tell ink from paper.`],
  ask:['At what t can you no longer see the 3?','Our pixel is ink. Why can it read 0 or below?'],
  expected:['Around t = 500–600.','The noise part √(1 − ᾱ)ε (here ε = −0.5) outweighs the shrunk signal.'],
- point:'The bars are the two coefficients of 1.2, √ᾱₜ and √(1 − ᾱₜ). The film is computed live from the clean 3 and one fixed noise draw.',
+ point:'The bars are the shortcut’s two coefficients (§{shortcut}), √ᾱₜ and √(1 − ᾱₜ). The film is computed live from the clean 3 and one fixed noise draw.',
  source:SRC.paras,
  transition:'Every image ends up in the same place.'});
 S('pixel-hist','fwd','Every image ends in the same place: N(0, 1)',{builds:2,
@@ -324,12 +351,12 @@ S('pixel-hist','fwd','Every image ends in the same place: N(0, 1)',{builds:2,
  expected:['Yes: the end point does not depend on the data.','Because then we know how to start the reverse process: draw from N(0, I).'],
  misconception:'Explainers often credit the Central Limit Theorem. The forward noise is Gaussian by construction and the signal is shrunk away; no averaging of many non-Gaussian pieces is involved.',
  source:by(SRC.paras,'(endpoint argument corrected)'),
- transition:'Follow one pixel through all thousand steps.'});
+ transition:'The same on a real photograph.'});
 S('river','fwd','One pixel, a thousand steps: the density flows',{builds:2,
  body:act(1,widget('river','The density of our pixel over the thousand steps')),
  lines:[`Our pixel across the dataset: ink (+1) with probability ${num(PI,2)}, paper (−1) otherwise. Its density over time, exactly: two thin lines that widen and merge into one bell.`,'Fourteen noising runs, step by step. Each starts at ink or paper and wanders; by the end you cannot tell where any of them started.'],
  ask:['Where is the density at t = 0?','Pick one path at t = 1,000. Did it start at ink or paper?'],
- expected:['Two spikes: at −1 with probability 0.65 and at +1 with 0.35.','You cannot tell. That is the problem Part 2 faces.'],
+ expected:['Two spikes: at −1 with probability 0.65 and at +1 with 0.35.','You cannot tell. That is the problem Part ¶{reverse-q} faces.'],
  source:SRC.deepia,
  transition:'Do we need all thousand steps to make one noisy example?'});
 chap('1.2');
@@ -338,13 +365,13 @@ S('toy-schedule','fwd','A toy schedule you can do by hand: five steps',{builds:3
  lines:['Five steps with growing β: 0.1, 0.2, 0.3, 0.5, 0.8. Each α is simply 1 − β: the share of the previous value that a step keeps.',`ᾱₜ (“alpha-bar”) multiplies the α’s so far: 0.9, then 0.9 × 0.8 = 0.72, then × 0.7 = 0.504, × 0.5 = 0.252, × 0.2 = ${tn(TOY.ab[5],4)}. It measures how much of the original image survives.`,`The two numbers we use all lecture: √ᾱₜ, the size of the signal, and √(1 − ᾱₜ), the size of the noise. By step 5 they are ${f3(Math.sqrt(TOY.ab[5]))} and ${f3(Math.sqrt(1-TOY.ab[5]))}: almost pure noise.`],
  ask:['Why does α fall as β grows?','Why multiply the α’s?','Do the squares of the two coefficients add to 1?'],
  expected:['α = 1 − β: more noise means keeping less of the old value.','Every step shrinks the signal again: after t steps, by √(α₁ α₂ ⋯ αₜ) = √ᾱₜ.','Yes, ᾱ + (1 − ᾱ) = 1: signal and noise share a fixed budget, so the spread stays 1.'],
- point:'A toy for the arithmetic only. Real schedules take 1,000 small steps, so that each step back is easy (Part 2).',
+ point:'A toy for the arithmetic only. Real schedules take 1,000 small steps, so that each step back is easy (Part ¶{reverse-explorer}).',
  transition:'Push our pixel through the five steps.'});
 S('toy-forward','fwd','Forward, step by step: every number',{builds:3,nb:'cell-toy',
  body:act(1,toyForwardTable(),at(3,p(`From x₅ = ${f3(toyF[5])} alone you cannot tell the pixel was ink. (A paper pixel with the same draws would give ${f3(toyFp[5])}.)`))),
  lines:[`Start at the ink pixel, x₀ = 1. Step 1: ${f3(toyF[1])}. Step 2 shrinks by √0.8 and adds √0.2 × (−0.5): ${f3(toyF[2])}.`,`Steps 3 and 4 have bigger kicks. After step 4 the ink pixel is negative, ${f3(toyF[4])}: it looks like paper.`,`Step 5: x₅ = ${f3(toyF[5])}. The original value is almost gone.`],
  ask:['Compute x₂ yourself.','How can an ink pixel become negative?','Could you recover x₀ from x₅?'],
- expected:[`√0.8 × ${f3(toyF[1])} + √0.2 × (−0.5) = ${f3(toyF[2])}.`,'The noise kick is as large as the shrunk signal.','Not reliably: ink and paper pixels end up in overlapping places. That is Part 2’s problem.'],
+ expected:[`√0.8 × ${f3(toyF[1])} + √0.2 × (−0.5) = ${f3(toyF[2])}.`,'The noise kick is as large as the shrunk signal.','Not reliably: ink and paper pixels end up in overlapping places. That is Part ¶{reverse-q}’s problem.'],
  transition:'Do we have to run every step?'});
 chap('1.3');
 S('shortcut-q','fwd','Do we need a 1,000-step loop for one noisy example?',{builds:3,
@@ -353,7 +380,7 @@ S('shortcut-q','fwd','Do we need a 1,000-step loop for one noisy example?',{buil
   at(3,eq(R`x_3=\sqrt{\alpha_3}\Big(\sqrt{\alpha_2}\big(\sqrt{\alpha_1}\,\dcol{x_0}+\sqrt{\beta_1}\,\ncol{\varepsilon_1}\big)+\sqrt{\beta_2}\,\ncol{\varepsilon_2}\Big)+\sqrt{\beta_3}\,\ncol{\varepsilon_3}\;\cdots`)))),
  lines:['Name the shrink factor: αₜ = 1 − βₜ. One step: x₁ = √α₁ x₀ + √β₁ ε₁.','Two steps: substitute x₁ into the rule for x₂.','Three steps, and it keeps nesting. Training needs millions of noisy examples at random t: we cannot afford this loop each time.'],
  ask:['What kind of random variable is x₂?','How many noise draws does x₁₀₀₀ involve?','Any way to collapse this?'],
- expected:['A constant times x₀ plus a sum of independent Gaussians.','A thousand.','A sum of independent Gaussians is one Gaussian: next slide.'],
+ expected:['A constant times x₀ plus a sum of independent Gaussians.','A thousand.','A sum of independent Gaussians is one Gaussian: §{two-steps}.'],
  source:SRC.seff,
  transition:'Collapse two steps by hand.'});
 S('two-steps','fwd','Two steps by hand: two noises become one',{builds:4,
@@ -361,7 +388,7 @@ S('two-steps','fwd','Two steps by hand: two noises become one',{builds:4,
   at(2,eq(R`\operatorname{Var}(\text{noise})=\alpha_2\beta_1+\beta_2=1-\alpha_1\alpha_2`)),
   at(3,eq(R`x_2=\sqrt{\alpha_1\alpha_2}\,\dcol{x_0}+\sqrt{1-\alpha_1\alpha_2}\;\ncol{\varepsilon},\qquad\ncol{\varepsilon}\sim\N(0,1)`)),
   at(4,eq(R`\beta_1=0.1,\ \beta_2=0.2:\quad x_2=\sqrt{0.72}\,(1)+\sqrt{0.28}\,(${tn(two.eps,2)})=${tn(two.x2,2)}`)))),
- lines:['Open the brackets: a signal part, and two independent noise terms.','Their variances add (Lecture 1): α₂β₁ + β₂. Since β = 1 − α, that is exactly 1 − α₁α₂.','So the two noises are one Gaussian with that variance: x₂ = √(α₁α₂) x₀ + √(1 − α₁α₂) ε.',`Check with two big illustrative steps, β₁ = 0.1 and β₂ = 0.2, and the draws ε₁ = 0.3, ε₂ = −0.5: step by step x₂ = ${num(two.x2,2)}, and the formula with the combined ε = ${num(two.eps,2)} gives the same.`],
+ lines:['Training needs millions of noisy examples at random t: must we run every step for each one? Substitute x₁ into the rule for x₂ and open the brackets: a signal part, and two independent noise terms.','Their variances add (Lecture 1): α₂β₁ + β₂. Since β = 1 − α, that is exactly 1 − α₁α₂.','So the two noises are one Gaussian with that variance: x₂ = √(α₁α₂) x₀ + √(1 − α₁α₂) ε.',`Check with two big illustrative steps, β₁ = 0.1 and β₂ = 0.2, and the draws ε₁ = 0.3, ε₂ = −0.5: step by step x₂ = ${num(two.x2,2)}, and the formula with the combined ε = ${num(two.eps,2)} gives the same.`],
  ask:['Why may we add the variances?','Check: α₂β₁ + β₂ = 1 − α₁α₂?','What is the signal coefficient after two steps?','Is the combined ε a new random draw?'],
  expected:['ε₁ and ε₂ are independent.','α₂(1 − α₁) + 1 − α₂ = 1 − α₁α₂. Yes.','√(α₁α₂): the product of the shrink factors.','It is a fixed combination of ε₁ and ε₂, with the right N(0, 1) distribution. To make a training example we can draw it directly.'],
  point:`Illustrative numbers only: real steps are tiny (β₁ = 0.0001). Step by step: x₁ = √0.9 + √0.1 × 0.3 = ${num(two.x1,4)}; x₂ = √0.8 × ${num(two.x1,4)} + √0.2 × (−0.5) = ${num(two.x2,4)}. Combined ε = (√0.8 √0.1 × 0.3 + √0.2 × (−0.5)) / √0.28 = ${num(two.eps,4)}.`,
@@ -392,7 +419,7 @@ S('schedule','fwd','The real schedule: 1,000 small steps',{builds:2,
  body:act(1,scheduleFig(1),at(2,eq(R`t=250:\ \ \bar\alpha=${tn(r.alpha_bar,3)},\quad x_{250}=${tn(r.signal,3)}\times 1+${tn(r.noise,3)}\times(${tn(r.eps,1)})=${tn(r.xt,3)}`))),
  lines:['The schedule of the original DDPM: 1,000 steps, β rising from 0.0001 to 0.02. The signal coefficient √ᾱₜ falls from 1 to almost 0; the noise coefficient √(1 − ᾱₜ) rises to 1.',`Our running example from now on: t = 250, where signal and noise are about equal. The ink pixel with the noise draw ε = −0.5 becomes x₂₅₀ = ${num(r.xt,3)}.`],
  ask:['Why 1,000 small steps rather than 5 big ones?','At t = 250, which is bigger, signal or noise?'],
- expected:['Small steps are easy to undo (Part 2).',`About equal: ${num(r.signal,3)} and ${num(r.noise,3)}.`],
+ expected:['Small steps are easy to undo (Part ¶{reverse-explorer}).',`About equal: ${num(r.signal,3)} and ${num(r.noise,3)}.`],
  point:'ᾱ₂₅₀ is a product of 250 α’s, each a little below 1. The calculator on the next slide shows the product for any t.',
  source:by(SRC.ddpm,SRC.iddpm),
  transition:'Try any step yourself.'});
@@ -406,11 +433,19 @@ chap('1.5');
 S('fwd-recap','fwd','Destroying is easy, and it hands us labels for free',{builds:2,
  body:act(1,table(['we have','how'],[['a clean image x₀','the dataset'],['a noise level t','pick 1 … 1,000 at random'],['the noise ε','draw N(0, I)'],['the noisy image xₜ','one line: √ᾱₜ x₀ + √(1 − ᾱₜ) ε']]),
   at(2,p('Next: can we go back? Given x<sub>t</sub>, where was x<sub>t−1</sub>?'))),
- lines:['Part 1 in one table. No learning anywhere: every quantity is chosen, drawn or computed.','The hard direction is the other one. Part 2: undoing it, one step back.'],
+ lines:['Part 1 in one table. No learning anywhere: every quantity is chosen, drawn or computed.','The hard direction is the other one. Part 2: the reverse process.'],
  ask:['Which of these will the network see?','What would we need to go back?'],
- expected:['xₜ and t. Part 3 makes ε its target.','The distribution of x_{t−1} given xₜ.'],
+ expected:['xₜ and t. Part ¶{tuple} makes ε its target.','The distribution of x_{t−1} given xₜ.'],
  transition:'Part 2.'});
-// ================================================================ Part 2 · One step back is a Bayes problem
+S('photo-jump','fwd','The same jump on a real photograph',{builds:2,
+ body:act(1,widget('photojump','A photograph of a cat, one noise image, and their mix at noise level t')),
+ lines:['Nothing in the shortcut is special to digits. A 256 × 256 colour photo is 196,608 numbers; the same two coefficients mix it with one noise image. Move t.','By t ≈ 600 only the layout is left, light and dark patches; by t = 1,000 the photo is gone. Every photo ends as the same static.'],
+ ask:['At what t can you no longer tell it is a cat?','Which survives longer: the fine fur, or the big dark patches?'],
+ expected:['Around t = 500–700 with this schedule.','The big patches: fine detail is small and drowns first. Generation will work in the opposite order, coarse first.'],
+ point:'The photo is “Chelsea” from scikit-image (CC0), 256 × 256; the noise is one fixed draw and the schedule is the linear DDPM schedule of §{schedule}. Frames every 50 steps, made for the companion film.',
+ source:by(SRC.ddpm,SRC.film),
+ transition:'Part 1 in one table.'});
+// ================================================================ Part 2 · The reverse process
 const pct=v=>`${Math.round(v*100)}%`;
 function knowFig(b){
  const W=1150,H=320;let s=`<defs>${arrowHead('kn-a',palette.p)}</defs>`+digitSVG(xtOf(250),{size:220,x:40,y:50})+label(40,36,'x₂₅₀: noisy',{fill:palette.ink,size:22,weight:600});
@@ -420,15 +455,16 @@ function knowFig(b){
  if(b<2)s+=label(420,150,'Where was x₂₄₉?',{fill:palette.loss,size:26,weight:650})+label(420,185,'It could have come from',{size:21})+label(420,212,'many different images.',{size:21});
  return fig(W,H,s,b<2?'A noisy 3 with question marks: many images could have produced it.':'The same noisy 3 next to the clean 3: given the clean image, the step back is pinned down.');
 }
-S('reverse-q','back','Going back: where was xₜ₋₁?',{builds:3,
- body:act(2,stack(eq(R`q(x_{t-1}\mid x_t)=\frac{q(x_t\mid x_{t-1})\;q(x_{t-1})}{q(x_t)}`),
-  at(2,table(['term','what it is','known?'],[[m(R`q(x_t\mid x_{t-1})`),'our noising step: N(√αₜ xₜ₋₁, βₜ)','yes'],[m(R`q(x_{t-1})`),'the distribution of all noisy images at step t − 1','no']])),
-  at(3,p('For images we cannot write that prior down. For one pixel, we can.')))),
- lines:['Bayes’ rule from Lecture 1: what was x_{t−1}, given that we see xₜ? The likelihood times the prior, normalised.','The likelihood is our own noising step. The prior is the distribution of every possible noisy image one step earlier: as hard as the generative model itself.','So we cannot compute the step back exactly for images. For one pixel we can, and it teaches us what to learn.'],
- ask:['Which term is the likelihood here?','Why is q(x_{t−1}) hard?','What do we know exactly about one pixel?'],
- expected:['q(xₜ | xₜ₋₁): how the noisy value arises from the previous one.','It averages the noising over every image in the world.','Its distribution: ink with probability π, paper otherwise, so its noisy prior is a mixture of two Gaussians.'],
- source:SRC.paras,
- transition:'What if we jump all the way back at once?'});
+S('reverse-q','back','Run the film backwards: where was xₜ₋₁?',{builds:3,
+ body:act(2,cols(backFig(),stack(eq(R`\text{we want:}\quad p(x_{t-1}\mid x_t)`),
+  at(2,p('The exact answer needs the distribution of <b>every possible image</b>, one step noisier. Nobody has that.')),
+  at(3,p('So we <b>learn</b> it. When the step is small, the answer is one bell curve: the network only has to find its centre.'))),'1.15fr 1fr')),
+ lines:['Forwards was one line of code. Backwards: we see a noisy image at step t. What did it look like one step earlier? Many images could have produced it.','The exact step back is Bayes’ rule, and it needs the distribution of all images at that noise level: as hard as the generative model itself.','So we learn it, one small step at a time. Next: why a small step back is just a Gaussian, on our one pixel, where we can compute everything exactly.'],
+ ask:['Why is going forwards easy?','What would we need to compute the step back exactly?','Why might small steps help?'],
+ expected:['We chose the noising: one shrink and one Gaussian kick.','The distribution of every possible noisy image one step earlier: the very thing we are trying to learn.','Between two neighbouring frames almost nothing changes, so the earlier frame is almost pinned down by the later one.'],
+ point:'In symbols: p(xₜ₋₁ | xₜ) = q(xₜ | xₜ₋₁) q(xₜ₋₁) / q(xₜ). The likelihood is our noising step; the prior q(xₜ₋₁) averages the noising over every image in the world. Optional depth works through this Bayes calculation for one pixel (§{pixel-bayes}).',
+ source:SRC.paras+' (V)',
+ transition:'Shrink the jump, and watch the step back become one Gaussian.'});
 chap('2.2');
 S('pixel-prior','back','One pixel: paper or ink',{builds:2,
  body:act(2,cols(pixelHistFig(),stack(p(`Across the 60,000 training images, our pixel is ink (darker than mid-grey) in ${pct(PI)} of them.`),
@@ -436,7 +472,7 @@ S('pixel-prior','back','One pixel: paper or ink',{builds:2,
   at(2,small(`A simplification: about ${pct(px.share_between)} of the time this pixel is a grey in between. Ignoring the greys makes every formula exact.`))),'1fr 1fr')),
  lines:[`Our pixel across the whole training set: mostly paper, often ink (${pct(PI)} of images), sometimes in between.`,'Model it as a coin: ink with probability π = 0.35, paper otherwise. This is the prior over the clean pixel, and it is all Bayes needs.'],
  ask:['Why is this pixel ink so often?','Is a coin a good model of one pixel?'],
- expected:['It sits where many digits have a stroke (the bottom curve of 3, 5, 8, 0…).','For one pixel, yes, up to the greys. Lecture 2: one probability per pixel gets each pixel right but makes poor images, because strokes are coordinated. Remember that for 3.7.'],
+ expected:['It sits where many digits have a stroke (the bottom curve of 3, 5, 8, 0…).','For one pixel, yes, up to the greys. Lecture 2: one probability per pixel gets each pixel right but makes poor images, because strokes are coordinated. Remember that for §{coordinate}.'],
  transition:'We observe the noisy pixel. Was it ink?'});
 S('pixel-bayes','back',`We see x₂₅₀ = ${num(r.xt,2)}. Was the pixel ink?`,{builds:4,
  body:act(2,cols(bumpsFig(1),`<div class="eq-sm">`+stack(eq(R`p(x_{250}\mid\text{ink})=${tn(r.lik_ink,2)},\qquad p(x_{250}\mid\text{paper})=${tn(r.lik_paper,2)}`),
@@ -466,19 +502,19 @@ S('big-jump','back','From pure noise straight back to the pixel: two spikes',{bu
 chap('2.4');
 S('reverse-explorer','back','Shrink the jump: the step back becomes one Gaussian',{builds:3,nb:'cell-reverse',
  body:act(2,widget('reverse','The exact distribution of the pixel several steps back, and the best single Gaussian')),
- lines:['The exact distribution of the pixel some steps back from t = 500, given xₜ = 0 (green), against the best single Gaussian (purple). A jump all the way back: two spikes.',`Back 200 steps, to t = 300: two bumps, ${num(px.reverse[2].separation,1)} widths apart. One Gaussian is still a poor fit.`,`One step back, 500 → 499: the bumps are ${num(px.reverse[5].separation,2)} widths apart, one bell. Press play to shrink the jump continuously.`],
+ lines:[`Our pixel is ink in ${pct(PI)} of training digits and paper otherwise: simple enough to compute the step back exactly. From t = 500, given xₜ = 0, a jump all the way back gives two spikes, ink or paper (green). One Gaussian (purple) fits badly.`,`Back 200 steps, to t = 300: two bumps, ${num(px.reverse[2].separation,1)} widths apart. One Gaussian is still a poor fit.`,`One step back, 500 → 499: the bumps are ${num(px.reverse[5].separation,2)} widths apart, one bell. Press play to shrink the jump continuously.`],
  ask:['Where are the spikes, and why those heights?','What makes the two bumps merge?','So what should one learned step look like?'],
  expected:['At ±1, with the posterior probabilities of paper and ink given xₜ.','Each bump is narrow when the jump is short, but the bumps also move together: one step changes x by very little.','A single Gaussian, N(μ, σ²), with a mean that depends on xₜ and t.'],
  point:'Everything here is exact: q(x_s | xₜ) = Σ over ink/paper of P(x₀ | xₜ) · q(x_s | xₜ, x₀), each term a Gaussian (optional depth derives it for one step).',
  source:by(SRC.seff,'(the 1-D picture, here computed exactly)'),
- transition:'Why a single step back is Gaussian, in general.'});
+ transition:'So learn one Gaussian per step. What should the network guess?'});
 S('why-gaussian','back','Why: a narrow likelihood times a smooth prior',{builds:3,
  body:act(2,stack(eq(R`q(x_{t-1}\mid x_t)\;\propto\;\underbrace{\N\big(x_t;\sqrt{\alpha_t}\,x_{t-1},\,\beta_t\big)}_{\text{narrow: }\beta_t\le 0.02}\;\times\;\underbrace{q(x_{t-1})}_{\text{smooth}}`),
   at(2,productFig()),
   at(3,eq(R`p_\theta(x_{t-1}\mid x_t)=\N\big(x_{t-1};\ \qcol{\mu_\theta(x_t,t)},\ \sigma_t^2\big)`)))),
  lines:['Bayes again for one step: the likelihood is a narrow bump, because βₜ is at most 0.02.','Over such a narrow range the prior hardly changes, so the product is one narrow bell, centred near xₜ and nudged towards where the prior is higher.','So we will learn one Gaussian per step: its mean comes from a network μ_θ(xₜ, t); its width σₜ is fixed by the schedule. A thousand such steps, and the network is shared.'],
  ask:['Why does a small β make the likelihood narrow?','What if β were large?','Which part needs learning: the mean or the width?'],
- expected:['β is the variance of one step’s noise.','The likelihood would be wide and the product would inherit the prior’s two bumps: 2.4 with a big jump.','The mean. DDPM fixes σₜ² to βₜ or to β̃ₜ of the next slide.'],
+ expected:['β is the variance of one step’s noise.','The likelihood would be wide and the product would inherit the prior’s two bumps: §{big-jump}.','The mean. DDPM fixes σₜ² to βₜ or to β̃ₜ of §{posterior-2}.'],
  point:'The general result is old (Feller 1949): for small steps, the reverse of a Gaussian diffusion has the same Gaussian form. Sohl-Dickstein et al. (2015) built on it.',
  source:by(SRC.seff,SRC.sohl),
  transition:'One case where the step back is exactly Gaussian.'});
@@ -494,7 +530,7 @@ S('posterior-1','back','Bayes with three Gaussians',{builds:3,
  body:act(2,stack(eq(R`q(x_{t-1}\mid x_t,\dcol{x_0})=\frac{q(x_t\mid x_{t-1},\dcol{x_0})\;q(x_{t-1}\mid\dcol{x_0})}{q(x_t\mid\dcol{x_0})}`),
   at(2,eq(R`=\frac{\N\big(x_t;\sqrt{\alpha_t}\,x_{t-1},\beta_t\big)\;\N\big(x_{t-1};\sqrt{\bar\alpha_{t-1}}\,\dcol{x_0},1-\bar\alpha_{t-1}\big)}{\N\big(x_t;\sqrt{\bar\alpha_t}\,\dcol{x_0},1-\bar\alpha_t\big)}`)),
   at(3,eq(R`\log q(x_{t-1}\mid x_t,\dcol{x_0})=-\frac12\Big[\frac{(x_t-\sqrt{\alpha_t}\,x_{t-1})^2}{\beta_t}+\frac{(x_{t-1}-\sqrt{\bar\alpha_{t-1}}\,\dcol{x_0})^2}{1-\bar\alpha_{t-1}}\Big]+\text{const}`)))),
- lines:['Bayes’ rule with x₀ given throughout: likelihood of xₜ, times the prior of x_{t−1} given x₀, over the evidence.','All three are Gaussians we know. The first is one noising step (x₀ adds nothing once x_{t−1} is known: the Markov property). The other two are the shortcut of 1.3.','Take logs. The denominator has no x_{t−1}: a constant. What is left is a quadratic in x_{t−1}, and an exponentiated quadratic is a Gaussian.'],
+ lines:['Bayes’ rule with x₀ given throughout: likelihood of xₜ, times the prior of x_{t−1} given x₀, over the evidence.','All three are Gaussians we know. The first is one noising step (x₀ adds nothing once x_{t−1} is known: the Markov property). The other two are the shortcut of §{shortcut}.','Take logs. The denominator has no x_{t−1}: a constant. What is left is a quadratic in x_{t−1}, and an exponentiated quadratic is a Gaussian.'],
  ask:['Why may we drop x₀ from q(xₜ | x_{t−1}, x₀)?','Which of the three is the shortcut?','Why does a quadratic in the exponent mean Gaussian?'],
  expected:['Each step only looks at the previous value.','The second and the third: x_{t−1} and xₜ given x₀.','N(x; μ, s²) ∝ exp(−(x − μ)²/(2s²)): a quadratic in x.'],
  source:by(SRC.outlier,SRC.weng),
@@ -516,17 +552,17 @@ S('guess-noise','back','If we knew the noise, we could undo the jump exactly',{b
   at(3,eq(R`\qcol{\hat\varepsilon}=\text{network}(x_t,\,t)\;\approx\;\ncol{\varepsilon}`)))),
  lines:['Solve the shortcut for x₀: if someone told us the noise ε, the clean pixel would follow in one line.',`Check on the toy: x₂ = ${num(two.x2,3)} with its noise ${num(two.eps,3)} gives back x₀ = 1 exactly.`,'When generating, nobody tells us ε. So a network guesses it from what it can see: xₜ and t. Everything else is arithmetic.'],
  ask:['Why can we solve for x₀?','What does the network see?','Can its guess be exact?'],
- expected:['The shortcut is a straight line in x₀ and ε: given one, the other follows.','xₜ and t only.','Not always: the same xₜ can come from different (x₀, ε) pairs, so it guesses an average (3.3).'],
+ expected:['The shortcut is a straight line in x₀ and ε: given one, the other follows.','xₜ and t only.','Not always: the same xₜ can come from different (x₀, ε) pairs, so it guesses an average (§{average}, optional depth).'],
  source:SRC.paras+' (VI)',
- transition:'Three names for one guess.'});
+ transition:'Put the guess into one step back.'});
 
 S('guess-x0','back','We do not have x₀ when generating, so guess it',{builds:3,
  body:act(2,stack(eq(R`\qcol{\mu_\theta(x_t,t)}=\tilde\mu_t\big(x_t,\ \qcol{\hat x_0(x_t,t)}\big)`),
   at(2,eq(R`\text{pixel:}\quad \qcol{\mu}=${tn(r.coef_x0,4)}\times\qcol{${tn(r.x0_hat,2)}}+${tn(r.coef_xt,4)}\times${tn(r.xt,3)}=\qcol{${tn(r.mu_hat,3)}}\qquad(\text{exact: }\pcol{${tn(r.mu_true,3)}})`)),
   at(3,eq(R`\qcol{\hat x_0}=\frac{x_t-\sqrt{1-\bar\alpha_t}\;\qcol{\hat\varepsilon}}{\sqrt{\bar\alpha_t}}\qquad\text{(the shortcut, solved for }x_0)`)))),
- lines:['The plan: replace the unknown x₀ in μ̃ by a guess x̂₀ computed from xₜ. That guess is the network.',`With the best possible guess for our pixel, x̂₀ = ${num(r.x0_hat,2)} from 2.2, the mean is ${num(r.mu_hat,3)}: within ${num(Math.abs(r.mu_true-r.mu_hat),3)} of the exact ${num(r.mu_true,3)}. Small errors per step, a thousand steps.`,'Guessing x₀ and guessing the noise are the same thing: solve the shortcut for x₀. DDPM’s network guesses the noise ε̂.'],
+ lines:['The plan: replace the unknown x₀ in μ̃ by a guess x̂₀ computed from xₜ. That guess is the network.',`With the best possible guess for our pixel, x̂₀ = ${num(r.x0_hat,2)} from §{pixel-bayes}, the mean is ${num(r.mu_hat,3)}: within ${num(Math.abs(r.mu_true-r.mu_hat),3)} of the exact ${num(r.mu_true,3)}. Small errors per step, a thousand steps.`,'Guessing x₀ and guessing the noise are the same thing: solve the shortcut for x₀. DDPM’s network guesses the noise ε̂.'],
  ask:['What should the network output, ideally?','Is a small error per step harmless?','Why might guessing ε be easier than guessing x₀?'],
- expected:['E[x₀ | xₜ]: the posterior mean, as in 2.2.','It accumulates over a thousand steps; the noise term in each step lets later steps correct it.','ε always has mean 0 and variance 1 at every t: a well-scaled target. Part 5 shows the choice reweights the loss.'],
+ expected:['E[x₀ | xₜ]: the posterior mean, as in §{pixel-bayes}.','It accumulates over a thousand steps; the noise term in each step lets later steps correct it.','ε always has mean 0 and variance 1 at every t: a well-scaled target. §{lsimple} shows the choice reweights the loss.'],
  transition:'Write the mean directly in terms of ε.'});
 S('mean-eps','back','Substitute: the mean in terms of the noise',{builds:3,
  body:act(2,stack(eq(R`\tilde\mu_t=a\,\dcol{x_0}+b\,x_t,\qquad a=\frac{\sqrt{\bar\alpha_{t-1}}\,\beta_t}{1-\bar\alpha_t},\ \ b=\frac{\sqrt{\alpha_t}\,(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}`),
@@ -541,24 +577,24 @@ S('three-targets','back','Three ways to say the same guess',{builds:2,
  body:act(2,table(['the network outputs','meaning','our pixel (best guess)'],[
   [m(R`\qcol{\hat\varepsilon}`),'the noise: “what is the noise? subtract it”',num(r.eps_star,2)],
   [m(R`\qcol{\hat x_0}`),'the clean value: “what is under the noise?”',num(r.x0_hat,2)],
-  [m(R`\qcol{s}=\nabla_x\log q_t`),'the score: “which way is more likely?” (Part 7)',num(r.score,2)]]),
+  [m(R`\qcol{s}=\nabla_x\log q_t`),'the score: “which way is more likely?” (Part ¶{score-def})',num(r.score,2)]]),
   at(2,p('Each can be converted into the others with the shortcut. DDPM predicts ε.'))),
- lines:['Three equivalent things a network can output. Knowing one, xₜ and t, you can compute the others.','So the network has one job: guess the noise. With that guess, one step back is simple arithmetic: next slide.'],
+ lines:['Three equivalent things a network can output. Knowing one, xₜ and t, you can compute the others.','DDPM picks the noise: it has the same scale at every t, so it is an easy target. The network has one job: guess the noise.'],
  ask:['Convert: given x̂₀ = 0.26, what is ε̂?','What is the network’s only job?'],
  expected:[`ε̂ = (xₜ − √ᾱ x̂₀)/√(1 − ᾱ) = (${num(r.xt,3)} − ${num(r.signal,3)} × ${num(r.x0_hat,2)})/${num(r.noise,3)} = ${num(r.eps_star,2)}.`,'Guess the noise in xₜ (equivalently the clean image), at every t.'],
  source:by(SRC.paras,SRC.outlier+' (4:48)'),
- transition:'One step back.'});
+ transition:'What network makes the guess?'});
 chap('2.4');
 S('reverse-step','back','One step back, in one line',{builds:3,
  body:act(2,stack(eq(R`x_{t-1}=\underbrace{\frac{1}{\sqrt{\alpha_t}}\Big(x_t-\frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\;\qcol{\hat\varepsilon}\Big)}_{\qcol{\mu}\text{: a little less noise}}+\underbrace{\sqrt{\beta_t}\;z}_{\text{fresh noise}},\qquad z\sim\N(0,1)`),
   at(2,reverseFig()))),
  lines:['The reverse step in one line. Inside the bracket: remove a small multiple of the guessed noise. Dividing by √αₜ undoes the forward shrink. Then add a little fresh noise.',`As a picture, toy step 5: from x₅ = ${f3(toyR[0].x)} the network guesses ε̂ = ${f3(toyR[0].e)}; the mean is ${f3(toyR[0].mu)}; with the fresh draw z = ${tn(toyR[0].z,1)} we land at x₄ = ${f3(toyR[0].next)}.`,'That is the whole generator: start from pure noise and repeat this step from t = T down to 1. Only the network is learned; everything else is the schedule’s numbers.'],
  ask:['Which part needs the network?','Why divide by √αₜ?','Why add noise when we want to remove it?'],
- expected:['Only ε̂.','The forward step shrank by √αₜ; going back we grow by the same factor.','Each step back is a draw from a narrow Gaussian (2.2), not a single point. 4.5 shows what goes wrong without it.'],
+ expected:['Only ε̂.','The forward step shrank by √αₜ; going back we grow by the same factor.','Each step back is a draw from a narrow Gaussian (§{reverse-explorer}), not a single point. §{why-noise} shows what goes wrong without it.'],
  point:'Where the mean comes from: it is the exact step back given x₀, with x₀ replaced by the guess from ε̂ (derived in optional depth by completing the square). Here σₜ = √βₜ; our MNIST runs use the slightly smaller √β̃ₜ, β̃ₜ = βₜ(1 − ᾱₜ₋₁)/(1 − ᾱₜ). Both work (Ho et al. 2020).',
  source:by(SRC.ddpm+' (Algorithm 2)',SRC.paras+' (V)'),
  transition:'Part 3: how does the network learn to guess the noise?'});
-// ================================================================ Part 3 · Training: labels for free
+// ================================================================ Part 3 · What the network learns, and training
 chap('3.1');
 S('tuple','train','A training example costs one line',{builds:3,
  body:act(3,`<div class="state-slot">${[1,2,3].map(b=>`<div data-only="${b}">${tupleFig(b)}</div>`).join('')}</div>`),
@@ -566,13 +602,13 @@ S('tuple','train','A training example costs one line',{builds:3,
  ask:['Which of these does the network see?','Is this supervised learning?','How many training examples can we make from one image?'],
  expected:['Only xₜ and t.','Yes: input (xₜ, t), target ε. We manufactured the labels.','As many as we like: every (t, ε) pair is a new example.'],
  source:SRC.ddpm+' (Algorithm 1)',
- transition:'Which noise exactly is the target?'});
+ transition:'The loss, once by hand.'});
 S('total-noise','train','ε is all the noise since x₀, not the last step’s',{builds:2,
  body:act(3,stack(eq(R`x_t=\sqrt{\bar\alpha_t}\,\dcol{x_0}+\underbrace{\sqrt{1-\bar\alpha_t}\;\ncol{\varepsilon}}_{\text{every step's noise, combined}}`),
   at(2,table(['t = 250','size'],[['all noise added since x₀: √(1 − ᾱ)',num(r.noise,3)],['the last step’s noise alone: √β₂₅₀',num(Math.sqrt(r.beta),3)]])))),
- lines:['The target ε is the combined noise of all t steps, as in 1.3: not the noise added in the last step.',`At t = 250 the last step’s noise has size ${num(Math.sqrt(r.beta),3)}; all the noise together, ${num(r.noise,3)}. The network predicts the whole thing.`],
+ lines:['The target ε is the combined noise of all t steps, as in §{two-steps}: not the noise added in the last step.',`At t = 250 the last step’s noise has size ${num(Math.sqrt(r.beta),3)}; all the noise together, ${num(r.noise,3)}. The network predicts the whole thing.`],
  ask:['Why not predict the last step’s noise?','Then how do we take one step?'],
- expected:['Training never runs the steps: it jumps with the shortcut, so there is no “last step” noise to target.','From the total-noise guess we get the mean μ (2.4): Part 4.'],
+ expected:['Training never runs the steps: it jumps with the shortcut, so there is no “last step” noise to target.','From the total-noise guess we get the mean μ (§{reverse-step}): Part ¶{step-hand}.'],
  misconception:'A common confusion: ε is not the small noise between xₜ₋₁ and xₜ.',
  source:SRC.mit(2)+' (16:15)',
  transition:'The network also needs t.'});
@@ -584,7 +620,7 @@ S('why-t','train','One network for every noise level: tell it t',{builds:3,
  ask:['Could one network without t work?','Why not feed t as a single number?','Where have you seen these features before?'],
  expected:['Only by guessing the noise level from the image, which is hard at both ends. Feeding t is free.','A plain number is a poor input for a network to make many different behaviours from; sinusoids give it a rich, smooth code.','Positional encodings in “Attention is all you need”.'],
  source:by(SRC.outlier+' (7:01)',SRC.mit(1)+' (22:21)'),
- transition:'The loss, once by hand.'});
+ transition:'The training loop.'});
 chap('3.3');
 S('loss-hand','train','The loss: squared error between the noise and its guess',{builds:3,
  body:act(3,stack(eq(R`\lcol{L(\theta)}=\big\|\ncol{\varepsilon}-\qcol{\hat\varepsilon_\theta(x_t,t)}\big\|^2\quad(\text{averaged over pixels and examples})`),
@@ -592,8 +628,8 @@ S('loss-hand','train','The loss: squared error between the noise and its guess',
   at(3,`<div class="thumbs"><figure>${pic('mnist-eps.png',150,'The noise we drew')}<figcaption>ε: the noise we drew</figcaption></figure><figure><svg width="150" height="150" viewBox="0 0 150 150">${svgFrame('mnist-film-eps.png',9,16,0,0,150)}</svg><figcaption>ε̂: the network’s guess, t = 250</figcaption></figure><figure style="justify-content:center"><p class="lead" style="color:${palette.loss}">mean squared error ${num(fr(250).eps_mse,3)}</p></figure></div>`))),
  lines:['The loss: how far the guessed noise is from the noise we drew, squared and averaged.',`Our pixel with the best possible guess, ${num(r.eps_star,2)}: the error is (−0.5 − ${num(r.eps_star,2)})² = ${num((r.eps-r.eps_star)**2,2)}. Even the best guess is wrong for this draw.`,`Our 3 at t = 250 through the trained network: the guessed noise looks just like the real one; the average squared error over 784 pixels is ${num(fr(250).eps_mse,3)}.`],
  ask:['Why squared error?','Why is the best guess wrong for our pixel?','Why can the network do so much better on the image than we did on one pixel?'],
- expected:['Its minimiser is the conditional mean (next slide); and Part 7 shows it comes from the ELBO.','The same xₜ could have come from paper with a different noise. Next slide.','It sees all 784 pixels: neighbours reveal whether this one is a stroke (3.6).'],
- transition:'Why even the best guess cannot be exact.'});
+ expected:['Squared error is minimised by the average (Lecture 1): the network learns the average noise that could have produced xₜ. It is also a reweighted ELBO (§{train-code}).','The same xₜ could have come from paper with a different noise (§{average}, optional depth).','It sees all 784 pixels: neighbours reveal whether this one is a stroke (§{x0film}).'],
+ transition:'The training step in code.'});
 chap('3.4');
 S('average','train','The same noisy value can come from different noises',{builds:3,
  body:act(3,stack(eq(R`x_{250}=${tn(r.xt,2)}:\quad\underbrace{\text{ink},\ \ncol{\varepsilon}=${tn(r.eps,2)}}_{P=${tn(r.post_ink,2)}}\qquad\text{or}\qquad\underbrace{\text{paper},\ \ncol{\varepsilon}=${tn((r.xt+r.signal)/r.noise,2)}}_{P=${tn(r.post_paper,2)}}`),
@@ -612,7 +648,7 @@ S('mlp','train','For points in 2-D: a small MLP',{nb:'cell-toy-train',
  ask:['What are the inputs and outputs?'],
  expected:['Inputs: x, y and 16 features of t. Outputs: the two components of ε̂.'],
  source:by(SRC.mit(1)+' (2-D toy model)','smiley after '+SRC.paras),
- transition:'For images, a network that can look at the whole picture.'});
+ transition:'Press play.'});
 S('unet','train','For images: a U-Net, so every pixel can see the whole digit',{builds:3,
  body:act(3,`<div class="state-slot">${[1,2,3].map(b=>`<div data-only="${b}">${unetFig(b)}</div>`).join('')}</div>`),
  lines:['The output must be the same size as the input: one guessed noise value per pixel. Shrink to 7×7 so that each unit sees the whole digit, then grow back to 28×28.',`Skip connections carry fine detail straight across, so the output can be sharp. ${mn.model.params.toLocaleString('en')} parameters.`,'The time embedding is added inside every block: the same weights, told how noisy the input is.'],
@@ -620,7 +656,7 @@ S('unet','train','For images: a U-Net, so every pixel can see the whole digit',{
  expected:['To coordinate pixels far apart: whether a pixel is a stroke depends on the whole digit.','Exact positions of edges: the decoder would have to reinvent them from 7×7.','In every block, as a learned per-channel shift.'],
  point:'Channels 32 → 64 → 128 → 64 → 32, GroupNorm and SiLU, time features → MLP → a per-block projection added to the activations. The code is in scripts/diffusion.py and the notebook.',
  source:by(SRC.ddpm,SRC.outlier+' (7:01)'),
- transition:'The training step.'});
+ transition:'The network also needs t.'});
 chap('3.6');
 S('train-code','train','The training step in eight lines',{builds:2,nb:'cell-train-step',
  body:act(3,stack(`<div class="code-sm">`+code(`t   = torch.randint(1, T + 1, (B,))          # a level per image
@@ -630,17 +666,18 @@ xt  = a.sqrt() * x0 + (1 - a).sqrt() * eps   # the shortcut
 eps_hat = model(xt, t)                       # the guess
 loss = ((eps - eps_hat) ** 2).mean()         # squared error
 opt.zero_grad(); loss.backward()
-opt.step()                                   # one gradient step`)+'</div>',at(2,p(`<b>That is all of training:</b> no adversary, no encoder, no sampling. Our MNIST model ran ${mn.model.steps.toLocaleString('en')} such steps (batch ${mn.model.batch}), about 50 minutes on a laptop GPU.`)))),
- lines:['Draw a level and a noise image for each training image, jump with the shortcut, guess the noise, take the squared error, and step.','Compare with the GAN of Lecture 4: one network, one loss, no game. Diffusion pays later, at sampling time.'],
+opt.step()                                   # one gradient step`)+'</div>',at(2,p(`<b>That is all of training:</b> no adversary, no encoder, no sampling. ${mn.model.steps.toLocaleString('en')} such steps trained our MNIST model in about 50 minutes. And the loss is a reweighted ELBO.`)))),
+ lines:['Draw a level and a noise image for each training image, jump with the shortcut, guess the noise, take the squared error, and step.','Compare with the GAN of Lecture 4: one network, one loss, no game. And the loss is not arbitrary: it is the ELBO of Lectures 1 and 3 with its weights set to 1. Diffusion pays later, at sampling time.'],
  ask:['Which line is the shortcut?','What does a batch contain?'],
  expected:['xt = a.sqrt() * x0 + (1 - a).sqrt() * eps.','Different images, each at its own random noise level.'],
+ point:`Batch ${mn.model.batch}, laptop GPU. Why squared error on the noise: the ELBO is a sum of KL terms, each a weighted squared noise error; Ho et al. found that setting every weight to 1 gives better samples. Optional depth derives it (§{elbo-simple}).`,
  source:SRC.ddpm+' (Algorithm 1)',
- transition:'Watch it learn.'});
+ transition:'Watch it learn, on points we can see.'});
 S('playground','train','Press play: the network learns the smiley',{builds:2,nb:'cell-toy-train',
  body:act(3,widget('playground','The smiley network during training: arrows, samples and loss')),
- lines:['Before training: arrows from each grid point to the network’s guess of the clean point (at t = 100) point nowhere useful, and its samples are a blob.','Press play: as the loss falls the arrows turn towards the face, and the samples, drawn with Part 4’s loop, become a smiley.'],
+ lines:['Before training: arrows from each grid point to the network’s guess of the clean point (at t = 100) point nowhere useful, and its samples are a blob.','Press play: as the loss falls the arrows turn towards the face, and the samples, drawn with Part ¶{sample-code}’s loop, become a smiley.'],
  ask:['What should the arrows point at?','Why does the loss stay well above zero?'],
- expected:['The nearest part of the face: where a clean point near this noisy one most likely was.','3.3: an unavoidable part remains.'],
+ expected:['The nearest part of the face: where a clean point near this noisy one most likely was.','Some of the noise cannot be guessed: the same noisy point can come from different clean points (§{average}, optional depth).'],
  point:`${toy['toy-uncond'].steps.toLocaleString('en')} Adam steps on fresh smiley points, batch ${toy['toy-uncond'].batch}; frames at steps 0, 200, 500, 1k, 2k, 5k, 10k, 20k, 40k.`,
  source:SRC.paras+' (“Training Playground”, here with a real network)',
  transition:'And on images: what does the trained network believe?'});
@@ -649,8 +686,16 @@ S('x0film','train','What the network believes our 3 is, at each noise level',{bu
  body:act(3,widget('x0film','Our 3 at a noise level: input, predicted noise and the network’s guess')),
  lines:['Our 3 at t = 250, its predicted noise, and the clean image that guess implies. Move the slider: at t = 1,000 the guess is a blurry average digit; by t = 500 it is clearly a 3; at small t it is exactly our 3.','Each pixel guessed on its own (the best one-pixel guess, from optional depth) stays a grey blur much longer. The network’s guesses are far better.'],
  ask:['Why is the guess blurry at high noise?','Why is the network so much better than one pixel at a time?'],
- expected:['It is an average over every digit that could hide under this much noise (2.2).','It sees all 784 pixels together: a stroke here makes a stroke there likely (next slide).'],
- transition:'The difference, at one noise level.'});
+ expected:['It is an average over every digit that could hide under this much noise.','It sees all 784 pixels together: a stroke here makes a stroke there likely (§{coordinate}, optional depth).'],
+ transition:'The same on a real photo, with the original DDPM network.'});
+S('photo-guess','train','The original DDPM network on a real photograph',{builds:2,
+ body:act(3,`<div class="state-slot"><div data-only="1">${photoRow([['pair-xt-0400.jpg','x₄₀₀: the input',palette.ink],['eps.jpg','ε: the noise we added',palette.noise],['pair-epshat-0400.jpg','ε̂: the network’s guess',palette.q],['pair-x0hat-0400.jpg','x̂₀: the photo it implies',palette.data]],220)}</div><div data-only="2">${guessGrid()}</div></div>`),
+ lines:['The network of the original DDPM paper, given our photo at t = 400. Its guess of the noise (third) is almost exactly the noise we added (second): correlation 0.998. Subtract it, and the photo comes back (right).','The same at other noise levels. At t = 950 its guess is a grey blur; by t = 600, a blurry cat; by t = 250, this cat. The same story as our 3, on a photo.'],
+ ask:['Why can it guess the noise so well at t = 400?','Why is the guess at t = 950 blurry?'],
+ expected:['Most of the photo is still there; noise and photo look very different; and it has seen millions of cat photos.','Many photos fit what is left. The best squared-error guess is their average: a blur.'],
+ point:'Error of the noise guess (mean squared, pixel values in [−1, 1]) at t = 100, 400, 950: 0.035, 0.0034, 0.00002, easier as the noise grows. Error of the photo guess: 0.004, 0.014, 0.18, harder as the noise grows, because a small noise error is divided by √ᾱₜ.',
+ source:by(SRC.ddpm,SRC.film),
+ transition:'Training in one table.'});
 S('coordinate','train','One pixel alone gives a grey; all 784 together give a 3',{builds:2,
  body:act(3,(()=>{const k=mn.film.t.indexOf(500),row=fr(500);const cell=(src,i,title,col,note,x)=>svgFrame(src,i,16,x,40,210)+label(x,28,title,{fill:col,size:21,weight:600})+label(x,280,note,{size:19});
   return `<div class="state-slot"><div data-only="1">${fig(1150,300,cell('mnist-film-xt.png',k,'x₅₀₀',palette.ink,'the input',0)+cell('mnist-film-alone.png',k,'each pixel alone',palette.p,`error ${num(row.alone_mse,3)}`,290),'The noisy 3 and the pixel-by-pixel guess.')}</div><div data-only="2">${fig(1150,300,cell('mnist-film-xt.png',k,'x₅₀₀',palette.ink,'the input',0)+cell('mnist-film-alone.png',k,'each pixel alone',palette.p,`error ${num(row.alone_mse,3)}`,290)+cell('mnist-film-x0.png',k,'the network',palette.q,`error ${num(row.x0_mse,3)}`,580)+`<svg x="870" y="40" width="210" height="210" viewBox="0 0 28 28">${digitSVG(held.x0,{size:28})}</svg>`+label(870,28,'our 3',{fill:palette.data,size:21,weight:600}),'The noisy 3, the pixel-by-pixel guess, the network’s guess and the truth.')}</div></div>`;})()),
@@ -663,10 +708,10 @@ S('train-recap','train','Training: a regression problem we made ourselves',{buil
   at(2,p('<b>Next:</b> generate. Start from pure noise and use the guesses to walk back, one small Gaussian step at a time.'))),
  lines:['Part 3 in four rows: draw, make, guess, learn. The network ends up predicting the average noise consistent with what it sees.','Part 4: put the guess into Part 2’s step back, and repeat a thousand times.'],
  ask:['What is the target, in one word?','What do we still need to generate an image?'],
- expected:['The noise.','A starting point (pure noise) and the reverse step of 2.4.'],
+ expected:['The noise.','A starting point (pure noise) and the reverse step of §{reverse-step}.'],
  transition:'Part 4.'});
 
-// ================================================================ Part 4 · Generating: walk back from noise
+// ================================================================ Part 4 · Sampling: birth of an image
 chap('4.1');
 S('step-hand','gen','One step back, by hand, on the real schedule',{builds:4,
  body:act(4,stack(eq(R`\qcol{\hat\varepsilon}=\text{network}(x_{250}=${tn(r.xt,3)},\ t=250)=\qcol{${tn(r.eps_star,3)}}`),
@@ -677,14 +722,14 @@ S('step-hand','gen','One step back, by hand, on the real schedule',{builds:4,
  ask:['Where does ε̂ come from?','Why does one step move so little?','What changes in the next step?','What will x̂₀ do as t falls?'],
  expected:['From the trained network, given xₜ and t.','βₜ is tiny: each real step removes only a little noise.','t becomes 249: new βₜ, ᾱₜ, and a new guess from the network.','Sharpen towards ink or paper as the noise disappears.'],
  source:SRC.ddpm+' (Algorithm 2)',
- transition:'The same step on a whole image.'});
+ transition:'The toy, all the way back.'});
 S('step-image','gen','The same step on an image, at t = 600',{builds:3,
  body:act(4,(()=>{const o=mn.onestep,cell=(f,title,col,x)=>`<image href="figures/${f}" x="${x}" y="44" width="190" height="190" style="image-rendering:pixelated"/><rect x="${x}" y="44" width="190" height="190" fill="none" stroke="#D7DCE1"/>`+label(x,32,title,{fill:col,size:20,weight:600});
   const f=b=>fig(1150,270,cell('mnist-onestep-xt.png','x₆₀₀',palette.ink,0)+(b>=2?cell('mnist-onestep-eps.png','ε̂: guessed noise',palette.noise,232)+cell('mnist-onestep-x0.png','x̂₀: guessed digit',palette.q,464):'')+(b>=3?cell('mnist-onestep-mean.png','μ: the mean',palette.q,696)+cell('mnist-onestep-next.png','x₅₉₉',palette.ink,928):'')+label(0,262,`β = ${num(o.beta,3)}, ᾱ = ${num(o.alpha_bar,3)}, step width ${num(o.sigma,3)}`,{size:18}),'One reverse step on an image.');
   return `<div class="state-slot">${[1,2,3].map(b=>`<div data-only="${b}">${f(b)}</div>`).join('')}</div>`;})()),
  lines:['A sampling run of our model at t = 600: to us, pure static.','The network’s guessed noise, and the digit it implies: already a 7.','The mean moves the static only very slightly towards that digit, and fresh noise is added. To the eye nothing changes; over 600 more steps the 7 appears.'],
  ask:['Can you see the 7 in x₆₀₀?','Why do μ and x₅₉₉ look the same as x₆₀₀?','So where is the progress?'],
- expected:['No.','One step changes each pixel by about 1%.','In x̂₀: the guess sharpens step by step (next slides).'],
+ expected:['No.','One step changes each pixel by about 1%.','In x̂₀: the guess sharpens step by step (§{mnist-traj}).'],
  transition:'The loop.'});
 chap('4.2');
 S('toy-reverse','gen','The toy, all the way back: every number',{builds:5,nb:'cell-toy-reverse',
@@ -712,8 +757,8 @@ for t in range(T, 0, -1):                    # 1000, 999, ..., 1
 return x`)+'</div>',at(2,p(`<b>Training</b> uses one random level per example; <b>sampling</b> visits every level, in order: ${num(mn.sampling_seconds_64,1)} s for 64 digits on a laptop GPU.`)))),
  lines:['Start from pure noise, which Part 1 showed is where every image ends. Then a thousand times: guess the noise, compute the mean, add a little fresh noise. No noise at the last step.','Training never runs this loop; sampling always does. That is why sampling is slow, and Part 6 makes it faster.'],
  ask:['Why may we start from N(0, I)?','Why is there no noise at t = 1?'],
- expected:['x_T ≈ N(0, I) for every image (1.5).','We want the final, clean sample, not a noisy draw around it.'],
- point:'σₜ = √βₜ as in 2.4. Our MNIST film and samples use the slightly smaller √β̃ₜ; both work (Ho et al. 2020).',
+ expected:['x_T ≈ N(0, I) for every image (§{pixel-hist}).','We want the final, clean sample, not a noisy draw around it.'],
+ point:'σₜ = √βₜ as in §{reverse-step}. Our MNIST film and samples use the slightly smaller √β̃ₜ; both work (Ho et al. 2020).',
  source:SRC.ddpm+' (Algorithm 2)',
  transition:'Watch it, in 2-D and on MNIST.'});
 chap('4.3');
@@ -730,6 +775,14 @@ S('mnist-traj','gen','Eight runs from noise: x_t, and the network’s guess of t
  ask:['Which appears first, the outline or the stroke details?','Why can the guess change its mind?'],
  expected:['The outline: high noise drowns fine detail first, so it is decided last.','Early on, many digits are consistent with xₜ; each step’s fresh noise and new evidence can tip the balance.'],
  source:by(SRC.mit(6)+' (coarse to fine)',SRC.paras+' (“The Generator”)'),
+ transition:'And on the real cat model.'});
+S('cat-film','gen','Eight runs of the real cat model: xₜ, and its guess of the end',{builds:2,
+ body:act(4,widget('filmstrip','Eight sampling runs of the original DDPM cat model, with the network’s guess of the final photo',{runs:'0,1,2,3,4,5,6,7',both:1,size:124})),
+ lines:['The opening film, now with a second row: at every step, the network’s guess of the finished photo. Press play.','Coarse to fine, as on MNIST: first blurry light and dark, then a layout, then fur and eyes. Not every run is a good cat: this 2020 model is small by today’s standards.'],
+ ask:['When is the layout of each photo decided?','Which runs failed, and how?'],
+ expected:['Early, by about t = 600: after that the guess changes only in detail.','Usually one or two: a very dark image, or two half-cats. LSUN cats contains many odd photos.'],
+ point:'google/ddpm-cat-256, 1,000 steps of ancestral sampling (σₜ² = β̃ₜ, as in our MNIST runs), seed 2026, every 50th step shown. The second row is the clean-image guess x̂₀ computed from ε̂ at that step.',
+ source:by(SRC.ddpm,SRC.film),
  transition:'Why the fresh noise at every step?'});
 chap('4.4');
 S('why-noise','gen','Take out the fresh noise, and every sample collapses',{builds:3,
@@ -738,24 +791,24 @@ S('why-noise','gen','Take out the fresh noise, and every sample collapses',{buil
   at(3,p(`The smiley does the same: without fresh noise all 300 particles end at one point. Each mean step pulls towards an average; only the noise lets a path commit, as our pixel must commit to paper or ink.`))),
  lines:['Sixteen runs of the sampler, as designed.',`The same sixteen starting noises, keeping only the mean of each step: sixteen identical thin 1s. Ink covers ${pct(mn.mean_only.ink_fraction_mean_only)} of the image instead of ${pct(mn.mean_only.ink_fraction_with_noise)}.`,'In 2-D every particle collapses to a single point. The step-back mean is a pull towards the average guess; the fresh noise is what keeps the samples spread like the data.'],
  ask:['Predict: what happens without the noise?','Why a 1?','So is the noise a nuisance?'],
- expected:['Students guess: blurry? the same digit?','A thin 1 is the least ink: the closest digit to the average, which every mean step pulls towards.','No: it is the sampling. It makes each step a draw from the Gaussian of 2.2, not its centre.'],
- misconception:'Removing the noise is not DDIM: DDIM (Part 6) changes the update so that it stays correct without noise.',
+ expected:['Students guess: blurry? the same digit?','A thin 1 is the least ink: the closest digit to the average, which every mean step pulls towards.','No: it is the sampling. It makes each step a draw from the Gaussian of §{reverse-explorer}, not its centre.'],
+ misconception:'Removing the noise is not DDIM: DDIM (Part ¶{ddim-idea}) changes the update so that it stays correct without noise.',
  transition:'The payoff.'});
 chap('4.5');
 S('samples64','gen','64 new digits',{builds:2,
- body:act(4,pic('mnist-samples-64.png',1100,'Sixty-four samples from our model'),at(2,p('Sharp like the GAN’s, trained with one regression loss like the VAE. And none is a copy of a training image: Part 7 measures it.'))),
+ body:act(4,pic('mnist-samples-64.png',1100,'Sixty-four samples from our model'),at(2,p('Sharp like the GAN’s, trained with one regression loss like the VAE. And none is a copy of a training image (optional depth measures it).'))),
  lines:[`64 samples from our model: each is a thousand steps from its own noise (${num(mn.sampling_seconds_64,1)} s for all 64).`,'This is what we were after: sharp digits from a stable, simple training loss.'],
  ask:['Find a bad one.','What did it cost?'],
  expected:['Usually a few odd strokes: the model is small and trained for 50 minutes.','A thousand network calls per image instead of one.'],
  transition:'The whole method on one slide.'});
 S('napkin','gen','The whole method on a napkin',{builds:2,
  body:act(4,cols(`<div class="algo"><h4>Train</h4><ol><li>x₀ from the data, t ~ 1 … T, ε ~ N(0, I)</li><li>xₜ = √ᾱₜ x₀ + √(1 − ᾱₜ) ε</li><li>step on ‖ε − ε̂_θ(xₜ, t)‖²</li></ol></div>`,`<div class="algo"><h4>Sample</h4><ol><li>x_T ~ N(0, I)</li><li>for t = T … 1: ε̂ = ε̂_θ(xₜ, t)</li><li>xₜ₋₁ = (xₜ − βₜ/√(1−ᾱₜ) ε̂)/√αₜ + σₜ z</li></ol></div>`),
-  at(2,p('<b>End of the first session.</b> Next: steer it with labels and text, make it faster, and see what the network really learns.'))),
- lines:['Everything so far, in six lines. Paras Chopra’s test: if you can derive these on a napkin, you have understood diffusion.','Next session: steering with labels and text, faster sampling, and what the network really learns.'],
+  at(2,p('<b>End of the first session.</b> Next: the score view, faster sampling, and steering with labels and text.'))),
+ lines:['Everything so far, in six lines. Paras Chopra’s test: if you can derive these on a napkin, you have understood diffusion.','Next session: arrows to the data (the score), faster sampling, and steering with labels and text.'],
  ask:['Which line needs the network?','Which line is Part 1?'],
  expected:['Train step 3 and sample step 2.','Train step 2: the shortcut.'],
  source:SRC.paras+' (“derive it on a napkin”)',
- transition:'Part 5: steering with labels and text.'});
+ transition:'Part 5: the score.'});
 // ================================================================ Part 5 · Why it works: a VAE, and a score
 function vaeChainFig(b){
  const W=1150,H=340;let s=`<defs>${arrowHead('vc-a',palette.ink)}${arrowHead('vc-q',palette.noise)}${arrowHead('vc-p',palette.q)}</defs>`;
@@ -793,7 +846,7 @@ S('elbo-flip','why','Turn each forward step around, given x₀',{builds:3,
  body:act(5,stack(eq(R`\ELBO=\E_q\Big[\log p(x_T)+\sum_{t=1}^{T}\log\frac{\qcol{p_\theta(x_{t-1}\mid x_t)}}{q(x_t\mid x_{t-1})}\Big]`),
   at(2,eq(R`q(x_t\mid x_{t-1})=q(x_t\mid x_{t-1},\dcol{x_0})=\frac{\pcol{q(x_{t-1}\mid x_t,\dcol{x_0})}\;q(x_t\mid \dcol{x_0})}{q(x_{t-1}\mid \dcol{x_0})}\qquad(t\ge2)`)),
   at(3,eq(R`\prod_{t=2}^{T}\frac{q(x_t\mid x_0)}{q(x_{t-1}\mid x_0)}=\frac{q(x_2\mid x_0)}{q(x_1\mid x_0)}\cdot\frac{q(x_3\mid x_0)}{q(x_2\mid x_0)}\cdots=\frac{q(x_T\mid x_0)}{q(x_1\mid x_0)}`)))),
- lines:['Put the factorisations in: one log ratio per step, the network’s step back over the fixed step forward.','The ratio compares steps in opposite directions. Fix that with Bayes, exactly as in 2.5: the forward step equals the step back given x₀, times a ratio of shortcut densities.','Those ratios telescope: every middle term cancels, leaving only the two ends.'],
+ lines:['Put the factorisations in: one log ratio per step, the network’s step back over the fixed step forward.','The ratio compares steps in opposite directions. Fix that with Bayes, exactly as in §{posterior-1}: the forward step equals the step back given x₀, times a ratio of shortcut densities.','Those ratios telescope: every middle term cancels, leaving only the two ends.'],
  ask:['Why compare in the same direction?','Why may we add x₀ to q(xₜ | xₜ₋₁)?','What is left after the cancellation?'],
  expected:['The network’s step goes backwards; to compare like with like we need the backward step of q.','Markov: x₀ adds nothing once xₜ₋₁ is known.','q(x_T | x₀) / q(x₁ | x₀).'],
  source:by(SRC.outlier+' (16:23)',SRC.luo),
@@ -801,10 +854,10 @@ S('elbo-flip','why','Turn each forward step around, given x₀',{builds:3,
 S('elbo-terms','why','Three kinds of term; the middle ones are the training loss',{builds:3,
  body:act(5,stack(`<div class="eq-sm">`+eq(R`-\ELBO=\underbrace{\KL\big(q(x_T\mid x_0)\,\|\,p(x_T)\big)}_{L_T}+\sum_{t=2}^{T}\underbrace{\E_q\,\KL\big(\pcol{q(x_{t-1}\mid x_t,x_0)}\,\|\,\qcol{p_\theta(x_{t-1}\mid x_t)}\big)}_{L_{t-1}}\;\underbrace{-\,\E_q\log p_\theta(x_0\mid x_1)}_{L_0}`)+'</div>',
   at(2,table(['term','what it compares','depends on θ?'],[['L_T','the noised image with the N(0, I) prior','no: and it is ≈ 0'],['L₀','the very last step back','yes, a small decoder term']])),
-  at(3,p(`Each L<sub>t−1</sub> compares the exact step back given x₀ (2.5) with the network’s step back. For our pixel at t = 250 it is ${num(r.kl,4)} nats.`)))),
+  at(3,p(`Each L<sub>t−1</sub> compares the exact step back given x₀ (§{posterior-2}) with the network’s step back. For our pixel at t = 250 it is ${num(r.kl,4)} nats.`)))),
  lines:['Group the logs into KL divergences. Three kinds of term.','L_T has no parameters, and the shortcut makes it tiny. L₀ is the final step, a small reconstruction term.','The heart of it: a thousand KLs, each between the exact step back given x₀ and the network’s step back. Both are Gaussians.'],
  ask:['Why is L_T ≈ 0?','Which terms does training change?','What are the two Gaussians in L_{t−1}?'],
- expected:['q(x_T | x₀) = N(√ᾱ_T x₀, 1 − ᾱ_T) ≈ N(0, 1): ᾱ_T ≈ 0.00004.','L₀ and the L_{t−1}.','N(μ̃ₜ(xₜ, x₀), β̃ₜ) from 2.5, and N(μ_θ(xₜ, t), σₜ²) with σₜ² = β̃ₜ.'],
+ expected:['q(x_T | x₀) = N(√ᾱ_T x₀, 1 − ᾱ_T) ≈ N(0, 1): ᾱ_T ≈ 0.00004.','L₀ and the L_{t−1}.','N(μ̃ₜ(xₜ, x₀), β̃ₜ) from §{posterior-2}, and N(μ_θ(xₜ, t), σₜ²) with σₜ² = β̃ₜ.'],
  point:'The KL form appears by grouping log p_θ(xₜ₋₁ | xₜ) − log q(xₜ₋₁ | xₜ, x₀) under the expectation; the two leftover ends make L_T and L₀.',
  source:by(SRC.ddpm,'eq. 5'),
  transition:'A KL of two Gaussians: Lecture 1 has the formula.'});
@@ -828,8 +881,8 @@ S('kl-mse','why','Write both means with noise: the KL is a squared noise error',
  body:act(5,stack(eq(R`\pcol{\tilde\mu_t}=\frac{1}{\sqrt{\alpha_t}}\Big(x_t-\frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\,\ncol{\varepsilon}\Big),\qquad\qcol{\mu_\theta}=\frac{1}{\sqrt{\alpha_t}}\Big(x_t-\frac{\beta_t}{\sqrt{1-\bar\alpha_t}}\,\qcol{\hat\varepsilon_\theta}\Big)`),
   at(2,eq(R`\pcol{\tilde\mu_t}-\qcol{\mu_\theta}=\frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\bar\alpha_t}}\big(\qcol{\hat\varepsilon_\theta}-\ncol{\varepsilon}\big)`)),
   at(3,eq(R`L_{t-1}=\frac{(\tilde\mu_t-\mu_\theta)^2}{2\tilde\beta_t}=\underbrace{\frac{\beta_t^2}{2\tilde\beta_t\,\alpha_t(1-\bar\alpha_t)}}_{w_t}\big\|\ncol{\varepsilon}-\qcol{\hat\varepsilon_\theta}\big\|^2`)),at(3,eq(R`w_{250}\,(${tn(r.eps,1)}-${tn(r.eps_star,2)})^2=${tn(r.weight,4)}\times${tn((r.eps-r.eps_star)**2,3)}=${tn(r.kl_check,4)}`)))),
- lines:['From 2.6: the exact mean uses the true noise ε, the network’s mean its guess ε̂. Everything else is identical.','Subtract: xₜ cancels, and what remains is a constant times the noise error.',`Square and divide by 2β̃: each KL term is a weight wₜ times the squared noise error. Our pixel: ${num(r.weight,4)} × ${num((r.eps-r.eps_star)**2,3)} = ${num(r.kl_check,4)}, the same as the previous slide.`],
- ask:['Why does xₜ cancel?','What depends on θ?','Check the number against 5.3.'],
+ lines:['From §{mean-eps}: the exact mean uses the true noise ε, the network’s mean its guess ε̂. Everything else is identical.','Subtract: xₜ cancels, and what remains is a constant times the noise error.',`Square and divide by 2β̃: each KL term is a weight wₜ times the squared noise error. Our pixel: ${num(r.weight,4)} × ${num((r.eps-r.eps_star)**2,3)} = ${num(r.kl_check,4)}, the same as the previous slide.`],
+ ask:['Why does xₜ cancel?','What depends on θ?','Check the number against §{kl-gauss}.'],
  expected:['It appears identically in both means.','Only ε̂: the weight is fixed by the schedule.',`${num(r.kl_check,4)} = ${num(r.kl,4)}: the same.`],
  source:by(SRC.ddpm,'eq. 12'),
  transition:'And the weights?'});
@@ -857,32 +910,32 @@ S('score-def','why','The score: an arrow at every point, pointing uphill',{build
  body:act(5,stack(eq(R`s(x)=\nabla_x\log p(x)`),at(2,scoreFig()))),
  lines:['The score of a distribution: the gradient of its log density, an arrow at every point.','Our noisy pixel at t = 250: two bumps. Every arrow points uphill, towards the nearer bump; between them, towards the more probable one.','Why it is useful: the gradient of log p ignores the normalising constant, the integral that made Lecture 1 hard. Arrows are enough to sample.'],
  ask:['Where is the score zero?','Why does the normaliser not matter?','How could you sample using only arrows?'],
- expected:['At the peaks, and at the dip between them.','log(p/Z) = log p − log Z, and log Z has no x: its gradient is zero.','Walk uphill with some noise: Langevin dynamics, next.'],
+ expected:['At the peaks, and at the dip between them.','log(p/Z) = log p − log Z, and log Z has no x: its gradient is zero.','Walk uphill with some noise: Langevin dynamics (§{langevin}).'],
  point:'Energy view (Vizuara): p ∝ exp(−E). The score is −∇E: downhill in energy, uphill in probability.',
  source:by(SRC.paras+' (IX)',SRC.vizuara+' (39:27)',SRC.song),
  transition:'The smiley’s arrows, from our network.'});
 S('scorefield','why','The smiley’s arrows, at different noise levels',{builds:2,nb:'cell-score',
  body:act(5,widget('scorefield','Arrows of the learned score of the smiley at a chosen noise level')),
- lines:['From the trained network: at noise level t = 100, every arrow points towards a slightly blurred, slightly shrunk smiley.','Move t. At t = 10 the arrows are sharp near the face; far from it the network saw no training points at this level, and the arrows are less trustworthy. At t = 500 the density is blurred everywhere and the arrows are smooth.'],
+ lines:['From the trained network: flip the guessed noise and scale it, s ≈ −ε̂/√(1 − ᾱₜ). The noise guess points away from the data; the score points towards it. At t = 100 every arrow points to a slightly blurred, slightly shrunk smiley.','Move t. At t = 10 the arrows are sharp near the face; far from it the network saw no training points at this level, and the arrows are less trustworthy. At t = 500 the density is blurred everywhere and the arrows are smooth.'],
  ask:['Why does the arrow length grow far from the face?','Why use many noise levels?'],
  expected:['The arrow is √ᾱ x̂₀ − x: the further from the face, the further to go.','Low noise: precise but only near the data. High noise: defined everywhere but blurry. Start high and lower it: the schedule.'],
  source:by(SRC.song,SRC.mit(1)+' (23:00)'),
- transition:'Diffusion is also a VAE.'});
-S('langevin','why','Follow the arrows, with a little noise: Langevin sampling',{builds:2,nb:'cell-score',
+ transition:'Follow the arrows.'});
+S('langevin','why','Follow the arrows, with a little noise: Langevin sampling',{builds:2,nb:'cell-langevin',
  body:act(5,widget('langevin','Particles moved by Langevin dynamics with the learned score')),
  lines:['Langevin dynamics: a small step uphill along the score, plus a small random kick. Run it at one fixed noise level, starting from pure noise.','Now anneal: begin at t = 1,000 where the arrows exist everywhere, and lower the noise as the particles settle. This is what DDPM’s sampler does, with a step size set by the schedule.'],
  ask:['Why the random kick?','How does this compare with Part 4’s loop?'],
- expected:['Without it every particle climbs to a peak and stops: no spread, just like 4.4.','Same structure: a nudge along the network’s guess plus fresh noise, at decreasing noise levels.'],
+ expected:['Without it every particle climbs to a peak and stops: no spread, just like §{why-noise}.','Same structure: a nudge along the network’s guess plus fresh noise, at decreasing noise levels.'],
  point:'Step size here: η = 0.1 (1 − ᾱₜ), one step per level, every fourth level. DDPM’s step is a particular choice of this nudge and kick.',
  source:by(SRC.song,SRC.paras+' (IX)'),
- transition:'Connect the arrows to the noise predictor.'});
+ transition:'Part 6: noise schedules and faster sampling.'});
 chap('5.6');
 S('tweedie','why','The noise predictor is a score estimator',{builds:4,
  body:act(5,stack(eq(R`\text{one bump, }x_0\text{ known:}\quad\nabla_{x}\log\N\big(x;\sqrt{\bar\alpha_t}\,x_0,1-\bar\alpha_t\big)=-\frac{x-\sqrt{\bar\alpha_t}\,x_0}{1-\bar\alpha_t}=-\frac{\ncol{\varepsilon}}{\sqrt{1-\bar\alpha_t}}`),
   at(2,eq(R`\text{all bumps:}\quad\nabla_x\log q_t(x)=\E\Big[-\frac{\ncol{\varepsilon}}{\sqrt{1-\bar\alpha_t}}\;\Big|\;x\Big]=-\frac{\E[\ncol{\varepsilon}\mid x]}{\sqrt{1-\bar\alpha_t}}`)),
   at(3,eq(R`\qcol{\hat\varepsilon_\theta(x_t,t)}\approx\E[\ncol{\varepsilon}\mid x_t]\quad\Longrightarrow\quad\qcol{\hat\varepsilon_\theta(x_t,t)}\approx-\sqrt{1-\bar\alpha_t}\;\nabla_{x}\log q_t(x_t)`)),
   at(4,eq(R`\text{pixel, }t=250:\quad-\frac{${tn(r.eps,1)}}{${tn(r.noise,3)}}=+${tn(r.score_conditional,2)}\ \ (\text{if we knew it was ink}),\qquad -\frac{${tn(r.eps_star,3)}}{${tn(r.noise,3)}}=${tn(r.score,2)}`)))),
- lines:['If we knew x₀, the noisy value would come from one Gaussian bump, and its score is the noise, scaled: −ε/√(1 − ᾱ).','The real noisy density mixes one bump per possible x₀. Its score is the average of the bumps’ scores, weighted by how likely each x₀ is given x: the average noise (Tweedie’s formula).','Our network learned exactly that average noise (3.4). So, up to a scale and a sign, the noise predictor is the score of the noisy data: the denoiser knows the arrows.',`Our pixel: the one-bump formula would say +${num(r.score_conditional,2)} (push up, towards ink) only if we knew it was ink. The true score is ${num(r.score,2)}: it points from xₜ towards √ᾱ · x̂₀ = ${num(r.signal*r.x0_hat,2)}.`],
+ lines:['If we knew x₀, the noisy value would come from one Gaussian bump, and its score is the noise, scaled: −ε/√(1 − ᾱ).','The real noisy density mixes one bump per possible x₀. Its score is the average of the bumps’ scores, weighted by how likely each x₀ is given x: the average noise (Tweedie’s formula).','Our network learned exactly that average noise (§{average}). So, up to a scale and a sign, the noise predictor is the score of the noisy data: the denoiser knows the arrows.',`Our pixel: the one-bump formula would say +${num(r.score_conditional,2)} (push up, towards ink) only if we knew it was ink. The true score is ${num(r.score,2)}: it points from xₜ towards √ᾱ · x̂₀ = ${num(r.signal*r.x0_hat,2)}.`],
  ask:['Where does the minus sign come from?','Why may the gradient move inside the average?','So what does the network estimate?','Why do the two numbers differ?'],
  expected:['Gaussian log density: −(x − mean)²/(2 var), whose gradient is −(x − mean)/var.','∇q_t = ∫ p(x₀) ∇q(x | x₀) dx₀; divide by q_t and Bayes turns p(x₀) q(x | x₀)/q_t(x) into p(x₀ | x).','The score of the noisy data distribution at every noise level, scaled by −√(1 − ᾱ).','One uses the true noise, unknown at generation time; the score averages over both stories, ink and paper.'],
  misconception:'Paras Chopra’s explainer writes ∇ log p(xₜ) = −ε/√(1 − ᾱₜ). That is the score of q(xₜ | x₀), for a known clean image. The score of the noisy data needs the posterior average E[ε | xₜ], which is what the network learns.',
@@ -890,12 +943,12 @@ S('tweedie','why','The noise predictor is a score estimator',{builds:4,
  transition:'Four ways to use the same trained network.'});
 S('map-2x2','why','Four ways to run the same trained network',{builds:2,
  body:act(5,table(['','random (fresh noise)','deterministic'],[['discrete steps','DDPM: Part 4','DDIM: Part 6'],['continuous time','reverse SDE','probability-flow ODE']]),
-  at(2,p('Part 5 in two sentences. Diffusion is a VAE whose encoder is fixed noising; its ELBO is a weighted sum of noise MSEs, and we train the unweighted one. The noise predictor is the score of the noisy data, so sampling climbs the arrows while the noise level falls.'))),
- lines:['One trained ε̂-network, four samplers: random or deterministic, in steps or in continuous time. Optional depth has the continuous versions.','<b>Next:</b> Part 6. Use the deterministic sampler to go faster, and steer the network with a label.'],
+  at(2,p('In two sentences: diffusion is a VAE whose encoder is fixed noising; its ELBO is a weighted sum of noise MSEs, and we train the unweighted one. The noise predictor is the score of the noisy data, so sampling climbs the arrows while the noise level falls.'))),
+ lines:['One trained ε̂-network, four samplers: random or deterministic, in steps or in continuous time. Optional depth has the continuous versions.','The deterministic samplers are the faster ones: Part ¶{ddim-idea}.'],
  ask:['Which of these is the DDPM loop?','Does changing the sampler need retraining?'],
  expected:['Discrete and random.','No: all four use the same ε̂-network.'],
  source:by(SRC.mit(2)+' (39:04)',SRC.sde),
- transition:'Part 6.'});
+ transition:'Diffusion is also a VAE.'});
 
 S('elbo-simple','learn','Its ELBO is a weighted noise error',{builds:2,
  body:act(7,stack(eq(R`-\ELBO=\sum_{t}w_t\;\E\big\|\ncol{\varepsilon}-\qcol{\hat\varepsilon_\theta(x_t,t)}\big\|^2+\text{const}`),
@@ -907,7 +960,7 @@ S('elbo-simple','learn','Its ELBO is a weighted noise error',{builds:2,
  source:by(SRC.ddpm,'§3.4'),
  transition:'Does it just copy its training set?'});
 
-// ================================================================ Part 6 · Faster and steerable
+// ================================================================ Part 6 · Noise schedules and faster sampling
 chap('6.1');
 const ddimX=(()=>{const a=LIN.ab[200];return Math.sqrt(a)*r.x0_hat+Math.sqrt(1-a)*r.eps_star;})();
 S('slow','fast','A thousand network calls per image',{builds:2,
@@ -915,16 +968,16 @@ S('slow','fast','A thousand network calls per image',{builds:2,
   at(2,p('Can we take fewer, bigger steps with the same trained network?'))),
  lines:['Sampling costs one network call per step: a thousand calls for each batch. Fine for 28×28 digits, painful for large images.','Part 2 said big jumps back are not Gaussian. Is there another way to jump?'],
  ask:['Where does the time go?','Why not just use fewer DDPM steps?'],
- expected:['Into the network calls: everything else is arithmetic.','The step back is only Gaussian for small steps (2.2); big DDPM steps get the distribution wrong.'],
+ expected:['Into the network calls: everything else is arithmetic.','The step back is only Gaussian for small steps (§{reverse-explorer}); big DDPM steps get the distribution wrong.'],
  transition:'Jump to the guess, then re-noise.'});
 S('ddim-idea','fast','DDIM: jump to the guess, then re-noise it to an earlier level',{builds:3,
  body:act(6,stack(eq(R`\qcol{\hat x_0}=\frac{x_t-\sqrt{1-\bar\alpha_t}\;\qcol{\hat\varepsilon}}{\sqrt{\bar\alpha_t}}`),
   at(2,eq(R`x_{t'}=\sqrt{\bar\alpha_{t'}}\;\qcol{\hat x_0}+\sqrt{1-\bar\alpha_{t'}}\;\qcol{\hat\varepsilon}\qquad(t'<t)`)),
   at(3,eq(R`\text{pixel, }250\to200:\ \ \sqrt{${tn(LIN.ab[200],3)}}\times${tn(r.x0_hat,2)}+\sqrt{${tn(1-LIN.ab[200],3)}}\times${tn(r.eps_star,2)}=${tn(ddimX,3)}`)))),
- lines:['Guess the clean image from xₜ, as before.','Then use the shortcut of 1.3 in reverse: noise the guess back up to an earlier level t′, reusing the same guessed noise instead of a fresh draw.','No fresh noise, so the path is deterministic, and t′ can be far earlier: 50 jumps instead of 1,000, with the same trained network.'],
+ lines:['Guess the clean image from xₜ, as before.','Then use the shortcut of §{shortcut} in reverse: noise the guess back up to an earlier level t′, reusing the same guessed noise instead of a fresh draw.','No fresh noise, so the path is deterministic, and t′ can be far earlier: 50 jumps instead of 1,000, with the same trained network.'],
  ask:['Which formula is the second line?','Why reuse ε̂ rather than draw new noise?','What do we lose?'],
  expected:['The shortcut xₜ = √ᾱ x₀ + √(1 − ᾱ) ε with the two guesses.','It keeps the noisy image consistent with the guess; DDIM shows these jumps keep the same marginals as the forward process.','The randomness of each step: the same starting noise always gives the same sample.'],
- misconception:'DDIM is not “DDPM with the noise term removed” (4.5 showed that collapses). It is a different update, with a non-Markov forward process that has the same marginals q(xₜ | x₀).',
+ misconception:'DDIM is not “DDPM with the noise term removed” (§{why-noise} showed that collapses). It is a different update, with a non-Markov forward process that has the same marginals q(xₜ | x₀).',
  source:by(SRC.ddim,SRC.mit(2)+' (24:35)'),
  transition:'See the paths.'});
 S('ddim-2d','fast','Same network: DDPM paths jitter, DDIM paths glide',{builds:2,nb:'cell-ddim',
@@ -936,11 +989,20 @@ S('ddim-2d','fast','Same network: DDPM paths jitter, DDIM paths glide',{builds:2
  transition:'And on MNIST?'});
 S('ddim-steps','fast','Fewer steps, same network: from 1 to 1,000',{nb:'cell-ddim',
  body:act(6,widget('ddimsteps','MNIST samples from DDIM with a chosen number of steps')),
- lines:['Eight digits from the same eight noises. One step gives the blurry average of 2.2; about twenty steps already give clean digits, fifty times faster than DDPM.'],
+ lines:['Eight digits from the same eight noises. One step gives the blurry average guess of §{x0film}; about twenty steps already give clean digits, fifty times faster than DDPM.'],
  ask:['Why does one step give blobs, and how few steps can you get away with?'],
- expected:['One jump returns x̂₀ at t = 1,000: the average digit. Here about 20 steps suffice; distilled and consistency models get to 1–4 (7.4).'],
+ expected:['One jump returns x̂₀ at t = 1,000: the average digit. Here about 20 steps suffice; distilled and consistency models get to 1–4 (§{frontier}).'],
  source:SRC.paras+' (XI, “Speed vs Quality”)',
- transition:'One more design choice: how fast the noise grows.'});
+ transition:'Faster still, on a real image model.'});
+S('sd-speed','fast','Stable Diffusion in fewer steps, and in one',{builds:2,
+ body:act(6,stack(stripLine('DDIM, the same network',palette.p,stripRow('sd/steps.jpg',6,['1 step','2 steps','5 steps','10 steps','25 steps','50 steps'],132)),
+  at(2,stripLine('a distilled model (LCM)',palette.q,stripRow('sd/lcm.jpg',5,['1 step','2 steps','4 steps','8 steps',`<span style="color:${palette.p}">DDIM, 4 steps</span>`],132))))),
+ lines:['The real Stable Diffusion: one sentence, one starting noise, fewer and fewer DDIM steps. From about five steps there is a fox; one or two big jumps are not enough. Twenty-five steps look as good as fifty.','A distilled model, a latent consistency adapter trained to jump far, draws a recognisable fox in one step and a sharp one in four. Plain DDIM at four steps (right) is still smeared.'],
+ ask:['How many DDIM steps would you pay for?','What did the consistency model learn that DDIM did not?'],
+ expected:['About 20–25: as good as 50 at half the cost. Our MNIST model needed about 20 as well (§{ddim-steps}).','To map a noisy point straight to the end of its path in one jump: a student trained to land where many small steps of the original model would.'],
+ point:'Stable Diffusion v1.5: DDIM (η = 0), guidance w = 7.5, seed 1, prompt “a red fox sitting in fresh snow, soft morning light, wildlife photograph”. LCM: the LCM-LoRA adapter for SD 1.5 with its own scheduler and w = 1. Run on a laptop GPU for the companion film.',
+ source:by(SRC.ddim,SRC.lcm,SRC.sd),
+ transition:'Where the field went.'});
 chap('6.2');
 S('cosine','fast','The schedule matters: linear destroys too early',{builds:2,
  body:act(6,widget('schedules','Our 3 under the linear and the cosine schedule')),
@@ -949,7 +1011,7 @@ S('cosine','fast','The schedule matters: linear destroys too early',{builds:2,
  expected:['Linear about 600, cosine about 800–850.','Training samples t uniformly: with linear, about a third of the examples are nearly pure noise.'],
  point:'Our models use the linear schedule (simpler, and enough for MNIST). The cosine schedule is ᾱₜ = cos²(((t/T) + s)/(1 + s) · π/2), s = 0.008.',
  source:by(SRC.iddpm,SRC.outlier+' (6:26)'),
- transition:'Part 7: what the network learns.'});
+ transition:'Even with a good schedule: a thousand steps. Can we take fewer?'});
 chap('6.3');
 S('label','fast','A 3 on demand: give the network the label',{builds:3,
  body:act(6,stack(code(`h = time_mlp(time_features(t))      # how noisy
@@ -959,7 +1021,7 @@ eps_hat = unet(x_t, h)`),
   at(3,p('Good, but some are weak or ambiguous. Can we push the samples to be more clearly 3s?')))),
  lines:['Conditioning is one line: a learned embedding of the label is added to the time embedding, so every block knows both how noisy the image is and which digit to make.',`Asked for a 3, the conditional model gives ${Math.round(mn.guidance.find(g=>g.w===1).is_three*16)} of 16 that our classifier calls a 3.`,'Not all are convincing. Guidance pushes harder, and it comes from Bayes’ rule.'],
  ask:['Where does the label enter?','How do we check what the samples are?','How would you push towards “more 3-like”?'],
- expected:['Added to the time embedding, so it reaches every block.','With a separate classifier trained on clean MNIST.','Add a push towards images a classifier is confident are 3s: next slide.'],
+ expected:['Added to the time embedding, so it reaches every block.','With a separate classifier trained on clean MNIST.','Ask the network twice, with and without the label, and push along the difference: next slide.'],
  transition:'Push harder: guidance.'});
 S('cg','fast','Classifier guidance: Bayes’ rule on scores',{builds:3,
  body:act(6,stack(eq(R`p(x\mid c)=\frac{p(c\mid x)\;p(x)}{p(c)}`),
@@ -978,7 +1040,7 @@ S('cfg-bayes','fast','Why guidance works: the classifier cancels out',{builds:4,
   at(4,code(`e_uncond = model(x_t, t, NULL)        # label hidden
 e_cond   = model(x_t, t, c)
 eps_hat  = e_uncond + w * (e_cond - e_uncond)`)))),
- lines:['Rearrange Bayes once more: the classifier’s gradient is the difference between the conditional and the unconditional score.','Substitute it into the guided score. No classifier left: only two scores of the same diffusion model.','In noises (5.6: score = −ε̂/√(1 − ᾱ), the scale cancels): start from the unconditional guess and move w times along the difference. w = 0 ignores the label; w = 1 is the plain conditional model; w > 1 extrapolates.','How many networks? One: during training the label is replaced by “no label” some of the time (10% for MNIST), so the same network gives both guesses. Two calls per step at sampling.'],
+ lines:['Rearrange Bayes once more: the classifier’s gradient is the difference between the conditional and the unconditional score.','Substitute it into the guided score. No classifier left: only two scores of the same diffusion model.','In noises (§{tweedie}: score = −ε̂/√(1 − ᾱ), the scale cancels): start from the unconditional guess and move w times along the difference. w = 0 ignores the label; w = 1 is the plain conditional model; w > 1 extrapolates.','How many networks? One: during training the label is replaced by “no label” some of the time (10% for MNIST), so the same network gives both guesses. Two calls per step at sampling.'],
  ask:['Where did the classifier go?','What is w = 1?','How many networks do we train?','What does guidance cost at sampling time?'],
  expected:['It is the difference of two denoisers: an implicit classifier.','The plain conditional model, ε̂(xₜ, t, c).','One, trained with label dropout.','Two network calls per step instead of one.'],
  source:by(SRC.cfg,SRC.mit(3)+' (17:28)'),
@@ -1016,7 +1078,7 @@ S('digits-demand','fast','Every digit on demand',{builds:2,
  ask:['What would change for a text prompt?','What stays the same?'],
  expected:['The label embedding becomes a text encoder, and conditioning uses cross-attention.','The training loop, the sampler and the guidance formula.'],
  transition:'Bigger images: latent diffusion.'});
-// ================================================================ Part 7 · From digits to text-to-image
+// ================================================================ Part 7 · From digits to text-to-image (sections 7.4 and 7.5)
 chap('7.1');
 S('latent','big','Pixels are expensive: diffuse a compressed code',{builds:3,
  body:act(7,stack(p('A 512 × 512 colour image: <b>786,432</b> numbers through the U-Net, at every one of 50 steps, twice with guidance.'),
@@ -1027,28 +1089,63 @@ S('latent','big','Pixels are expensive: diffuse a compressed code',{builds:3,
  expected:['Reconstruction: the code must keep everything visible.','The distribution of codes: smaller, and with the pixel-level detail handled by the decoder.','The samples are codes; the decoder turns them into images.'],
  point:`Our autoencoder: convolutions down to 4 × 7 × 7, codes scaled by their standard deviation (${num(mn.latent.latent_std,2)}) before diffusion. Latent DDPM: 4 time-conditioned blocks, 20,000 updates.`,
  source:by(SRC.ldm,SRC.paras+' (XII)'),
+ transition:'The real thing: Stable Diffusion’s autoencoder.'});
+S('sd-vae','big','Stable Diffusion’s autoencoder: 48 times fewer numbers',{builds:2,
+ body:act(7,`<div class="eqimg" style="gap:22px;justify-content:center">`+
+  `<figure class="eqimg-f">${photo(0,2,250,'sd/vae.jpg')}<figcaption>our photo: 512 × 512 × 3<br>786,432 numbers</figcaption></figure>`+sdArrow('encode')+
+  `<figure class="eqimg-f"><span style="display:grid;grid-template-columns:repeat(2,121px);gap:8px">${[0,1,2,3].map(c=>photo(c,4,121,'sd/vae-latent.png')).join('')}</span><figcaption>the code: 4 × 64 × 64<br>16,384 numbers</figcaption></figure>`+
+  at(2,sdArrow('decode'))+at(2,`<figure class="eqimg-f">${photo(1,2,250,'sd/vae.jpg')}<figcaption>decoded: almost the same<br>(30.9 dB)</figcaption></figure>`)+'</div>'),
+ lines:['The real autoencoder of Stable Diffusion on our photo: 786,432 numbers in, four 64 × 64 channels out. That is 16,384 numbers, 48 times fewer, and the channels still look like a small cat.','Decoded back, the photo is almost unchanged (30.9 dB). Stable Diffusion’s U-Net works only on these small codes; the decoder runs once, at the very end.'],
+ ask:['Why does the code still look like a cat?','What does the decoder have to invent?'],
+ expected:['Each code position summarises an 8 × 8 patch of the photo, so the layout survives: the code is a small, strange image.','Fine texture such as fur and sharp edges: restored plausibly, not exactly.'],
+ point:'The encoder’s mean, times the scaling factor 0.18215; each channel stretched to its 1–99% range for display. Autoencoder: 83.7M parameters (34.2M encoder, 49.5M decoder). Round trip: 30.9 dB PSNR.',
+ source:by(SRC.ldm,SRC.sd),
  transition:'From a label to a sentence.'});
 chap('7.2');
 function sdFig(b){
  const W=1150,H=310;let s=`<defs>${arrowHead('sd-a',palette.ink)}</defs>`;
  const box=(x,y,w,h,t,sub,c,lec)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" fill="#FFFFFF" stroke="${c}" stroke-width="2.4"/>`+label(x+w/2,y+h/2,t,{fill:c,size:21,anchor:'middle',weight:650})+label(x+w/2,y+h/2+24,sub,{size:16,anchor:'middle'})+(lec?label(x+w/2,y+h+24,lec,{fill:palette.p,size:16,anchor:'middle',weight:600}):'');
  const ar=(x1,y1,x2,y2)=>`<path d="M${x1},${y1} L${x2},${y2}" stroke="${palette.ink}" stroke-width="2.2" marker-end="url(#sd-a)"/>`;
- s+=label(20,60,'“a basket of cherries”',{fill:palette.ink,size:21,weight:600})+ar(110,72,110,104)+box(20,108,180,70,'text encoder','CLIP or T5','#245EDB','CLIP lecture');
+ s+=label(20,60,'“a red fox sitting in the snow”',{fill:palette.ink,size:21,weight:600})+ar(110,72,110,104)+box(20,108,180,70,'text encoder','CLIP or T5','#245EDB','CLIP lecture');
  s+=box(20,212,180,64,'noise','64 × 64 × 4','#AA4E08','Part 1');
  s+=ar(200,244,300,226)+ar(200,143,300,190);
  s+=box(304,150,330,110,'U-Net denoiser','× 50 steps, with guidance','#8B2CDE','today');
  s+=label(469,140,'cross-attention: image asks, words answer',{fill:palette.q,size:17,anchor:'middle'});
  s+=ar(634,205,720,205)+box(724,170,180,70,'VAE decoder','64 × 64 × 4 → image','#0F766E','Lectures 2–3')+ar(904,205,960,205);
- s+=`<image href="figures/pub/pub-cherries-1.png" x="966" y="125" width="160" height="160"/>`;
+ s+=`<image href="figures/film/sd/fox.jpg" x="966" y="125" width="160" height="160"/>`;
  return fig(W,H,s,'The text-to-image pipeline: a text encoder, a U-Net denoiser in latent space, and a VAE decoder.');
 }
 S('text','big','Text in, through cross-attention',{builds:3,
  body:act(7,stack(sdFig(1),at(2,small('Cross-attention: each image position asks the words a question. Queries come from the U-Net’s features; keys and values from the word vectors.')))),
  lines:['A label was one embedding added everywhere. A sentence is many word vectors, and different parts of the image care about different words: cross-attention lets each position attend to the words, exactly the attention of our attention lectures.','The whole pipeline: text encoder, a U-Net denoiser on 64 × 64 × 4 latents with guidance, then the VAE decoder. Every box is a lecture you have had.','Nothing new in the training loop: image codes and captions instead of digits and labels.'],
  ask:['Where do queries and keys come from?','Which box is today’s lecture?','What does guidance do to a text prompt?'],
- expected:['Queries from image features, keys and values from words.','The U-Net denoiser and its sampler.','Pushes images to match the caption more strongly, at the cost of variety (5.3).'],
- source:by(SRC.ldm,SRC.paras+' (XII)'),
- transition:'Part 6: faster sampling.'});
+ expected:['Queries from image features, keys and values from words.','The U-Net denoiser and its sampler.','Pushes images to match the caption more strongly, at the cost of variety (§{sd-guidance}).'],
+ source:by(SRC.ldm,SRC.paras+' (XII)','the fox: Stable Diffusion v1.5'),
+ transition:'Which words go where, in the real model.'});
+S('sd-attn','big','Which words go where: the real cross-attention',{builds:2,
+ body:act(7,stripRow('sd/attn.jpg',5,['the picture','“red”','“fox”','“sitting”','“snow”'],205)+at(2,small('Bright: this part of the picture attends to the word. Each map is averaged over heads, layers and all 50 steps.'))),
+ lines:['Stable Diffusion, asked for “a red fox sitting in the snow”. For each word, the parts of the picture that attend to it are lit up. The fox attends to “fox”, “red” and “sitting”.','The snow and the background attend to “snow”, and the fox does not. The sentence is not squeezed into one vector: each region reads the words it needs, at every step.'],
+ ask:['Which part of the picture attends to “snow”?','How can different regions read different words?'],
+ expected:['Everything except the fox: on average 0.26 off the fox and 0.04 on it, on a 0–1 scale.','Each image position sends its own query, so it gets its own attention weights over the words: cross-attention.'],
+ point:'U-Net cross-attention at 16 × 16, the conditional half, mean over heads, layers and the 50 steps; each word’s map scaled to its own 0–1 range. Mean on the fox (its orange and dark pixels) / elsewhere: “fox” 0.50 / 0.14, “red” 0.39 / 0.17, “sitting” 0.64 / 0.27, “snow” 0.04 / 0.26. The small words “in” and “the” also light up the fox (0.61 / 0.18 and 0.51 / 0.19), so a single word’s map should not be over-read.',
+ source:by(SRC.p2p,SRC.sd),
+ transition:'Watch whole sentences become pictures.'});
+S('sd-film','big','A sentence in, a picture out: 50 steps',{builds:2,
+ body:act(7,widget('filmstrip','Five Stable Diffusion runs, one per sentence, from noise to a picture',{film:'sd',runs:'0,1,2,4,5',size:190,caps:'“a red fox sitting in fresh snow…”|“a peacock with its tail feathers open…”|“a lighthouse on a rocky cliff at sunset, oil painting”|“a watercolor painting of a hummingbird…”|“glowing jellyfish in the deep ocean…”'})),
+ lines:['The real Stable Diffusion: five sentences, five starting noises, one network and the same 50-step loop with guidance. Press play.','The same story as our digits and the cats: blotches of colour first (noise in the latent space, decoded), then a layout, then detail. Only the sentence differs.'],
+ ask:['Why do the first frames look like coloured blotches rather than grey static?','When is each layout decided?'],
+ expected:['They are pure noise in the 4 × 64 × 64 code, passed through the decoder: decoded noise is blotchy and colourful.','Early: the network’s guess of the final picture shows each layout within the first ten or fifteen of the 50 steps; the rest adds detail.'],
+ point:'Prompts: “a red fox sitting in fresh snow, soft morning light, wildlife photograph” · “a peacock with its tail feathers open in a garden, golden hour, photograph” · “a lighthouse on a rocky cliff at sunset, oil painting” · “a watercolor painting of a hummingbird and red flowers” · “glowing jellyfish in the deep ocean, underwater photograph”. Stable Diffusion v1.5, DDIM (η = 0), 50 steps, w = 7.5; every second step shown, decoded to pixels.',
+ source:by(SRC.ldm,SRC.sd),
+ transition:'Turn the guidance dial on a sentence.'});
+S('sd-guidance','big','The guidance dial on a sentence: w = 0 to 15',{builds:2,
+ body:act(7,stripRow('sd/guidance.jpg',5,['w = 0','w = 1','w = 3','w = 7.5 (default)','w = 15'],205)+at(2,eq(R`\qcol{\hat\varepsilon_{\text{guided}}}=\hat\varepsilon(x_t,t,\varnothing)+w\,\big(\hat\varepsilon(x_t,t,\text{sentence})-\hat\varepsilon(x_t,t,\varnothing)\big)`))),
+ lines:['“A red fox sitting in fresh snow…”, the same starting noise, five guidance strengths. At w = 0 the sentence is ignored: an unrelated picture. At w = 1, the plain conditional model, a dull, greyish fox.','From w = 3 to 7.5, the fox we asked for; 7.5 is the usual default. At w = 15 the colours burn and the picture looks over-processed. The same trade as our 3s (§{dial}): more of the prompt, less natural.'],
+ ask:['Why is w = 0 not a fox at all?','Which w would you ship?'],
+ expected:['w = 0 keeps only the guess for the empty sentence: the unconditional model, which can draw anything.','Somewhere around 5–8. Paras Chopra’s explainer notes that most users settle around 7.5.'],
+ point:'Stable Diffusion v1.5, DDIM 50 steps, seed 1. The guided noise is our formula of §{cfg}, with the sentence as the label and the empty sentence as “no label”; w = 1 uses only the conditional guess.',
+ source:by(SRC.cfg,SRC.paras+' (XII)',SRC.sd),
+ transition:'Part 8: wrap-up.'});
 chap('7.3');
 S('ideal','big','The best possible denoiser only copies its training set',{builds:3,
  body:act(7,stack(eq(R`\hat x_0^{*}(x_t)=\sum_{i=1}^{N}w_i\,x^{(i)},\qquad w_i\propto\exp\!\Big(-\frac{\|x_t-\sqrt{\bar\alpha_t}\,x^{(i)}\|^2}{2(1-\bar\alpha_t)}\Big)`),
@@ -1078,7 +1175,7 @@ S('frontier','big','Where the field went: same idea, better parts',{
  ask:['Which of these would you try first for faster sampling?'],
  expected:['Distillation or consistency models for speed; flow matching for simpler training and straighter paths.'],
  source:by(SRC.mit(2),SRC.mit(6),'Peebles &amp; Xie (2023) · Lipman et al. (2023) · Liu et al. (2023) · Song et al. (2023)'),
- transition:'Wrap-up.'});
+ transition:'Part 7: steering with labels and text.'});
 chap('7.5');
 S('compare','big','Three generators, side by side',{
  body:act(7,`<div class="table-sm">`+table(['','VAE (Lecture 3)','GAN (Lecture 4)','Diffusion (today)'],[
@@ -1097,17 +1194,17 @@ S('exit','big','Exit questions',{builds:5,
   ['Why must t be an input?','One set of weights serves every noise level; the same xₜ means different things at different t.'],
   ['What happens in one reverse step?','Guess ε̂, turn it into x̂₀, compute the mean μ, add a little fresh noise.'],
   ['Why add noise while sampling?','Each step is a draw from a Gaussian; without the noise all samples collapse to one average.'],
-  ['Why does a perfect training loss copy the data?','The optimal denoiser of a finite set is a weighted average of training images, and sampling with it returns them.']].map(([q,a],k)=>`<b>Q${k+1}</b><span>${q}${at(k+1,`<span style="color:${palette.p}"> ${a}</span>`)}</span>`).join('')}</div>`),
- lines:['Q1: training.','Q2: time.','Q3: one step back.','Q4: sampling noise.','Q5: memorisation.'],
+  ['How does a sentence steer the image?','Its word vectors enter the U-Net through cross-attention; guidance pushes along the difference between the guesses with and without the text.']].map(([q,a],k)=>`<b>Q${k+1}</b><span>${q}${at(k+1,`<span style="color:${palette.p}"> ${a}</span>`)}</span>`).join('')}</div>`),
+ lines:['Q1: training.','Q2: time.','Q3: one step back.','Q4: sampling noise.','Q5: text.'],
  ask:['Answer Q1 before the reveal.','Q2.','Q3.','Q4.','Q5.'],
- expected:['xₜ and t in; ε out.','Different noise levels need different behaviour from shared weights.','ε̂ → x̂₀ → μ → μ + σz.','Without it every sample is the same thin 1.','Bayes with N training images: the guess is their weighted average.'],
+ expected:['xₜ and t in; ε out.','Different noise levels need different behaviour from shared weights.','ε̂ → x̂₀ → μ → μ + σz.','Without it every sample is the same thin 1.','Cross-attention for the words, guidance for the push.'],
  transition:'References.'});
 S('references','big','References and credits',{
  body:`<div class="refs">${[
   `<b>Explainer and videos this lecture follows.</b> ${SRC.paras} · ${SRC.seff} · ${SRC.deepia} · ${SRC.outlier} · ${SRC.vizuara} · MIT 6.S183 “A Practical Introduction to Diffusion Models” (IAP 2025), Lectures 1–6 (Yuan, Becker, Chen, Scarvelis, Lukoianov).`,
-  `<b>Papers.</b> ${SRC.sohl} · ${SRC.ddpm} · ${SRC.song} · ${SRC.sde} · ${SRC.ddim} · ${SRC.iddpm} · ${SRC.cg} · ${SRC.cfg} · ${SRC.ldm} · Karras et al., “Elucidating the Design Space of Diffusion-Based Generative Models” (2022) · Lipman et al., “Flow Matching for Generative Modeling” (2023) · Liu et al., “Flow Straight and Fast” (2023) · Peebles &amp; Xie, “Scalable Diffusion Models with Transformers” (2023) · Kadkhodaie et al., “Generalization in diffusion models arises from geometry-adaptive harmonic representations” (2024).`,
+  `<b>Papers.</b> ${SRC.sohl} · ${SRC.ddpm} · ${SRC.song} · ${SRC.sde} · ${SRC.ddim} · ${SRC.iddpm} · ${SRC.cg} · ${SRC.cfg} · ${SRC.ldm} · Karras et al., “Elucidating the Design Space of Diffusion-Based Generative Models” (2022) · Lipman et al., “Flow Matching for Generative Modeling” (2023) · Liu et al., “Flow Straight and Fast” (2023) · Peebles &amp; Xie, “Scalable Diffusion Models with Transformers” (2023) · Kadkhodaie et al., “Generalization in diffusion models arises from geometry-adaptive harmonic representations” (2024) · ${SRC.lcm} · ${SRC.p2p}.`,
   `<b>Tutorials.</b> ${SRC.weng} · ${SRC.luo} · Sander Dieleman’s blog (sander.ai).`,
-  `<b>Published images</b> (opening): LDM, RePaint, SR3, SDEdit, ControlNet, DreamBooth, each from the paper’s own figures. <b>Illustration:</b> ink in water, generated with Gemini.`,
+  `<b>Published images</b> (opening): LDM, RePaint, SR3, SDEdit, ControlNet, DreamBooth, each from the paper’s own figures. <b>Real photos</b> (§{hook}, §{photo-jump}, §{photo-guess}, §{cat-film}): the original DDPM cat checkpoint (google/ddpm-cat-256) and the CC0 photo “Chelsea” from scikit-image; (§{sd-speed}, §{sd-vae}, §{sd-attn}, §{sd-film}, §{sd-guidance}): Stable Diffusion v1.5 with the LCM-LoRA adapter. Both run for the companion film “Diffusion models, from noise to images, step by step” (2026). <b>Illustration:</b> ink in water, generated with Gemini.`,
   `<b>Our models and data.</b> MNIST (LeCun et al.); the MNIST DDPM, conditional DDPM, autoencoder, latent DDPM and classifier from the Generative Modelling II rebuild; the smiley models trained for this lecture. Gemini (Google) watched the videos and drafted a plan; Claude (Anthropic) built the lecture.`].map(t=>`<p>${t}</p>`).join('')}</div>`,
  lines:['Every source used, with the slides that use it credited in their footers.'],
  ask:['Which video would you watch next?'],
@@ -1120,7 +1217,7 @@ O('opt-sde','The continuous view: a stochastic differential equation',{builds:2,
  body:stack(eq(R`dx=-\tfrac12\beta(t)\,x\,dt+\sqrt{\beta(t)}\,dW\qquad\text{(forward: the noising, with many tiny steps)}`),
   at(2,eq(R`dx=\Big[-\tfrac12\beta(t)\,x-\beta(t)\,\nabla_x\log q_t(x)\Big]dt+\sqrt{\beta(t)}\,d\bar W\qquad\text{(reverse: needs the score)}`))),
  ask:['Where does the drift −½βx come from?','Why does the reverse need the score?'],
- expected:['From √(1 − β) x ≈ (1 − β/2) x for small β: the shrink.','Anderson (1982): running a diffusion backwards adds a drift along the score of the current density. Part 5’s network supplies it.'],
+ expected:['From √(1 − β) x ≈ (1 − β/2) x for small β: the shrink.','Anderson (1982): running a diffusion backwards adds a drift along the score of the current density. Part ¶{score-def}’s network supplies it.'],
  point:'Dropping the noise and halving the score term gives the probability-flow ODE, with the same marginals; DDIM is a discretisation of it.',
  source:SRC.sde});
 O('opt-targets','Other targets: x₀, v and flow matching',{builds:2,
@@ -1136,27 +1233,30 @@ O('opt-sds','A frozen diffusion model as a critic: score distillation',{
  source:SRC.mit(5)});
 
 // ================================================================ Lecture map, filled in once every section knows its first slide
-S('contents','map','Lecture 5 at a glance: eight parts, numbered sections',{nb:'top',
+S('contents','map','Lecture 5 at a glance: following Paras Chopra’s explainer',{nb:'top',
  body:'',
- lines:['Two sessions. Parts 0–4 build a working diffusion model, following every number by hand. Parts 5–7 steer it with labels and text, make it faster, and show what it learns. The ▶ Notebook link on every slide opens its section in Colab.'],
+ lines:['Two sessions, in the order of Paras Chopra’s “Diffusion Models from First Principles”. Parts 0–4 build a working diffusion model, following every number by hand. Parts 5–8: the score view, faster sampling, and steering with labels and text. The ▶ Notebook link on every slide opens its section in Colab.'],
  ask:['Which part do you expect to be hardest?'],
  expected:['Usually Part 2, the step back; we follow every number.'],
  point:'Click a section to jump to its first slide; ▶ opens the matching notebook section. Run the notebook top to bottom once before class.',
- transition:'Opening: noise to a digit.'});
+ transition:'Introduction: static in, a cat out.'});
 // ================================================================ The route: every slide in its numbered section, then optional depth
 const ROUTE={
- '0.1':['hook','apps'],'0.2':['three-gens'],'0.3':['core-idea','route'],
- '1.1':['one-step','explode','shrink-math'],'1.2':['toy-schedule','toy-forward'],'1.3':['shortcut-q','two-steps','shortcut','shortcut-check'],'1.4':['schedule','calc-forward'],'1.5':['film','pixel-hist','fwd-recap'],
- '2.1':['reverse-q'],'2.2':['big-jump','reverse-explorer'],'2.3':['guess-noise','three-targets'],'2.4':['reverse-step'],
- '3.1':['tuple','total-noise'],'3.2':['why-t'],'3.3':['loss-hand','average'],'3.4':['mlp','unet'],'3.5':['train-code','playground'],'3.6':['x0film','coordinate','train-recap'],
- '4.1':['step-hand','step-image'],'4.2':['toy-reverse','calc-reverse'],'4.3':['sample-code'],'4.4':['sampler2d','mnist-traj'],'4.5':['why-noise'],'4.6':['samples64','napkin'],
- '5.1':['label'],'5.2':['cfg','cfgvec'],'5.3':['dial','digits-demand'],'5.4':['latent'],'5.5':['text'],
- '6.1':['slow','ddim-idea','ddim-2d','ddim-steps'],'6.2':['cosine'],
- '7.1':['score-def','scorefield'],'7.2':['vae-map','elbo-simple'],'7.3':['ideal','copy-2d'],'7.4':['frontier','compare','exit','references'],
+ '0.1':['hook','apps'],'0.2':['core-idea','route'],
+ '1.1':['one-step','explode','shrink-math'],'1.2':['toy-schedule','toy-forward'],'1.3':['two-steps','shortcut','shortcut-check'],'1.4':['schedule','calc-forward'],'1.5':['film','pixel-hist','photo-jump','fwd-recap'],
+ '2.1':['reverse-q'],'2.2':['reverse-explorer'],'2.3':['guess-noise'],'2.4':['reverse-step'],
+ '3.1':['three-targets'],'3.2':['unet','why-t'],'3.3':['tuple','loss-hand','train-code'],'3.4':['mlp','playground'],'3.5':['x0film','photo-guess','train-recap'],
+ '4.1':['step-hand'],'4.2':['toy-reverse','calc-reverse'],'4.3':['sample-code'],'4.4':['sampler2d','mnist-traj','cat-film'],'4.5':['why-noise'],'4.6':['samples64','napkin'],
+ '5.1':['score-def','scorefield'],'5.2':['langevin'],
+ '6.1':['cosine'],'6.2':['slow','ddim-idea','ddim-2d','ddim-steps'],'6.3':['sd-speed','frontier'],
+ '7.1':['label'],'7.2':['cfg','cfgvec'],'7.3':['dial','digits-demand'],'7.4':['latent','sd-vae'],'7.5':['text','sd-attn'],'7.6':['sd-film','sd-guidance'],
+ '8.1':['compare','exit','references'],
 };
-const OPTIONAL=['pixel-prior','pixel-bayes','inkpaper','river','why-gaussian','know-x0','posterior-1','posterior-2','guess-x0','mean-eps',
- 'elbo-chain','elbo-flip','elbo-terms','kl-gauss','kl-mse','lsimple','tweedie','langevin','map-2x2','cg','cfg-bayes','opt-sde','opt-targets','opt-sds'];
-const PART_ID={0:'open',1:'fwd',2:'back',3:'train',4:'gen',5:'steer',6:'fast',7:'learn'};
+/** Depth for the curious, in the order of the main route. */
+const OPTIONAL=['three-gens','river','shortcut-q','pixel-prior','pixel-bayes','inkpaper','big-jump','why-gaussian','know-x0','posterior-1','posterior-2','guess-x0','mean-eps',
+ 'total-noise','average','coordinate','step-image','tweedie','map-2x2','vae-map','elbo-simple','elbo-chain','elbo-flip','elbo-terms','kl-gauss','kl-mse','lsimple',
+ 'ideal','copy-2d','cg','cfg-bayes','opt-sde','opt-targets','opt-sds'];
+const PART_ID={0:'open',1:'fwd',2:'back',3:'train',4:'gen',5:'score',6:'fast',7:'steer',8:'wrap'};
 const STRIP=/<div class="act-strip"[^>]*>(?:<span[^>]*>[^<]*<\/span>)*<\/div>/;
 {
  const byId=Object.fromEntries(slides.map(s=>[s.id,s])),ordered=[byId.contents],used=new Set(['contents']);
@@ -1170,6 +1270,13 @@ const STRIP=/<div class="act-strip"[^>]*>(?:<span[^>]*>[^<]*<\/span>)*<\/div>/;
  for(const id of OPTIONAL){const s=byId[id];if(!s)throw new Error('Optional list names a missing slide: '+id);place(s,{section:'optional',anchor:s.nbAnchor,optional:true,part:0});}
  const left=slides.filter(s=>!used.has(s.id)).map(s=>s.id);if(left.length)throw new Error('Slides missing from the route: '+left.join(', '));
  slides.length=0;slides.push(...ordered);
+ // cross-references: §{id} is the section of a slide (or the title of an optional one), ¶{id} its part
+ const at_=Object.fromEntries(slides.map(s=>[s.id,s]));
+ const secOf=id=>{const s=at_[id];if(!s)throw new Error('Reference to a missing slide: '+id);return s.optional?`“${s.title}”`:s.chapter.split(' ')[0];};
+ const partOf=id=>{const s=at_[id];if(!s||s.optional)throw new Error('Part reference to a slide off the route: '+id);return s.chapter.split('.')[0];};
+ const res=v=>typeof v==='string'?v.replace(/§\{([a-z0-9-]+)\}/g,(_,id)=>secOf(id)).replace(/¶\{([a-z0-9-]+)\}/g,(_,id)=>partOf(id)):v;
+ for(const s of slides){for(const k of ['title','body','source'])s[k]=res(s[k]);s.prompts=s.prompts.map(res);
+  for(const [k,v] of Object.entries(s.notes))s.notes[k]=Array.isArray(v)?v.map(res):res(v);}
 }
 slides[0].notebook=nbLink('top');
 
