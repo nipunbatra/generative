@@ -322,7 +322,7 @@
       "id": "kl-asymmetry",
       "title": "Which one is the truth? KL is not symmetric",
       "section": "kl",
-      "builds": 3,
+      "builds": 2,
       "optional": false
     },
     {
@@ -977,5 +977,5 @@
       "optional": true
     }
   ],
-  "totalStates": 299
+  "totalStates": 298
 }

@@ -873,13 +873,12 @@ S('kl-properties','kl','Never negative, and zero only for the right code',{build
  ask:['Can KL be negative?','If KL(p‖q) = 0, what do we know?'],
  expected:['No: that would beat the best possible code.','q = p: the belief is right.'],
  transition:'Does it matter which one is the truth?'});
-S('kl-asymmetry','kl','Which one is the truth? KL is not symmetric',{builds:3,nb:'cell-cross-entropy',
- body:stack(p('“Oliver is 10 cm taller than Oscar” and “Oscar is 10 cm shorter than Oliver”: the description depends on who you measure from. With KL even the size changes.'),
-  at(2,cols(weatherBars([wb.p,inf.kl.asym.q],['our weather, p','a sunny town, q'],[palette.p,palette.q],{small:true}),
-   table(['','bits wasted per day'],[[`our weather, their code`,num(inf.kl.asym.fwd,2)],[at(3,`their weather, our code`),at(3,num(inf.kl.asym.rev,2))]]),'1fr 1fr'))),
- lines:['Which distribution is the reference? For heights, only the wording changes. For KL, the number does.','A sunny town expects sun 98% of the time, so its code gives cloudy and rainy 6.6-bit codewords. On our weather, where they come half the time, that wastes 1.84 bits a day: KL(p‖q).','Swap the roles: our code on their weather wastes only 0.86 bits a day, KL(q‖p). The truth supplies the weights, so swapping changes the answer.'],
- ask:['Why is their code so costly for us?','Is KL a distance in the everyday sense?','Which direction will VI use?'],
- expected:['It spends 6.6 bits on our cloudy and rainy days, which are half of all days.','No: a distance is the same both ways. KL is a divergence.','KL(q ‖ posterior), q first. Section 3.6 shows what that does to a fitted q.'],
+S('kl-asymmetry','kl','Which one is the truth? KL is not symmetric',{builds:2,nb:'cell-cross-entropy',
+ body:cols(weatherBars([wb.p,inf.kl.asym.q],['our weather, p','a sunny town, q'],[palette.p,palette.q]),
+  table(['','bits wasted per day'],[[`our weather, their code: ${m(R`\KL(p\|q)`)}`,num(inf.kl.asym.fwd,2)],[at(2,`their weather, our code: ${m(R`\KL(q\|p)`)}`),at(2,num(inf.kl.asym.rev,2))]]),'1fr 1fr'),
+ lines:['A sunny town expects sun 98% of the time, so its code gives cloudy and rainy 6.6-bit codewords. On our weather, where they come half the time, that wastes 1.84 bits a day: KL(p‖q).','Swap the roles: our code on their weather wastes only 0.86 bits a day, KL(q‖p). The truth supplies the weights, so swapping changes the answer.'],
+ ask:['Why is their code so costly for us?','Is KL a distance in the everyday sense? Which direction will VI use?'],
+ expected:['It spends 6.6 bits on our cloudy and rainy days, which are half of all days.','No: a distance is the same both ways; KL is a divergence. VI uses KL(q ‖ posterior), q first; Section 3.6 shows what that does to a fitted q.'],
  point:`Sunny town q = (0.98, 0.01, 0.01): codeword lengths log₂ 1/q = ${inf.kl.asym.codeword_bits.map(v=>num(v,2)).join(', ')} bits.`,
  source:HUANG,transition:'Section 2.5: where you have already met all this.'});
 chap('2.5');

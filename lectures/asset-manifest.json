@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-21T05:49:50.936Z",
+  "created": "2026-10-21T06:08:07.633Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -35,7 +35,7 @@
     {
       "path": "index.html",
       "bytes": 5817,
-      "sha256": "f5706e1906b99cf1960c7cd7ee0178834be1fb1f3e3b255a65c3a1ae8e11f1f1"
+      "sha256": "3818b19333cfd37969c8ca49e133d7281f92921b15ba2edc7b6e0083bf34a04a"
     },
     {
       "path": "lecture1/README.md",
@@ -44,8 +44,8 @@
     },
     {
       "path": "lecture1/content.js",
-      "bytes": 194672,
-      "sha256": "eeba3bd837ee4b419dde8f0517a9b4c487d6733022185829551281d5495ec844"
+      "bytes": 194412,
+      "sha256": "da4c3df12b13314ed2ae48fd3e26500474d7a13e1ff0e563111ac943c724bd56"
     },
     {
       "path": "lecture1/data/notebook-anchors.json",
@@ -59,13 +59,13 @@
     },
     {
       "path": "lecture1/exports/all-builds.pdf",
-      "bytes": 5076711,
-      "sha256": "2f4194dba363284f44b50ec46a42fb943c3c2388b4128b93f85c885ff492e931"
+      "bytes": 5065713,
+      "sha256": "8c5a6caafe254dc6fbaddda9e5ab0af8014959621498cea4a9c6461b0128ff56"
     },
     {
       "path": "lecture1/exports/completed.pdf",
-      "bytes": 3073102,
-      "sha256": "1acbe25354a392882b09c7fda763162fd5eab446e70a63fe5bfd518c10ff61af"
+      "bytes": 3071251,
+      "sha256": "a9303a1cc4773edf10f7749d4d483187ef0a933c4b446c6feef16f98f759e380"
     },
     {
       "path": "lecture1/figures/bnn-evidence-1d.png",
@@ -325,7 +325,7 @@
     {
       "path": "lecture1/index.html",
       "bytes": 1598,
-      "sha256": "07a934adc8b3c55fd789df93e6ab35783bf1e09c3249d078294c696bb04c4491"
+      "sha256": "7bf90668ae2e35fd342068f7652fd2aa913a631cf12a3b49db37b49027d0cfac"
     },
     {
       "path": "lecture1/lecture1-variational-inference.ipynb",
@@ -335,7 +335,7 @@
     {
       "path": "lecture1/manifest.json",
       "bytes": 23757,
-      "sha256": "b3519443d7454f18b77cb7df7f7f53c09c2cbf75e95c3d1a8745c130361b6e0d"
+      "sha256": "b878eeec88634290b5e1dd20fe9081d0cc0dd039652e2e74f65f692341eed2b6"
     },
     {
       "path": "lecture1/math.mjs",
@@ -364,8 +364,8 @@
     },
     {
       "path": "lecture1/speaker-notes.md",
-      "bytes": 74246,
-      "sha256": "fe30979afdccd9a20badf7f3e5282db089b108e46f27b4aa707ef2cebaa14b8e"
+      "bytes": 74220,
+      "sha256": "98cd37ab752c0a84cb446a21db25058d124f462d36381c9586122c225f9b7b1d"
     },
     {
       "path": "lecture1/widgets.js",

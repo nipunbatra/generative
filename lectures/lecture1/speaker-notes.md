@@ -589,13 +589,9 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** It spends 6.6 bits on our cloudy and rainy days, which are half of all days.
 
-**Build 2, ask:** Is KL a distance in the everyday sense?
+**Build 2, ask:** Is KL a distance in the everyday sense? Which direction will VI use?
 
-**Expected:** No: a distance is the same both ways. KL is a divergence.
-
-**Build 3, ask:** Which direction will VI use?
-
-**Expected:** KL(q ‖ posterior), q first. Section 3.6 shows what that does to a fitted q.
+**Expected:** No: a distance is the same both ways; KL is a divergence. VI uses KL(q ‖ posterior), q first; Section 3.6 shows what that does to a fitted q.
 
 **Point here:** Sunny town q = (0.98, 0.01, 0.01): codeword lengths log₂ 1/q = 0.03, 6.64, 6.64 bits.
 
