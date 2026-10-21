@@ -9,7 +9,7 @@ The audience knows probability and Bayes' rule and is new to variational inferen
 | 1. KL, VI, ELBO and optimisation | 140 | Compare Gaussian approximations; take a literal update; estimate an expectation; inspect the gradient path; derive the ELBO from Bayes; fit and check the coin posterior. |
 | 2. From fitting a distribution to the VAE | 145 | Fit then sample the geyser waits; one model for all digits and why pixels need a code; encode, fit, draw, decode; random codes against the actual code cloud; both roads to the VAE and the ELBO derived for one image; one worked loss step. |
 | 3. GANs | 60 | Compute the two players' updates separately; preserve the correct gradient paths; alternate; inspect coverage and collapse; transfer to image sampling. |
-| 4. Diffusion | 70 | Make corruption exact; build one supervised example; inspect the loss and update; calculate one reverse step; assemble a DDPM; connect briefly to text conditioning. |
+| 4. Diffusion models | 138 | Make corruption exact; build one supervised example; inspect the loss and update; calculate one reverse step; assemble a DDPM; connect briefly to text conditioning. |
 
 Section budgets are recorded in each `manifest.json` and displayed in the lecture outline. Notes provide the question, expected answer, visual focus, misconception and transition. Pause on the initial state for a prediction. Use the answer reveal to discuss the reason, not merely to read the answer aloud.
 

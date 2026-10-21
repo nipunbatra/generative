@@ -1,491 +1,784 @@
 {
   "id": "lecture4",
   "number": 4,
-  "title": "Denoising diffusion probabilistic models",
-  "subtitle": "From one noisy pixel to a working sampler",
-  "minutes": 70,
-  "notebook": "lecture4.ipynb",
+  "title": "Diffusion models",
+  "subtitle": "Create by learning to undo noise",
+  "minutes": 138,
+  "notebook": "lecture4-diffusion.ipynb",
   "sections": [
     {
-      "id": "question",
-      "title": "From noise to images",
-      "minutes": 6
+      "id": "map",
+      "title": "Lecture map",
+      "minutes": 1
     },
     {
-      "id": "forward",
-      "title": "The known forward process",
-      "minutes": 11
+      "id": "open",
+      "title": "Introduction · Destruction as creation",
+      "minutes": 7
     },
     {
-      "id": "tuple",
-      "title": "One supervised example",
-      "minutes": 12
+      "id": "fwd",
+      "title": "Part 1 · The forward process",
+      "minutes": 22
     },
     {
-      "id": "learn",
-      "title": "One loss and one update",
-      "minutes": 11
+      "id": "back",
+      "title": "Part 2 · The reverse process",
+      "minutes": 10
     },
     {
-      "id": "reverse",
-      "title": "One reverse step",
+      "id": "train",
+      "title": "Part 3 · What the network learns, and training",
+      "minutes": 20
+    },
+    {
+      "id": "gen",
+      "title": "Part 4 · Sampling: birth of an image",
+      "minutes": 20
+    },
+    {
+      "id": "score",
+      "title": "Part 5 · The score: arrows to the data",
+      "minutes": 8
+    },
+    {
+      "id": "fast",
+      "title": "Part 6 · Noise schedules and faster sampling",
       "minutes": 14
     },
     {
-      "id": "ddpm",
-      "title": "Run the small DDPM",
+      "id": "steer",
+      "title": "Part 7 · Steering: labels, guidance and text",
+      "minutes": 28
+    },
+    {
+      "id": "wrap",
+      "title": "Part 8 · Wrap-up",
       "minutes": 8
     },
     {
-      "id": "text",
-      "title": "Text conditioning and retrieval",
-      "minutes": 8
+      "id": "optional",
+      "title": "Optional depth",
+      "minutes": 0
     }
   ],
-  "coreSlides": 60,
-  "optionalSlides": 3,
+  "coreSlides": 68,
+  "optionalSlides": 34,
   "slides": [
     {
-      "id": "noise-to-image",
-      "title": "How could this become an image?",
-      "section": "question",
+      "id": "contents",
+      "title": "Lecture 4 at a glance: following Paras Chopra’s explainer",
+      "section": "map",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "hook",
+      "title": "Static in, a cat out",
+      "section": "open",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "show-trajectory",
-      "title": "Many small decisions make one sample",
-      "section": "question",
+      "id": "apps",
+      "title": "The same loop runs today’s image generators",
+      "section": "open",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "held-example",
-      "title": "For this lecture, follow one handwritten 7",
-      "section": "question",
+      "id": "core-idea",
+      "title": "The idea in one sentence",
+      "section": "open",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "forward-film",
-      "title": "The easy direction destroys information",
-      "section": "question",
+      "id": "route",
+      "title": "The plan: forwards, backwards, train, sample",
+      "section": "open",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "two-directions",
-      "title": "Known corruption; learned reverse transitions",
-      "section": "question",
+      "id": "one-step",
+      "title": "One noising step: shrink a little, add a little noise",
+      "section": "fwd",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "explode",
+      "title": "Keep adding noise: what happens to the spread?",
+      "section": "fwd",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "one-step-pixel",
-      "title": "One pixel, one small corruption",
-      "section": "forward",
-      "builds": 2,
+      "id": "shrink-math",
+      "title": "Shrink a little, then add: the spread stays at 1",
+      "section": "fwd",
+      "builds": 3,
       "optional": false
     },
     {
-      "id": "forward-kernel",
-      "title": "The forward step is a Gaussian conditional",
-      "section": "forward",
-      "builds": 2,
+      "id": "toy-schedule",
+      "title": "A toy schedule you can do by hand: five steps",
+      "section": "fwd",
+      "builds": 3,
       "optional": false
     },
     {
-      "id": "alpha-vs-alphabar",
-      "title": "One step and many steps need different symbols",
-      "section": "forward",
-      "builds": 2,
+      "id": "toy-forward",
+      "title": "Forward, step by step: every number",
+      "section": "fwd",
+      "builds": 3,
       "optional": false
     },
     {
-      "id": "two-step-expansion",
-      "title": "Expand two corruption steps",
-      "section": "forward",
-      "builds": 2,
+      "id": "two-steps",
+      "title": "Two steps by hand: two noises become one",
+      "section": "fwd",
+      "builds": 4,
       "optional": false
     },
     {
-      "id": "direct-marginal",
-      "title": "Jump directly to any chosen timestep",
-      "section": "forward",
-      "builds": 2,
+      "id": "shortcut",
+      "title": "The shortcut: jump straight to any step",
+      "section": "fwd",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "shortcut-check",
+      "title": "Step by step or one jump: the same distribution",
+      "section": "fwd",
+      "builds": 1,
       "optional": false
     },
     {
       "id": "schedule",
-      "title": "Choose a schedule whose endpoint is near noise",
-      "section": "forward",
+      "title": "The real schedule: 1,000 small steps",
+      "section": "fwd",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "schedule-values",
-      "title": "The bar carries the cumulative effect",
-      "section": "forward",
+      "id": "calc-forward",
+      "title": "Try it: every number of a forward jump",
+      "section": "fwd",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "film",
+      "title": "Slide t: watch our 3 dissolve",
+      "section": "fwd",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-inputs",
-      "title": "Choose one scalar training example",
-      "section": "forward",
+      "id": "pixel-hist",
+      "title": "Every image ends in the same place: N(0, 1)",
+      "section": "fwd",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-forward",
-      "title": "Compute the noisy pixel",
-      "section": "forward",
+      "id": "photo-jump",
+      "title": "The same jump on a real photograph",
+      "section": "fwd",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "image-forward",
-      "title": "Apply the same construction to every pixel",
-      "section": "forward",
+      "id": "fwd-recap",
+      "title": "Destroying is easy, and it hands us labels for free",
+      "section": "fwd",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "reverse-q",
+      "title": "Run the film backwards: where was xₜ₋₁?",
+      "section": "back",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "reverse-explorer",
+      "title": "Shrink the jump: the step back becomes one Gaussian",
+      "section": "back",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "guess-noise",
+      "title": "If we knew the noise, we could undo the jump exactly",
+      "section": "back",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "reverse-step",
+      "title": "One step back, in one line",
+      "section": "back",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "three-targets",
+      "title": "Three ways to say the same guess",
+      "section": "train",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "unet",
+      "title": "For images: a U-Net, so every pixel can see the whole digit",
+      "section": "train",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "why-t",
+      "title": "One network for every noise level: tell it t",
+      "section": "train",
+      "builds": 3,
       "optional": false
     },
     {
       "id": "tuple",
-      "title": "What does one training example contain?",
-      "section": "tuple",
+      "title": "A training example costs one line",
+      "section": "train",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "loss-hand",
+      "title": "The loss: squared error between the noise and its guess",
+      "section": "train",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "train-code",
+      "title": "The training step in eight lines",
+      "section": "train",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "known-training",
-      "title": "Training knows how the input was made",
-      "section": "tuple",
+      "id": "mlp",
+      "title": "For points in 2-D: a small MLP",
+      "section": "train",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "playground",
+      "title": "Press play: the network learns the smiley",
+      "section": "train",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "time-needed",
-      "title": "The same value can mean different things at different t",
-      "section": "tuple",
+      "id": "x0film",
+      "title": "What the network believes our 3 is, at each noise level",
+      "section": "train",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "noise-levels",
-      "title": "The prediction problem changes with noise level",
-      "section": "tuple",
+      "id": "photo-guess",
+      "title": "The original DDPM network on a real photograph",
+      "section": "train",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "ambiguity",
-      "title": "One noisy input can have several explanations",
-      "section": "tuple",
+      "id": "train-recap",
+      "title": "Training: a regression problem we made ourselves",
+      "section": "train",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "conditional-mean",
-      "title": "Squared error learns a conditional average",
-      "section": "tuple",
+      "id": "step-hand",
+      "title": "One step back, by hand, on the real schedule",
+      "section": "gen",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "toy-reverse",
+      "title": "The toy, all the way back: every number",
+      "section": "gen",
+      "builds": 5,
+      "optional": false
+    },
+    {
+      "id": "calc-reverse",
+      "title": "Try it: walk back from noise, one step at a time",
+      "section": "gen",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "sample-code",
+      "title": "The sampling loop: start from noise, repeat a thousand times",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "noise-not-image",
-      "title": "The network predicts a noise tensor",
-      "section": "tuple",
+      "id": "sampler2d",
+      "title": "Watch 300 particles find the smiley, and drop your own",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "shapes",
-      "title": "The output shape matches the noise target",
-      "section": "tuple",
+      "id": "mnist-traj",
+      "title": "Eight runs from noise: x_t, and the network’s guess of the end",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "tuple-code",
-      "title": "Construct inputs and labels in one short block",
-      "section": "tuple",
+      "id": "cat-film",
+      "title": "Eight runs of the real cat model: xₜ, and its guess of the end",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-predictor",
-      "title": "Begin with a predictor we can differentiate by hand",
-      "section": "learn",
+      "id": "why-noise",
+      "title": "Take out the fresh noise, and every sample collapses",
+      "section": "gen",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "samples64",
+      "title": "64 new digits",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-residual",
-      "title": "Compare prediction with the injected noise",
-      "section": "learn",
+      "id": "napkin",
+      "title": "The whole method on a napkin",
+      "section": "gen",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-loss",
-      "title": "A squared residual gives one scalar loss",
-      "section": "learn",
+      "id": "score-def",
+      "title": "The score: an arrow at every point, pointing uphill",
+      "section": "score",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "scorefield",
+      "title": "The smiley’s arrows, at different noise levels",
+      "section": "score",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-gradient",
-      "title": "Differentiate through the prediction",
-      "section": "learn",
+      "id": "langevin",
+      "title": "Follow the arrows, with a little noise: Langevin sampling",
+      "section": "score",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "scalar-update",
-      "title": "One update, then recompute the same loss",
-      "section": "learn",
+      "id": "cosine",
+      "title": "The schedule matters: linear destroys too early",
+      "section": "fast",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "loss-reduction",
-      "title": "State exactly what “mean squared error” averages",
-      "section": "learn",
+      "id": "slow",
+      "title": "A thousand network calls per image",
+      "section": "fast",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "update-code",
-      "title": "A complete training update is short",
-      "section": "learn",
+      "id": "ddim-idea",
+      "title": "DDIM: jump to the guess, then re-noise it to an earlier level",
+      "section": "fast",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ddim-2d",
+      "title": "Same network: DDPM paths jitter, DDIM paths glide",
+      "section": "fast",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "unet-shape",
-      "title": "A small U-Net keeps context and detail",
-      "section": "learn",
+      "id": "ddim-steps",
+      "title": "Fewer steps, same network: from 1 to 1,000",
+      "section": "fast",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "sd-speed",
+      "title": "Stable Diffusion in fewer steps, and in one",
+      "section": "fast",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "time-conditioning",
-      "title": "The timestep enters the network explicitly",
-      "section": "learn",
+      "id": "frontier",
+      "title": "Where the field went: same idea, better parts",
+      "section": "fast",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "label",
+      "title": "A 3 on demand: give the network the label",
+      "section": "steer",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "cfg",
+      "title": "Guidance: ask twice, then exaggerate the difference",
+      "section": "steer",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "cfgvec",
+      "title": "Guidance as arrows: two guesses, and a push past them",
+      "section": "steer",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "dial",
+      "title": "The guidance dial: more w, more 3, less variety",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "neural-update",
-      "title": "Inspect a real image-model update",
-      "section": "learn",
+      "id": "digits-demand",
+      "title": "Every digit on demand",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "training-vs-sampling",
-      "title": "Training and sampling start with different information",
-      "section": "reverse",
+      "id": "latent",
+      "title": "Pixels are expensive: diffuse a compressed code",
+      "section": "steer",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "sd-vae",
+      "title": "Stable Diffusion’s autoencoder: 48 times fewer numbers",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "clean-estimate",
-      "title": "Solve the forward equation for a clean estimate",
-      "section": "reverse",
+      "id": "text",
+      "title": "Text in, through cross-attention",
+      "section": "steer",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "sd-attn",
+      "title": "Which words go where: the real cross-attention",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "estimate-image",
-      "title": "A clean estimate is useful, but is not a reverse step",
-      "section": "reverse",
+      "id": "sd-film",
+      "title": "A sentence in, a picture out: 50 steps",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "reverse-kernel",
-      "title": "Model the previous state with a Gaussian",
-      "section": "reverse",
+      "id": "sd-guidance",
+      "title": "The guidance dial on a sentence: w = 0 to 15",
+      "section": "steer",
       "builds": 2,
       "optional": false
     },
     {
-      "id": "reverse-mean",
-      "title": "The predicted noise determines the reverse mean",
-      "section": "reverse",
-      "builds": 2,
+      "id": "compare",
+      "title": "Three generators, side by side",
+      "section": "wrap",
+      "builds": 1,
       "optional": false
     },
     {
-      "id": "reverse-numbers",
-      "title": "One scalar reverse step has explicit inputs",
-      "section": "reverse",
-      "builds": 2,
+      "id": "exit",
+      "title": "Exit questions",
+      "section": "wrap",
+      "builds": 5,
       "optional": false
     },
     {
-      "id": "mean-vs-estimate",
-      "title": "The clean estimate and reverse mean are different",
-      "section": "reverse",
-      "builds": 2,
+      "id": "references",
+      "title": "References and credits",
+      "section": "wrap",
+      "builds": 1,
       "optional": false
     },
     {
-      "id": "posterior-variance",
-      "title": "Choose the reverse variance explicitly",
-      "section": "reverse",
-      "builds": 2,
-      "optional": false
+      "id": "three-gens",
+      "title": "Two generators so far, and a third idea",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
     },
     {
-      "id": "sample-previous",
-      "title": "Draw around the reverse mean",
-      "section": "reverse",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "final-boundary",
-      "title": "At the final step, do not add noise",
-      "section": "reverse",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "reverse-code",
-      "title": "The complete sampling loop uses the model repeatedly",
-      "section": "reverse",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "reverse-replay",
-      "title": "Inspect successive states on one trajectory",
-      "section": "reverse",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "latent-chain",
-      "title": "The noisy states form a latent-variable model",
-      "section": "ddpm",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "vi-connection",
-      "title": "The forward process supplies a tractable training distribution",
-      "section": "ddpm",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "weighted-vs-simple",
-      "title": "The common noise loss simplifies the variational objective",
-      "section": "ddpm",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "training-record",
-      "title": "What was actually trained?",
-      "section": "ddpm",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "history",
-      "title": "A falling training loss is useful but incomplete evidence",
-      "section": "ddpm",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "sample-gallery",
-      "title": "Inspect several fresh-noise samples",
-      "section": "ddpm",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "notebook-demo",
-      "title": "Live: one update, then use the saved sampler",
-      "section": "ddpm",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "text-conditioning",
-      "title": "Text adds a condition to the denoiser",
-      "section": "text",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "cross-attention",
-      "title": "Cross-attention lets image features consult text",
-      "section": "text",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "latent-diffusion",
-      "title": "The same idea can operate in a compressed space",
-      "section": "text",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "guidance",
-      "title": "Guidance combines two predictions",
-      "section": "text",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "exit-training",
-      "title": "Exit check: what is known during training?",
-      "section": "text",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "exit-reverse",
-      "title": "Exit check: reconstruct one reverse step",
-      "section": "text",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "five-model-questions",
-      "title": "Four lectures, four connected questions",
-      "section": "text",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "optional-posterior",
-      "title": "Optional: the tractable training posterior",
-      "section": "reverse",
+      "id": "river",
+      "title": "One pixel, a thousand steps: the density flows",
+      "section": "optional",
       "builds": 2,
       "optional": true
     },
     {
-      "id": "optional-mean-check",
-      "title": "Optional: two forms of the same reverse mean",
-      "section": "reverse",
+      "id": "shortcut-q",
+      "title": "Do we need a 1,000-step loop for one noisy example?",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "pixel-prior",
+      "title": "One pixel: paper or ink",
+      "section": "optional",
       "builds": 2,
       "optional": true
     },
     {
-      "id": "optional-display",
-      "title": "Optional: image display is not model arithmetic",
-      "section": "forward",
+      "id": "pixel-bayes",
+      "title": "We see x₂₅₀ = 0.38. Was the pixel ink?",
+      "section": "optional",
+      "builds": 4,
+      "optional": true
+    },
+    {
+      "id": "inkpaper",
+      "title": "Move t and x_t: the posterior and the best guess",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "big-jump",
+      "title": "From pure noise straight back to the pixel: two spikes",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "why-gaussian",
+      "title": "Why: a narrow likelihood times a smooth prior",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "know-x0",
+      "title": "If we knew the clean image, the step back would be exact",
+      "section": "optional",
       "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "posterior-1",
+      "title": "Bayes with three Gaussians",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "posterior-2",
+      "title": "Complete the square: the mean and the width",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "guess-x0",
+      "title": "We do not have x₀ when generating, so guess it",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "mean-eps",
+      "title": "Substitute: the mean in terms of the noise",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "total-noise",
+      "title": "ε is all the noise since x₀, not the last step’s",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "average",
+      "title": "The same noisy value can come from different noises",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "coordinate",
+      "title": "One pixel alone gives a grey; all 784 together give a 3",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "step-image",
+      "title": "The same step on an image, at t = 600",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "tweedie",
+      "title": "The noise predictor is a score estimator",
+      "section": "optional",
+      "builds": 4,
+      "optional": true
+    },
+    {
+      "id": "map-2x2",
+      "title": "Four ways to run the same trained network",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "vae-map",
+      "title": "Diffusion is a VAE with a fixed encoder",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "elbo-simple",
+      "title": "Its ELBO is a weighted noise error",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "elbo-chain",
+      "title": "The same bound as Lecture 1",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "elbo-flip",
+      "title": "Turn each forward step around, given x₀",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "elbo-terms",
+      "title": "Three kinds of term; the middle ones are the training loss",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "kl-gauss",
+      "title": "Lecture 1’s formula: two Gaussians of the same width",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "kl-mse",
+      "title": "Write both means with noise: the KL is a squared noise error",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "lsimple",
+      "title": "Drop the weights: the simple loss we trained in Part 3",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "ideal",
+      "title": "The best possible denoiser only copies its training set",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "copy-2d",
+      "title": "In 2-D: the perfect denoiser copies, a network fills in",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "cg",
+      "title": "Classifier guidance: Bayes’ rule on scores",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "cfg-bayes",
+      "title": "Why guidance works: the classifier cancels out",
+      "section": "optional",
+      "builds": 4,
+      "optional": true
+    },
+    {
+      "id": "opt-sde",
+      "title": "The continuous view: a stochastic differential equation",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-targets",
+      "title": "Other targets: x₀, v and flow matching",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-sds",
+      "title": "A frozen diffusion model as a critic: score distillation",
+      "section": "optional",
+      "builds": 1,
       "optional": true
     }
   ],
-  "totalStates": 126
+  "totalStates": 246
 }

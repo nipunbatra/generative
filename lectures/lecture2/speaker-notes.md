@@ -380,7 +380,7 @@ Planned main route: 145 minutes. Timing includes student responses and the speci
 
 **Expected:** (½, ½). For (0, 1): (1/(1 + e), e/(1 + e)) ≈ (0.27, 0.73).
 
-**Point here:** Lecture 1 used the same trick for σ (section 3.2).
+**Point here:** Lecture 1 used the same trick for σ when it fitted q by gradient descent.
 
 **Transition:** Now the loop: one line per piece of the formula.
 
@@ -572,7 +572,7 @@ Planned main route: 145 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** What do we need instead of independent bells?
 
-**Expected:** A covariance between pixels: like the 2 × 2 covariances of Lecture 1 (section 3.3), now 784 × 784.
+**Expected:** A covariance between pixels: like the 2 × 2 covariances in Lecture 1, now 784 × 784.
 
 **Transition:** Second try: one Gaussian with a full covariance.
 
@@ -1316,7 +1316,7 @@ Planned main route: 145 minutes. Timing includes student responses and the speci
 
 **Expected:** KL(q ‖ p(z)) between two Gaussians has a formula; KL(q ‖ p(z | x)) needs the intractable posterior. Maximising the ELBO shrinks it anyway.
 
-**Point here:** This is Lecture 1, section 4.1, with θ → z and 𝒟 → one image x.
+**Point here:** This is Lecture 1’s ELBO derivation, with θ → z and 𝒟 → one image x.
 
 **Transition:** Write the ELBO in terms of the network.
 

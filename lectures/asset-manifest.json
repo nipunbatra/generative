@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-21T10:34:04.099Z",
+  "created": "2026-10-21T10:40:23.282Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -34,38 +34,38 @@
     },
     {
       "path": "index.html",
-      "bytes": 5294,
-      "sha256": "912716eb534d734f69f9c2d171d3f3f54f55e08f3aea2f2447c799430a241558"
+      "bytes": 5273,
+      "sha256": "8ebe0e1a1cc5c778bbdd16e839317343b6ce8701e82053822c62fe3420585637"
     },
     {
       "path": "lecture1/README.md",
-      "bytes": 7231,
-      "sha256": "cb9d827e3f91c848251ec66b2e3159553a706cc2301716d20724783203aae4f4"
+      "bytes": 7384,
+      "sha256": "280c279621e4cc1eaa98f905669d15fd127fa714fe23266dd8a9bd6d08ae826f"
     },
     {
       "path": "lecture1/content.js",
-      "bytes": 213399,
-      "sha256": "5f2fde20821613968f870522eaa5bc6de6e13471134e6a5b0b71c2f01df744e9"
+      "bytes": 216535,
+      "sha256": "bb737c189b496097200ac12ffdfdd8bb5a5821c9a386aab7097f364d69a1f776"
     },
     {
       "path": "lecture1/data/notebook-anchors.json",
-      "bytes": 1299,
-      "sha256": "eb7210fb00c91ba078c449fc25ce708300780392dc221f7d3a0bfe063498f4bf"
+      "bytes": 1303,
+      "sha256": "9999b359677e06d5d0c0e9e3343fb63c602165051218079de51356df713c5bec"
     },
     {
       "path": "lecture1/data/science.json",
-      "bytes": 2554038,
-      "sha256": "8ee0aff0d4ed917ae32f2ae5b7adcca7c650bcea6f059dd9476b21adf2fe8d5b"
+      "bytes": 2551022,
+      "sha256": "72132dce4ed395ab859242120da4b4c3a384a712b860d205b9bc5783bddcc44d"
     },
     {
       "path": "lecture1/exports/all-builds.pdf",
-      "bytes": 5744021,
-      "sha256": "147ecfdc84da7650ee69612a4b573819c354926d3b3c00ea3b8b3e4f686d831f"
+      "bytes": 5732178,
+      "sha256": "3c83e3e8854a6b378603d33f33ba0339ee0e579c0de58d802334306d935cb192"
     },
     {
       "path": "lecture1/exports/completed.pdf",
-      "bytes": 3479693,
-      "sha256": "9db8d8955e1999a888783ce6ea16a41c4c2ec0e7a710ae5b58f448bbf30343ce"
+      "bytes": 3462638,
+      "sha256": "46a21959fa21dd6ee19b85fb5258d6e7c6c1610634512d81986f2d61aa5eb78f"
     },
     {
       "path": "lecture1/figures/bnn-evidence-1d.png",
@@ -75,7 +75,7 @@
     {
       "path": "lecture1/figures/bnn-evidence-1d.svg",
       "bytes": 12323,
-      "sha256": "4f1f9434cd092bdb8a736e2f85d3ab4d6bcc019f09d915e23e59692e2232c9d4"
+      "sha256": "69ec73e6c5ece934ab63cee61e2c5415e28cb1077c41653577fe159b448fd1b1"
     },
     {
       "path": "lecture1/figures/bnn-evidence-mc.png",
@@ -85,7 +85,7 @@
     {
       "path": "lecture1/figures/bnn-evidence-mc.svg",
       "bytes": 26005,
-      "sha256": "eb20bd7fbc42a6209efd15494f8eae25c8b0ec28a94cba52aa2c9795ce5d5625"
+      "sha256": "458d349b6253037455747c015a3ed74687d4ebc108ce50346e7be85d5065aed6"
     },
     {
       "path": "lecture1/figures/bnn-posterior-predictive.png",
@@ -95,7 +95,7 @@
     {
       "path": "lecture1/figures/bnn-posterior-predictive.svg",
       "bytes": 78235,
-      "sha256": "467d2d558b905d5780e5da2472e2268259dde931c80c57adfca89df6d4099359"
+      "sha256": "b6c008a1ef74f5e21c0e4fae6b6ca91f7827d9c344a11e1c51ea5c2043513886"
     },
     {
       "path": "lecture1/figures/bnn-prior-and-fits.png",
@@ -105,7 +105,7 @@
     {
       "path": "lecture1/figures/bnn-prior-and-fits.svg",
       "bytes": 83994,
-      "sha256": "306c04b84519678dfe6f67a3f44b8d0b9046a4830bbe5376225fda302c6a6497"
+      "sha256": "537dd235f6d8b7d2fb9f1fac87d0428f5edde9770a8825984e61183d7102f3a7"
     },
     {
       "path": "lecture1/figures/bnn-prior-predictive.png",
@@ -115,7 +115,7 @@
     {
       "path": "lecture1/figures/bnn-prior-predictive.svg",
       "bytes": 77528,
-      "sha256": "b39bd8ea90b3598b3f245a16ed3aa184fd87db7e677730df1816e38fec5d3305"
+      "sha256": "376aa32626ea182d57c3df653e5b4ae1db384857d8db178d0f5f61789318e9d3"
     },
     {
       "path": "lecture1/figures/bnn-vi-families.png",
@@ -125,7 +125,7 @@
     {
       "path": "lecture1/figures/bnn-vi-families.svg",
       "bytes": 51433,
-      "sha256": "feade505634245bcb570dbbdc1b6d1aff32d8643878e4f51d7448cd6b2398aba"
+      "sha256": "bedd8f7f3f81274645e70eea330b523b59ee6dfe045c3ac188f184d60aebf0e4"
     },
     {
       "path": "lecture1/figures/bnn-vi-vs-hmc.png",
@@ -135,7 +135,7 @@
     {
       "path": "lecture1/figures/bnn-vi-vs-hmc.svg",
       "bytes": 30172,
-      "sha256": "e624914ae82f82bff62d1c22cf9c35a5b5d2c4dc8b2afb801cfdf73edb9258c5"
+      "sha256": "4faea4dfc0cd9f8360f7a9d2f3b209b827682ea75f6d768abea815e2ff1c37d4"
     },
     {
       "path": "lecture1/figures/coin-fit.png",
@@ -145,7 +145,7 @@
     {
       "path": "lecture1/figures/coin-fit.svg",
       "bytes": 24806,
-      "sha256": "67a93b7212abe2e2ed73fad4a097a5d2f2e4fd9c3f57e203107e452024f3c905"
+      "sha256": "a7c438f42b4f1ac4a9507c251ec7d8d1661f39e366c7ae889275a9c6591f006c"
     },
     {
       "path": "lecture1/figures/coin-noisy-objective.png",
@@ -155,7 +155,7 @@
     {
       "path": "lecture1/figures/coin-noisy-objective.svg",
       "bytes": 28454,
-      "sha256": "ffe1300964f3f39bb30cec56d87f9155027b54b5f4e19162e2b884856e6b1c0a"
+      "sha256": "27d00ee1185439b496f89b8cfdc1cd7d42eb244eed3fa53902a8e3ac0326d7d7"
     },
     {
       "path": "lecture1/figures/cov-families-fit.png",
@@ -165,7 +165,7 @@
     {
       "path": "lecture1/figures/cov-families-fit.svg",
       "bytes": 50167,
-      "sha256": "91cb498733ec5932c4f32223654b4fb29cd54f3b069f6ed733f89280aebd4615"
+      "sha256": "2433b706ef86b5655efb8dda323d05136a13ff4ae2cb53cc15214d00053c29a5"
     },
     {
       "path": "lecture1/figures/distillation.png",
@@ -175,7 +175,7 @@
     {
       "path": "lecture1/figures/distillation.svg",
       "bytes": 82298,
-      "sha256": "aa00ae0a9098097ee46f5273232c7bbd6140272fe1b08d6687e9f4ccf5c7ed70"
+      "sha256": "3219801566079096a1b7395bfb785afc4c2db21ba06a953b724a9a077db79397"
     },
     {
       "path": "lecture1/figures/entropy.png",
@@ -185,7 +185,7 @@
     {
       "path": "lecture1/figures/entropy.svg",
       "bytes": 56330,
-      "sha256": "1c80fb2c50f4be6eba087ffaee288a1d1eb7b068f9c113cf454f5852242fefec"
+      "sha256": "aa7bf060ff0724bb482d61960a7725c75cc250cbc44b182e7965f2ba5ca649c4"
     },
     {
       "path": "lecture1/figures/forward-reverse.png",
@@ -195,7 +195,7 @@
     {
       "path": "lecture1/figures/forward-reverse.svg",
       "bytes": 54564,
-      "sha256": "51b43b323d1e7a87298b4182af98aca8bba7bb267f24b8ef888403b624f7b1a8"
+      "sha256": "b6968c9029f6c4c84acb22d5032e693e90c8aa935cb777f4f3a63cebe9eb8d6b"
     },
     {
       "path": "lecture1/figures/gaussian-candidates.png",
@@ -205,7 +205,7 @@
     {
       "path": "lecture1/figures/gaussian-candidates.svg",
       "bytes": 16557,
-      "sha256": "ed4e426bee60fab3d4505a10cf49ae0f40a26fb9275e592cdc5b95d0feb0eab3"
+      "sha256": "9b88e2e614bf118e1013c966645eaa3f607e2d699e1730148beeb06609855b4e"
     },
     {
       "path": "lecture1/figures/gaussian-fit.png",
@@ -215,7 +215,7 @@
     {
       "path": "lecture1/figures/gaussian-fit.svg",
       "bytes": 27525,
-      "sha256": "66753fd1638953aee02ca2c50324bcb7fa7ad9c9c6a3f030ed15bafdf1fa442c"
+      "sha256": "edde6c135cedd3c57ea0f46eda6bb4d0d658ed4e9b3b8a416088771606eca66d"
     },
     {
       "path": "lecture1/figures/gaussian-olive.png",
@@ -225,7 +225,7 @@
     {
       "path": "lecture1/figures/gaussian-olive.svg",
       "bytes": 38948,
-      "sha256": "434a1917ecca0349bcfa23357f0355abb06c8fa991d20cfed95c0a909f130793"
+      "sha256": "1ef5f57298a02eeb72660e9ab62b0b7b8b1e797a887f04629ee4d45423fb30cb"
     },
     {
       "path": "lecture1/figures/grades-sampling.png",
@@ -235,7 +235,7 @@
     {
       "path": "lecture1/figures/grades-sampling.svg",
       "bytes": 48750,
-      "sha256": "17a2c5f239f358b6cdbb998fd41433a6b4dd5c60e2ee0ca854615c6797a7546e"
+      "sha256": "63fb398a9ffe9cacf65d19b5da4f4d9ecb93b44f28cb8e6598863bfc1d737da4"
     },
     {
       "path": "lecture1/figures/kl-grid.png",
@@ -245,7 +245,7 @@
     {
       "path": "lecture1/figures/kl-grid.svg",
       "bytes": 409291,
-      "sha256": "5816f74b1741b1863acc295370baf910a01252e93b139311ec6faf952205d755"
+      "sha256": "336f27f505bc979bd25ae70a78d4d50bb6b16d79caf744c64187a9e44518a003"
     },
     {
       "path": "lecture1/figures/kl-intuition.png",
@@ -255,7 +255,7 @@
     {
       "path": "lecture1/figures/kl-intuition.svg",
       "bytes": 18544,
-      "sha256": "a56352a732877764b195fd0e58c0092bed0554b03decfef194416e399738ab81"
+      "sha256": "7366a50adc49097121cbc90ddcac99ed4f1b25b9a264107ae101ed9357d45481"
     },
     {
       "path": "lecture1/figures/mc-variability.png",
@@ -265,7 +265,7 @@
     {
       "path": "lecture1/figures/mc-variability.svg",
       "bytes": 32301,
-      "sha256": "0fc5a24ed160cf0664cd7ce1610a7f1b4e9d0c550383c27e46118437e7401cb1"
+      "sha256": "7da6d328ea046f96109cab7174cac0ea8d77e1326e1f0a5891d36f6e0aeb2d69"
     },
     {
       "path": "lecture1/figures/mixture-candidates.png",
@@ -275,7 +275,7 @@
     {
       "path": "lecture1/figures/mixture-candidates.svg",
       "bytes": 15047,
-      "sha256": "95cc785a9d43473eaabf7ae30f54c069fb6af5d80c3504997ebc95979be60b3b"
+      "sha256": "2de7ebf8b67c5970dd80275f30162ca3ade603739bb854c7ddfbd15f8915f86d"
     },
     {
       "path": "lecture1/figures/mixture-fit.png",
@@ -285,7 +285,7 @@
     {
       "path": "lecture1/figures/mixture-fit.svg",
       "bytes": 22590,
-      "sha256": "26f4c914af6521376286f11da9e4c62fdaf94c206f11417f54d1ce443746730b"
+      "sha256": "699725632028019e5787ac7ea53e268ded570b031597daf08ef2fe5b5c568631"
     },
     {
       "path": "lecture1/figures/mixture-sampling.png",
@@ -295,7 +295,7 @@
     {
       "path": "lecture1/figures/mixture-sampling.svg",
       "bytes": 34444,
-      "sha256": "4526d92b6292080f5e4896b3c23d6c07c6e150eebce9b9f47f2a50b87f2c960e"
+      "sha256": "9a24612473893409438489b7a0aaf8ee14ad5bf567be7842a955ed9524f68593"
     },
     {
       "path": "lecture1/figures/provenance.json",
@@ -310,7 +310,7 @@
     {
       "path": "lecture1/figures/surprise-curve.svg",
       "bytes": 14114,
-      "sha256": "1ead3585db069d392d786c42b6137aa0cc8d0911d807e9109dec4cd818daa7ed"
+      "sha256": "082af467eccc6922491ac76ed6095b2ed86aab284fe8db94556e46f197be48a0"
     },
     {
       "path": "lecture1/figures/three-ways.png",
@@ -320,7 +320,7 @@
     {
       "path": "lecture1/figures/three-ways.svg",
       "bytes": 60625,
-      "sha256": "4b20cb46d926f000d655088318f6a95e512be7b7ebb7aea293ab21b869e23076"
+      "sha256": "164ae42ba5c6927b5864e238500db4ba52c03a727ce1a7ee5f62f1a32934350a"
     },
     {
       "path": "lecture1/figures/weather-sampling.png",
@@ -330,22 +330,22 @@
     {
       "path": "lecture1/figures/weather-sampling.svg",
       "bytes": 50093,
-      "sha256": "5ce82687d8ffa446e131f8bd95a788cc6ab30ef6438520c9af1a16c60d2560b4"
+      "sha256": "efce60d4a360b9c16839e600906e4087b872eda5db6b2f027869a9077982210c"
     },
     {
       "path": "lecture1/index.html",
       "bytes": 1598,
-      "sha256": "a50107ab4902832b598ab23100f63e54df0e46b3e6a7112e9dbc5c4d1a0a9ea6"
+      "sha256": "4fc3577905bd609e6d5487fe484889342f6a879f3326436335dc1434f2da8710"
     },
     {
       "path": "lecture1/lecture1-variational-inference.ipynb",
-      "bytes": 1936591,
-      "sha256": "2d1a783779ae22c8ea7a0fdec3aea129c6ab3f6cd2f2de87aa590c9f9875bdba"
+      "bytes": 1933620,
+      "sha256": "e0eb709f87d34ff96ba991aca847ce03508b7dc399335ac0af1b59eb60a62b75"
     },
     {
       "path": "lecture1/manifest.json",
-      "bytes": 25509,
-      "sha256": "309a428cb15ccf36b49c311cda2b59f77f526de8815cb273ac708938cfa09895"
+      "bytes": 25818,
+      "sha256": "0906ad437311221d097f648dc3a73d296ec55dc10baea2621a4fbfbeb6f60660"
     },
     {
       "path": "lecture1/math.mjs",
@@ -354,13 +354,13 @@
     },
     {
       "path": "lecture1/scripts/build_notebook.py",
-      "bytes": 120239,
-      "sha256": "bc12782772c2cf67611c6dbb51a102e386cbf6b25935c7ed58f85bc44b4a6e78"
+      "bytes": 119055,
+      "sha256": "17de92657d27e430c731d9e47113f32ce181c9cf720fd2449f8f70ab9bd10404"
     },
     {
       "path": "lecture1/scripts/check-science.mjs",
-      "bytes": 21286,
-      "sha256": "42e76171418eec01a5b5bdb78c00f756b084ff3842e7176977aedd6190d2bce6"
+      "bytes": 20414,
+      "sha256": "b8f9f9a1c73e4523402e4e41fdf9dd7cb47f7c0bcb76fa22e209a6944b9caeae"
     },
     {
       "path": "lecture1/scripts/check-svg-bounds.mjs",
@@ -369,18 +369,18 @@
     },
     {
       "path": "lecture1/scripts/run_science.py",
-      "bytes": 78470,
-      "sha256": "6f969aa87d99e27574d672123549716fc77f5697329ee775d13ebecfacdd9699"
+      "bytes": 76663,
+      "sha256": "ca7524e3d26414d8cd46153b401d18d3a1209f87bb4db6a3ec8d38b3ce233b8a"
     },
     {
       "path": "lecture1/speaker-notes.md",
-      "bytes": 80669,
-      "sha256": "26430cbe9b16043199cb0ed57e540f6644998ac238dd83e39f8eefecf9a0588e"
+      "bytes": 79963,
+      "sha256": "084962b312151affbd1205b2cfaa5d9278183e7dd508670f12d29f44181d2a83"
     },
     {
       "path": "lecture1/widgets.js",
-      "bytes": 58532,
-      "sha256": "338ed9206e14a12af421dc8839bddf070274130170b8828d6bd4b9ed132b38b7"
+      "bytes": 56197,
+      "sha256": "98e562b2ae11bd62fe2a7f671154cff60ef8b830afd272ceb8508c9626828103"
     },
     {
       "path": "lecture2/.gitignore",
@@ -504,8 +504,8 @@
     },
     {
       "path": "lecture2/content.js",
-      "bytes": 184130,
-      "sha256": "d873b1edd21b5dc3223e1a247ae6e6ee0fd437bf85183163dd3eb93956621db3"
+      "bytes": 184150,
+      "sha256": "e80cced70f1f3805ca18dded8ce52f81613c956a24f7b5993a1317b03196d3dc"
     },
     {
       "path": "lecture2/data/digits.json",
@@ -534,18 +534,18 @@
     },
     {
       "path": "lecture2/exports/all-builds.pdf",
-      "bytes": 16541997,
-      "sha256": "bb16397b11a2fe2487c4f7e7fe9d60bb57a49aaf90c4a7c83c8f879c67c4a8d0"
+      "bytes": 16541451,
+      "sha256": "5a88d60142ae42dbac3841e7399386910600a511fc656550c17d988ba315ba38"
     },
     {
       "path": "lecture2/exports/completed.pdf",
-      "bytes": 8588770,
-      "sha256": "add14bcc55637649c8c870997f59e3f658617e730395f9759f6c08a690418e4f"
+      "bytes": 8588287,
+      "sha256": "2c17cd053500aaddd2cbd6b694874dce5094ad0f8e5bb31b48a8eb63d35b4bd4"
     },
     {
       "path": "lecture2/index.html",
       "bytes": 1559,
-      "sha256": "c52e5ffbc43cfc2f9a368a0fd1661023f5a86b0cc8f67fb6bb8692192bd56c08"
+      "sha256": "e158fbb7c35eb3cf3636dfeef12401dd9ca0b4137b2e2c130e7b22e79b410dc9"
     },
     {
       "path": "lecture2/lecture2-generative-models.ipynb",
@@ -589,8 +589,8 @@
     },
     {
       "path": "lecture2/speaker-notes.md",
-      "bytes": 67969,
-      "sha256": "c25057ae1a6f6755cae8df9f3e86b425b2bcf582d01333966503b7c8c2257cae"
+      "bytes": 67985,
+      "sha256": "f6557431fd36d32496033e22954c23af90b12529c8c12c2b6cccc44585387cfa"
     },
     {
       "path": "lecture2/widgets.js",
@@ -755,7 +755,7 @@
     {
       "path": "lecture3/index.html",
       "bytes": 1516,
-      "sha256": "e6e1d432ff579610fb9e6db54cc16b559ea5c0c54ba078b14ecc9e3a75ef9fee"
+      "sha256": "407e218a27a549e378b30669297bb98b42944d9b28a86b66076a9feaa06e25d3"
     },
     {
       "path": "lecture3/lecture3.ipynb",
@@ -799,213 +799,713 @@
     },
     {
       "path": "lecture4/README.md",
-      "bytes": 5365,
-      "sha256": "486091f7a3933624163dd1e3305f56db94b6a0622f4ee742cd1e3e829e723636"
+      "bytes": 7957,
+      "sha256": "9ecdc8b3cbebd8be728cd63be755968c502a64cd102dbdeff36c3eaf39024c2c"
     },
     {
       "path": "lecture4/content.js",
-      "bytes": 35188,
-      "sha256": "749b37b11449885efa0342ee0d49e5d1be7d6f1c5fe6cc679e9e41f6a4a40550"
+      "bytes": 174127,
+      "sha256": "1c4a5ba2d1b0500d70d846beaf3330fa725c433b828f17ff2714499722c6d2a5"
     },
     {
-      "path": "lecture4/data/fixtures.json",
-      "bytes": 4274,
-      "sha256": "6a1b2ee4d32b3e412457357481ec7aecde477eda5c1a85b8b7af5d339f3c46c4"
+      "path": "lecture4/data/extra.json",
+      "bytes": 2926,
+      "sha256": "e2be7c0cdc4968e69eddf26cc4134549f58a8b2afc6d4c14e00b3761841045cc"
     },
     {
-      "path": "lecture4/data/mnist-subset.npz",
-      "bytes": 104019,
-      "sha256": "2cd5365b46589878864ec8da9acd7d9eac048f6a78f44349ed19ea1a654aa4ff"
+      "path": "lecture4/data/mnist.json",
+      "bytes": 15239,
+      "sha256": "7487cf2fcac24e12539ae56d2d80388657cf30245b8bdda152078ca5cfc6b259"
     },
     {
-      "path": "lecture4/data/original-training.json",
-      "bytes": 3015,
-      "sha256": "0b44c662a69cc52ab4299ce8bb5edc39ce8dba7e313cdce82c3f86f6abdd11e4"
+      "path": "lecture4/data/notebook-anchors.json",
+      "bytes": 672,
+      "sha256": "e1c59b94d97d6316d75b71caab36a978f16ed2a96b62b3618d490432389621ee"
     },
     {
-      "path": "lecture4/data/original-trajectory.npz",
-      "bytes": 356379,
-      "sha256": "5bd544bafe769db78c84ffb166c694d3524d06c2436b20a9e39d52915a2f1bf7"
+      "path": "lecture4/data/pixel.json",
+      "bytes": 3841,
+      "sha256": "09ca271e223ec335ac59296d9c7e994ad71adcf6eeee177e6f51fa7d17aa1420"
     },
     {
-      "path": "lecture4/data/replayed-trajectory.npz",
-      "bytes": 201899,
-      "sha256": "aaf1a2708539d65eec767b890cf9d24864408e284b27f1d7e5d2b94c1e1210fa"
+      "path": "lecture4/data/toy-weights.json",
+      "bytes": 681825,
+      "sha256": "2e54e27cf45f7e97790e3d8160042a415590ae28589123b0f62cdaf76a439cf2"
     },
     {
-      "path": "lecture4/data/reuse-manifest.json",
-      "bytes": 932,
-      "sha256": "bd48c5c31d86197e9e3ba544adf8af1e0bf0a4b71ea2abd4ae2c0d3006f16517"
+      "path": "lecture4/data/toy.json",
+      "bytes": 854754,
+      "sha256": "83e064baa61c5e58004f0666759ef06288c164a4f7a7c00a8e02fb4bdb5dff3a"
     },
     {
       "path": "lecture4/exports/all-builds.pdf",
-      "bytes": 1100003,
-      "sha256": "c482cafe06ae2c35189f3e907c41b9360feefa6f8d97e6b8185cda38b2a2f5d6"
+      "bytes": 14444429,
+      "sha256": "435b6a13dad5b063cbd673201c0ea74d0fc9eb4cbfd7d40c9a9d1d648f2c0b6c"
     },
     {
       "path": "lecture4/exports/completed.pdf",
-      "bytes": 780898,
-      "sha256": "5fea04b948f81599db01f7bed60a559f94b2bfa71db1866e299f5133b3f8e95c"
+      "bytes": 9127918,
+      "sha256": "7a2d0e56f6b17ec8aafaf77c4ef6fb0c1e03061708cd52058a9a258264b4eee5"
     },
     {
-      "path": "lecture4/figures/clean-estimate.png",
-      "bytes": 1741,
-      "sha256": "f8ff0999a8dc642f5eda363d58c028bac313e8daea78d95e15d5ec416adb20d8"
+      "path": "lecture4/figures/film/cat-guess-x0.jpg",
+      "bytes": 40407,
+      "sha256": "647e852c811d33006a0e1547cec79c13e3938a18afea56af5a11535d3f4bcb86"
     },
     {
-      "path": "lecture4/figures/forward-1.png",
-      "bytes": 1206,
-      "sha256": "ab9cd27fe07e4f5431985ad9dfa83129c2271fb74d25fe2248bc22ed874b5390"
+      "path": "lecture4/figures/film/cat-guess-xt.jpg",
+      "bytes": 131481,
+      "sha256": "f5090c6f6c76c0976d34a7c8a0d4c6555b75fc4bfafe6900fc77b0b6721abcfd"
     },
     {
-      "path": "lecture4/figures/forward-100.png",
-      "bytes": 1931,
-      "sha256": "60180ca346b93f860ee86c4dc9546cb87c0dadde7cf7a3889d5df5c245f8cfd3"
+      "path": "lecture4/figures/film/cat-jump.jpg",
+      "bytes": 448165,
+      "sha256": "6e74a760c6efb95f517b51cd724d35c8f9d07f47f6fecef7640940a143bc337e"
     },
     {
-      "path": "lecture4/figures/forward-1000.png",
-      "bytes": 2040,
-      "sha256": "ca2b32f126ce6cf115dc02161d7d7cef530eb974ca4fcbe01a8c1ac0d6526bd5"
+      "path": "lecture4/figures/film/cat-run0-x0.jpg",
+      "bytes": 88134,
+      "sha256": "e7cddee867aba0194b5bb473cc56255b430e4a8dff4f5952c9fc262ee2c45cbc"
     },
     {
-      "path": "lecture4/figures/forward-350.png",
-      "bytes": 2061,
-      "sha256": "56a8b20dcea7c12ae6c9ed5b840836dcb730f29c30a7376ce6d23b0aadd9ba6f"
+      "path": "lecture4/figures/film/cat-run0-xt.jpg",
+      "bytes": 288093,
+      "sha256": "e68f6b836241dc3f1cff59a19574d8904766b56622f14ddefb817c632e641155"
     },
     {
-      "path": "lecture4/figures/forward-600.png",
-      "bytes": 2068,
-      "sha256": "67012a953335a0934f5c72c6dce1b4adaff71b30d18580a3653624d529cc74fa"
+      "path": "lecture4/figures/film/cat-run1-x0.jpg",
+      "bytes": 85177,
+      "sha256": "086d054882406765e89826e0a5aee0fac3ba7a72f996c51b8a54a37e4d80271c"
     },
     {
-      "path": "lecture4/figures/forward-7.png",
-      "bytes": 1538,
-      "sha256": "b9ff748f146e2c65245713270d83d32f8568310abe574b9f3b436bb31eac597c"
+      "path": "lecture4/figures/film/cat-run1-xt.jpg",
+      "bytes": 284695,
+      "sha256": "4c6c10c3dc7fe6798cdf2f7b956158884ea0f389373a3c5b3af4275f35e68bd3"
     },
     {
-      "path": "lecture4/figures/forward-920.png",
-      "bytes": 2032,
-      "sha256": "f696027baab66c2528cc70c2456b8e3fa94a551e6055014930aa32bf673dd5d3"
+      "path": "lecture4/figures/film/cat-run2-x0.jpg",
+      "bytes": 79341,
+      "sha256": "597b4394b6c67d2558fa4cbb91f675ba3f010ab422f8d2b0f385262019f2b04b"
     },
     {
-      "path": "lecture4/figures/held-seven.png",
-      "bytes": 785,
-      "sha256": "d7a66b8f20c4408a2dcf3531bf2a5e889b2bd38016e4d73c2e50b3458bd2f668"
+      "path": "lecture4/figures/film/cat-run2-xt.jpg",
+      "bytes": 281729,
+      "sha256": "79e9efe55e14da2116dfd665eab28dab3a088ecd07756a63fd876214a3efccf5"
     },
     {
-      "path": "lecture4/figures/injected-noise.png",
-      "bytes": 2107,
-      "sha256": "a761af4c3126cbaf221386a3e6e707f4f03d935d92811e9ef2afd264187e96a7"
+      "path": "lecture4/figures/film/cat-run3-x0.jpg",
+      "bytes": 90777,
+      "sha256": "2aca85b28573213e0dadbe079a140abd0f181058d528edef55482ba5e3c0728b"
     },
     {
-      "path": "lecture4/figures/predicted-noise.png",
-      "bytes": 2110,
-      "sha256": "6cb212ea2bb32880708141de6e0d88ac27a69deed1b82117a9a6ee7023bd8830"
+      "path": "lecture4/figures/film/cat-run3-xt.jpg",
+      "bytes": 286071,
+      "sha256": "e0da0346030337cec9353b380fde795d152a0099d9e7648135df85b249a03dc3"
     },
     {
-      "path": "lecture4/figures/reverse-0.png",
-      "bytes": 1454,
-      "sha256": "6bdbe4a1942e19ae2909bcd634fafa15410b52dac5a8a924463e4535f3a512bb"
+      "path": "lecture4/figures/film/cat-run4-x0.jpg",
+      "bytes": 89133,
+      "sha256": "791238a5d4fe554760e7b1da8432b12e66c921418f5daa906769919dc27ec38d"
     },
     {
-      "path": "lecture4/figures/reverse-1.png",
-      "bytes": 1585,
-      "sha256": "6c59922b9d5b4d557eba7368e9cc7b181a9179830933e9d879e9928330d07667"
+      "path": "lecture4/figures/film/cat-run4-xt.jpg",
+      "bytes": 288117,
+      "sha256": "30f9cd326f27c2a9e6fcb108488236e1e016921cda662242196a7d87a3e224a7"
     },
     {
-      "path": "lecture4/figures/reverse-1000.png",
-      "bytes": 2046,
-      "sha256": "beef8ce657a0fb811dbce9a9ec635184d8ff25ac173fd9d528eacab77d5e7aed"
+      "path": "lecture4/figures/film/cat-run5-x0.jpg",
+      "bytes": 96395,
+      "sha256": "871777d122c7e5104f48401a6ee752166eba59e1087bde56fa50fff12547f2a9"
     },
     {
-      "path": "lecture4/figures/reverse-200.png",
-      "bytes": 2029,
-      "sha256": "2b3f3903c4ac8b993035e516c85f92f91d26967e837aac8a194c46ba6e21d977"
+      "path": "lecture4/figures/film/cat-run5-xt.jpg",
+      "bytes": 289440,
+      "sha256": "7ead690304571c8f09522d25abe3de31cad7f3600638209fb651a1efa7c11352"
     },
     {
-      "path": "lecture4/figures/reverse-400.png",
-      "bytes": 2047,
-      "sha256": "75136c2d1d2d428c56cda48be39541675346784f4da9748f2924028f952dd4aa"
+      "path": "lecture4/figures/film/cat-run6-x0.jpg",
+      "bytes": 48833,
+      "sha256": "b4a52072f219414f01a74fdd706f2721875c6c16a72858e42eafaed924f17dd8"
     },
     {
-      "path": "lecture4/figures/reverse-50.png",
-      "bytes": 1896,
-      "sha256": "ef5bc095a18b463d352f212fdae30f54b9aa4ec2ffd08adb698e85adff7a103f"
+      "path": "lecture4/figures/film/cat-run6-xt.jpg",
+      "bytes": 271515,
+      "sha256": "f6fe97efd6a006710a5f2f7caf03474585118c985a867d1e4dfc20ed391c6919"
     },
     {
-      "path": "lecture4/figures/reverse-600.png",
-      "bytes": 2073,
-      "sha256": "cdf05cfed650d9085bc4667e51eb2e6970a4c934c07e3834c0f0907ba3d38193"
+      "path": "lecture4/figures/film/cat-run7-x0.jpg",
+      "bytes": 102511,
+      "sha256": "dfa930341a712f1268f6acaf172f9284ac1289e0aa118ba0796673baa7629fa0"
     },
     {
-      "path": "lecture4/figures/reverse-800.png",
-      "bytes": 2089,
-      "sha256": "4938e305fc37dcc749aae655d4c185fa3307b9a4505331bd3ebb17e10e785c54"
+      "path": "lecture4/figures/film/cat-run7-xt.jpg",
+      "bytes": 288872,
+      "sha256": "ea7a88ac7241344c3692b590de55cb7a0361d4d020587e7cd07ab8233192f374"
     },
     {
-      "path": "lecture4/figures/samples-replayed.png",
-      "bytes": 13563,
-      "sha256": "3a6012557c06407f6abd0ae2da97ca0b4fe06d23cb67ca9820c8c20531456a65"
+      "path": "lecture4/figures/film/chelsea.jpg",
+      "bytes": 22569,
+      "sha256": "c375f03405cd613b32ad43b6046cec48ecde8c58d06ee12675d17270c3159488"
     },
     {
-      "path": "lecture4/figures/schedule.svg",
-      "bytes": 9592,
-      "sha256": "d5ce145c00989c2fc8a5dfefe73b2c0c379601b4af478d536f1c829985f1a458"
+      "path": "lecture4/figures/film/eps.jpg",
+      "bytes": 51509,
+      "sha256": "ae7fac546733f85713cfe54bbb101623cf446cb909566c03e3824c0a8b2b39d4"
     },
     {
-      "path": "lecture4/figures/training-history.svg",
-      "bytes": 8139,
-      "sha256": "44866316babb5a1a248c513283a9d73a1aea4b11bf4418be784d236aa866cd75"
+      "path": "lecture4/figures/film/pair-epshat-0400.jpg",
+      "bytes": 51379,
+      "sha256": "e3094be6bf5118ac4b4a7e152516b6e3ce9c1a0139adb3dfae73484be95a30dc"
+    },
+    {
+      "path": "lecture4/figures/film/pair-err-0400.jpg",
+      "bytes": 9096,
+      "sha256": "a11f1bfb90c25a5c743a601a0dff6cf38c08eb9addb01f16578d660b9db28012"
+    },
+    {
+      "path": "lecture4/figures/film/pair-x0hat-0400.jpg",
+      "bytes": 11788,
+      "sha256": "9daccb8fc1cb12ca21dc5977deae6a869ca6cfe182fa464c98a723911a437bca"
+    },
+    {
+      "path": "lecture4/figures/film/pair-xt-0400.jpg",
+      "bytes": 59411,
+      "sha256": "5dd0ed2f8abcc273dcb2f3d4b72f8541cc44dd34de503eef6765d737fff9254f"
+    },
+    {
+      "path": "lecture4/figures/film/provenance.json",
+      "bytes": 24378,
+      "sha256": "636c163996bed439635c1f8af6137c7f4ad23534db3abde121240ad06fd5e076"
+    },
+    {
+      "path": "lecture4/figures/film/sd/attn.jpg",
+      "bytes": 60705,
+      "sha256": "8f948522ebe610ee43a97441a32db21230a85adfbc2773c098015e4746c3805b"
+    },
+    {
+      "path": "lecture4/figures/film/sd/fox.jpg",
+      "bytes": 15909,
+      "sha256": "76caf586a0696558028937b2d41dfb50215d50743eb96d69c6a4f7eec612a736"
+    },
+    {
+      "path": "lecture4/figures/film/sd/guidance.jpg",
+      "bytes": 84593,
+      "sha256": "b908755f4d71f3f81a7d2eb4c8d981d066862b5e3dffe1bd3c0b840277a0b34e"
+    },
+    {
+      "path": "lecture4/figures/film/sd/lcm.jpg",
+      "bytes": 58231,
+      "sha256": "1c64f12b19e7cec529cf30bc268836c7dcc6971c32a5f40692cac38ae6f50552"
+    },
+    {
+      "path": "lecture4/figures/film/sd/run0-xt.jpg",
+      "bytes": 453253,
+      "sha256": "4acdcfc74b5633995299404b66bfde38e9bc98ace48f3fdfb6bf3ac0888a0504"
+    },
+    {
+      "path": "lecture4/figures/film/sd/run1-xt.jpg",
+      "bytes": 520188,
+      "sha256": "dae246742d9f3c4cc4ef5d91c8569b4eb3f7bd6b1d45bed5abf3f10b54207e44"
+    },
+    {
+      "path": "lecture4/figures/film/sd/run2-xt.jpg",
+      "bytes": 483655,
+      "sha256": "1f1f5b843f73ca82b2cabdf5762016c8fbff5492d110683cb0013611627b7e19"
+    },
+    {
+      "path": "lecture4/figures/film/sd/run4-xt.jpg",
+      "bytes": 496508,
+      "sha256": "f88d349858f2c0acc2003243adf26a0444c7c1eb20adf00d915a34362a3e72d3"
+    },
+    {
+      "path": "lecture4/figures/film/sd/run5-xt.jpg",
+      "bytes": 480298,
+      "sha256": "94f4bf8932dcb51a2204d74ae74d974c63f582e14234416cf825270d300574b6"
+    },
+    {
+      "path": "lecture4/figures/film/sd/steps.jpg",
+      "bytes": 128039,
+      "sha256": "82c5931e17ddce15b5cfa2fe6197a864af1d837ad03bc890d4b86733fa18def2"
+    },
+    {
+      "path": "lecture4/figures/film/sd/vae-latent.png",
+      "bytes": 20663,
+      "sha256": "883ed8f97d3990501702e81044f12ca58fbb3a1faa48998eb53143e507c2946c"
+    },
+    {
+      "path": "lecture4/figures/film/sd/vae.jpg",
+      "bytes": 31615,
+      "sha256": "5a5d90df2533bc0ed2170061f8ddd83514c16e5f363d928470900bd954865967"
+    },
+    {
+      "path": "lecture4/figures/gan-samples.png",
+      "bytes": 11447,
+      "sha256": "4bf9ae11fa18e0cfaad35272eca53bc8fde5d975d873ccaed81493679fd37e5c"
+    },
+    {
+      "path": "lecture4/figures/illustrations/ink-drop.jpg",
+      "bytes": 76261,
+      "sha256": "a672094b86fbed4d09475b92a1a232c0085ef4ff38bd03644f74d94badb9c1f8"
+    },
+    {
+      "path": "lecture4/figures/mnist-ae-3.png",
+      "bytes": 646,
+      "sha256": "5a9e984dd012f68c4e1745e49030d6cf4bdff91cda7096754f50f2a2a200dd98"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-0.png",
+      "bytes": 3869,
+      "sha256": "9d4233a59db65a1264dc2c9f2fb617bf8b1c0f3231a8aa2a3f5b92ddb25e1a14"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-1.png",
+      "bytes": 4371,
+      "sha256": "7718b6b0e80ce3529e2a43952a206e32c96f50e4a99a7f4af18b193ff96c23f4"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-2.png",
+      "bytes": 4487,
+      "sha256": "5369336511efd966d060cbf86ffb51b22a3cae46d1f9695ad3ff5e958c1850b4"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-3.png",
+      "bytes": 4624,
+      "sha256": "8ccbdf8bde7174d3ede54a20d222718887421ba6df15a44f94ac6418cdff16e2"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-5.png",
+      "bytes": 4778,
+      "sha256": "417e188ef27085e87b56a713c50dd0f4ef37ae441544f3bc6f12f689eb04e328"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-7.png",
+      "bytes": 4798,
+      "sha256": "dbb4a91db0e02be3b9711dbc544ae499049276355ca32b1bc89af2d19633b334"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-digits-cols.png",
+      "bytes": 16708,
+      "sha256": "d139eebde3f5887ca9f8d5a0e427b647a49d65e05e65844cc091557064103817"
+    },
+    {
+      "path": "lecture4/figures/mnist-cfg-digits.png",
+      "bytes": 15770,
+      "sha256": "aae657ae19fde6e05888077bd9f45741e047f109e3fcfe9fa5cb894956d980bf"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-1.png",
+      "bytes": 4978,
+      "sha256": "1c3d9fd63d5a776115c1f86f5aeec0cf9d66091406fb9d7a7a2c86cfd2814d8b"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-10.png",
+      "bytes": 2949,
+      "sha256": "e3baf70378a830e391ba5d3e623c594e8a739a37f216abb6a9417102fb9a35cb"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-100.png",
+      "bytes": 2796,
+      "sha256": "51586dca5169e2e0d7476cf200c940226c260f62708eb007d9c0778cbcbc508e"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-1000.png",
+      "bytes": 2769,
+      "sha256": "7edc6e27b0b3ed3a6f53d83c3c5a260b509d8af3b307ca4aeebab39b81969ec8"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-2.png",
+      "bytes": 4870,
+      "sha256": "649ad5c210557e23060e18453bdc26451db0fe014a6052f1d278a737b254f7f6"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-20.png",
+      "bytes": 2846,
+      "sha256": "c13563085e50ff705ca3490f53d908b6d286b16b1d77adca67837a4809595845"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-5.png",
+      "bytes": 3571,
+      "sha256": "bbd9ad1d9f5ec684be53ec9d414ef99f9290f93566d116a6ba7c66a96cac2ebe"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-50.png",
+      "bytes": 2806,
+      "sha256": "b47d6b15bef44718cdb38656e4a84e6f61cba4f87a60ca22ce2c2d0064cd3831"
+    },
+    {
+      "path": "lecture4/figures/mnist-ddim-ddpm.png",
+      "bytes": 2425,
+      "sha256": "8ec1b979b14b8c3f4d5d9e38970100dfba7470b3b9a263d0ea9b960f921cce75"
+    },
+    {
+      "path": "lecture4/figures/mnist-eps.png",
+      "bytes": 880,
+      "sha256": "9071b8550cc420bf6cc6ae0cbf6fd890c41e4703f43ef63751945b4a42f5b36b"
+    },
+    {
+      "path": "lecture4/figures/mnist-film-alone.png",
+      "bytes": 5495,
+      "sha256": "1c92a27165842c26419b8efe494e32602c6dcebd7b334071431a66b3f0a75101"
+    },
+    {
+      "path": "lecture4/figures/mnist-film-eps.png",
+      "bytes": 9097,
+      "sha256": "e295277193e7a55eefdcb4a754f4ffdf982a0c1050fa0947b61598392979ae4e"
+    },
+    {
+      "path": "lecture4/figures/mnist-film-x0.png",
+      "bytes": 6855,
+      "sha256": "42675cf8d844b831d26ef2e1eca264d6de408a061bbc5905b54c722c7599a6a2"
+    },
+    {
+      "path": "lecture4/figures/mnist-film-xt.png",
+      "bytes": 10780,
+      "sha256": "d9efbd0c8955be3795e1a68fd6bdb40679277e65f93a734802cb79f9a9b3886f"
+    },
+    {
+      "path": "lecture4/figures/mnist-ideal-nearest.png",
+      "bytes": 1224,
+      "sha256": "d3b78c60b23b0f16ab391987fd071b127601a7865a404655de59e9b8174a03d2"
+    },
+    {
+      "path": "lecture4/figures/mnist-ideal-samples.png",
+      "bytes": 1224,
+      "sha256": "d3b78c60b23b0f16ab391987fd071b127601a7865a404655de59e9b8174a03d2"
+    },
+    {
+      "path": "lecture4/figures/mnist-latent-3.png",
+      "bytes": 462,
+      "sha256": "65d49687c3b92ebc1b5b63eb4bc9e1e6dcbb6f9df05c4529f27f1b30253c8bdc"
+    },
+    {
+      "path": "lecture4/figures/mnist-latent-samples.png",
+      "bytes": 4083,
+      "sha256": "3f853c6063ff8e356214855d27a097daf68aa8f7443bde2642cc9edbb738ed8e"
+    },
+    {
+      "path": "lecture4/figures/mnist-mean-3.png",
+      "bytes": 477,
+      "sha256": "6e7ea34dc441efd31c764a46adce5d653edd293c3a1dff68fa5feb7a654ddb72"
+    },
+    {
+      "path": "lecture4/figures/mnist-mean-all.png",
+      "bytes": 440,
+      "sha256": "4b6386b9418deba02a516fa3ac94321ef3bfb643b1753282874917772a5018a4"
+    },
+    {
+      "path": "lecture4/figures/mnist-mean-only.png",
+      "bytes": 1037,
+      "sha256": "8108ad2dfa1c0af7300452924fcde8d75e510391da9fb82ac09a17a90ee267a4"
+    },
+    {
+      "path": "lecture4/figures/mnist-onestep-eps.png",
+      "bytes": 880,
+      "sha256": "8884b009e8fe8d51b8f1706d549fdd5a30f0ade136ef7183fb89886dea76c031"
+    },
+    {
+      "path": "lecture4/figures/mnist-onestep-mean.png",
+      "bytes": 857,
+      "sha256": "0180ab27da256ef2784a50cdc849187555cba7268dc0582d930474bfcea84c36"
+    },
+    {
+      "path": "lecture4/figures/mnist-onestep-next.png",
+      "bytes": 834,
+      "sha256": "b19a337eb21433a46f3293afe06d9d5bd9a9c0842af9ee822678310f3230b803"
+    },
+    {
+      "path": "lecture4/figures/mnist-onestep-x0.png",
+      "bytes": 569,
+      "sha256": "9423486fd0d514298cd6c4efb135960c7c467672b25155c1fffedee5eb23f318"
+    },
+    {
+      "path": "lecture4/figures/mnist-onestep-xt.png",
+      "bytes": 853,
+      "sha256": "c7bdcf22c747cceda0040908991a46b81523b2d4727784b799dc8b1844ecb88a"
+    },
+    {
+      "path": "lecture4/figures/mnist-onestep.png",
+      "bytes": 3585,
+      "sha256": "1f566a4556806f3c66233d84e9c13adb44153b9110dff6ed08b9a49f67c79852"
+    },
+    {
+      "path": "lecture4/figures/mnist-ours-8.png",
+      "bytes": 2170,
+      "sha256": "2e37ee6ea0a6879121841e02a3be80c565816dd0853f57a9b122e2071b19e878"
+    },
+    {
+      "path": "lecture4/figures/mnist-ours-nearest.png",
+      "bytes": 1800,
+      "sha256": "f9babb50cd9f644bab35a2e30995eeef6560e0b50610f8909a4e38f5b6946066"
+    },
+    {
+      "path": "lecture4/figures/mnist-samples-16.png",
+      "bytes": 5499,
+      "sha256": "aaaba8e9e48ec5030be619975900af3ce1113bc63db2200ab3d247b0af45ebb8"
+    },
+    {
+      "path": "lecture4/figures/mnist-samples-64.png",
+      "bytes": 14763,
+      "sha256": "ee9e94b0ed7e5a3c988190a2065872b9c429101147077d63ef87c11f4ab2ce82"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-0-x.png",
+      "bytes": 13308,
+      "sha256": "b32ec945b7a0116d3af5636fd1589d8e32536dff4bfd265049dd68e1e333bfd7"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-0-x0.png",
+      "bytes": 9625,
+      "sha256": "22990efaea9c369d958aeae0abe89d5d464b6e8799a087d6f6bdd889d175c5ff"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-1-x.png",
+      "bytes": 14062,
+      "sha256": "7081a9d0e8ec3a31b9739fb75570cd00ab0ac88a1893c91487b8749ec9318043"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-1-x0.png",
+      "bytes": 10355,
+      "sha256": "a2baf1a4cf9e2934d1b7d1e610873c43ec61b10ffe708a1d5cc6946d8704cc68"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-2-x.png",
+      "bytes": 14081,
+      "sha256": "52176ac4d22a267e59fd224da064aa0bd9457153e80755b4d5d04cd37e4859f2"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-2-x0.png",
+      "bytes": 10391,
+      "sha256": "6fdaa3063111831688c1a098c162f3858e6b45840df5cc3eb9eac6fac3bcc6ff"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-3-x.png",
+      "bytes": 13589,
+      "sha256": "b4bd29f3b6a0c57b049659054b6bec307c38c8ec50ac7ee0338c443ba29691b1"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-3-x0.png",
+      "bytes": 10714,
+      "sha256": "70873dfeb131656b5eaaf2dd1c549edbc1cc130c1160d00daded6a9e94ef8b79"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-4-x.png",
+      "bytes": 13978,
+      "sha256": "6fdbdd2527ec9df2ae853dc5a9c91e920e37dd9450bde53aa0dd82fd6de1924c"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-4-x0.png",
+      "bytes": 11021,
+      "sha256": "c7a9ab73b55d6f0afbc90300d9003b0980035f6cb12e9e042d2ede85b33ef6c8"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-5-x.png",
+      "bytes": 13872,
+      "sha256": "cae9e64a638fc1429a31a61187a43f2a603ec1df6b38b883f4d1ee2590239e9e"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-5-x0.png",
+      "bytes": 9918,
+      "sha256": "e175c74384b4206dd3017d64f43e7e59bea42f8eb316d9ef925c62b89c108eda"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-6-x.png",
+      "bytes": 14052,
+      "sha256": "4d9b81387d8b0a8244ef2b468e316aa38f0f779006cf86b235e5b6e2ae75acdb"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-6-x0.png",
+      "bytes": 10348,
+      "sha256": "b6b97865195a6b207aefe57b6cdaeb0928f5ab5aaa3e7e649e48deff017caf6f"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-7-x.png",
+      "bytes": 13719,
+      "sha256": "0c02ece31fa3b1d2b085626280da785ff6c56ad9c6a338ec9534949248378def"
+    },
+    {
+      "path": "lecture4/figures/mnist-traj-7-x0.png",
+      "bytes": 9703,
+      "sha256": "d26c3c31fe2f291a21d52f5d314afdeb3ca9bd1500b9aefffcc387b5ca51456e"
+    },
+    {
+      "path": "lecture4/figures/mnist-with-noise.png",
+      "bytes": 3932,
+      "sha256": "be4141550214f69a604e13f8db2fa68fbe3dedc6d4724aa59393ddbef0af87aa"
+    },
+    {
+      "path": "lecture4/figures/provenance.json",
+      "bytes": 2353,
+      "sha256": "c0712f5cebf92b9672432246a24314313e06053ba71b262a1f6a9aae369c4bb8"
+    },
+    {
+      "path": "lecture4/figures/pub/pub-cherries-1.png",
+      "bytes": 25202,
+      "sha256": "35301bc673c684601466b308e949de5c5efd68a81f6908db9b547ec327cd4c02"
+    },
+    {
+      "path": "lecture4/figures/pub/pub-control-2.png",
+      "bytes": 114023,
+      "sha256": "6eb99b7e11a20d40b0e8f85a1fc63ee4e50250422ba002f437e6687ee272b462"
+    },
+    {
+      "path": "lecture4/figures/pub/pub-dreambooth-acropolis.png",
+      "bytes": 224676,
+      "sha256": "afeb468ca3537573ad68d240820d01b3255d883389de7ed1a794bbd56fa95758"
+    },
+    {
+      "path": "lecture4/figures/pub/pub-repaint-1.png",
+      "bytes": 50957,
+      "sha256": "b77557943cc4751c1dd210a1b69d9dacd42c292e4aac8e2aa295b17f8c7bd1e6"
+    },
+    {
+      "path": "lecture4/figures/pub/pub-sdedit-out1.png",
+      "bytes": 15972,
+      "sha256": "3fd9779934c8b43c2ff562e0005903f12735cf4d96b6a421285c59516ffd52af"
+    },
+    {
+      "path": "lecture4/figures/pub/pub-sr3-face-3.png",
+      "bytes": 125621,
+      "sha256": "6f8016c5ad860eeaaf2a96d89c8c58e8a398ae70c968756c435a500641c7b008"
+    },
+    {
+      "path": "lecture4/figures/vae-samples.png",
+      "bytes": 3929,
+      "sha256": "a6fb1ab81772891138576e92eba8c10e2fa45c9b63628a846ea8c4578dff5c6c"
     },
     {
       "path": "lecture4/index.html",
-      "bytes": 1516,
-      "sha256": "7f0176655fbc7ddaa7bf2adf554ed25dc787621f0b7b27c33831a048840f2222"
+      "bytes": 1598,
+      "sha256": "90a9ca6a247bc59ef33bc1925f6652899abf2e4cd7e4322a59462fc3c58a3b9e"
     },
     {
-      "path": "lecture4/lecture4.ipynb",
-      "bytes": 103084,
-      "sha256": "348fe93d4579ea1567ff60ab3e460130ac0385657fba4f5e8a284a968d6e8379"
+      "path": "lecture4/lecture4-diffusion.ipynb",
+      "bytes": 1001796,
+      "sha256": "15fb69b4bf5aa0bb6cb314bb62724a3729b495d1d4e69ac1b793a005b64b74a7"
     },
     {
       "path": "lecture4/manifest.json",
-      "bytes": 11884,
-      "sha256": "a803be811d416e16e61085b6d581f9610203b039784e050c250b42425b3244bc"
+      "bytes": 18682,
+      "sha256": "df6e0df5a2a2e3c11e0e7ceb1139b9517ad356d9e7e63710040f570c14b706e2"
     },
     {
-      "path": "lecture4/models/ddpm.pt",
-      "bytes": 3274809,
-      "sha256": "9dc135888ec05bceebc35fcf6b7c6b5ee1823f2cea7c0b2ec32906368b793585"
+      "path": "lecture4/math.mjs",
+      "bytes": 5096,
+      "sha256": "35fd33a5d5c967f58b56c002552e6fe370feecdb8d4e88f3f4b96bf9a61d33ca"
     },
     {
-      "path": "lecture4/scripts/ddpm.py",
-      "bytes": 3910,
-      "sha256": "3bee8378814605d441178e17be1080ad14962c2a46a5bf1ebc9bd6b93857cac1"
+      "path": "lecture4/models/mnist-ae.pt",
+      "bytes": 814473,
+      "sha256": "ed39f68c1299498f254cb75dba66f399a73c5014975b30be196a800156bfba7f"
     },
     {
-      "path": "lecture4/scripts/execute_notebook.py",
-      "bytes": 1020,
-      "sha256": "71691712d0806f8b84baa9b59fc7180baf02ce884ead2b8cea4b2f1c67415361"
+      "path": "lecture4/models/mnist-cfg.pt",
+      "bytes": 3281000,
+      "sha256": "1b553495fee0aab265d56484121e49e8d546ccb01d4959830124e417175628fe"
     },
     {
-      "path": "lecture4/scripts/make_notebook.py",
-      "bytes": 11778,
-      "sha256": "5c2ef56611efc8c60eedf8b4490681055dba64cab9b76de7d9cf6944f737f3ce"
+      "path": "lecture4/models/mnist-classifier.pt",
+      "bytes": 1690379,
+      "sha256": "69659c180e8787fe614c08d4ceb91ca0063d2b635c9ad380799f1b0f1d61ace2"
     },
     {
-      "path": "lecture4/scripts/prepare.py",
-      "bytes": 8872,
-      "sha256": "3c32941e0a9a19f0a781460f6d4575534431c0a1983ca97953eecb0cbc9e7ab9"
+      "path": "lecture4/models/mnist-ddpm.pt",
+      "bytes": 3278005,
+      "sha256": "1d71a1be7bf663b854a507b55ccf0bf12a9801569bd39f118d146bdb0d702972"
     },
     {
-      "path": "lecture4/scripts/train.py",
-      "bytes": 2461,
-      "sha256": "763237b91ba551e554199dc20df7b9cb646b54047a3ece9c748b2ef9b824f50f"
+      "path": "lecture4/models/mnist-latent.pt",
+      "bytes": 4949665,
+      "sha256": "8acbf584aa92cc8d2becc113c83eb149a4d10e97105ab8f4a7f0ad1ee8dbeadf"
+    },
+    {
+      "path": "lecture4/models/provenance.json",
+      "bytes": 2093,
+      "sha256": "53f9aa15a7eae1816525e67279af38f6c72c6e5b3204469215d5d5ef13688db1"
+    },
+    {
+      "path": "lecture4/models/toy-cond-log.json",
+      "bytes": 16161,
+      "sha256": "844aa78d52b2f09424f4327f3fa963af1cb95b497a3e1ffcaf67350e3796a5c1"
+    },
+    {
+      "path": "lecture4/models/toy-cond.pt",
+      "bytes": 148571,
+      "sha256": "df96385c7a9c219abd997a48efef35fdf66dd0893fb92dec78c64f2ce6a0981e"
+    },
+    {
+      "path": "lecture4/models/toy-uncond-log.json",
+      "bytes": 10775,
+      "sha256": "b23e88ee419e29a10874ef7ef045e4eb0da454936a801af1ea0833076d5ab3b2"
+    },
+    {
+      "path": "lecture4/models/toy-uncond.pt",
+      "bytes": 1452405,
+      "sha256": "0554b058738daca83357ba7c52b253435aa17f5c2be5f9e50a2f16872bc13e31"
+    },
+    {
+      "path": "lecture4/scripts/assets.py",
+      "bytes": 4277,
+      "sha256": "f365b1efd81192ad9eba500d34b49706c7c38d78b89fe8693ce4926734bb3bb4"
+    },
+    {
+      "path": "lecture4/scripts/build_notebook.py",
+      "bytes": 39921,
+      "sha256": "613c46b224b6dbc44c99469571ebe634c12c1b6db9f9d0fbaa0dda6410bcc861"
+    },
+    {
+      "path": "lecture4/scripts/check-science.mjs",
+      "bytes": 2971,
+      "sha256": "3f213119faa8a1419aefde4c8c1e6c43fec6dbc7fd20486198e84dbfcb143e12"
+    },
+    {
+      "path": "lecture4/scripts/diffusion.py",
+      "bytes": 9498,
+      "sha256": "a5a3a999ccd4937ceb96625169c3d1fbcd1d7ec998673a4a09ff90fd6ac16460"
+    },
+    {
+      "path": "lecture4/scripts/extra.py",
+      "bytes": 1264,
+      "sha256": "7e5e41578bd3f1f0fb7302c0855a657a4ac02d52a95e6d7c6c18000b863c1657"
+    },
+    {
+      "path": "lecture4/scripts/film_assets.py",
+      "bytes": 8303,
+      "sha256": "968df674a9f21353a428b23b86e172a7a31813d9117d601d68b08ed23cab4c5c"
+    },
+    {
+      "path": "lecture4/scripts/mnist.py",
+      "bytes": 13940,
+      "sha256": "69460da5adf7242763e5fa24643af35b66ef03a06ce08154f779eebda80037dd"
+    },
+    {
+      "path": "lecture4/scripts/pixel.py",
+      "bytes": 7431,
+      "sha256": "ed01d77402cf7de32780c482020e002cb6e3e56cb34f508243d4af586612efb7"
+    },
+    {
+      "path": "lecture4/scripts/shots.mjs",
+      "bytes": 1804,
+      "sha256": "6edee306aeecbf3b1b626144f02388c0e5a037b61437d58de59f087e38dc3c8c"
+    },
+    {
+      "path": "lecture4/scripts/toy2d.py",
+      "bytes": 6071,
+      "sha256": "aff45fc3869f25940c0a3a43a15753e121ae7e6528ea98ec14383837ac4839f1"
+    },
+    {
+      "path": "lecture4/scripts/toy_record.py",
+      "bytes": 8168,
+      "sha256": "563631fd579c88514a058afe7dd6050eebb31908a455c021f018a91da8fc7401"
     },
     {
       "path": "lecture4/speaker-notes.md",
-      "bytes": 39005,
-      "sha256": "2061c50dfb59f2699fcc103da01af4f34ac22c803c42e506112d41391e411192"
+      "bytes": 75506,
+      "sha256": "df22880f40226f9f7a56819c658425affe115081b4d5bd51c1f49c823bc25e78"
+    },
+    {
+      "path": "lecture4/widgets.js",
+      "bytes": 68952,
+      "sha256": "5240125b5461efe6d003bf9fd89bd4be2d1ae7463504fe5ddb16a09421a80efe"
     },
     {
       "path": "notebook-verification.json",
@@ -1094,8 +1594,8 @@
     },
     {
       "path": "shared/deck.css",
-      "bytes": 11048,
-      "sha256": "e960b54f73a3576ff43babb0e2cb74be696b82e6e6682df82333b169da61a309"
+      "bytes": 11151,
+      "sha256": "50b0c1aad68fece9f58c8fd8f7cc1190e710a2cc7186220f780d4b6d20651784"
     },
     {
       "path": "shared/deck.js",

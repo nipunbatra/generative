@@ -21,7 +21,7 @@ Open <http://127.0.0.1:8767/>. Serve the files over HTTP: the modules load numer
 - Each lecture has editable `content.js`, figures, numerical data, a notebook, speaker notes, and two PDFs under `exports/`.
 - `completed.pdf` has one completed page per slide; `all-builds.pdf` includes every authored reveal. Both include labelled optional extensions at the end.
 
-The recommended main routes are 140, 145, 60 and 70 minutes; Lectures 1 and 2 each fill two class sessions. These include student responses and demonstrations; they are not classroom-rehearsed timings. See [the teaching guide](TEACHING-GUIDE.md) for shorter routes and demonstration choices.
+The recommended main routes are 140, 145, 60 and 138 minutes; Lectures 1, 2 and 4 each fill two class sessions. These include student responses and demonstrations; they are not classroom-rehearsed timings. See [the teaching guide](TEACHING-GUIDE.md) for shorter routes and demonstration choices.
 
 ## Run a notebook
 

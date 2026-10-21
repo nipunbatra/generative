@@ -60,7 +60,7 @@ const dimg=(key,i,x,y,s,extra='')=>`<image href="${digitSrc(key,i)}" x="${x}" y=
 const sub=(base,s_)=>`${base}<tspan baseline-shift="sub" font-size="70%">${s_}</tspan>`;
 const takeaway=s=>`<div class="takeaway"><b>Takeaway.</b> ${s}</div>`;
 /** A link back to the Lecture 1 slide where an idea was taught. */
-const l1=(id,sec,text)=>`<a class="l1-link" href="../lecture1/#${id}/1" target="_blank" rel="noopener">↗ Lecture 1, ${sec}: ${text}</a>`;
+const l1=(id,sec,text)=>`<a class="l1-link" href="../lecture1/#${id}/1" target="_blank" rel="noopener">↗ Lecture 1: ${text}</a>`;
 const rows=(...r)=>`<div class="digit-rows">${r.map(([lab,html])=>`<div class="row-label">${lab}</div><div>${html}</div>`).join('')}</div>`;
 const F=d.faithful,M=d.mnist,A=d.ae,G=d.gen,V=d.vae,SW=A.sweep,BETA=V.beta;
 const WATCH_LABELS=['0','1','2','3','4','5','6','7'];
@@ -387,7 +387,7 @@ S('mix-params','fit','The numbers to learn, each kept valid',{builds:3,
  lines:['The centres can be any number, so the loop changes them directly. Start them near the middle: 65 and 75 minutes.','A width must stay positive. Learn its log instead: whatever log_s becomes, σ = exp(log_s) is positive.','The two shares must be positive and add to 1. Learn any two numbers w and pass them through softmax.'],
  ask:['What could go wrong if the loop changed σ directly?','Why is exp(log_s) always positive?','What does softmax give for w = (0, 0)? For w = (0, 1)?'],
  expected:['One large step could make σ negative, and a negative width is meaningless.','exp of any real number is positive.','(½, ½). For (0, 1): (1/(1 + e), e/(1 + e)) ≈ (0.27, 0.73).'],
- point:'Lecture 1 used the same trick for σ (section 3.2).',
+ point:'Lecture 1 used the same trick for σ when it fitted q by gradient descent.',
  transition:'Now the loop: one line per piece of the formula.',source:FAITHFUL_SRC});
 S('mix-code','fit','The loop: one line for each piece of the formula',{builds:2,
  body:act(2,`<div class="code-sm">${code(`def bell(x, m, s):                    # N(x; m, s²), the formula from 2.2
@@ -518,7 +518,7 @@ S('neighbours','pca','Why it fails: neighbouring pixels move together',{builds:2
   stack(`<div class="tsm">${table(['pixel pair','correlation'],[['centre and its right neighbour',f(M.corr_pairs.right,2)],['two to the right',f(M.corr_pairs.two_right,2)],['five to the right',f(M.corr_pairs.five_right,2)],['a far corner pixel',f(M.corr_pairs.far,2)]])}</div>`,at(2,takeaway('Pixels are not independent. Modelling every pair directly needs a 784 × 784 covariance: over 300,000 numbers. We need a smarter idea.'))),'1fr 1.2fr')),
  lines:['If the centre pixel is inked, its neighbours usually are too: correlation 0.78 with the pixel to its right.','Strokes are made of neighbouring pixels that move together. A model of digits must capture that.'],
  ask:['Why is the correlation five pixels away negative?','What do we need instead of independent bells?'],
- expected:['A stroke through the centre often means white space a little further out.','A covariance between pixels: like the 2 × 2 covariances of Lecture 1 (section 3.3), now 784 × 784.'],
+ expected:['A stroke through the centre often means white space a little further out.','A covariance between pixels: like the 2 × 2 covariances in Lecture 1, now 784 × 784.'],
  transition:'Second try: one Gaussian with a full covariance.',source:'Correlations over the 60,000 MNIST training digits. '+OURS});
 chap('3.3');
 S('threes-map','pca','Digits vary in only a few ways',{builds:3,
@@ -989,7 +989,7 @@ S('road1-penalty','vae','Road 1: keep the clouds near N(0, I) with a KL penalty'
  body:act(6,stack(`<div class="eq-sm">${eq(R`L=\underbrace{\lVert x-f_\theta(z)\rVert^2}_{\text{rebuild the image}}\;+\;\underbrace{\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,I)\big)}_{\text{keep the cloud near }\N(0,I)}`)}</div>`,
   at(2,`<div class="eq-sm">${eq(R`\KL=\tfrac12\sum_{k}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)`)}</div>`),at(2,l1('diag-kl','2.8','KL between diagonal Gaussians')),
   at(3,takeaway('Without the penalty, the encoder could shrink the clouds to points and spread them far apart: an autoencoder again. The KL stops both.')))),
- lines:['Loss = squared reconstruction error + a penalty: the KL divergence from each image’s cloud to N(0, I).','The KL between two Gaussians has a formula (Lecture 1, section 2.8): it is zero only when μ = 0 and σ = 1.','The penalty pulls every cloud towards N(0, I) (wish 1) and stops it from shrinking to a point (wish 2).'],
+ lines:['Loss = squared reconstruction error + a penalty: the KL divergence from each image’s cloud to N(0, I).','The KL between two Gaussians has a formula (Lecture 1, closed-form KL): it is zero only when μ = 0 and σ = 1.','The penalty pulls every cloud towards N(0, I) (wish 1) and stops it from shrinking to a point (wish 2).'],
  ask:['What is the KL for a cloud with μ = 0, σ = 1?','What does the KL do to a code with μ = 5?','What does the −log σ² term do as σ → 0?'],
  expected:['Zero: the cloud is exactly N(0, I).','About 12.5 per number: a strong pull back towards the origin.','It grows without limit: tiny clouds are penalised.'],
  point:'Road 1 looks like a hand-made penalty, like ridge regression (squared error + λ‖w‖²). Road 2 shows that this exact sum comes out of maximum likelihood, with a weight fixed by σ.',
@@ -1070,7 +1070,7 @@ function inferPgm(stage){
  if(stage>=2)g+=`<path d="M404,140 Q310,190 222,142" fill="none" stroke="${palette.q}" stroke-width="2.5" stroke-dasharray="8 6"/><path d="M216,138 l14,0 l-6,12 z" fill="${palette.q}"/>`+label(310,206,`${sub('q','φ')}(z | x): encoder`,{fill:palette.q,size:18,anchor:'middle',weight:650});
  g+=label(630,46,'the posterior p(z | x): which codes made this x?',{fill:palette.ink,size:19,weight:650})+label(630,74,'Bayes’ rule needs p(x) = ∫ p(x | z) p(z) dz: no formula',{size:17});
  if(stage>=2)g+=label(630,124,'the variational part: approximate it with',{fill:palette.q,size:19,weight:650})+label(630,152,`${sub('q','φ')}(z | x) = N(${sub('μ','φ')}(x), ${sub('σ','φ')}(x)²), a Gaussian whose`,{fill:palette.q,size:17})+label(630,176,'mean and spread the encoder computes from x',{fill:palette.q,size:17});
- if(stage>=3)g+=label(630,226,'fit θ and φ together by maximising the ELBO',{fill:palette.ink,size:19,weight:650})+label(630,252,'(Lecture 1, section 4.1)',{size:17});
+ if(stage>=3)g+=label(630,226,'fit θ and φ together by maximising the ELBO',{fill:palette.ink,size:19,weight:650})+label(630,252,'(Lecture 1, deriving the ELBO)',{size:17});
  return fig(W,H,g,'The VAE graphical model with the dashed inference arrow: the encoder q_φ(z | x) approximates the posterior.');
 }
 S('vae-infer','vae','The variational part: an encoder that approximates the posterior',{builds:3,
@@ -1087,7 +1087,7 @@ S('elbo-derive','vae','Road 2: where the KL comes from, for one image',{builds:3
  lines:['Road 2 chose to approximate the posterior with q. Measure how far q is from it: the KL from q to the true posterior.','Bayes’ rule: log p(z | x) = log p(x | z) + log p(z) − log p(x). The evidence log p(x) is the same for every z, so it comes out of the average.',`Rearrange: log p(x) = ELBO + a gap that is never negative. Inside the ELBO, a KL to the prior has appeared on its own: nobody added it by hand. ${l1('elbo-step1','4.1','the same derivation')}`],
  ask:['Which distribution does the expectation use?','Why can log p(x) leave the expectation?','Which KL can we compute, and which can we not?'],
  expected:['q_φ(z | x), the encoder’s Gaussian.','It does not depend on z; it is a constant inside the average over z.','KL(q ‖ p(z)) between two Gaussians has a formula; KL(q ‖ p(z | x)) needs the intractable posterior. Maximising the ELBO shrinks it anyway.'],
- point:'This is Lecture 1, section 4.1, with θ → z and 𝒟 → one image x.',
+ point:'This is Lecture 1’s ELBO derivation, with θ → z and 𝒟 → one image x.',
  transition:'Write the ELBO in terms of the network.'});
 S('elbo-meets','vae','The ELBO for one image is Road 1’s loss',{builds:3,
  body:act(6,stack(`<div class="eq-sm">${eq(R`\ELBO=\underbrace{\E_{q_\phi(z\mid x)}\big[\log p_\theta(x\mid z)\big]}_{\text{reconstruct }x}\;-\;\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,p(z)\big)}_{\text{stay near the prior}}`)}</div>`,
@@ -1121,7 +1121,7 @@ chap('6.4');
 S('vae-loss','vae','The loss for one image is the negative ELBO',{builds:3,
  body:act(6,stack(eq(R`L(\phi,\theta;x)=\underbrace{\E_{q_\phi(z\mid x)}\Big[\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2\Big]}_{\text{reconstruction}}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,\N(0,I)\big)}_{\text{stay near the prior}}`),
   at(2,eq(R`\text{reconstruction}\approx\tfrac{1}{2\sigma^2}\lVert x-f_\theta(\mu+\sigma\odot\epsilon)\rVert^2,\qquad \epsilon\sim\N(0,I)\ \text{(one draw)}`)),
-  at(3,eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(Lecture 1, section 2.8)}`)),at(3,`<div>${l1('kl-sampling','2.9','Monte Carlo estimates')}${l1('reparam','3.5','reparameterisation')}${l1('diag-kl','2.8','diagonal-Gaussian KL')}</div>`))),
+  at(3,eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(Lecture 1, closed-form KL)}`)),at(3,`<div>${l1('kl-sampling','2.9','Monte Carlo estimates')}${l1('reparam','3.5','reparameterisation')}${l1('diag-kl','2.8','diagonal-Gaussian KL')}</div>`))),
  lines:['Minus the ELBO, up to the constant 541.4 from section 6.1: an expected scaled squared error, plus a KL from q to the prior.','The expectation is estimated with one reparameterised draw per image per step.','The KL between two diagonal Gaussians has a closed form: no sampling needed.'],
  ask:['Which term pulls the codes towards N(0, I)?','Why is one draw enough?','What does the KL do to a code with μ = 5?'],
  expected:['The KL term.','Over many steps and images the noise averages out; the estimate is unbiased.','Penalises it by about 12.5: strong pressure back towards the origin.'],

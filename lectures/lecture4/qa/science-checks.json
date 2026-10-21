@@ -1,31 +1,331 @@
 {
-  "passed": true,
-  "device": "cpu",
-  "torch": "2.13.0",
-  "elapsedSeconds": 13.758878946304321,
-  "forwardMeanError": 0.00036895182184970565,
-  "forwardVarianceError": 0.0018814607725142762,
-  "reverseMeanResidual": 2.7755575615628914e-17,
-  "finalStepIndependentOfNoise": true,
-  "gradientResidual": 6.906406002649135e-12,
-  "checkpointReplay": {
-    "sha256": "9dc135888ec05bceebc35fcf6b7c6b5ee1823f2cea7c0b2ec32906368b793585",
-    "trainingSteps": 2000,
-    "trainingSeed": 667,
-    "parameters": 814145,
-    "sampleSeed": 667,
-    "sampleCount": 8,
-    "samplerSteps": 1000,
-    "replaySeconds": 13.009360790252686,
-    "maxDifferenceFromOriginalDevice": 1.8805265426635742e-05,
-    "freshFullTraining": false,
-    "dataRepresentation": "uint8/127.5\u22121",
-    "heldExample": {
-      "split": "test",
-      "index": 0,
-      "label": 7
-    },
-    "display": "images clip values to [\u22121,1] only for viewing; neither training states nor sampler states are clipped"
+ "passed": true,
+ "count": 54,
+ "failed": [],
+ "checks": [
+  {
+   "name": "alpha_bar[250]",
+   "got": 0.524085,
+   "want": 0.5241,
+   "ok": true
   },
-  "claim": "fresh maths and neural update; full sampler replay of a saved checkpoint, not new full training"
+  {
+   "name": "x_250 from the shortcut",
+   "got": 0.379005,
+   "want": 0.379,
+   "ok": true
+  },
+  {
+   "name": "P(ink | x_250)",
+   "got": 0.630106,
+   "want": 0.6301,
+   "ok": true
+  },
+  {
+   "name": "E[x0 | x_250]",
+   "got": 0.260213,
+   "want": 0.2603,
+   "ok": true
+  },
+  {
+   "name": "E[eps | x_250]",
+   "got": 0.276318,
+   "want": 0.2763,
+   "ok": true
+  },
+  {
+   "name": "score at x_250",
+   "got": -0.400539,
+   "want": -0.4005,
+   "ok": true
+  },
+  {
+   "name": "mu tilde with x0 = 1",
+   "got": 0.383639,
+   "want": 0.3836,
+   "ok": true
+  },
+  {
+   "name": "reverse mean from eps_hat",
+   "got": 0.377931,
+   "want": 0.3779,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→0: fit sd",
+   "got": 0.95375,
+   "want": 0.9538,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→0: bump width",
+   "got": 0,
+   "want": 0,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→100: fit sd",
+   "got": 0.949756,
+   "want": 0.9498,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→100: bump width",
+   "got": 0.319333,
+   "want": 0.3193,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→300: fit sd",
+   "got": 0.893434,
+   "want": 0.8934,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→300: bump width",
+   "got": 0.724706,
+   "want": 0.7247,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→450: fit sd",
+   "got": 0.617169,
+   "want": 0.6172,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→450: bump width",
+   "got": 0.600942,
+   "want": 0.6009,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→490: fit sd",
+   "got": 0.30847,
+   "want": 0.3085,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→490: bump width",
+   "got": 0.307101,
+   "want": 0.3071,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→499: fit sd",
+   "got": 0.100199,
+   "want": 0.1002,
+   "ok": true
+  },
+  {
+   "name": "reverse kernel 500→499: bump width",
+   "got": 0.100157,
+   "want": 0.1002,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=100",
+   "got": 0.04021,
+   "want": 0.0402,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=200",
+   "got": 0.438579,
+   "want": 0.4386,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=300",
+   "got": 0.352652,
+   "want": 0.3527,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=400",
+   "got": 0.179103,
+   "want": 0.1791,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=500",
+   "got": 0.071915,
+   "want": 0.0719,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=600",
+   "got": 0.023593,
+   "want": 0.0236,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=700",
+   "got": 0.006341,
+   "want": 0.0063,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=800",
+   "got": 0.001394,
+   "want": 0.0014,
+   "ok": true
+  },
+  {
+   "name": "irreducible loss t=900",
+   "got": 0.00025,
+   "want": 0.0003,
+   "ok": true
+  },
+  {
+   "name": "toy alpha_bar[1]",
+   "got": 0.9,
+   "want": 0.9,
+   "ok": true
+  },
+  {
+   "name": "toy alpha_bar[2]",
+   "got": 0.72,
+   "want": 0.72,
+   "ok": true
+  },
+  {
+   "name": "toy alpha_bar[3]",
+   "got": 0.504,
+   "want": 0.504,
+   "ok": true
+  },
+  {
+   "name": "toy alpha_bar[4]",
+   "got": 0.252,
+   "want": 0.252,
+   "ok": true
+  },
+  {
+   "name": "toy alpha_bar[5]",
+   "got": 0.0504,
+   "want": 0.0504,
+   "ok": true
+  },
+  {
+   "name": "toy x_5",
+   "got": 0.359452,
+   "want": 0.35948,
+   "ok": true
+  },
+  {
+   "name": "toy x_2 equals the two-step example",
+   "got": 0.709774,
+   "want": 0.7098,
+   "ok": true
+  },
+  {
+   "name": "uncond network x=(0,0) t=1: eps_x",
+   "got": -0.362547,
+   "want": -0.36254242062568665,
+   "ok": true
+  },
+  {
+   "name": "uncond network x=(0,0) t=1: eps_y",
+   "got": -0.295275,
+   "want": -0.2952756881713867,
+   "ok": true
+  },
+  {
+   "name": "uncond network x=(0.5,-0.5) t=250: eps_x",
+   "got": 0.526013,
+   "want": 0.5260128974914551,
+   "ok": true
+  },
+  {
+   "name": "uncond network x=(0.5,-0.5) t=250: eps_y",
+   "got": -0.459176,
+   "want": -0.4591768980026245,
+   "ok": true
+  },
+  {
+   "name": "uncond network x=(-1.2000000476837158,0.30000001192092896) t=1000: eps_x",
+   "got": -1.204036,
+   "want": -1.204039216041565,
+   "ok": true
+  },
+  {
+   "name": "uncond network x=(-1.2000000476837158,0.30000001192092896) t=1000: eps_y",
+   "got": 0.293625,
+   "want": 0.29362499713897705,
+   "ok": true
+  },
+  {
+   "name": "cond_mouth network x=(0,0) t=1: eps_x",
+   "got": 0.183888,
+   "want": 0.18388421833515167,
+   "ok": true
+  },
+  {
+   "name": "cond_mouth network x=(0,0) t=1: eps_y",
+   "got": 1.505094,
+   "want": 1.5051002502441406,
+   "ok": true
+  },
+  {
+   "name": "cond_mouth network x=(0.5,-0.5) t=250: eps_x",
+   "got": 0.640541,
+   "want": 0.6405428647994995,
+   "ok": true
+  },
+  {
+   "name": "cond_mouth network x=(0.5,-0.5) t=250: eps_y",
+   "got": -0.311635,
+   "want": -0.3116360008716583,
+   "ok": true
+  },
+  {
+   "name": "cond_mouth network x=(-1.2000000476837158,0.30000001192092896) t=1000: eps_x",
+   "got": -1.213361,
+   "want": -1.2133599519729614,
+   "ok": true
+  },
+  {
+   "name": "cond_mouth network x=(-1.2000000476837158,0.30000001192092896) t=1000: eps_y",
+   "got": 0.315899,
+   "want": 0.3158983886241913,
+   "ok": true
+  },
+  {
+   "name": "cond_none network x=(0,0) t=1: eps_x",
+   "got": 0.142991,
+   "want": 0.1430024951696396,
+   "ok": true
+  },
+  {
+   "name": "cond_none network x=(0,0) t=1: eps_y",
+   "got": -0.291274,
+   "want": -0.2912774980068207,
+   "ok": true
+  },
+  {
+   "name": "cond_none network x=(0.5,-0.5) t=250: eps_x",
+   "got": 0.524668,
+   "want": 0.5246696472167969,
+   "ok": true
+  },
+  {
+   "name": "cond_none network x=(0.5,-0.5) t=250: eps_y",
+   "got": -0.453159,
+   "want": -0.4531612694263458,
+   "ok": true
+  },
+  {
+   "name": "cond_none network x=(-1.2000000476837158,0.30000001192092896) t=1000: eps_x",
+   "got": -1.208827,
+   "want": -1.2088260650634766,
+   "ok": true
+  },
+  {
+   "name": "cond_none network x=(-1.2000000476837158,0.30000001192092896) t=1000: eps_y",
+   "got": 0.301857,
+   "want": 0.3018571436405182,
+   "ok": true
+  }
+ ]
 }

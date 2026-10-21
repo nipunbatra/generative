@@ -109,7 +109,7 @@
       "status": 200
     },
     {
-      "label": "Denoising diffusion probabilistic models",
+      "label": "Diffusion models",
       "href": "http://127.0.0.1:8791/lecture4/",
       "status": 200
     },
@@ -125,7 +125,7 @@
     },
     {
       "label": "Notebook",
-      "href": "http://127.0.0.1:8791/lecture4/lecture4.ipynb",
+      "href": "http://127.0.0.1:8791/lecture4/lecture4-diffusion.ipynb",
       "status": 200
     },
     {
