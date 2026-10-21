@@ -1,5 +1,7 @@
-import {m,eq,at,only,cols,code,image,table,flow,plot,palette as C} from '../shared/author.js';
+import {m,eq,at,only,cols,code,image,table,flow,plot,palette as C,sectionDeck} from '../shared/author.js';
 const F=await fetch(new URL('./data/fixtures.json',import.meta.url),{cache:'no-cache'}).then(r=>r.json());
+const SECTIONS=await fetch(new URL('./data/sections.json',import.meta.url),{cache:'no-cache'}).then(r=>r.json());
+const ANCHORS=new Set(await fetch(new URL('./data/notebook-anchors.json',import.meta.url),{cache:'no-cache'}).then(r=>r.json()));
 const S=F.scalar,f=(x,n=4)=>Number(x).toFixed(n),tex=String.raw;
 const p=x=>`<p class="lead">${x}</p>`,cap=x=>`<p class="caption">${x}</p>`;
 const pic=(name,alt,caption='')=>image(`figures/${name}`,alt,caption);
@@ -70,3 +72,5 @@ add('next-question','images','Can we create the training target ourselves?',p('A
 add('optional-optimal-d','failure','Optional: the ideal classifier at fixed G',eq(tex`D^*(x)=\frac{p_{\rm data}(x)}{p_{\rm data}(x)+p_G(x)}`)+at(2,eq(tex`p_G=p_{\rm data}\ \Longrightarrow\ D^*(x)=\tfrac12`)),'Under what assumptions is this ideal discriminator statement meaningful?','Unlimited classifier capacity and exact optimisation at fixed distributions; finite neural training need not reach it.','Return to measured diagnostics rather than treating the ideal as a guarantee.',{optional:true});
 add('optional-batchnorm','images','Optional: frozen parameters are not all model state',p('BatchNorm running statistics and dropout behaviour depend on training/evaluation mode.')+at(2,p('Our scalar checks have no mutable buffers. The MNIST D uses dropout and no BatchNorm.')),'Does requires_grad_(False) switch a network to evaluation mode?','No. Parameter gradients and train/eval mode are separate controls.','Make the intended training-state convention explicit in implementations.',{optional:true});
 add('optional-controls','failure','Optional: changes to the game are experiments',p('Capacity, update ratio, regularisation and architecture can change training behaviour.')+at(2,p('Change one factor, retain seeds and diagnostics, and report what the run actually shows.')),'Does one stabilised run prove a remedy always works?','No. It supports the measured configuration only.','Use the companion notebook for controlled extensions.',{optional:true});
+// Numbered parts and sections, a contents slide and a break slide per part, from data/sections.json.
+sectionDeck({meta,slides,...SECTIONS,anchors:ANCHORS});

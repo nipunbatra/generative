@@ -1,6 +1,8 @@
 # Lecture 3: generative adversarial networks
 
-A 60-minute slide-led lecture: **53 core scenes + 3 optional scenes**, with 113 authored presentation states. The route makes one discriminator update and one generator update visible before introducing the alternating game. Speaker notes and PDFs are generated from `content.js` by the series build.
+A 61-minute slide-led lecture: **60 core scenes + 3 optional scenes** (a contents slide, a break slide for each of the six parts, and 53 teaching scenes), with 120 authored presentation states. The route makes one discriminator update and one generator update visible before introducing the alternating game. Speaker notes and PDFs are generated from `content.js` by the series build.
+
+**Sections.** The deck opens with a contents slide, and each of the six parts starts with a break slide that lists its sections. Every other slide sits in a numbered section (1.1, 1.2, …) shown in its header, with a ▶ Notebook link to the cell that runs it. The table is `data/sections.json`; `python ../scripts/notebook_sections.py 3` gives the notebook the matching anchors and slide links, and `scripts/make_notebook.py` runs it after every rebuild.
 
 Open `index.html` through the local series server. Use the same reading, notes, keyboard and print controls as the other lectures. No external scripts or services are needed.
 

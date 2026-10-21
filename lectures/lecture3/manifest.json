@@ -3,43 +3,62 @@
   "number": 3,
   "title": "Generative adversarial networks",
   "subtitle": "A learned critic supplies the learning signal",
-  "minutes": 60,
+  "minutes": 61,
   "notebook": "lecture3.ipynb",
   "sections": [
     {
+      "id": "map",
+      "title": "Lecture map",
+      "minutes": 1
+    },
+    {
       "id": "signal",
-      "title": "A learning signal",
+      "title": "Part 1 · A learning signal",
       "minutes": 6
     },
     {
       "id": "discriminator",
-      "title": "One discriminator update",
+      "title": "Part 2 · One discriminator update",
       "minutes": 10
     },
     {
       "id": "generator",
-      "title": "One generator update",
+      "title": "Part 3 · One generator update",
       "minutes": 12
     },
     {
       "id": "game",
-      "title": "Alternate the players",
+      "title": "Part 4 · Alternate the players",
       "minutes": 11
     },
     {
       "id": "failure",
-      "title": "Samples, coverage and failure",
+      "title": "Part 5 · Samples, coverage and failure",
       "minutes": 11
     },
     {
       "id": "images",
-      "title": "MNIST and retrieval",
+      "title": "Part 6 · MNIST and retrieval",
       "minutes": 10
     }
   ],
-  "coreSlides": 53,
+  "coreSlides": 60,
   "optionalSlides": 3,
   "slides": [
+    {
+      "id": "contents",
+      "title": "Lecture 3 at a glance: six parts, seventeen sections",
+      "section": "map",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "part-1",
+      "title": "Part 1 · A learning signal",
+      "section": "signal",
+      "builds": 1,
+      "optional": false
+    },
     {
       "id": "start",
       "title": "Where could a generator get feedback?",
@@ -73,6 +92,13 @@
       "title": "One network proposes; one distinguishes",
       "section": "signal",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "part-2",
+      "title": "Part 2 · One discriminator update",
+      "section": "discriminator",
+      "builds": 1,
       "optional": false
     },
     {
@@ -174,6 +200,13 @@
       "optional": false
     },
     {
+      "id": "part-3",
+      "title": "Part 3 · One generator update",
+      "section": "generator",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "g-goal",
       "title": "Now let the generator ask for label 1",
       "section": "generator",
@@ -244,6 +277,13 @@
       "optional": false
     },
     {
+      "id": "part-4",
+      "title": "Part 4 · Alternate the players",
+      "section": "game",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "alternating",
       "title": "The training loop alternates two objectives",
       "section": "game",
@@ -307,6 +347,13 @@
       "optional": false
     },
     {
+      "id": "part-5",
+      "title": "Part 5 · Samples, coverage and failure",
+      "section": "failure",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "coverage",
       "title": "Count mass near each known mode",
       "section": "failure",
@@ -339,6 +386,13 @@
       "title": "Ask separate questions about the samples",
       "section": "failure",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "part-6",
+      "title": "Part 6 · MNIST and retrieval",
+      "section": "images",
+      "builds": 1,
       "optional": false
     },
     {
@@ -433,5 +487,5 @@
       "optional": true
     }
   ],
-  "totalStates": 113
+  "totalStates": 120
 }

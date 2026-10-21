@@ -1,5 +1,5 @@
 {
-  "created": "2026-10-21T10:40:23.282Z",
+  "created": "2026-10-21T10:57:39.037Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -24,18 +24,18 @@
     },
     {
       "path": "README.md",
-      "bytes": 4055,
-      "sha256": "18e8905fe90e1c6276f109af2ffac88c6d25da0d225be10497c4a88ea94c66d2"
+      "bytes": 4059,
+      "sha256": "5306c131ff4acd24ab0a53016b9862b2b5d87c3765945d96fcefe4d4d446d4d6"
     },
     {
       "path": "TEACHING-GUIDE.md",
-      "bytes": 5336,
-      "sha256": "c55a38de6efbbea53c1335cfca11ae17aa87a8f65349b89f57833d475c4591e8"
+      "bytes": 5344,
+      "sha256": "69adec20e64f638ecaa7da46b40406a15e1f5db4407174be19e77482cd614c96"
     },
     {
       "path": "index.html",
       "bytes": 5273,
-      "sha256": "8ebe0e1a1cc5c778bbdd16e839317343b6ce8701e82053822c62fe3420585637"
+      "sha256": "a013d8f03ef6acebfd22eb4483dc0f822be80f46583ff39b9b78b2083ea79127"
     },
     {
       "path": "lecture1/README.md",
@@ -335,7 +335,7 @@
     {
       "path": "lecture1/index.html",
       "bytes": 1598,
-      "sha256": "4fc3577905bd609e6d5487fe484889342f6a879f3326436335dc1434f2da8710"
+      "sha256": "188557312d755e3dab32a2d10b09a3a3298f82dcb63cc6e15f8cc7409b784768"
     },
     {
       "path": "lecture1/lecture1-variational-inference.ipynb",
@@ -545,7 +545,7 @@
     {
       "path": "lecture2/index.html",
       "bytes": 1559,
-      "sha256": "e158fbb7c35eb3cf3636dfeef12401dd9ca0b4137b2e2c130e7b22e79b410dc9"
+      "sha256": "6c995fb4a09c00e074172b431b398bb63fa3bd002b96af1ad66a40cb9b7720f4"
     },
     {
       "path": "lecture2/lecture2-generative-models.ipynb",
@@ -599,13 +599,13 @@
     },
     {
       "path": "lecture3/README.md",
-      "bytes": 4826,
-      "sha256": "c5c3ca78afaad5e4447d2585c262eee0e259675e142a098afdb68d3f03bc8065"
+      "bytes": 5368,
+      "sha256": "5967da24280418fbc39f56b0e46f2b5b4830a63db4ff2f89be53cc772d6e48a1"
     },
     {
       "path": "lecture3/content.js",
-      "bytes": 28714,
-      "sha256": "ad8be61ee3b7ca74c02a872b5de2b428d8b65fe0d033530d74a3ea2af2c99669"
+      "bytes": 29128,
+      "sha256": "09827db395283bbc28c5ecd75fe72cdddb757ee547bc244a88b8c9645ba601f7"
     },
     {
       "path": "lecture3/data/fixtures.json",
@@ -623,6 +623,11 @@
       "sha256": "2cd5365b46589878864ec8da9acd7d9eac048f6a78f44349ed19ea1a654aa4ff"
     },
     {
+      "path": "lecture3/data/notebook-anchors.json",
+      "bytes": 82,
+      "sha256": "4937f2ae49425f653ff1a23150d4367881d46f6dba0b6c6b0f68f7bd47aac88a"
+    },
+    {
       "path": "lecture3/data/original-training.json",
       "bytes": 5960,
       "sha256": "a19b41f17e5690cc58bb4d7a89642b2a8cc6a20c930ff92e3fd3784170c7901a"
@@ -631,6 +636,11 @@
       "path": "lecture3/data/reuse-manifest.json",
       "bytes": 1969,
       "sha256": "56b4558f4c6153f708e90454dcee3ca650e133fb07b6106973a96147c5b290d4"
+    },
+    {
+      "path": "lecture3/data/sections.json",
+      "bytes": 1884,
+      "sha256": "e49a1d62d501b007c5ec6714b53a1bcaf597bf06ae2eb4fa66d6f9d77e7718b8"
     },
     {
       "path": "lecture3/data/toy_gan_collapse.json",
@@ -649,13 +659,13 @@
     },
     {
       "path": "lecture3/exports/all-builds.pdf",
-      "bytes": 1071753,
-      "sha256": "61d0dbf8f5d20e357dc6230adf18ba48bb198157b7a8f09ee715756e6e5d41bd"
+      "bytes": 1516625,
+      "sha256": "5a1c099b5cfd08e0fb04fb66e2d9dd2ef047e03a3aa4288f167a13f021d807a8"
     },
     {
       "path": "lecture3/exports/completed.pdf",
-      "bytes": 694192,
-      "sha256": "4b717430bb1455d8e429176fe3fda9ca1a8a7192ca660a619fe60aa5857cc72b"
+      "bytes": 1004884,
+      "sha256": "89691f915ce4e353a7ef254dd44a6e1a369934e06f01a1fa5b6d0bb3919cc6dd"
     },
     {
       "path": "lecture3/figures/d_only-0.svg",
@@ -755,17 +765,17 @@
     {
       "path": "lecture3/index.html",
       "bytes": 1516,
-      "sha256": "407e218a27a549e378b30669297bb98b42944d9b28a86b66076a9feaa06e25d3"
+      "sha256": "bd5b1f7bdb217b1e596b56440435ee7142c94cac5767b9f6f5e2470d939bb0fc"
     },
     {
       "path": "lecture3/lecture3.ipynb",
-      "bytes": 189007,
-      "sha256": "67e662f4e95e4ae8ba71026a926e0cc8db58506efc4b7c60739f065a74518f48"
+      "bytes": 191251,
+      "sha256": "82e382208578693ee34ecd4f303a752db34cb4750c74522bc1433e67e23e2df6"
     },
     {
       "path": "lecture3/manifest.json",
-      "bytes": 10335,
-      "sha256": "a064fbcd42af1ebf788dd6ba749dfa46aa758ca0bda8a3dd03e8704c35736bfa"
+      "bytes": 11594,
+      "sha256": "aed4c8790285452f3e014a6c5fed976d2fe6e744897a024686c9f2b4c2ac00cb"
     },
     {
       "path": "lecture3/models/gan_mnist.pt",
@@ -784,8 +794,8 @@
     },
     {
       "path": "lecture3/scripts/make_notebook.py",
-      "bytes": 9729,
-      "sha256": "1c314b55c0d2013834b46d6da2606ab96b19cd7b180173ea98e8b5bf90344cfa"
+      "bytes": 9870,
+      "sha256": "ffea2e9fc191745704f82240dca72d33fdb62ae9368aec37e90185b544ab055c"
     },
     {
       "path": "lecture3/scripts/prepare.py",
@@ -794,8 +804,8 @@
     },
     {
       "path": "lecture3/speaker-notes.md",
-      "bytes": 31631,
-      "sha256": "9962bbfc43e3caecb3cf8ec7e971db7e6939f45ba32d276ca3d6b0c3c1dbbe1d"
+      "bytes": 34041,
+      "sha256": "11a04e0aa5e4cfa83478627b0734d291d2e16b0ed0e3607c2921ce3475bd29f4"
     },
     {
       "path": "lecture4/README.md",
@@ -1375,7 +1385,7 @@
     {
       "path": "lecture4/index.html",
       "bytes": 1598,
-      "sha256": "90a9ca6a247bc59ef33bc1925f6652899abf2e4cd7e4322a59462fc3c58a3b9e"
+      "sha256": "7070b94cbe2480c53a486a6cd8cf5489f23ea49699576c7f2a407273e6a3c170"
     },
     {
       "path": "lecture4/lecture4-diffusion.ipynb",
@@ -1509,8 +1519,8 @@
     },
     {
       "path": "notebook-verification.json",
-      "bytes": 466,
-      "sha256": "4880f96d749899d591d368e2f847261864487f602d867ad79cdcf1e40ff3c933"
+      "bytes": 476,
+      "sha256": "2351c195c6c9e3d6d573cda5963959aabd3577f52d41dc80cd324f1873a0d387"
     },
     {
       "path": "package.json",
@@ -1558,6 +1568,11 @@
       "sha256": "48861fe8e5f9c6225b6783a87aee5fa48be246f0b2395f6bfa05bea9d3fe043e"
     },
     {
+      "path": "scripts/notebook_sections.py",
+      "bytes": 2919,
+      "sha256": "298be02cbbec5a0fa781827e3e071e109b83aeae2bcbf9df9b21e5a498ddf544"
+    },
+    {
       "path": "scripts/package.mjs",
       "bytes": 5105,
       "sha256": "be8733afb5b3009d1deff142b0823645fb07627ce2cecc40956a01b3b8177485"
@@ -1589,13 +1604,13 @@
     },
     {
       "path": "shared/author.js",
-      "bytes": 7865,
-      "sha256": "9ee057d1bf37c60bb8b1d6e0d8519fb393912b02c8236d24bcbcf24383bc8f88"
+      "bytes": 12475,
+      "sha256": "628222d9ca5daa747a8984c67693d95091be57c228ee3f33c3d029d1b1c90eab"
     },
     {
       "path": "shared/deck.css",
-      "bytes": 11151,
-      "sha256": "50b0c1aad68fece9f58c8fd8f7cc1190e710a2cc7186220f780d4b6d20651784"
+      "bytes": 11750,
+      "sha256": "c4977ba1bde02272be8f7a513ff75c94b645a464947c00f80e32d07fc94aa7e4"
     },
     {
       "path": "shared/deck.js",

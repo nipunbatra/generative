@@ -1,17 +1,38 @@
 # Generative adversarial networks: speaker notes
 
-Planned main route: 60 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 61 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
-| A learning signal | 6 |
-| One discriminator update | 10 |
-| One generator update | 12 |
-| Alternate the players | 11 |
-| Samples, coverage and failure | 11 |
-| MNIST and retrieval | 10 |
+| Lecture map | 1 |
+| Part 1 · A learning signal | 6 |
+| Part 2 · One discriminator update | 10 |
+| Part 3 · One generator update | 12 |
+| Part 4 · Alternate the players | 11 |
+| Part 5 · Samples, coverage and failure | 11 |
+| Part 6 · MNIST and retrieval | 10 |
+
+## contents: Lecture 3 at a glance: six parts, seventeen sections
+
+**Build 1, ask:** Where does today’s route start, and where does it end?
+
+**Expected:** Part 1, “A learning signal”, to Part 6, “MNIST and retrieval”.
+
+**Point here:** The same section numbers appear in every slide header and in the notebook links.
+
+**Transition:** Part 1 · A learning signal.
+
+## part-1: Part 1 · A learning signal
+
+**Build 1, ask:** What should Part 1 let us do?
+
+**Expected:** A generator can sample, but it cannot score its own samples. What tells it how to improve?
+
+**Point here:** A break between parts: two sections follow, each linked to its notebook cell.
+
+**Transition:** 1.1 A generator needs feedback.
 
 ## start: Where could a generator get feedback?
 
@@ -82,6 +103,16 @@ Planned main route: 60 minutes. Timing includes student responses and the specif
 **Transition:** Now hold G still and train the classifier.
 
 **Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+
+## part-2: Part 2 · One discriminator update
+
+**Build 1, ask:** What should Part 2 let us do?
+
+**Expected:** Train a classifier to tell real from generated, one inspected step at a time.
+
+**Point here:** A break between parts: four sections follow, each linked to its notebook cell.
+
+**Transition:** 2.1 Data, labels and two small networks.
 
 ## data-labels: Fix the samples and label their source
 
@@ -279,6 +310,16 @@ Planned main route: 60 minutes. Timing includes student responses and the specif
 
 **Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
+## part-3: Part 3 · One generator update
+
+**Build 1, ask:** What should Part 3 let us do?
+
+**Expected:** Now the generator asks for the label “real”, through a frozen critic.
+
+**Point here:** A break between parts: three sections follow, each linked to its notebook cell.
+
+**Transition:** 3.1 The generator’s goal.
+
 ## g-goal: Now let the generator ask for label 1
 
 **Build 1, ask:** Are we relabelling generated data for the next D update?
@@ -419,6 +460,16 @@ Planned main route: 60 minutes. Timing includes student responses and the specif
 
 **Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
+## part-4: Part 4 · Alternate the players
+
+**Build 1, ask:** What should Part 4 let us do?
+
+**Expected:** Alternate the two updates, and see why practice changes the generator’s loss.
+
+**Point here:** A break between parts: three sections follow, each linked to its notebook cell.
+
+**Transition:** 4.1 The training loop.
+
 ## alternating: The training loop alternates two objectives
 
 **Build 1, ask:** Are both players minimising one fixed function of their own weights?
@@ -545,6 +596,16 @@ Planned main route: 60 minutes. Timing includes student responses and the specif
 
 **Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
 
+## part-5: Part 5 · Samples, coverage and failure
+
+**Build 1, ask:** What should Part 5 let us do?
+
+**Expected:** A loss curve is not a quality certificate: count where the samples land.
+
+**Point here:** A break between parts: two sections follow, each linked to its notebook cell.
+
+**Transition:** 5.1 Coverage and collapse.
+
 ## coverage: Count mass near each known mode
 
 **Build 1, ask:** What does a near-zero entry tell us?
@@ -614,6 +675,16 @@ Planned main route: 60 minutes. Timing includes student responses and the specif
 **Transition:** Transfer the same two-phase algorithm to images.
 
 **Source / evidence:** Original teaching construction · Goodfellow et al. (2014), arxiv.org/abs/1406.2661
+
+## part-6: Part 6 · MNIST and retrieval
+
+**Build 1, ask:** What should Part 6 let us do?
+
+**Expected:** The same game on images, then what we reproduced today.
+
+**Point here:** A break between parts: three sections follow, each linked to its notebook cell.
+
+**Transition:** 6.1 Images in and out.
 
 ## image-representation: Keep the data convention visible
 

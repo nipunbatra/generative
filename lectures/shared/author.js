@@ -77,3 +77,38 @@ export function plot(series,options={}){
   svg+=`<text x="${W-R}" y="${H-12}" text-anchor="end" fill="#68717B" font-size="23">${esc(options.xLabel||'')}</text><text x="${L}" y="${T-10}" fill="#68717B" font-size="22">${esc(options.yLabel||'')}</text></svg>`;
   return `<div class="diagram-scroll">${svg}</div>`;
 }
+const NUMBER_WORDS='zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three twenty-four twenty-five twenty-six twenty-seven twenty-eight twenty-nine thirty'.split(' ');
+/** Number a lecture in place, as Lecture 1 does: each meta section becomes Part k, the core slides fall into
+ *  numbered sections k.j, a contents slide opens the deck, a break slide opens each part, and every section links
+ *  to its notebook cell. leads: one framing line per part; sections: [number, title, first slide id, notebook anchor]. */
+export function sectionDeck({meta,slides,leads,sections,anchors}){
+ const colab=`https://colab.research.google.com/github/nipunbatra/generative/blob/main/lectures/${meta.id}/${meta.notebook}`;
+ const nbHref=a=>{if(anchors&&!anchors.has(a))throw new Error(`Notebook anchor ${a} is missing: rebuild the notebook`);return `${colab}#scrollTo=${a}`;};
+ const parts=meta.sections.filter(x=>x.id!=='optional'&&x.id!=='map'),names=parts.map(x=>x.title);
+ if(leads.length!==parts.length)throw new Error('sectionDeck: one lead line per part');
+ const partOf=s=>parts.findIndex(x=>x.id===s.section)+1,starts=new Map(sections.map(x=>[x[2],x]));
+ sections.forEach(([num,,first],i)=>{const s=slides.find(x=>x.id===first);
+  if(!s||s.optional)throw new Error(`sectionDeck: section ${num} starts at an unknown slide, ${first}`);
+  if(num.split('.')[0]!==String(partOf(s)))throw new Error(`sectionDeck: ${first} belongs to Part ${partOf(s)}, not ${num}`);
+  if(i&&slides.indexOf(s)<slides.findIndex(x=>x.id===sections[i-1][2]))throw new Error(`sectionDeck: section ${num} starts before ${sections[i-1][0]}`);});
+ let cur=null;
+ for(const s of slides){if(s.optional)continue;cur=starts.get(s.id)||cur;
+  if(!cur||cur[0].split('.')[0]!==String(partOf(s)))throw new Error(`sectionDeck: ${s.id} has no section in Part ${partOf(s)}`);
+  s.chapter=`${cur[0]} ${cur[1]}`;s.notebook={href:nbHref(cur[3]),label:'▶ Notebook'};}
+ const inPart=k=>sections.filter(([num])=>num.split('.')[0]===String(k));
+ const nbArrow=(num,a)=>`<a class="toc-nb" href="${esc(nbHref(a))}" target="_blank" rel="noopener" aria-label="notebook ${num}">▶</a>`;
+ const strip=k=>`<div class="act-strip" role="img" aria-label="Part ${k} of ${parts.length}">${names.map((t,i)=>`<span class="${i+1<k?'done':i+1===k?'now':''}">${i+1} · ${esc(t)}</span>`).join('')}</div>`;
+ parts.forEach((part,i)=>{const k=i+1,secs=inPart(k),where=slides.findIndex(s=>!s.optional&&partOf(s)===k);
+  slides.splice(where,0,{id:`part-${k}`,section:part.id,title:`Part ${k} · ${esc(names[i])}`,builds:1,
+   body:`<div class="part-break">${strip(k)}<p class="lead">${esc(leads[i])}</p><ol class="pb-list">${secs.map(([num,title,first,a])=>`<li><span class="pb-num">${num}</span><a href="#${esc(first)}/1">${esc(title)}</a>${nbArrow(num,a)}</li>`).join('')}</ol></div>`,
+   prompts:[`Part ${k} of ${parts.length}: ${NUMBER_WORDS[secs.length]} sections. Each ▶ opens the notebook cell that runs it.`],chapter:'',notebook:{href:nbHref(secs[0][3]),label:'▶ Notebook'},source:'',
+   notes:{ask:[`What should Part ${k} let us do?`],expected:[esc(leads[i])],point:`A break between parts: ${NUMBER_WORDS[secs.length]} sections follow, each linked to its notebook cell.`,misconception:'',transition:`${secs[0][0]} ${esc(secs[0][1])}.`,demo:''}});});
+ parts.forEach((part,i)=>{part.title=`Part ${i+1} · ${names[i]}`;});
+ meta.sections.unshift({id:'map',title:'Lecture map',minutes:1});meta.minutes+=1;
+ const words=NUMBER_WORDS[parts.length];
+ slides.unshift({id:'contents',section:'map',title:`Lecture ${meta.number} at a glance: ${words} parts, ${NUMBER_WORDS[sections.length]} sections`,builds:1,
+  body:`<div class="toc toc-flow">${parts.map((part,i)=>`<h3><a href="#part-${i+1}/1">${esc(part.title)}</a></h3><ol>${inPart(i+1).map(([num,title,first,a])=>`<li><a href="#${esc(first)}/1">${num} ${esc(title)}</a>${nbArrow(num,a)}</li>`).join('')}</ol>`).join('')}</div>`,
+  prompts:[`${words[0].toUpperCase()+words.slice(1)} parts, ${NUMBER_WORDS[sections.length]} numbered sections. The ▶ links open the matching notebook cell in Colab.`],
+  chapter:'',notebook:{href:nbHref('top'),label:'▶ Notebook'},source:'',
+  notes:{ask:['Where does today’s route start, and where does it end?'],expected:[`Part 1, “${esc(names[0])}”, to Part ${parts.length}, “${esc(names.at(-1))}”.`],point:'The same section numbers appear in every slide header and in the notebook links.',misconception:'',transition:`Part 1 · ${esc(names[0])}.`,demo:''}});
+}

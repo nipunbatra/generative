@@ -1,0 +1,117 @@
+{
+ "leads": [
+  "A generator can sample, but it cannot score its own samples. What tells it how to improve?",
+  "Train a classifier to tell real from generated, one inspected step at a time.",
+  "Now the generator asks for the label “real”, through a frozen critic.",
+  "Alternate the two updates, and see why practice changes the generator’s loss.",
+  "A loss curve is not a quality certificate: count where the samples land.",
+  "The same game on images, then what we reproduced today."
+ ],
+ "sections": [
+  [
+   "1.1",
+   "A generator needs feedback",
+   "start",
+   "nb-5"
+  ],
+  [
+   "1.2",
+   "Two players",
+   "toy-vote",
+   "nb-3"
+  ],
+  [
+   "2.1",
+   "Data, labels and two small networks",
+   "data-labels",
+   "nb-1"
+  ],
+  [
+   "2.2",
+   "The discriminator’s loss",
+   "d-real-term",
+   "nb-1"
+  ],
+  [
+   "2.3",
+   "One D update, then check",
+   "d-gradient",
+   "nb-1"
+  ],
+  [
+   "2.4",
+   "Detach the fake",
+   "detach",
+   "nb-2"
+  ],
+  [
+   "3.1",
+   "The generator’s goal",
+   "g-goal",
+   "nb-1"
+  ],
+  [
+   "3.2",
+   "One G update, then check",
+   "g-gradient",
+   "nb-1"
+  ],
+  [
+   "3.3",
+   "Freeze versus detach",
+   "g-code",
+   "nb-2-freeze"
+  ],
+  [
+   "4.1",
+   "The training loop",
+   "alternating",
+   "nb-3"
+  ],
+  [
+   "4.2",
+   "Minimax and saturation",
+   "minimax",
+   "nb-3"
+  ],
+  [
+   "4.3",
+   "One neural update",
+   "alternating-code-d",
+   "nb-2"
+  ],
+  [
+   "5.1",
+   "Coverage and collapse",
+   "coverage",
+   "nb-4"
+  ],
+  [
+   "5.2",
+   "What a loss curve cannot tell",
+   "losses-not-quality",
+   "nb-4"
+  ],
+  [
+   "6.1",
+   "Images in and out",
+   "image-representation",
+   "nb-5"
+  ],
+  [
+   "6.2",
+   "Training on MNIST",
+   "image-training-early",
+   "nb-5"
+  ],
+  [
+   "6.3",
+   "Exit and next",
+   "exit-detach",
+   "nb-exit"
+  ]
+ ],
+ "headings": {
+  "### Why freezing is different from detaching": "nb-2-freeze"
+ }
+}
