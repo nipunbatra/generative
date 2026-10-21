@@ -1,6 +1,6 @@
 # KL and variational inference: speaker notes
 
-Planned main route: 130 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 140 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -8,12 +8,12 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 |---|---:|
 | Lecture map | 1 |
 | Part 1 · Bayes’ rule for a neural network | 22 |
-| Part 2 · How far apart are two distributions? | 64 |
+| Part 2 · How far apart are two distributions? | 74 |
 | Part 3 · Find the closest q | 22 |
 | Part 4 · Back to Bayes: the ELBO | 13 |
 | Part 5 · Implement it | 8 |
 
-## contents: Lecture 1 at a glance: five parts, twenty-three sections
+## contents: Lecture 1 at a glance: five parts, twenty-four sections
 
 **Build 1, ask:** Which part do you expect to be hardest?
 
@@ -383,7 +383,7 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Expected:** Only by luck: one rainy day in ten gives 0.47, two give 0.8. It settles as days accumulate, because sun comes on 90% of them and rain on 10%.
 
-**Point here:** The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.8).
+**Point here:** The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.9).
 
 **Notebook demonstration:** Notebook 2.2: the entropy cell simulates 10,000 days and prints the running average at 10, 100, 1,000 and 10,000 days.
 
@@ -773,17 +773,143 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 
 **Transition:** Collect the pattern.
 
-## kl-everywhere: Takeaway: KL is everywhere in machine learning
+## kl-everywhere: KL at work: the same quantity in many losses
 
-**Build 1, ask:** What is different about the VI row?
+**Build 1, ask:** Which distribution comes first in each row?
 
-**Expected:** The order: our approximation comes first, because we can sample from q but not from the posterior.
+**Expected:** The one that supplies the weights: labels, data, teacher, policy, q. Section 3.6 shows why the order matters for VI.
 
-**Point here:** RLHF penalises KL from the trained policy to a reference model, to keep it from drifting. The video opens with distillation, generative models and RLHF as motivation.
+**Point here:** The video opens with distillation, generative models and RLHF as motivation.
 
-**Transition:** Back to continuous distributions: closed forms.
+**Transition:** Distillation: a big teacher and a small student.
 
 **Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## distill-why: Knowledge distillation: a big teacher, a small student
+
+**Build 1, ask:** Why not just deploy the teacher?
+
+**Expected:** Cost and speed: memory, latency and energy grow with the number of parameters.
+
+**Build 2, ask:** How could the small model learn to behave like the big one?
+
+**Expected:** Copy its outputs: make the student’s distribution over labels match the teacher’s, input by input.
+
+**Point here:** Hinton, Vinyals and Dean (2015), “Distilling the Knowledge in a Neural Network”. Smaller deployed models, such as DistilBERT, are trained this way.
+
+**Transition:** Make the two distributions the same.
+
+## distill-match: Make the student’s distribution match the teacher’s
+
+**Build 1, ask:** Why does the teacher come first in the KL?
+
+**Expected:** The teacher plays the truth: its distribution supplies the weights, exactly like the labels in 2.5.
+
+**Build 2, ask:** Does the student need the true labels?
+
+**Expected:** Not for this term: the teacher labels every input, even unlabelled ones. In practice a small label term is often added.
+
+**Transition:** The loss, term by term.
+
+## distill-loss: The distillation loss, term by term
+
+**Build 1, ask:** Which part can the student change?
+
+**Expected:** Only q_S: H(p_T) is fixed by the frozen teacher.
+
+**Build 2, ask:** How is this related to the ordinary classification loss?
+
+**Expected:** It is the same cross-entropy loss, with the teacher’s soft distribution in place of the one-hot label.
+
+**Build 3, ask:** What does a temperature τ > 1 do?
+
+**Expected:** It flattens the teacher’s distribution so its small probabilities, which carry the extra information, count for more.
+
+**Transition:** What do soft labels teach that a one-hot label cannot?
+
+## distill-soft: What soft labels teach: a cat looks a bit like a dog
+
+**Build 1, ask:** What does the student learn from the 0.20 on dog?
+
+**Expected:** That cats and dogs look alike to the teacher, so confusing them is a small error, unlike cat versus ape.
+
+**Build 2, ask:** Why would τ = 1 hide that information?
+
+**Expected:** The 0.02 and 0.03 barely change the loss; dividing the logits by τ evens the distribution out.
+
+**Transition:** Watch a real student learn.
+
+## distill-demo: Press play: a tiny student learns a big teacher
+
+**Build 1, ask:** Predict: can a 27-parameter network copy a 4,547-parameter one?
+
+**Expected:** On this problem, nearly: the classes need only gently curved boundaries.
+
+**Build 2, ask:** Why do the boundaries stay blurred?
+
+**Expected:** The student copies the teacher’s uncertainty too: where classes overlap, the teacher is unsure, and so is the student.
+
+**Notebook demonstration:** Notebook 2.7: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.
+
+**Transition:** Second application: RLHF.
+
+## rlhf-setup: RLHF: reward a chatbot, but keep it close to where it started
+
+**Build 1, ask:** What does the reward model reward?
+
+**Expected:** Replies people preferred, as learned from human comparisons.
+
+**Build 2, ask:** Why keep a frozen copy?
+
+**Expected:** To measure how far the policy has drifted from a model that writes fluent, sensible text.
+
+**Build 3, ask:** What does β control?
+
+**Expected:** The trade-off: small β chases reward, large β stays near the reference.
+
+**Point here:** This KL penalty is part of InstructGPT/ChatGPT-style RLHF (PPO) and of GRPO; DPO optimises the same KL-regularised objective without a separate reward model.
+
+**Transition:** What goes wrong without the leash?
+
+## rlhf-hacking: Without the KL: the policy fools the reward model
+
+**Build 1, ask:** Which reply does the reward model prefer?
+
+**Expected:** The shouting one, +2.0: a flaw in the learned reward.
+
+**Build 2, ask:** Why is the KL term a defence?
+
+**Expected:** A reply the reference almost never writes has a large log ratio <span class="pi">π</span>/<span class="pi">π</span><sub>ref</sub>, so piling probability on it costs a lot of KL.
+
+**Transition:** Slide the leash.
+
+## rlhf-beta: Slide the leash: the best policy for each β
+
+**Build 1, ask:** At β = 1, which reply gains most?
+
+**Expected:** “Yes, it is hot. Careful!”: probable under the reference and well rewarded.
+
+**Build 2, ask:** What happens as β → 0? As β → ∞?
+
+**Expected:** β → 0: all mass on the highest reward, the hacked reply. β → ∞: <span class="pi">π</span>* = <span class="pi">π</span><sub>ref</sub>, no change.
+
+**Point here:** Derivation: maximise Σ <span class="pi">π</span> r − β Σ <span class="pi">π</span> log(<span class="pi">π</span>/<span class="pi">π</span><sub>ref</sub>) subject to Σ <span class="pi">π</span> = 1; setting the derivative to zero gives log <span class="pi">π</span> = log <span class="pi">π</span><sub>ref</sub> + r/β − const. The notebook checks it by gradient ascent.
+
+**Notebook demonstration:** Notebook 2.7: the RLHF cell prints <span class="pi">π</span>* for eight values of β and checks the closed form at β = 1 by gradient ascent.
+
+**Transition:** How is that KL computed for real text?
+
+## rlhf-tokens: In practice: the KL is estimated token by token, from samples
+
+**Build 1, ask:** Why not compute the KL exactly?
+
+**Expected:** Vocabulary^length possible replies: astronomically many.
+
+**Build 2, ask:** Which estimator can never be negative?
+
+**Expected:** r − 1 − log r with r = <span class="pi">π</span><sub>ref</sub>/<span class="pi">π</span>: optional slide in the appendix; DeepSeek’s GRPO uses it.
+
+**Transition:** Back to continuous distributions: closed forms.
 
 ## densities: From sums to integrals
 
@@ -1714,6 +1840,20 @@ Planned main route: 130 minutes. Timing includes student responses and the speci
 **Notebook demonstration:** Notebook 2.5: the grades-sampling cell draws 10,000 grades and prints the running average at 10, 100, 1,000 and 10,000 draws.
 
 **Transition:** Back to the optional slides.
+
+## kl-estimators: A KL estimator that is never negative (optional)
+
+**Build 1, ask:** Why does adding r − 1 not change the average?
+
+**Expected:** E_q[r] = ∫ q · p/q = ∫ p = 1, so E_q[r − 1] = 0: it only removes noise.
+
+**Build 2, ask:** When can the better estimator be worse?
+
+**Expected:** When p has heavier tails than q: r = p/q can then have infinite variance. Here p is narrower than q, so r stays bounded.
+
+**Point here:** q = N(0, 2²) against p = N(0.5, 1.5²), exact KL 0.157; 400 repeats per size. From Jia-Bin Huang’s video and John Schulman’s note “Approximating KL divergence”; GRPO uses this estimator for its KL penalty.
+
+**Source / evidence:** After <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang</a> and <a href="http://joschu.net/blog/kl-approx.html">John Schulman, “Approximating KL divergence”</a>
 
 ## evidence-mc: Sampling from the prior: a few lucky draws carry everything (optional)
 

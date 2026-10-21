@@ -14,12 +14,12 @@ const n=d.normal,c=d.coin,g=d.gradients,mc=d.monte_carlo,st=d.story,b=st.bnn,ink
 const A=b.theta_A,Bt=b.theta_B,E=b.evidence,H=b.hmc,V=b.vi,VF=b.vi_full;
 export const meta={
  id:'lecture1',number:1,title:'KL and variational inference',
- subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:130,
+ subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:140,
  notebook:'lecture1-variational-inference.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
   {id:'bayes',title:'Part 1 · Bayes’ rule for a neural network',minutes:22},
-  {id:'kl',title:'Part 2 · How far apart are two distributions?',minutes:64},
+  {id:'kl',title:'Part 2 · How far apart are two distributions?',minutes:74},
   {id:'fit',title:'Part 3 · Find the closest q',minutes:22},
   {id:'elbo',title:'Part 4 · Back to Bayes: the ELBO',minutes:13},
   {id:'impl',title:'Part 5 · Implement it',minutes:8},
@@ -30,7 +30,7 @@ export const slides=[];
 /** Numbered sections. The notebook uses the same numbers, with anchors sec-1-1 … sec-5-2. */
 const CHAPTERS=[
  ['1.1','Bayes’ rule'],['1.2','A tiny network and its prior'],['1.3','Likelihood and training'],['1.4','The evidence is intractable'],['1.5','Approximating the posterior'],
- ['2.1','Surprise'],['2.2','Entropy: average surprise'],['2.3','Codes: entropy in bits'],['2.4','Cross-entropy and KL'],['2.5','Classification loss'],['2.6','Maximum likelihood'],['2.7','Closed forms and PyTorch'],['2.8','KL by sampling'],
+ ['2.1','Surprise'],['2.2','Entropy: average surprise'],['2.3','Codes: entropy in bits'],['2.4','Cross-entropy and KL'],['2.5','Classification loss'],['2.6','Maximum likelihood'],['2.7','KL at work: distillation, RLHF'],['2.8','Closed forms and PyTorch'],['2.9','KL by sampling'],
  ['3.1','Search a grid'],['3.2','Gradient descent'],['3.3','Covariance in 2-D'],['3.4','Mixtures: no formula'],['3.5','The reparameterisation trick'],['3.6','Which direction of KL?'],
  ['4.1','Deriving the ELBO'],['4.2','Checking it on a coin'],
  ['5.1','VI for the tiny network'],['5.2','Wrap-up'],
@@ -417,6 +417,65 @@ function dataGrid(){
  return fig(W,H,s,`Twenty days of weather: ${ml.counts[0]} sunny, ${ml.counts[1]} cloudy and ${ml.counts[2]} rainy.`);
 }
 
+// ---------------------------------------------------------------- Section 2.7 figures: distillation and RLHF
+const ds=st.distill,rl=st.rlhf;
+const PI='<tspan font-family="Times New Roman,Georgia,serif" font-style="italic">π</tspan>',PIH='<span class="pi">π</span>';
+const STUDENT0=[.25,.20,.40,.15];
+/** Probability bars over ape, bear, cat and dog, drawn at (ox, oy). */
+function classBars(ox,oy,vals,color,title,bw=150,rowH=34){
+ let g=label(ox,oy,title,{fill:color,size:19,weight:600});
+ cl.classes.forEach((c,i)=>{const y=oy+14+i*rowH,w=Math.max(2,vals[i]*bw);g+=label(ox,y+21,c,{fill:ink,size:18})+`<rect x="${ox+48}" y="${y}" width="${w.toFixed(1)}" height="26" rx="4" fill="${color}"/>`+label(ox+54+w,y+20,num(vals[i],2),{fill:color,size:17});});
+ return g;
+}
+/** A network drawn as columns of nodes, scaled to look big or small. */
+function netGlyph(x,y,w,h,cols,rows,color){
+ let g='';const cx=c=>x+(c+.5)*w/cols,cy=(r,n)=>y+h/2+(r-(n-1)/2)*Math.min(h/(n+.5),22);
+ for(let c=0;c<cols-1;c++){const n1=c===0?2:rows,n2=c===cols-2?3:rows;for(let a=0;a<n1;a++)for(let b2=0;b2<n2;b2++)g+=`<line x1="${cx(c).toFixed(1)}" y1="${cy(a,n1).toFixed(1)}" x2="${cx(c+1).toFixed(1)}" y2="${cy(b2,n2).toFixed(1)}" stroke="${color}" stroke-opacity=".22" stroke-width="1"/>`;}
+ for(let c=0;c<cols;c++){const n=c===0?2:c===cols-1?3:rows;for(let r=0;r<n;r++)g+=`<circle cx="${cx(c).toFixed(1)}" cy="${cy(r,n).toFixed(1)}" r="5" fill="${palette.paper}" stroke="${color}" stroke-width="2"/>`;}
+ return g;
+}
+/** Knowledge distillation: the same image through a big frozen teacher and a small student. */
+function distillDiagram(stage=3){
+ const W=1150,H=380,T=palette.p,Sq=palette.q,L=palette.loss;let s=graphDefs('dd');
+ s+=`<rect x="10" y="104" width="130" height="120" rx="10" fill="#FFF7ED" stroke="${ink}" stroke-width="2"/>`+catGlyph(75,166,1.1)+label(75,248,'one image x',{size:18,anchor:'middle'});
+ // the teacher: big and deep
+ s+=`<rect x="200" y="10" width="300" height="128" rx="12" fill="${TINT.p}" stroke="${T}" stroke-width="2.5"/>`+netGlyph(214,22,272,104,6,5,T)+
+  label(350,160,'teacher: big, accurate, slow',{fill:T,size:19,anchor:'middle',weight:600});
+ s+=fwdEdge('dd','M140,136 L198,90')+fwdEdge('dd','M500,80 L566,80');
+ s+=classBars(570,24,cl.teacher,T,'teacher’s p(y | x)');
+ // the student: small and shallow
+ const st2=`<rect x="250" y="192" width="190" height="90" rx="12" fill="${TINT.q}" stroke="${Sq}" stroke-width="2.5"/>`+netGlyph(262,200,166,74,3,3,Sq)+
+  label(345,306,'student: small, fast',{fill:Sq,size:19,anchor:'middle',weight:600})+fwdEdge('dd','M140,196 L248,236')+fwdEdge('dd','M440,236 L566,262')+
+  classBars(570,198,STUDENT0,Sq,'student’s q(y | x)');
+ s+=stage>=2?st2:`<g opacity="0">${st2}</g>`;
+ // the KL link and the gradient into the student
+ if(stage>=3)s+=`<path d="M805,102 C870,102 870,276 805,276" fill="none" stroke="${L}" stroke-width="3"/>`+label(872,182,'KL(p ‖ q)',{fill:L,size:22,weight:600})+label(872,210,'make these the same',{fill:L,size:18});
+ if(stage>=4)s+=backEdge('dd','M900,236 C930,372 520,360 444,272')+label(900,364,'gradient: only the student learns',{fill:L,size:17,anchor:'middle'})+
+  `<rect x="452" y="16" width="42" height="24" rx="6" fill="${palette.paper}" stroke="${T}"/>`+label(473,33,'frozen',{fill:T,size:12,anchor:'middle',weight:600});
+ return fig(W,H,s,'Knowledge distillation: the same image goes through a big teacher network and a small student network; the student is trained so its output distribution matches the teacher’s, minimising KL from the teacher to the student, and only the student receives gradients.');
+}
+/** One-hot label against the teacher’s soft labels, plain and softened by temperature. */
+function softTemps(){
+ const soft=t=>{const w=cl.teacher.map(v=>Math.pow(v,1/t)),z=w.reduce((a,b2)=>a+b2,0);return w.map(v=>v/z);};
+ let s=classBars(0,26,cl.classes.map((_,i)=>i===cl.label?1:0),MUTED,'one-hot label',120);
+ s+=classBars(380,26,soft(1),palette.p,'teacher, τ = 1',120)+classBars(760,26,soft(4),palette.p,'teacher softened, τ = 4',120);
+ return fig(1150,220,s,'A one-hot label for cat, the teacher’s distribution, and the same distribution softened with temperature 4.');
+}
+/** RLHF: the policy writes a reply, a reward model scores it, and a frozen reference keeps it close. */
+function rlhfDiagram(stage=3){
+ const W=1150,H=340,Q=palette.q,T=palette.p,L=palette.loss;let s=graphDefs('rd');
+ s+=box(10,60,170,90,ink)+label(95,96,'prompt',{fill:ink,size:19,anchor:'middle',weight:600})+label(95,124,'“Is the stove hot?”',{size:16,anchor:'middle'});
+ s+=`<rect x="240" y="40" width="220" height="130" rx="12" fill="${TINT.q}" stroke="${Q}" stroke-width="2.5"/>`+netGlyph(252,52,196,86,5,4,Q)+label(350,160,`policy ${PI}, being trained`,{fill:Q,size:17,anchor:'middle',weight:600});
+ s+=fwdEdge('rd','M180,105 L238,105')+fwdEdge('rd','M460,105 L528,105')+box(530,62,220,86,ink)+label(640,96,'reply y',{fill:ink,size:19,anchor:'middle',weight:600})+label(640,124,'“Yes, careful!”',{size:16,anchor:'middle'});
+ s+=fwdEdge('rd','M750,105 L818,105')+box(820,62,170,86,palette.d)+label(905,96,'reward model',{fill:palette.d,size:18,anchor:'middle',weight:600})+label(905,124,'score r(y)',{size:16,anchor:'middle'});
+ s+=fwdEdge('rd','M990,105 L1040,105')+label(1046,112,'+r',{fill:palette.d,size:24,weight:700});
+ const ref=`<rect x="240" y="226" width="220" height="100" rx="12" fill="${TINT.p}" stroke="${T}" stroke-width="2.5"/>`+netGlyph(252,232,196,70,5,4,T)+label(350,320,`reference ${PI}<tspan baseline-shift="sub" font-size="70%">ref</tspan>, frozen`,{fill:T,size:16,anchor:'middle',weight:600})+
+  `<path d="M350,172 L350,224" stroke="${L}" stroke-width="3" stroke-dasharray="6 5"/>`+label(364,204,`KL(${PI} ‖ ${PI}<tspan baseline-shift="sub" font-size="70%">ref</tspan>): stay close`,{fill:L,size:18,weight:600});
+ s+=stage>=2?ref:`<g opacity="0">${ref}</g>`;
+ if(stage>=3)s+=label(600,232,'maximise',{fill:ink,size:20})+label(600,266,`E[r(y)] − β · KL(${PI} ‖ ${PI}<tspan baseline-shift="sub" font-size="70%">ref</tspan>)`,{fill:ink,size:24,weight:600})+label(600,298,'reward, minus a leash to where it started',{size:17});
+ return fig(W,H,s,'RLHF: a prompt goes to the policy, which writes a reply; a reward model scores the reply; a frozen reference copy of the model keeps the policy close through a KL penalty. The objective is expected reward minus beta times KL.');
+}
+
 // ---------------------------------------------------------------- Part 3 figures: covariance families, mixtures, computational graphs
 const c3=st.cov3,COV_NAMES={iso:'isotropic: s²I',diag:'diagonal: diag(s₁², s₂²)',full:'full: LLᵀ'};
 const COV_COUNTS={iso:'1 number, whatever the dimension',diag:'2 numbers; d in d dimensions',full:'3 numbers; d(d + 1)/2 in general'};
@@ -774,7 +833,7 @@ S('entropy-days','kl','Why an expectation? It is the average over many days',{nb
  lines:['Let days go by, each with its surprise: 0.15 bits if sunny, 3.32 if rainy. The running average settles on 0.47 bits. An expectation is a long-run average.'],
  ask:['After 10 days, is the average close to 0.47?'],
  expected:['Only by luck: one rainy day in ten gives 0.47, two give 0.8. It settles as days accumulate, because sun comes on 90% of them and rain on 10%.'],
- point:'The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.8).',
+ point:'The weighted sum Σ p(x) f(x) is the average of f over infinitely many draws; with S draws the plain average estimates it (Section 2.9).',
  demo:'Notebook 2.2: the entropy cell simulates 10,000 days and prints the running average at 10, 100, 1,000 and 10,000 days.',
  transition:'How does entropy change with the forecast?'});
 S('entropy-explorer','kl','From certain to fully uncertain: between 0 and 1 bit',{nb:'cell-entropy',
@@ -970,14 +1029,80 @@ S('mle-kl','kl','Maximum likelihood minimises KL(data ‖ model)',{builds:3,nb:'
  ask:['Which distribution comes first in this KL?','What happens with more data?','What is a training set’s cross-entropy loss?'],
  expected:['The data’s, p̂.','p̂ gets closer to the true distribution of the data.','The average surprise at the true labels: minus the average log-likelihood.'],
  transition:'Collect the pattern.'});
-S('kl-everywhere','kl','Takeaway: KL is everywhere in machine learning',{nb:'sec-2-6',
- body:table(['training …','minimises','first argument'],[['a classifier with cross-entropy','KL(labels ‖ predictions)','the labels'],['a model by maximum likelihood','KL(data ‖ model)','the data'],['a student by distillation','KL(teacher ‖ student)','the teacher'],['a chatbot with RLHF','reward − KL(policy ‖ reference)','the policy'],['an approximation by VI','KL(q ‖ posterior)','our approximation q']]),
- lines:['The same quantity hides in many losses. Variational inference minimises one with q first; Section 3.6 shows why the order matters.'],
- ask:['What is different about the VI row?'],
- expected:['The order: our approximation comes first, because we can sample from q but not from the posterior.'],
- point:'RLHF penalises KL from the trained policy to a reference model, to keep it from drifting. The video opens with distillation, generative models and RLHF as motivation.',
- source:HUANG,transition:'Back to continuous distributions: closed forms.'});
 chap('2.7');
+S('kl-everywhere','kl','KL at work: the same quantity in many losses',{nb:'sec-2-7',
+ body:`<div class="table-sm">${table(['training …','minimises','first argument','where'],[['a classifier with cross-entropy','KL(labels ‖ predictions)','the labels','2.5 ✓'],['a model by maximum likelihood','KL(data ‖ model)','the data','2.6 ✓'],['a small student from a big teacher','KL(teacher ‖ student)','the teacher','next'],['a chatbot with RLHF','reward − β KL(policy ‖ reference)','the policy','after that'],['an approximation by VI','KL(q ‖ posterior)','our approximation q','Parts 3–5']])}</div>`,
+ lines:['We have met two uses already: classification and maximum likelihood. Two more, step by step: distilling a big model into a small one, and keeping a chatbot honest in RLHF. VI is the rest of the lecture.'],
+ ask:['Which distribution comes first in each row?'],
+ expected:['The one that supplies the weights: labels, data, teacher, policy, q. Section 3.6 shows why the order matters for VI.'],
+ point:'The video opens with distillation, generative models and RLHF as motivation.',
+ source:HUANG,transition:'Distillation: a big teacher and a small student.'});
+S('distill-why','kl','Knowledge distillation: a big teacher, a small student',{builds:2,nb:'cell-distill',
+ body:`<div class="state-slot"><div data-only="1">${distillDiagram(1)}</div><div data-only="2">${distillDiagram(2)}</div></div>`,
+ lines:['A big network, the teacher, is accurate but too slow and too expensive to run on a phone, or a million times a day.','We want a small network, the student, that behaves like it. Give both the same image: the teacher says cat 0.75, dog 0.20; the untrained student is vaguer.'],
+ ask:['Why not just deploy the teacher?','How could the small model learn to behave like the big one?'],
+ expected:['Cost and speed: memory, latency and energy grow with the number of parameters.','Copy its outputs: make the student’s distribution over labels match the teacher’s, input by input.'],
+ point:'Hinton, Vinyals and Dean (2015), “Distilling the Knowledge in a Neural Network”. Smaller deployed models, such as DistilBERT, are trained this way.',
+ transition:'Make the two distributions the same.'});
+S('distill-match','kl','Make the student’s distribution match the teacher’s',{builds:2,nb:'cell-distill',
+ body:`<div class="state-slot"><div data-only="1">${distillDiagram(3)}</div><div data-only="2">${distillDiagram(4)}</div></div>`,
+ lines:['For each input, measure how far the student’s distribution is from the teacher’s: KL(teacher ‖ student). Average it over many inputs.','Minimise it. The teacher is frozen; gradients flow only into the student. At KL = 0 the student answers like the teacher on every input, doubts included.'],
+ ask:['Why does the teacher come first in the KL?','Does the student need the true labels?'],
+ expected:['The teacher plays the truth: its distribution supplies the weights, exactly like the labels in 2.5.','Not for this term: the teacher labels every input, even unlabelled ones. In practice a small label term is often added.'],
+ transition:'The loss, term by term.'});
+S('distill-loss','kl','The distillation loss, term by term',{builds:3,nb:'cell-distill',
+ body:stack(eq(R`\min_{\text{student}}\ \frac1N\sum_{i=1}^{N}\KL\big(p_T(\cdot\mid x_i)\,\|\,q_S(\cdot\mid x_i)\big),\qquad\KL(p_T\,\|\,q_S)=H(p_T,q_S)-H(p_T)`),
+  at(2,eq(R`\text{teacher frozen}\ \Rightarrow\ H(p_T)\ \text{fixed}\ \Rightarrow\ \text{minimise }H(p_T,q_S)=-\sum_y p_T(y)\log q_S(y)`)),
+  at(3,eq(R`\mathcal L=(1-\alpha)\,H(y_{\text{true}},q_S)+\alpha\,\tau^2\,\KL\big(p_T^{(\tau)}\,\|\,q_S^{(\tau)}\big)`)),
+  at(3,small('p<sup>(τ)</sup> = softmax(logits / τ): a temperature τ > 1 softens both distributions; τ² keeps the gradient scale comparable. α blends in the true labels.'))),
+ lines:['Write the KL out: it is the cross-entropy with the teacher’s soft labels, minus the teacher’s entropy.','The teacher is frozen, so its entropy is a constant: minimising the KL is minimising cross-entropy with soft labels, the soft-label slide of 2.5.','In practice both distributions are softened with a temperature τ, and a small term with the true labels is added. For our cat the KL is 0.05 nats.'],
+ ask:['Which part can the student change?','How is this related to the ordinary classification loss?','What does a temperature τ > 1 do?'],
+ expected:['Only q_S: H(p_T) is fixed by the frozen teacher.','It is the same cross-entropy loss, with the teacher’s soft distribution in place of the one-hot label.','It flattens the teacher’s distribution so its small probabilities, which carry the extra information, count for more.'],
+ transition:'What do soft labels teach that a one-hot label cannot?'});
+S('distill-soft','kl','What soft labels teach: a cat looks a bit like a dog',{builds:2,nb:'cell-classifier',
+ body:stack(softTemps(),at(2,p('A one-hot label says only “cat”. The teacher also says “a bit like a dog, not like an ape”: information about how classes relate, which Hinton called dark knowledge. Softening with τ = 4 makes it visible.'))),
+ lines:['Compare what the student is shown. The label: all on cat. The teacher: mostly cat, some dog, almost no ape or bear.','The teacher’s small probabilities tell the student which mistakes are reasonable. A temperature τ = 4 turns them up, so they shape the loss.'],
+ ask:['What does the student learn from the 0.20 on dog?','Why would τ = 1 hide that information?'],
+ expected:['That cats and dogs look alike to the teacher, so confusing them is a small error, unlike cat versus ape.','The 0.02 and 0.03 barely change the loss; dividing the logits by τ evens the distribution out.'],
+ transition:'Watch a real student learn.'});
+S('distill-demo','kl','Press play: a tiny student learns a big teacher',{builds:2,nb:'cell-distill',
+ body:stack(widget('distill','A student network learning a teacher’s distribution, with the KL from teacher to student'),
+  at(2,small(`Test accuracy: teacher ${num(100*ds.teacher_acc,1)}%, student ${num(100*ds.student_acc,1)}%; the student agrees with the teacher on ${num(100*ds.agree,1)}% of test points, with ${Math.round(ds.teacher_params/ds.student_params)}× fewer parameters.`))),
+ lines:[`Three overlapping classes in the plane. The teacher has ${ds.teacher_params.toLocaleString('en')} parameters, the student ${ds.student_params}. Colours show each network’s class probabilities. Predict: can the student copy the teacher?`,`Press play. The student’s map turns into the teacher’s, uncertain boundaries included, and KL(teacher ‖ student) falls from ${num(ds.frames[0][1],2)} to ${num(ds.frames.at(-1)[1],3)} nats.`],
+ ask:[`Predict: can a ${ds.student_params}-parameter network copy a ${ds.teacher_params.toLocaleString('en')}-parameter one?`,'Why do the boundaries stay blurred?'],
+ expected:['On this problem, nearly: the classes need only gently curved boundaries.','The student copies the teacher’s uncertainty too: where classes overlap, the teacher is unsure, and so is the student.'],
+ demo:'Notebook 2.7: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.',
+ transition:'Second application: RLHF.'});
+S('rlhf-setup','kl','RLHF: reward a chatbot, but keep it close to where it started',{builds:3,nb:'cell-rlhf',
+ body:`<div class="state-slot"><div data-only="1">${rlhfDiagram(1)}</div><div data-only="2">${rlhfDiagram(2)}</div><div data-only="3">${rlhfDiagram(3)}</div></div>`,
+ lines:['Reinforcement learning from human feedback: the language model, called the policy, writes a reply; a reward model, trained on human preferences, scores it. Training raises the reward.','A frozen copy of the starting model, the reference, stays alongside. A KL penalty keeps the policy’s next-word distributions close to the reference’s.',`The objective: expected reward minus β times KL(${PIH} ‖ ${PIH}<sub>ref</sub>). β sets how long the leash is.`],
+ ask:['What does the reward model reward?','Why keep a frozen copy?','What does β control?'],
+ expected:['Replies people preferred, as learned from human comparisons.','To measure how far the policy has drifted from a model that writes fluent, sensible text.','The trade-off: small β chases reward, large β stays near the reference.'],
+ point:'This KL penalty is part of InstructGPT/ChatGPT-style RLHF (PPO) and of GRPO; DPO optimises the same KL-regularised objective without a separate reward model.',
+ transition:'What goes wrong without the leash?'});
+S('rlhf-hacking','kl','Without the KL: the policy fools the reward model',{builds:2,nb:'cell-rlhf',
+ body:stack(`<div class="table-sm">${table(['reply to “Is the stove hot?”',m(R`\pi_{\text{ref}}`),'reward'],rl.replies.map((rep,i)=>[rep,num(rl.ref[i],2),(rl.reward[i]>0?'+':'')+num(rl.reward[i],1)]))}</div>`,
+  at(2,p(`Maximise reward alone and everything goes to “${rl.replies.at(-1)}”: <b>reward hacking</b>.`))),
+ lines:['Five possible replies. The reference model, trained on human text, mostly says sensible things. The reward model is imperfect: it loves enthusiasm.',`Chase the reward with no leash and the policy puts everything on the worst reply. The KL term charges for moving away from the reference: the less likely a reply was under ${PIH}<sub>ref</sub>, the more it costs.`],
+ ask:['Which reply does the reward model prefer?','Why is the KL term a defence?'],
+ expected:['The shouting one, +2.0: a flaw in the learned reward.',`A reply the reference almost never writes has a large log ratio ${PIH}/${PIH}<sub>ref</sub>, so piling probability on it costs a lot of KL.`],
+ transition:'Slide the leash.'});
+S('rlhf-beta','kl','Slide the leash: the best policy for each β',{builds:2,nb:'cell-rlhf',
+ body:stack(widget('rlhfbeta','The best policy over five replies as beta changes'),at(2,small(`The best policy reweights the reference by the reward: ${PIH}*(y) ∝ ${PIH}<sub>ref</sub>(y) · e<sup>r(y)/β</sup>.`))),
+ lines:['Move β. With a tight leash (large β) the policy stays the reference. Loosen it and probability flows to high-reward replies; with no leash it all goes to the hacked one.','The best policy has a closed form: reweight the reference by e<sup>r/β</sup>. KL keeps it a reweighting of what the model already says, never something new.'],
+ ask:['At β = 1, which reply gains most?','What happens as β → 0? As β → ∞?'],
+ expected:['“Yes, it is hot. Careful!”: probable under the reference and well rewarded.',`β → 0: all mass on the highest reward, the hacked reply. β → ∞: ${PIH}* = ${PIH}<sub>ref</sub>, no change.`],
+ point:`Derivation: maximise Σ ${PIH} r − β Σ ${PIH} log(${PIH}/${PIH}<sub>ref</sub>) subject to Σ ${PIH} = 1; setting the derivative to zero gives log ${PIH} = log ${PIH}<sub>ref</sub> + r/β − const. The notebook checks it by gradient ascent.`,
+ demo:`Notebook 2.7: the RLHF cell prints ${PIH}* for eight values of β and checks the closed form at β = 1 by gradient ascent.`,
+ transition:'How is that KL computed for real text?'});
+S('rlhf-tokens','kl','In practice: the KL is estimated token by token, from samples',{builds:2,nb:'cell-rlhf',
+ body:stack(eq(R`\KL(\pi\,\|\,\pi_{\text{ref}})\approx\sum_{t}\Big[\log\pi(y_t\mid y_{<t})-\log\pi_{\text{ref}}(y_t\mid y_{<t})\Big],\qquad y\sim\pi`),
+  at(2,p('A reply is a sequence of tokens, and there are far too many sequences to sum over. So sample replies from the policy and add the log ratios of the tokens: a Monte Carlo estimate (Section 2.9). GRPO uses the never-negative estimator r − 1 − log r from the appendix.'))),
+ lines:[`For text, ${PIH} is a next-token distribution: the KL of a reply is the sum, over its tokens, of log ${PIH} − log ${PIH}<sub>ref</sub>.`,'There is no way to sum over all possible replies, so the KL is estimated from sampled replies, exactly the sampling idea of Section 2.9.'],
+ ask:['Why not compute the KL exactly?','Which estimator can never be negative?'],
+ expected:['Vocabulary^length possible replies: astronomically many.',`r − 1 − log r with r = ${PIH}<sub>ref</sub>/${PIH}: optional slide in the appendix; DeepSeek’s GRPO uses it.`],
+ transition:'Back to continuous distributions: closed forms.'});
+chap('2.8');
 S('densities','kl','From sums to integrals',{builds:2,
  body:stack(eq(R`\text{discrete:}\qquad\KL(p\|q)=\sum_x p(x)\log\frac{p(x)}{q(x)}`),eq(R`\text{continuous:}\qquad\KL(p\|q)=\int p(\theta)\log\frac{p(\theta)}{q(\theta)}\,d\theta`),
   at(2,small('Probabilities become densities and the sum becomes an integral; the recipe is the same weighted average of log ratios.'))),
@@ -1085,7 +1210,7 @@ S('kl-area','kl','KL is an area you can watch',{nb:'cell-kl-area',
  expected:['KL(q‖p) stays moderate: q only visits places where p is reasonable. KL(p‖q) explodes: p’s tails land where q is nearly zero.'],
  point:'Click q₁, then q₂, then flip to KL(p‖q). Then shrink σ in each direction.',
  transition:'What if there is no formula at all?'});
-chap('2.8');
+chap('2.9');
 S('kl-expectation','kl','KL is an average: an expectation under p',{builds:2,
  body:stack(eq(R`\KL(p\,\|\,q)=\sum_x p(x)\log\frac{p(x)}{q(x)}`),at(2,eq(R`=\E_{x\sim p}\Big[\log\frac{p(x)}{q(x)}\Big]`)),
   at(2,small('E with x ~ p means: the average value when x is drawn from p.'))),
@@ -1512,6 +1637,13 @@ O('mc-grades','Sample grades and watch the average find the KL',{nb:'cell-grades
  point:'The exact value is the weighted sum (analytic); the running average is the Monte Carlo estimate. Draws are seeded, so the sequence replays identically.',
  transition:'Back to the optional slides.'});
 
+O('kl-estimators','A KL estimator that is never negative',{builds:2,nb:'cell-estimators',
+ body:stack(eq(R`r=\frac{p(\theta)}{q(\theta)},\ \theta\sim q:\qquad\underbrace{-\log r}_{\text{plain}}\qquad\text{vs}\qquad\underbrace{r-1-\log r}_{\ge0\text{ for every draw}}`),
+  at(2,table(['draws S','plain: spread','plain: negative','r − 1 − log r: spread','negative'],st.estimators.rows.map(rw=>[String(rw.S),num(rw.plain_sd,3),`${Math.round(100*rw.plain_negative)}%`,num(rw.better_sd,3),`${Math.round(100*rw.better_negative)}%`])))),
+ ask:['Why does adding r − 1 not change the average?','When can the better estimator be worse?'],
+ expected:['E_q[r] = ∫ q · p/q = ∫ p = 1, so E_q[r − 1] = 0: it only removes noise.','When p has heavier tails than q: r = p/q can then have infinite variance. Here p is narrower than q, so r stays bounded.'],
+ point:`${st.estimators.pair}, exact KL ${num(st.estimators.exact,3)}; 400 repeats per size. From Jia-Bin Huang’s video and John Schulman’s note “Approximating KL divergence”; GRPO uses this estimator for its KL penalty.`,
+ source:'After <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang</a> and <a href="http://joschu.net/blog/kl-approx.html">John Schulman, “Approximating KL divergence”</a>'});
 O('evidence-mc','Sampling from the prior: a few lucky draws carry everything',{nb:'cell-evidence-mc',builds:2,
  body:cols(evidenceMcChart(),stack(eq(R`p(\mathcal D)\approx\frac1S\sum_{s=1}^{S}p(\mathcal D\mid\theta_s)`),eq(R`\theta_s\sim p(\theta)`),
   at(2,p(`Ten draws: off by about 1,000 nats. Ten million: about ${effective} draws carry the estimate, ${num(E.estimate)}.`))),'1.05fr 1fr'),
@@ -1634,9 +1766,9 @@ O('optional-beta-elbo','Check the sampled objective with analytic Beta moments',
  expected:['Expected log r and expected log(1−r).','ψ already denotes the variational parameters.','The ELBO is computed directly from these moments, then the separately computed KL is added and compared with the evidence.']});
 
 // ================================================================ Lecture map, filled in once every section knows its first slide
-S('contents','map','Lecture 1 at a glance: five parts, twenty-three sections',{nb:'top',
+S('contents','map','Lecture 1 at a glance: five parts, twenty-four sections',{nb:'top',
  body:'',
- lines:['Five parts, twenty-three numbered sections. The notebook uses the same numbers: the ▶ Notebook link at the top right of every slide opens its section in Colab.'],
+ lines:['Five parts, twenty-four numbered sections. The notebook uses the same numbers: the ▶ Notebook link at the top right of every slide opens its section in Colab.'],
  ask:['Which part do you expect to be hardest?'],
  expected:['Usually Part 4, the ELBO derivation, so we take it one rule per line.'],
  point:'Click a section to jump to its first slide; ▶ notebook opens the matching notebook section in Colab. Run the notebook top to bottom once before class.',

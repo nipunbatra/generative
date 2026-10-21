@@ -41,7 +41,7 @@ This notebook computes every number, figure and animation in the Lecture 1 slide
 | Part | Sections |
 |---|---|
 | **1 · Bayes’ rule for a neural network** | [1.1 Bayes’ rule]({DECK}#bayes-rule/1) · [1.2 A tiny network and its prior]({DECK}#tiny-net/1) · [1.3 Likelihood and training]({DECK}#data-likelihood/1) · [1.4 The evidence is intractable]({DECK}#evidence-area/1) · [1.5 Approximating the posterior]({DECK}#predictive/1) |
-| **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 Classification loss]({DECK}#classifier/1) · [2.6 Maximum likelihood]({DECK}#mle-data/1) · [2.7 Closed forms and PyTorch]({DECK}#densities/1) · [2.8 KL by sampling]({DECK}#kl-expectation/1) |
+| **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 Classification loss]({DECK}#classifier/1) · [2.6 Maximum likelihood]({DECK}#mle-data/1) · [2.7 KL at work: distillation and RLHF]({DECK}#kl-everywhere/1) · [2.8 Closed forms and PyTorch]({DECK}#densities/1) · [2.9 KL by sampling]({DECK}#kl-expectation/1) |
 | **3 · Find the closest q** | [3.1 Search a grid]({DECK}#six-candidates/1) · [3.2 Gradient descent]({DECK}#walk-downhill/1) · [3.3 Covariance in 2-D]({DECK}#cov-families/1) · [3.4 Mixtures: no formula]({DECK}#mixture-what/1) · [3.5 The reparameterisation trick]({DECK}#missing-path/1) · [3.6 Which direction of KL?]({DECK}#fwdrev/1) |
 | **4 · Back to Bayes: the ELBO** | [4.1 Deriving the ELBO]({DECK}#can-we/1) · [4.2 Checking it on a coin]({DECK}#elbo-slider/1) |
 | **5 · Implement it** | [5.1 VI for the tiny network]({DECK}#bnn-elbo-code/1) · [5.2 Wrap-up]({DECK}#five-tools/1) |
@@ -627,9 +627,111 @@ assert torch.allclose(fitted, torch.tensor(p_hat), atol=1e-3)
 fixtures["story"]["mle"]["fitted"] = fitted.tolist()
 """, anchor="cell-mle-fit")
 md(r"""
-### 2.7 Closed forms, and what PyTorch computes
+### 2.7 KL at work: distillation and RLHF
 
-Slides: [2.7 From sums to integrals]({DECK}#densities/1) · [Bernoulli]({DECK}#bern-pmf/1) · [categorical]({DECK}#cat-pmf/1) · [Gaussian]({DECK}#gauss-pdf/1) · [diagonal Gaussian]({DECK}#diag-pdf/1) · [PyTorch’s source]({DECK}#torch-discrete/1)
+Slides: [2.7 The same quantity in many losses]({DECK}#kl-everywhere/1) · [a big teacher, a small student]({DECK}#distill-why/1) · [the distillation loss]({DECK}#distill-loss/1) · [a real student]({DECK}#distill-demo/1) · [RLHF]({DECK}#rlhf-setup/1) · [the KL leash]({DECK}#rlhf-beta/1)
+
+**Knowledge distillation** ([Hinton, Vinyals and Dean, 2015](https://arxiv.org/abs/1503.02531)): a big, accurate *teacher* is too slow to deploy, so a small *student* learns to reproduce the teacher’s output distribution. The loss is $\mathrm{KL}(p_{\text{teacher}}\,\|\,q_{\text{student}})$ on the same inputs, with the teacher frozen. The teacher’s soft labels say more than a one-hot label: which wrong classes are plausible.
+
+**RLHF**: a language model, the *policy* $\pi$, is fine-tuned to maximise a learned reward, minus $\beta\,\mathrm{KL}(\pi\,\|\,\pi_{\text{ref}})$ to a frozen copy of where it started. Without that leash it drifts to whatever fools the reward model. Over a small set of replies the best policy has a closed form, $\pi^*(y)\propto\pi_{\text{ref}}(y)\,e^{r(y)/\beta}$, which the second cell checks by gradient ascent.
+""", anchor="sec-2-7")
+code(r"""
+# Knowledge distillation on a toy problem: three overlapping classes in the plane.
+centres = torch.tensor([[-1.3, -.4], [1.3, -.4], [0., 1.5]])
+def sample_points(n, seed):
+    g = torch.Generator().manual_seed(seed)
+    y = torch.randint(0, 3, (n,), generator=g)
+    return centres[y] + .9 * torch.randn(n, 2, generator=g), y
+x_tr, y_tr = sample_points(3000, 1)
+x_te, y_te = sample_points(4000, 2)
+def mlp(sizes, seed):
+    torch.manual_seed(seed)
+    layers = []
+    for a, b in zip(sizes[:-1], sizes[1:]):
+        layers += [torch.nn.Linear(a, b), torch.nn.Tanh()]
+    return torch.nn.Sequential(*layers[:-1])
+def n_params(model):
+    return sum(w.numel() for w in model.parameters())
+teacher_net = mlp([2, 64, 64, 3], seed=10)                     # the big teacher, trained on labels
+opt_t = torch.optim.Adam(teacher_net.parameters(), lr=.01)
+for step in range(400):                                        # short training: a big net overfits noisy labels
+    loss_t = F.cross_entropy(teacher_net(x_tr), y_tr)
+    opt_t.zero_grad(); loss_t.backward(); opt_t.step()
+with torch.no_grad():
+    p_teacher_tr = torch.softmax(teacher_net(x_tr), -1)       # soft labels on the training inputs
+    p_teacher_te = torch.softmax(teacher_net(x_te), -1)
+def kl_rows(target, logits):
+    "KL(target ‖ softmax(logits)) for each row, in nats"
+    return (target * (target.clamp_min(1e-12).log() - torch.log_softmax(logits, -1))).sum(-1)
+student_net = mlp([2, 4, 3], seed=11)                         # the small student
+opt_s = torch.optim.Adam(student_net.parameters(), lr=.03)
+gx, gy = torch.meshgrid(torch.linspace(-3.6, 3.6, 24), torch.linspace(-3, 4, 24), indexing="xy")
+grid_pts = torch.stack([gx.flatten(), gy.flatten()], -1)
+record, frames, kl_curve = [0, 25, 50, 100, 200, 400, 800, 1600, 3000], [], []
+for step in range(3001):
+    with torch.no_grad():
+        kl_now = number(kl_rows(p_teacher_te, student_net(x_te)).mean())
+        if step % 50 == 0:
+            kl_curve.append([step, kl_now])
+        if step in record:
+            frames.append([step, kl_now, torch.softmax(student_net(grid_pts), -1).round(decimals=3).tolist()])
+    if step == 3000:
+        break
+    loss_s = kl_rows(p_teacher_tr, student_net(x_tr)).mean()     # the distillation loss: only the student learns
+    opt_s.zero_grad(); loss_s.backward(); opt_s.step()
+with torch.no_grad():
+    teacher_acc = number((teacher_net(x_te).argmax(-1) == y_te).double().mean())
+    student_acc = number((student_net(x_te).argmax(-1) == y_te).double().mean())
+    agree = number((student_net(x_te).argmax(-1) == teacher_net(x_te).argmax(-1)).double().mean())
+    teacher_grid = torch.softmax(teacher_net(grid_pts), -1).round(decimals=3).tolist()
+print(f"teacher: {n_params(teacher_net):,} parameters, test accuracy {teacher_acc:.3f}")
+print(f"student: {n_params(student_net):,} parameters, test accuracy {student_acc:.3f}, agrees with the teacher on {agree:.1%} of test points")
+print(f"KL(teacher ‖ student) on test points: {frames[0][1]:.3f} nats at the start, {frames[-1][1]:.4f} after 3,000 steps")
+assert frames[-1][1] < .1 * frames[0][1]
+fixtures["story"]["distill"] = dict(teacher_params=n_params(teacher_net), student_params=n_params(student_net),
+    teacher_acc=teacher_acc, student_acc=student_acc, agree=agree, kl_curve=kl_curve, frames=frames, teacher_grid=teacher_grid,
+    grid=dict(x=[-3.6, 3.6], y=[-3., 4.], n=24), points=x_tr[:180].tolist(), labels=y_tr[:180].tolist(), centres=centres.tolist())
+fig, axes = plt.subplots(1, 2, figsize=(12, 4.6), sharey=True)
+cols = np.array([[.14, .37, .86], [.75, .07, .24], [.08, .47, .22]])
+for ax, probs, title in [(axes[0], teacher_grid, f"teacher, {n_params(teacher_net):,} parameters"), (axes[1], frames[-1][2], f"student, {n_params(student_net)} parameters")]:
+    img = (np.array(probs) @ cols).reshape(24, 24, 3)
+    ax.imshow(.35 + .65 * img, origin="lower", extent=[-3.6, 3.6, -3, 4], aspect="auto")
+    ax.scatter(*x_tr[:180].T, c=cols[y_tr[:180]], s=10, edgecolors="white", linewidths=.4)
+    ax.set_title(title, loc="left")
+savefig("distillation")
+""", anchor="cell-distill")
+code(r"""
+# RLHF in miniature: five possible replies to one prompt, a frozen reference model and a reward model.
+replies = ["Yes, it is hot. Careful!", "Yes.", "It might be.", "No.", "YES!!! AMAZING STOVE!!!"]
+pi_ref = torch.tensor([.40, .30, .20, .09, .01])             # the pretrained model's probabilities
+reward = torch.tensor([1.0, .6, .3, -1.0, 2.0])               # a reward model that is fooled by enthusiasm
+def best_policy(beta):
+    "argmax over π of E_π[r] − β KL(π ‖ π_ref): π*(y) ∝ π_ref(y) exp(r(y)/β)"
+    w = pi_ref * torch.exp(reward / beta)
+    return w / w.sum()
+def kl_ref(pi_):
+    return number((pi_ * (pi_ / pi_ref).log()).sum())
+policies = {}
+for beta in [.05, .1, .2, .5, 1., 2., 5., 20.]:
+    pb = best_policy(beta)
+    policies[str(beta)] = dict(probs=pb.tolist(), reward=number((pb * reward).sum()), kl=kl_ref(pb))
+    print(f"β = {beta:5}: π* = {pb.numpy().round(3)}, expected reward {number((pb * reward).sum()):.3f}, KL(π*‖π_ref) = {kl_ref(pb):.3f}")
+# The closed form, checked by gradient ascent on the objective at β = 1
+logits_r = torch.nn.Parameter(pi_ref.log().clone())
+opt_r = torch.optim.Adam([logits_r], lr=.05)
+for step in range(3000):
+    pi_ = torch.softmax(logits_r, 0)
+    loss_r = -((pi_ * reward).sum() - 1. * (pi_ * (torch.log_softmax(logits_r, 0) - pi_ref.log())).sum())
+    opt_r.zero_grad(); loss_r.backward(); opt_r.step()
+assert torch.allclose(torch.softmax(logits_r.detach(), 0), best_policy(1.), atol=1e-4)
+print("gradient ascent at β = 1 lands on the closed form:", torch.softmax(logits_r.detach(), 0).numpy().round(4))
+fixtures["story"]["rlhf"] = dict(replies=replies, ref=pi_ref.tolist(), reward=reward.tolist(), policies=policies,
+    ref_reward=number((pi_ref * reward).sum()), gd_check=torch.softmax(logits_r.detach(), 0).tolist())
+""", anchor="cell-rlhf")
+md(r"""
+### 2.8 Closed forms, and what PyTorch computes
+
+Slides: [2.8 From sums to integrals]({DECK}#densities/1) · [Bernoulli]({DECK}#bern-pmf/1) · [categorical]({DECK}#cat-pmf/1) · [Gaussian]({DECK}#gauss-pdf/1) · [diagonal Gaussian]({DECK}#diag-pdf/1) · [PyTorch’s source]({DECK}#torch-discrete/1)
 
 For continuous $\theta$ the sum becomes an integral, $\mathrm{KL}(p\|q)=\int p(\theta)\log\frac{p(\theta)}{q(\theta)}\,d\theta$. For four families the average has a formula:
 
@@ -641,7 +743,7 @@ For continuous $\theta$ the sum becomes an integral, $\mathrm{KL}(p\|q)=\int p(\
 | diagonal Gaussians | the sum of the one-dimensional KLs |
 
 The next cell checks each formula against `torch.distributions.kl_divergence` and prints PyTorch’s own implementation ([source on GitHub](https://github.com/pytorch/pytorch/blob/main/torch/distributions/kl.py)).
-""", anchor="sec-2-7")
+""", anchor="sec-2-8")
 code(r"""
 import inspect
 from torch.distributions import kl as torch_kl
@@ -726,12 +828,12 @@ print("Matched distributions: KL(p||p) =", number(dist.kl_divergence(p,p)))
 fixtures["normal"] = {"target": {"mu":1., "sigma":4.}, "candidates":normal_values}
 """, anchor="cell-kl-area")
 md(r"""
-### 2.8 KL by sampling
+### 2.9 KL by sampling
 
-Slides: [2.8 KL is an average]({DECK}#kl-expectation/1) · [two ways to compute an expectation]({DECK}#expectation-sampling/1) · [sample the weather]({DECK}#mc-weather/1) · [the code]({DECK}#kl-sampling/1) · [watch it settle]({DECK}#mc-live/1)
+Slides: [2.9 KL is an average]({DECK}#kl-expectation/1) · [two ways to compute an expectation]({DECK}#expectation-sampling/1) · [sample the weather]({DECK}#mc-weather/1) · [the code]({DECK}#kl-sampling/1) · [watch it settle]({DECK}#mc-live/1)
 
 KL is an **expectation**: $\mathrm{KL}(p\|q)=\mathbb E_{x\sim p}\big[\log\frac{p(x)}{q(x)}\big]$. An expectation can be computed three ways: a weighted sum $\sum_x p(x)f(x)$, an integral $\int p(\theta)f(\theta)\,d\theta$, or a **sample average** $\frac1S\sum_s f(x_s)$ with $x_s\sim p$. Draws land on each value in proportion to its probability, so the plain average weights each $f(x)$ by $p(x)$ by itself. First with the weather of 2.4, where the exact answer is 0.25 bits.
-""", anchor="sec-2-8")
+""", anchor="sec-2-9")
 code(r"""
 rng = np.random.default_rng(11)
 days8 = rng.choice(3, size=10_000, p=weather_p)                  # days drawn from our weather p

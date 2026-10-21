@@ -562,6 +562,49 @@ function mlefit(el,ctx,d){
  el.querySelectorAll('[data-q]').forEach(bt=>bt.addEventListener('click',()=>{[s.a,s.b]=bt.dataset.q.split(',').map(Number);sync(el,s);draw();}));
 }
 
+// ---- Section 2.7: a small student learns a big teacher's distribution --------------------------
+const CLASS_RGB=[[36,94,219],[190,18,60],[20,119,55]];
+/** A 24 × 24 map of class probabilities, each cell coloured by its probability-weighted class colour. */
+function probMap(P,probs,n){
+ let s='';const cw=(P.x(P.x1)-P.x(P.x0))/n,ch=(P.y(P.y0)-P.y(P.y1))/n;
+ probs.forEach((pr,k)=>{const i=k%n,j=Math.floor(k/n),rgb=[0,1,2].map(c=>Math.round(255*(.35+.65*(pr[0]*CLASS_RGB[0][c]+pr[1]*CLASS_RGB[1][c]+pr[2]*CLASS_RGB[2][c])/255)));
+  s+=`<rect x="${(P.x(P.x0)+i*cw).toFixed(1)}" y="${(P.y(P.y0)-(j+1)*ch).toFixed(1)}" width="${(cw+.6).toFixed(1)}" height="${(ch+.6).toFixed(1)}" fill="rgb(${rgb.join(',')})"/>`;});
+ return s;
+}
+function distill(el,ctx,d){
+ const ds=d.story.distill,fr=ds.frames,n=ds.grid.n,W=1150,H=330,[x0,x1]=ds.grid.x,[y0,y1]=ds.grid.y;
+ const mapPanel=(ox,probs,title,color)=>{const P=panel({ox,W:350,H,L:10,R:10,T:44,B:16,xMin:x0,xMax:x1,yMin:y0,yMax:y1,yAxis:false});P.x0=x0;P.x1=x1;P.y0=y0;P.y1=y1;
+  return probMap(P,probs,n)+ds.points.map((pt,k)=>`<circle cx="${P.x(pt[0]).toFixed(1)}" cy="${P.y(pt[1]).toFixed(1)}" r="3" fill="rgb(${CLASS_RGB[ds.labels[k]].join(',')})" stroke="#fff" stroke-width=".8"/>`).join('')+label(ox+10,28,title,{fill:color,size:19,weight:600});};
+ const render=i=>{const [step,kl,probs]=fr[i];
+  const K=panel({ox:760,W:390,H,L:56,R:34,T:44,B:56,xMin:0,xMax:3000,yMin:0,yMax:Math.max(.6,fr[0][1]*1.1),ticksX:[0,1500,3000],ticksY:[0,.25,.5],xLabel:'training step'});
+  const tr=ds.kl_curve.filter(r=>r[0]<=step);
+  return svg(W,H,mapPanel(0,ds.teacher_grid,`teacher · ${ds.teacher_params.toLocaleString('en')} parameters`,palette.p)+mapPanel(380,probs,`student · ${ds.student_params} parameters · step ${step}`,palette.q)+
+   K.axes+(tr.length>1?K.line(tr.map(r=>r[0]),tr.map(r=>r[1]),palette.loss):'')+K.dot(step,kl,palette.loss)+label(816,28,`KL(teacher ‖ student) = ${num(kl,3)}`,{fill:palette.loss,size:19,weight:600}),
+   'The teacher’s class-probability map, the student’s map at this training step, and the KL from teacher to student falling.');
+ };
+ animated(el,ctx,{count:fr.length,render,step:i=>`step ${fr[i][0]}`,alt:'A student network learning a teacher’s distribution',duration:4500});
+}
+// ---- Section 2.7: RLHF's best policy as the KL leash loosens -----------------------------------
+function rlhfbeta(el,ctx,d){
+ const r=d.story.rlhf,W=1150,H=300,s={lb:0};
+ const best=beta=>{const w=r.ref.map((v,i)=>v*Math.exp(r.reward[i]/beta)),z=w.reduce((a,b2)=>a+b2,0);return w.map(v=>v/z);};
+ const render=()=>{
+  const beta=Math.pow(10,s.lb),pi=best(beta),er=pi.reduce((a,v,i)=>a+v*r.reward[i],0),kl=pi.reduce((a,v,i)=>a+(v>0?v*Math.log(v/r.ref[i]):0),0);
+  let g=label(0,24,'reply',{size:18})+label(560,24,'reward',{size:18,anchor:'end'})+label(590,24,'<tspan font-family="Times New Roman,Georgia,serif" font-style="italic">π</tspan><tspan baseline-shift="sub" font-size="70%">ref</tspan> (teal) and the best policy <tspan font-family="Times New Roman,Georgia,serif" font-style="italic">π</tspan>* (purple)',{size:18});
+  r.replies.forEach((rep,i)=>{const y=46+i*46,bw=480;
+   g+=label(0,y+18,rep,{fill:palette.ink,size:19})+label(560,y+18,(r.reward[i]>0?'+':'')+num(r.reward[i],1),{fill:r.reward[i]>=0?palette.d:palette.loss,size:19,anchor:'end',weight:600})+
+    `<rect x="590" y="${y}" width="${Math.max(1.5,r.ref[i]*bw).toFixed(1)}" height="14" rx="3" fill="${palette.p}"/>`+label(596+r.ref[i]*bw,y+12,num(r.ref[i],2),{fill:palette.p,size:15})+
+    `<rect x="590" y="${y+17}" width="${Math.max(1.5,pi[i]*bw).toFixed(1)}" height="14" rx="3" fill="${palette.q}"/>`+label(596+pi[i]*bw,y+29,num(pi[i],2),{fill:palette.q,size:15});});
+  g+=label(0,292,`β = ${num(beta,beta<1?2:1)}:  expected reward ${num(er,2)}  ·  KL to the reference = ${num(kl,2)} nats`,{fill:palette.ink,size:21,weight:600});
+  return svg(W,H,g,`With beta ${num(beta,2)}, the best policy over five replies, against the reference, with expected reward ${num(er,2)}.`);
+ };
+ const controls=`<label>log₁₀ β<input type="range" min="-1.3" max="1.3" step=".02" value="0" data-k="lb" aria-label="log10 of beta"><span class="w-readout" data-o="lb">0.00</span></label>`+
+  [['β = 0.05: no leash',-1.3],['β = 1',0],['β = 20: tight leash',1.3]].map(([t,v])=>`<button type="button" data-lb="${v}">${t}</button>`).join('');
+ const draw=interactive(el,ctx,{controls,render});if(!draw)return;
+ bindSliders(el,s,draw);
+ el.querySelectorAll('[data-lb]').forEach(bt=>bt.addEventListener('click',()=>{s.lb=Number(bt.dataset.lb);sync(el,s);draw();}));
+}
+
 // ---- Part 5: variational inference for the tiny network -----------------------------------------
 function bnnvi(el,ctx,d){
  const b=d.story.bnn,fr=b.vi.frames,xs=b.grid,ev=b.evidence.estimate,W=1150,H=330;
@@ -581,7 +624,7 @@ function bnnvi(el,ctx,d){
 }
 
 export function mount(stage,ctx,d){
- const make={klarea,fwdrev,olive,elboslider,mclive,bnnvi,priorfuncs,mapfit,mcgrades,klgrid,cov3,mixsample,surprise,entropy2,mlefit,'days-entropy':(e,c)=>days(e,c,d,'entropy'),'days-codes':(e,c)=>days(e,c,d,'codes'),'days-logratio':(e,c)=>days(e,c,d,'logratio'),'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
+ const make={klarea,fwdrev,olive,elboslider,mclive,bnnvi,priorfuncs,mapfit,mcgrades,klgrid,cov3,mixsample,surprise,entropy2,mlefit,distill,rlhfbeta,'days-entropy':(e,c)=>days(e,c,d,'entropy'),'days-codes':(e,c)=>days(e,c,d,'codes'),'days-logratio':(e,c)=>days(e,c,d,'logratio'),'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
  for(const el of stage.querySelectorAll('[data-widget]')){
   const f=make[el.dataset.widget];if(!f)throw new Error('Unknown widget '+el.dataset.widget);f(el,ctx,d);
  }

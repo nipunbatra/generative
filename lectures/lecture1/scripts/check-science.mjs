@@ -132,6 +132,18 @@ near('Average surprise under q = cross-entropy with the frequencies',ml.avg_q,ml
 near('Average surprise under p-hat = entropy of the data',ml.avg_hat,ml.p_hat.reduce((a,v)=>a-v*lg2(v),0),1e-12);
 near('Likelihood ratio 2^(20 KL)',ml.ratio,2**(20*(ml.avg_q-ml.avg_hat)),1e-9);
 ml.fitted.forEach((v,i)=>near(`Gradient descent finds the frequency ${i}`,v,ml.p_hat[i],1e-3));
+const dst=st.distill;
+check('Distillation: the student is far smaller than the teacher',dst.student_params*50<dst.teacher_params);
+check('Distillation: KL(teacher || student) falls tenfold or more',dst.frames.at(-1)[1]<.1*dst.frames[0][1]);
+check('Distillation: the student agrees with the teacher on most test points',dst.agree>.9);
+check('Distillation: every map row is a distribution',[dst.teacher_grid,...dst.frames.map(f=>f[2])].every(g=>g.every(row=>Math.abs(row[0]+row[1]+row[2]-1)<.01)));
+const rh=st.rlhf,best=b=>{const w=rh.ref.map((v,i)=>v*Math.exp(rh.reward[i]/b)),z=w.reduce((a,c)=>a+c,0);return w.map(v=>v/z);};
+for(const [b,pol] of Object.entries(rh.policies)){const bp=best(Number(b));pol.probs.forEach((v,i)=>near(`RLHF closed form, beta ${b}, reply ${i}`,v,bp[i],1e-9));
+ near(`RLHF expected reward, beta ${b}`,pol.reward,bp.reduce((a,v,i)=>a+v*rh.reward[i],0),1e-9);
+ near(`RLHF KL to the reference, beta ${b}`,pol.kl,bp.reduce((a,v,i)=>a+v*Math.log(v/rh.ref[i]),0),1e-9);}
+rh.gd_check.forEach((v,i)=>near(`RLHF gradient ascent matches the closed form, reply ${i}`,v,best(1)[i],1e-4));
+const byBeta=Object.entries(rh.policies).sort((a,b)=>Number(a[0])-Number(b[0])).map(e=>e[1]);
+check('RLHF: a looser leash (smaller beta) buys more reward and more KL',byBeta.slice(1).every((pol,k)=>pol.reward<=byBeta[k].reward+1e-12&&pol.kl<=byBeta[k].kl+1e-12));
 const es=st.estimators;
 check('Better estimator is never negative and has lower spread',es.rows.every(r=>r.better_negative===0&&r.better_sd<r.plain_sd));
 near('Weather sampling at 10,000 days is close to the KL in bits',st.weather_sampling.estimates.at(-1),bitsW.kl,.03);

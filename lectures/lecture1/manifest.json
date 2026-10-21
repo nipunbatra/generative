@@ -3,7 +3,7 @@
   "number": 1,
   "title": "KL and variational inference",
   "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
-  "minutes": 130,
+  "minutes": 140,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
@@ -19,7 +19,7 @@
     {
       "id": "kl",
       "title": "Part 2 · How far apart are two distributions?",
-      "minutes": 64
+      "minutes": 74
     },
     {
       "id": "fit",
@@ -42,12 +42,12 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 108,
-  "optionalSlides": 25,
+  "coreSlides": 117,
+  "optionalSlides": 26,
   "slides": [
     {
       "id": "contents",
-      "title": "Lecture 1 at a glance: five parts, twenty-three sections",
+      "title": "Lecture 1 at a glance: five parts, twenty-four sections",
       "section": "map",
       "builds": 1,
       "optional": false
@@ -411,9 +411,72 @@
     },
     {
       "id": "kl-everywhere",
-      "title": "Takeaway: KL is everywhere in machine learning",
+      "title": "KL at work: the same quantity in many losses",
       "section": "kl",
       "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "distill-why",
+      "title": "Knowledge distillation: a big teacher, a small student",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "distill-match",
+      "title": "Make the student’s distribution match the teacher’s",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "distill-loss",
+      "title": "The distillation loss, term by term",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "distill-soft",
+      "title": "What soft labels teach: a cat looks a bit like a dog",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "distill-demo",
+      "title": "Press play: a tiny student learns a big teacher",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "rlhf-setup",
+      "title": "RLHF: reward a chatbot, but keep it close to where it started",
+      "section": "kl",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "rlhf-hacking",
+      "title": "Without the KL: the policy fools the reward model",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "rlhf-beta",
+      "title": "Slide the leash: the best policy for each β",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "rlhf-tokens",
+      "title": "In practice: the KL is estimated token by token, from samples",
+      "section": "kl",
+      "builds": 2,
       "optional": false
     },
     {
@@ -858,6 +921,13 @@
       "optional": true
     },
     {
+      "id": "kl-estimators",
+      "title": "A KL estimator that is never negative",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
       "id": "evidence-mc",
       "title": "Sampling from the prior: a few lucky draws carry everything",
       "section": "optional",
@@ -977,5 +1047,5 @@
       "optional": true
     }
   ],
-  "totalStates": 298
+  "totalStates": 320
 }
