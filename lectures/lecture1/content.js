@@ -210,6 +210,18 @@ function predictiveChart(){
   legend(52,30,[['mean ± 2 sd, and 20 posterior draws',palette.p]]),'The posterior predictive: a band that widens away from the data, and twenty functions drawn from the posterior.');
 }
 /** One Gaussian per parameter. With fitted values, drawn against the N(0, 1) prior in grey. */
+/** Variational inference in one picture: the posterior we need but cannot compute, and a q we control, tuned to sit close to it. */
+function viIdeaFig(){
+ const t=st.three,xs=t.plot.x,Pc=palette.p,Q=palette.q;let s=graphDefs('vi');
+ const curves=(ox,withQ)=>{const P=panel({ox,oy:40,W:430,H:130,L:10,R:10,T:12,B:14,xMin:-6,xMax:6,yMax:.44,yAxis:false});
+  return P.axes+P.area(xs,t.plot.p,withQ?'#0F766E14':TINT.p)+P.line(xs,t.plot.p,Pc,withQ?'stroke-opacity=".35"':'')+(withQ?P.line(xs,t.plot.vi,Q):'');};
+ s+=box(10,6,450,228,Pc)+label(30,34,'the posterior p(θ | 𝒟)',{fill:Pc,size:22,weight:600})+curves(20,false)+
+  label(235,190,'what we need: predictions, error bars',{size:17,anchor:'middle'})+label(235,216,'but p(𝒟) is intractable: we cannot compute it',{fill:palette.loss,size:17,anchor:'middle'});
+ s+=`<g data-at="2">${box(690,6,450,228,Q)+label(710,34,`q${sub('ψ')}(θ): a distribution we control`,{fill:Q,size:22,weight:600})+curves(700,true)+
+  label(915,190,'its knobs: ψ = (μ, σ); θ ∼ q is easy to draw',{size:17,anchor:'middle'})+label(915,216,'also called the guide (in Pyro)',{fill:MUTED,size:17,anchor:'middle'})+
+  fwdEdge('vi','M688,104 L464,104')+label(576,84,'tune ψ to make q',{fill:Q,size:17,anchor:'middle'})+label(576,132,'as close as possible',{fill:Q,size:17,anchor:'middle'})}</g>`;
+ return fig(1150,240,s,'Variational inference: on the left the posterior, which we need for predictions but cannot compute; on the right a distribution q with parameters psi that we control and tune to sit as close as possible to the posterior.');
+}
 function qFactors(fit=null){
  const W=1150,H=fit?190:150,PW=150,G=(W-7*PW)/6,us=lin(-3,3,161);let s='';
  const shape=[[.6,.5],[-.8,.35],[.2,.6],[-.3,.3],[.9,.45],[-.5,.4],[.1,.25]];
@@ -780,8 +792,18 @@ S('three-ways','bayes','Three ways to approximate the posterior; we take the thi
  ask:['What does Laplace miss here?','What does MCMC cost?','What does VI trade away?'],
  expected:['The second bump: it only looks at the peak.','Many steps, each evaluating the model on the data; hard to scale to large models and datasets.','Exactness. The answer is limited to the family, here one Gaussian. In return it is fast and uses the same gradient tools as deep learning.'],
  point:'Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 0.',
- transition:'Variational inference, in one slide.'});
+ transition:'Variational inference, in one picture.'});
 S('vi-idea','bayes','Variational inference: choose q, make it close to the posterior',{builds:3,
+ body:stack(viIdeaFig(),
+  at(3,`<div class="eq-sm">${eq(R`\begin{aligned}p(y^*\mid x^*,\mathcal D)&=\int p(y^*\mid x^*,\theta)\,\pcol{p(\theta\mid\mathcal D)}\,d\theta&&\text{needs the posterior}\\&\approx\frac1S\sum_{s=1}^{S}p(y^*\mid x^*,\theta_s),\quad\theta_s\sim\qcol{q_\psi(\theta)}&&\text{needs only }q_\psi\end{aligned}`)}</div>`)),
+ lines:['What we need is the posterior: every prediction with error bars averages over it. But we cannot compute it, because the evidence p(𝒟) is intractable.',
+  'So choose a distribution q<sub>ψ</sub>(θ) that we control through its knobs ψ, and tune ψ until q<sub>ψ</sub> is as close as possible to the posterior. Pyro calls q<sub>ψ</sub> the guide.',
+  'Then use q<sub>ψ</sub> wherever the posterior was needed. For predictions: draw networks from q<sub>ψ</sub> and average their outputs.'],
+ ask:['What do we need the posterior for?','What can we change about q<sub>ψ</sub>?','Why is the second line easy to compute?'],
+ expected:['Predictions that average over every plausible network, with their error bars.','Only its knobs ψ: for a Gaussian, a mean and a width for each parameter.','Drawing θ from q<sub>ψ</sub> is easy, and each draw costs one forward pass of the network.'],
+ point:'The same q<sub>ψ</sub> is called the variational distribution, the approximate posterior, or, in Pyro and NumPyro, the guide.',
+ transition:'Our q for the tiny network.'});
+S('vi-family','bayes','Our q for the network: one Gaussian per parameter',{builds:3,
  body:stack(eq(R`q_\psi(\theta)=\prod_{j=1}^{7}\N(\theta_j;\,\mu_j,\,\sigma_j^2),\qquad\psi=(\mu_1,\dots,\mu_7,\ \sigma_1,\dots,\sigma_7)`),at(2,qFactors()),
   at(3,eq(R`\psi^*=\arg\min_\psi\ \text{distance}\big(q_\psi(\theta),\ \pcol{p(\theta\mid\mathcal D)}\big)`))),
  lines:['Pick a simple family: one Gaussian per parameter, each with its own mean and width. ψ is fourteen numbers.','One bell per parameter. Together they define q(θ), and drawing θ from q is easy.','Tune ψ until q is as close as possible to the posterior. Two questions: what is “close”, and how do we tune without the posterior?'],

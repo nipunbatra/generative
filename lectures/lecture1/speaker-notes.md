@@ -263,9 +263,27 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Point here:** Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 0.
 
-**Transition:** Variational inference, in one slide.
+**Transition:** Variational inference, in one picture.
 
 ## vi-idea: Variational inference: choose q, make it close to the posterior
+
+**Build 1, ask:** What do we need the posterior for?
+
+**Expected:** Predictions that average over every plausible network, with their error bars.
+
+**Build 2, ask:** What can we change about q<sub>ψ</sub>?
+
+**Expected:** Only its knobs ψ: for a Gaussian, a mean and a width for each parameter.
+
+**Build 3, ask:** Why is the second line easy to compute?
+
+**Expected:** Drawing θ from q<sub>ψ</sub> is easy, and each draw costs one forward pass of the network.
+
+**Point here:** The same q<sub>ψ</sub> is called the variational distribution, the approximate posterior, or, in Pyro and NumPyro, the guide.
+
+**Transition:** Our q for the tiny network.
+
+## vi-family: Our q for the network: one Gaussian per parameter
 
 **Build 1, ask:** How many numbers does q have?
 
