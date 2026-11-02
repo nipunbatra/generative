@@ -35,8 +35,8 @@ const CHAPTERS=[
  ['4.1','Deriving the ELBO'],['4.2','Checking it on a coin'],
  ['5.1','VI for the tiny network'],['5.2','Wrap-up'],
 ];
-/** Sub-sections: the three approximations of Section 1.5 and the three applications of Section 2.5; subsec(null) returns to the section itself. */
-const SUBS=[['1.5.1','Laplace'],['1.5.2','MCMC'],['1.5.3','VI'],['2.5.1','Classification'],['2.5.2','Knowledge distillation']];
+/** Sub-sections: the applications of Section 2.5; subsec(null) returns to the section itself. */
+const SUBS=[['2.5.1','Classification'],['2.5.2','Knowledge distillation']];
 const PARTS=[['1','Bayes’ rule for a neural network'],['2','How far apart are two distributions?'],['3','Find the closest q'],['4','Back to Bayes: the ELBO'],['5','Implement it']];
 const COLAB='https://colab.research.google.com/github/nipunbatra/generative/blob/main/lectures/lecture1/lecture1-variational-inference.ipynb';
 const secAnchor=k=>`sec-${k.replaceAll('.','-')}`;
@@ -52,7 +52,7 @@ function nbLink(anchor,number){
 function S(id,section,title,o){
  const builds=o.builds||1;
  for(const k of ['lines','ask','expected'])if(!Array.isArray(o[k])||o[k].length!==builds)throw new Error(`${id}: ${k} needs ${builds} entries`);
- const ch=section==='optional'||section==='map'?null:chapter,sc=ch?subchapter:null;
+ const ch=section==='optional'||section==='map'||o.part?null:chapter,sc=ch?subchapter:null;
  if(ch&&!firstOf[ch[0]])firstOf[ch[0]]=id;
  if(sc&&!firstOf[sc[0]])firstOf[sc[0]]=id;
  const anchor=o.nb||(sc?secAnchor(sc[0]):ch?secAnchor(ch[0]):null);
@@ -229,51 +229,16 @@ function klWhyFig(){
  return fig(1150,310,one(0,'fwd','q stretched across both bumps')+one(590,'revl','q on the left bump'),
   'The cost of each KL along theta. Reverse KL: for a q stretched across both bumps the cost piles up in the gap where p is nearly zero; for a q on one bump it is small. Forward KL: the one-bump q pays heavily on the bump it ignores.');
 }
-/** The two-bump target of Section 1.5, as a function we can evaluate. */
-const threeDens=u=>st.three.weights.reduce((a,w,k)=>a+w*normalPdf(u,{mu:st.three.means[k],sigma:st.three.scales[k]}),0);
 /** Laplace in three steps: climb to the peak, read the bend of log p there, and draw the matching Gaussian. */
-function laplaceFig(){
- const t=st.three,xs=t.plot.x,[mode,sd]=t.laplace;
- const A=panel({W:640,H:300,L:16,R:14,T:52,B:50,xMin:-6,xMax:6,yMax:.32,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
- const path=t.climb.map(u=>[A.x(u),A.y(threeDens(u))]),last=path.at(-1);
- let s=A.axes+A.area(xs,t.plot.p,TINT.p)+A.line(xs,t.plot.p,palette.p)+label(16,30,'likelihood × prior: the posterior’s shape',{fill:palette.p,size:20,weight:600})+
-  `<polyline points="${path.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' ')}" fill="none" stroke="${palette.noise}" stroke-width="2"/>`+
-  path.map(([x,y],k)=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${k===path.length-1?7:4.5}" fill="${palette.noise}"/>`).join('')+
-  // labels sit in empty space, joined to their dots by thin leader lines
-  `<line x1="${A.x(1.15).toFixed(1)}" y1="${(A.y(.18)+6).toFixed(1)}" x2="${path[0][0].toFixed(1)}" y2="${path[0][1].toFixed(1)}" stroke="${palette.noise}" stroke-width="1.2"/>`+label(A.x(1.2),A.y(.18),'start: θ = 0',{fill:palette.noise,size:18})+
-  `<line x1="${A.x(-4.3).toFixed(1)}" y1="${(A.y(.25)+6).toFixed(1)}" x2="${last[0].toFixed(1)}" y2="${last[1].toFixed(1)}" stroke="${palette.noise}" stroke-width="1.2"/>`+label(A.x(-5.8),A.y(.25),`θ${sub('MAP')} = ${num(mode,2)}`,{fill:palette.noise,size:19,weight:600});
- s+=`<g data-at="3">${A.line(xs,t.plot.laplace,palette.noise,'stroke-dasharray="8 5"')+label(A.x(-5.8),A.y(.19),`dashed: N(${num(mode,2)}, ${num(sd,2)}²)`,{fill:palette.noise,size:19,weight:600})}</g>`;
- const B=panel({ox:680,W:470,H:300,L:56,R:14,T:52,B:50,xMin:-4.5,xMax:.5,yMin:-5,yMax:-.5,ticksX:[-4,-3,-2,-1,0],ticksY:[-5,-3,-1],xLabel:'θ'});
- const zs=lin(-4.5,.5,101),top=Math.log(threeDens(mode));
- s+=`<g data-at="2">${B.axes+B.line(zs,zs.map(u=>Math.log(threeDens(u))),palette.p)+B.line(zs,zs.map(u=>top-(u-mode)**2/(2*sd*sd)),palette.noise,'stroke-dasharray="8 5"')+
-  label(736,30,'log p near the peak, and a parabola',{fill:ink,size:19,weight:600})}</g>`;
- return fig(1150,300,s,'Laplace in three steps: gradient ascent climbs from theta = 0 to the highest peak; near the peak the log density is matched by a parabola; the Gaussian with that peak and that bend.');
-}
 /** The walker's rule: from θ, propose θ′; uphill always, downhill with probability p(θ′)/p(θ); in the long run the visits follow p. */
-function mcmcRuleFig(){
- const t=st.three,xs=t.plot.x,cur=-1,up=-1.6,down=.8,ratio=threeDens(down)/threeDens(cur);
- const A=panel({W:1150,H:290,L:16,R:14,T:46,B:50,xMin:-6,xMax:6,yMax:.32,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
- const e=t.mcmc.edges,pt=u=>[A.x(u),A.y(threeDens(u))],[cx,cy]=pt(cur),[ux,uy]=pt(up),[dx,dy]=pt(down);
- let bars='';t.mcmc.hist.forEach((h,i)=>{if(!h)return;const x0=A.x(e[i]),x1=A.x(e[i+1]);bars+=`<rect x="${(x0+1).toFixed(1)}" y="${A.y(h).toFixed(1)}" width="${(x1-x0-2).toFixed(1)}" height="${(A.y(0)-A.y(h)).toFixed(1)}" fill="${palette.data}" fill-opacity=".4"/>`;});
- let s=A.axes+`<g data-at="3">${bars}${label(A.x(5.9),A.y(.24),`${t.mcmc.steps.toLocaleString('en')} steps: where the walker spent its time`,{fill:palette.data,size:20,anchor:'end',weight:600})}</g>`+A.area(xs,t.plot.p,'none')+A.line(xs,t.plot.p,palette.p);
- const hollow=(x,y,c)=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8" fill="${palette.paper}" stroke="${c}" stroke-width="3"/>`;
- const guide=(x1,x2,y)=>`<line x1="${x1.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${MUTED}" stroke-width="2" stroke-dasharray="5 5"/>`;
- s+=`<g data-only="1-2">${guide(cx,ux,A.y(0)-18)+guide(cx,dx,A.y(0)-18)}</g>`+
-  hollow(ux,uy,palette.d)+hollow(dx,dy,palette.loss)+`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="${palette.noise}"/>`+
-  label(cx-14,cy+34,'θ: the walker',{fill:palette.noise,size:19,anchor:'end',weight:600})+
-  label(ux-14,uy-18,'θ′',{fill:palette.d,size:20,anchor:'end',weight:600})+label(dx+14,dy-16,'θ′',{fill:palette.loss,size:20,weight:600})+
-  `<g data-only="2">${label(ux-14,uy-44,'higher: always move',{fill:palette.d,size:19,anchor:'end',weight:600})+
-   label(dx+14,dy-62,`lower: move with probability`,{fill:palette.loss,size:19,weight:600})+label(dx+14,dy-38,`p(θ′) / p(θ) = ${num(ratio,2)}, else stay`,{fill:palette.loss,size:19,weight:600})}</g>`;
- return fig(1150,290,s,'A random walk on the two-bump target. The walker at theta proposes a step; a higher proposal is always accepted, a lower one with probability equal to the ratio of densities. The histogram of a long walk matches the target.');
-}
 /** VI's family is a choice: the closest single Gaussian, and the closest mixture of two Gaussians. */
 function viChoiceFig(){
  const t=st.three,xs=t.plot.x;
- const one=(ox,ys,title,kl)=>{const P=panel({ox,W:560,H:280,L:16,R:14,T:70,B:50,xMin:-6,xMax:6,yMax:.32,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
-  return P.axes+P.area(xs,t.plot.p,TINT.p)+P.line(xs,t.plot.p,palette.p,'stroke-opacity=".45"')+P.line(xs,ys,palette.q)+
-   label(ox+16,28,title,{fill:palette.q,size:21,weight:600})+label(ox+16,54,`closest member: KL(q ‖ p) ${kl}`,{size:19});};
- return fig(1150,280,one(0,t.plot.vi,'family: one Gaussian',`= ${num(t.vi_kl,2)}`)+`<g data-at="2">${one(590,t.plot.vi_mix,'family: mixtures of two Gaussians',t.vi_mix.kl<5e-4?'≈ 0':`= ${num(t.vi_mix.kl,3)}`)}</g>`,
-  'Variational inference with two families on the two-bump target: the closest single Gaussian covers only the big bump; the closest mixture of two Gaussians matches both bumps.');
+ const one=(ox,ys,title)=>{const P=panel({ox,W:560,H:280,L:16,R:14,T:70,B:50,xMin:-6,xMax:6,yMax:.32,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
+  return P.axes+P.area(xs,t.plot.p,TINT.p)+P.line(xs,t.plot.p,palette.p)+P.line(xs,ys,palette.q)+label(ox+16,28,title,{fill:ink,size:21,weight:600})+
+   label(ox+16,54,'teal: the target p',{fill:palette.p,size:19,weight:600})+label(ox+200,54,'purple: the closest q',{fill:palette.q,size:19,weight:600});};
+ return fig(1150,280,one(0,t.plot.vi,'family: one Gaussian')+`<g data-at="2">${one(590,t.plot.vi_mix,'family: mixtures of two Gaussians')}</g>`,
+  'Variational inference with two families on the two-bump target p (teal): the closest single Gaussian q (purple) stretches across both bumps; the closest mixture of two Gaussians matches both.');
 }
 /** Ordinary calculus finds the best number; the calculus of variations finds the best function. */
 function variationsFig(){
@@ -556,6 +521,59 @@ function softTemps(){
 /** One row per step of the recipe, for one application. */
 const planCard=rows=>`<div class="table-sm">${table(['step','in this application'],rows.map(([k,t])=>[`<b>${k}</b>`,t]))}</div>`;
 
+// ---------------------------------------------------------------- Part openers: one diagram per part
+/** A chip with a short label, for the road maps on the part openers. */
+const chip=(x,y,w,t,c)=>`<rect x="${x}" y="${y}" width="${w}" height="44" rx="22" fill="${palette.paper}" stroke="${c}" stroke-width="2"/>`+label(x+w/2,y+29,t,{fill:c,size:18,anchor:'middle',weight:600});
+/** A road of chips in two rows: left to right, then down, then right to left; colours per chip. */
+const chipSnake=(x0,y0,items,w=170,gap=26,rowGap=70)=>{const per=Math.ceil(items.length/2),pos=i=>{const r=i<per?0:1,c=r?per-1-(i-per):i;return [x0+c*(w+gap),y0+r*rowGap];};
+ return items.map(([t,c],i)=>{const [x,y]=pos(i);let link='';if(i<items.length-1){const [x2,y2]=pos(i+1);link=y2===y?`<line x1="${x2>x?x+w:x}" y1="${y+22}" x2="${x2>x?x2:x2+w}" y2="${y+22}" stroke="${MUTED}" stroke-width="2"/>`:`<line x1="${x+w/2}" y1="${y+44}" x2="${x2+w/2}" y2="${y2}" stroke="${MUTED}" stroke-width="2"/>`;}return link+chip(x,y,w,t,c);}).join('');};
+function partFig(k){
+ const W=1150,H=250,curves=(P,rows,color,op)=>rows.map(r=>`<polyline points="${b.grid.map((x,i)=>`${P.x(x).toFixed(1)},${P.y(Math.max(-3,Math.min(3,r[i]))).toFixed(1)}`).join(' ')}" fill="none" stroke="${color}" stroke-opacity="${op}" stroke-width="2"/>`).join('');
+ let s='';
+ if(k===1){
+  const fx=ox=>panel({ox,W:330,H,L:10,R:10,T:44,B:16,xMin:-2.5,xMax:2.5,yMin:-3,yMax:3,yAxis:false});
+  const A=fx(0),B=fx(410),C=fx(820),dots=P=>b.x.map((x,i)=>`<circle cx="${P.x(x).toFixed(1)}" cy="${P.y(b.y[i]).toFixed(1)}" r="5" fill="${palette.data}"/>`).join('');
+  s+=A.axes+curves(A,b.prior_draws,MUTED,.55)+label(10,26,'prior: networks before the data',{fill:ink,size:20,weight:600});
+  s+=label(372,140,'×',{fill:ink,size:44,anchor:'middle'})+B.axes+dots(B)+label(420,26,'likelihood: the data',{fill:palette.data,size:20,weight:600});
+  s+=label(782,140,'=',{fill:ink,size:44,anchor:'middle'})+C.axes+curves(C,b.hmc.draws,palette.p,.6)+dots(C)+label(830,26,'posterior: networks that fit',{fill:palette.p,size:20,weight:600});
+ }
+ if(k===2){
+  const xs=lin(-11,13,241),P=panel({W:560,H,L:10,R:10,T:44,B:30,xMin:-11,xMax:13,yMax:.22,yAxis:false});
+  s+=P.axes+P.area(xs,xs.map(u=>normalPdf(u,{mu:1,sigma:4})),TINT.p)+P.line(xs,xs.map(u=>normalPdf(u,{mu:1,sigma:4})),palette.p)+P.line(xs,xs.map(u=>normalPdf(u,{mu:0,sigma:2})),palette.q)+
+   label(10,26,'how far apart are p and q? one number',{fill:ink,size:20,weight:600})+label(P.x(6),P.y(.1),'p',{fill:palette.p,size:26,weight:700})+label(P.x(2.4),P.y(.19),'q',{fill:palette.q,size:26,weight:700});
+  s+=chipSnake(590,40,[['surprise',palette.p],['entropy',palette.p],['codes, in bits',palette.p],['cross-entropy',palette.loss],['KL: extra bits',palette.loss],['KL at work',palette.loss]])+label(590,26,'the road through Part 2',{size:18});
+ }
+ if(k===3){
+  const fr=st.olive.frames,xs=lin(-11,13,241),P=panel({W:560,H,L:10,R:10,T:44,B:30,xMin:-11,xMax:13,yMax:.85,yAxis:false});
+  s+=P.axes+P.area(xs,xs.map(u=>normalPdf(u,{mu:1,sigma:4})),TINT.p)+P.line(xs,xs.map(u=>normalPdf(u,{mu:1,sigma:4})),palette.p);
+  [0,8,20,45,200].forEach((f,i,a)=>{const [,mu,sg]=fr[f];s+=P.line(xs,xs.map(u=>normalPdf(u,{mu,sigma:sg})),palette.q,`stroke-opacity="${(.25+.75*i/(a.length-1)).toFixed(2)}"`);});
+  s+=label(10,26,'q slides onto p, one gradient step at a time',{fill:ink,size:20,weight:600});
+  s+=chipSnake(590,40,[['search a grid',palette.q],['gradient descent',palette.q],['2-D covariances',palette.q],['mixtures',palette.q],['reparameterise',palette.q],['which direction?',palette.q]])+label(590,26,'the road through Part 3',{size:18});
+ }
+ if(k===4){
+  const x0=60,w=1030,e=x0+w,split=x0+w*.72;
+  s+=`<rect x="${x0}" y="110" width="${split-x0}" height="64" fill="${TINT.q}" stroke="${palette.q}" stroke-width="2.5"/><rect x="${split}" y="110" width="${e-split}" height="64" fill="${TINT.loss}" stroke="${palette.loss}" stroke-width="2.5"/>`+
+   label((x0+split)/2,152,'ELBO: we can compute it',{fill:palette.q,size:24,anchor:'middle',weight:700})+label((split+e)/2,152,'KL: unknown, ≥ 0',{fill:palette.loss,size:22,anchor:'middle',weight:700})+
+   `<path d="M${x0},92 L${x0},78 L${e},78 L${e},92" fill="none" stroke="${palette.data}" stroke-width="2.5"/>`+label((x0+e)/2,64,'log p(𝒟): one fixed number, the log evidence',{fill:palette.data,size:22,anchor:'middle',weight:700})+
+   label((x0+e)/2,222,'raise the ELBO, and the KL to the posterior must fall',{fill:ink,size:21,anchor:'middle'});
+ }
+ if(k===5){
+  const P=panel({ox:560,W:590,H,L:10,R:10,T:44,B:16,xMin:-2.5,xMax:2.5,yMin:-3,yMax:3,yAxis:false}),V5=b.vi;
+  const up=V5.mean.map((m2,i)=>m2+2*V5.sd[i]),dn=V5.mean.map((m2,i)=>m2-2*V5.sd[i]);
+  s+=`<polygon points="${b.grid.map((x,i)=>`${P.x(x).toFixed(1)},${P.y(Math.min(3,up[i])).toFixed(1)}`).join(' ')} ${b.grid.map((x,i)=>`${P.x(x).toFixed(1)},${P.y(Math.max(-3,dn[i])).toFixed(1)}`).reverse().join(' ')}" fill="${TINT.q}"/>`+
+   P.axes+P.line(b.grid,V5.mean,palette.q)+b.x.map((x,i)=>`<circle cx="${P.x(x).toFixed(1)}" cy="${P.y(b.y[i]).toFixed(1)}" r="5" fill="${palette.data}"/>`).join('')+label(570,26,'the network’s predictions, with error bars',{fill:palette.q,size:20,weight:600});
+  s+=`<rect x="10" y="40" width="470" height="170" rx="10" fill="#F4F6F8" stroke="#E1E6EB"/>`+['q = Normal(mu, rho.exp())','theta = q.rsample()','elbo = log_lik(theta) + log_prior(theta)','       - q.log_prob(theta).sum()','(-elbo).backward(); opt.step()'].map((t,i)=>label(28,76+i*30,t.replace(/ /g,' '),{fill:ink,size:18})).join('').replace(/<text /g,'<text style="font-family:SFMono-Regular,Menlo,Consolas,monospace" ')+
+   fwdEdge('p5','M488,125 L552,125');
+  s=graphDefs('p5')+s;
+ }
+ return fig(W,H,s,['','Prior networks times the data give the posterior: networks that fit.','Two distributions p and q, and the road from surprise to KL.','A Gaussian q slides onto p by gradient descent.','The log evidence splits into the ELBO, which we can compute, and the KL to the posterior.','Five lines of code give the network’s predictions with error bars.'][k]);
+}
+const partOpeners=[];
+/** A full opening slide for a part: its question, a diagram, and its sections with notebook links. The section list is filled in at the end. */
+function partOpener(k,section,lead,ask,expected){
+ S(`part-${k}`,section,`Part ${k} · ${PARTS[k-1][1]}`,{part:true,nb:`part-${k}`,body:'',lines:[lead],ask:[ask],expected:[expected],transition:`Section ${k}.1.`});
+ partOpeners.push([slides.at(-1),k]);
+}
 // ---------------------------------------------------------------- Part 3 figures: covariance families, mixtures, computational graphs
 const c3=st.cov3,COV_NAMES={iso:'isotropic: s²I',diag:'diagonal: diag(s₁², s₂²)',full:'full: LLᵀ'};
 const COV_COUNTS={iso:'1 number, whatever the dimension',diag:'2 numbers; d in d dimensions',full:'3 numbers; d(d + 1)/2 in general'};
@@ -717,9 +735,10 @@ function viVsHmc(full=false){
 const big=(v,k=2)=>Number(v).toLocaleString('en',{minimumFractionDigits:k,maximumFractionDigits:k}).replace('-','−');
 const effective=Math.round(E.runs.reduce((s,r)=>s+r.effective_draws,0)/E.runs.length);
 const lt=A.log_lik_points,lp=A.log_prior_terms;
+partOpener(1,'bayes','Part 1 asks what Bayes’ rule says about a neural network’s weights: start from a prior over networks, keep the ones that fit the data. The catch is one number, the evidence.','What do we want to end up with?','A distribution over the network’s weights, the posterior, and from it predictions with error bars.');
 chap('1.1');
 S('bayes-rule','bayes','Bayes’ rule: update what you believe, using data',{builds:2,
- body:act(1,eq(R`\pcol{p(A\mid B)}=\frac{p(B\mid A)\,p(A)}{\dcol{p(B)}}`),
+ body:stack(eq(R`\pcol{p(A\mid B)}=\frac{p(B\mid A)\,p(A)}{\dcol{p(B)}}`),
   at(2,eq(R`\underbrace{p(A\mid B)}_{\text{posterior}}=\dfrac{\overbrace{p(B\mid A)}^{\text{likelihood}}\ \ \overbrace{p(A)}^{\text{prior}}}{\underbrace{p(B)}_{\text{evidence}}}`))),
  lines:['Bayes’ rule: what to believe after seeing B, from what we believed before and how well each belief explains B.','Four names for the whole lecture: posterior, likelihood, prior and evidence.'],
  ask:['Which term is the belief before seeing B?','Which term only rescales?'],
@@ -849,45 +868,16 @@ S('core-problem','bayes','The core problem of probabilistic machine learning',{b
  expected:['The likelihood and the prior, as we did for θ<sub>A</sub>. Not the evidence.','In every Bayesian model with many unknowns, including the VAE in Lecture 2.'],
  transition:'Three ways to approach it.'});
 S('three-ways','bayes','Three ways to approximate the posterior; we take the third',{nb:'cell-three-ways',builds:3,
- body:grid3(stack(threeWay('laplace'),small(`Climb to the highest peak, then fit a Gaussian there: N(${num(st.three.laplace[0],1)}, ${num(st.three.laplace[1],1)}²). It never sees the second bump.`)),
-  at(2,stack(threeWay('mcmc'),small(`A random walk, 20,000 steps. The visits follow the target: mean ${num(st.three.mcmc.mean)}, true ${num(st.three.true_mean)}.`))),
-  at(3,stack(threeWay('vi'),small('The closest member of a family we choose: one Gaussian (dashed) must stretch across both bumps; a mixture of two (solid) matches them.')))),
- lines:['Laplace: climb to the highest peak, then fit a Gaussian to its shape there.','MCMC: a random walk whose visits follow the posterior. Right in the long run, but slow.','Variational inference: choose a family, then find its member closest to the posterior by optimisation. The family need not be Gaussian.'],
- ask:['What does Laplace miss here?','What does MCMC cost?','What does VI trade away?'],
- expected:['The second bump: it only looks at the peak it climbed to.','Many steps, each evaluating the model on the data; hard to scale to large models and datasets.','Exactness, unless the family contains the posterior. In return it is fast and uses the same gradient tools as deep learning.'],
- point:'Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 1.5. The next slides take each method in turn.',
- transition:'1.5.1: Laplace, step by step.'});
-subsec('1.5.1');
-S('laplace-steps','bayes','Laplace: climb to the peak, then fit a Gaussian there',{nb:'cell-laplace',builds:3,
- body:stack(laplaceFig(),`<div class="state-slot eq-sm">${[
-   R`\theta_{\text{MAP}}=\arg\max_\theta\ \log\big[p(\mathcal D\mid\theta)\,p(\theta)\big]=${num(st.three.laplace[0],2)}`,
-   R`\frac{d^2}{d\theta^2}\log p(\theta)\Big|_{\theta_{\text{MAP}}}=${num(st.three.curvature,2)}\quad\Longrightarrow\quad\sigma=\frac{1}{\sqrt{${num(-st.three.curvature,2)}}}=${num(st.three.laplace[1],2)}`,
-   R`q_{\text{Laplace}}(\theta)=\mathcal N\big(\theta_{\text{MAP}},\ \sigma^2\big)=\mathcal N\big(${num(st.three.laplace[0],2)},\ ${num(st.three.laplace[1],2)}^2\big)`].map((x,k)=>`<div data-only="${k+1}">${eq(x)}</div>`).join('')}</div>`),
- lines:['Step 1, climb. Likelihood × prior has the same peaks as the posterior: the evidence only rescales it. Gradient ascent from θ = 0 reaches θ<sub>MAP</sub>.',
-  'Step 2, measure the bend. Near the peak, log p looks like a parabola. Its second derivative sets the width: the sharper the bend, the narrower the Gaussian.',
-  'Step 3, fit. The Gaussian with that centre and that width matches the peak well, and never sees the second bump.'],
- ask:['Why can we climb without knowing the evidence?','What does a sharper bend mean for σ?','When is Laplace a good approximation?'],
- expected:['p(𝒟) is a constant: dividing by it rescales the curve without moving its peak.','A larger second derivative gives a smaller σ: a narrow, confident Gaussian.','When the posterior has one bump that is close to Gaussian, as often happens with plenty of data.'],
- point:`Start the climb at θ = 1 instead and it ends at ${num(st.three.climb_right.at(-1),2)}: the smaller bump. Laplace only sees the peak it climbs to. With seven parameters, the second derivative becomes the 7 × 7 Hessian matrix, and σ² becomes its inverse.`,
- transition:'1.5.2: MCMC.'});
-subsec('1.5.2');
-S('mcmc-idea','bayes','MCMC: a random walk that follows the posterior',{nb:'cell-mcmc',builds:3,
- body:stack(mcmcRuleFig(),`<div class="state-slot eq-sm"><div data-only="1">${eq(R`\theta'=\theta+\text{a small random step}`)}</div><div data-only="2">${eq(R`\text{move with probability}\ \min\Big(1,\ \frac{p(\mathcal D\mid\theta')\,p(\theta')\,/\,\cancel{p(\mathcal D)}}{p(\mathcal D\mid\theta)\,p(\theta)\,/\,\cancel{p(\mathcal D)}}\Big)`)}</div><div data-only="3">${p(`After ${st.three.mcmc.steps.toLocaleString('en')} steps the visits follow the posterior, both bumps included: their mean is ${num(st.three.mcmc.mean)}, the true mean ${num(st.three.true_mean)}.`)}</div></div>`),
- lines:['MCMC is a walker. From where it stands, θ, it proposes a random step to a nearby θ′.',
-  'Uphill: always move. Downhill: move with probability p(θ′)/p(θ), otherwise stay put. Only the ratio matters, so the unknown evidence cancels.',
-  'Count where the walker spends its time. In the long run the counts follow the posterior: more visits where it is high.'],
- ask:['Why not always move uphill?','Why does the evidence not matter?','What does MCMC cost?'],
- expected:['Then the walker would climb to the nearest peak and stop: an optimiser, not a sampler. Sometimes going downhill is what lets it visit every bump in the right proportion.','It divides both p(θ′) and p(θ), so it cancels in the ratio: likelihood × prior is enough.','Many steps, each evaluating the model on all the data, and neighbouring steps are correlated.'],
- point:'This is random-walk Metropolis (Metropolis et al., 1953). The posterior predictive of Section 1.5 came from a smarter walker, Hamiltonian Monte Carlo, which uses gradients to propose long moves.',
- transition:'Walk it yourself.'});
-S('mcmc-live','bayes','Walk it yourself: the visits build up the posterior',{nb:'cell-mcmc',
- body:widget('mcwalk','A random-walk sampler on the two-bump target: the walker, its last proposal, the histogram of its visits and the trace of θ over the last 300 steps'),
- lines:['Take single steps first, then hundreds. Then try a tiny step size and a huge one: tiny steps crawl and rarely cross the gap; huge steps are mostly rejected.'],
- ask:['What happens with step size 0.1? With 5?'],
- expected:['0.1: nearly every proposal is accepted, but the walker crawls and may not reach the second bump for a long time. 5: most proposals land far out, where p is tiny, and are rejected. In between mixes best.'],
- demo:'Notebook 1.5.2 runs the same walk for 20,000 steps with step size 2 and compares the visits with the target.',
- transition:'1.5.3: variational inference.'});
-subsec('1.5.3');
+ body:grid3(stack(threeWay('laplace'),small(`<b>1</b> climb to the highest peak, θ<sub>MAP</sub>. <b>2</b> measure how sharply log p bends there. <b>3</b> the Gaussian with that peak and that bend: N(${num(st.three.laplace[0],1)}, ${num(st.three.laplace[1],1)}²). It never sees the second bump.`)),
+  at(2,stack(threeWay('mcmc'),small(`A walker proposes random steps. Uphill: always move; downhill: move with probability p(θ′)/p(θ), so the evidence cancels. Its visits follow the target: mean ${num(st.three.mcmc.mean)}, true ${num(st.three.true_mean)}.`))),
+  at(3,stack(threeWay('vi'),small('Choose a family, then tune its knobs to make KL(q ‖ p) small. One Gaussian (dashed) must stretch across both bumps; a mixture of two (solid) matches them.')))),
+ lines:['Laplace: climb to the highest peak, measure how sharply it bends, and use the Gaussian with that peak and that bend. Fast, but it only sees the peak it climbed to.',
+  'MCMC: a walker proposes random steps. Uphill it always moves; downhill only sometimes, with probability p(θ′)/p(θ). Its visits follow the posterior: right in the long run, but slow.',
+  'Variational inference: choose a family, then find its member closest to the posterior by optimisation. The family need not be Gaussian. The rest of the lecture develops this one.'],
+ ask:['What does Laplace miss here?','Why does MCMC not need the evidence? What does it cost?','What does VI trade away?'],
+ expected:['The second bump: it only looks at the peak it climbed to.','It only uses the ratio p(θ′)/p(θ), in which p(𝒟) cancels. It costs many steps, each evaluating the model on all the data.','Exactness, unless the family contains the posterior. In return it is fast and uses the same gradient tools as deep learning.'],
+ point:`Target 0.7·N(−2, 1) + 0.3·N(2, 1). Laplace: θ_MAP = ${num(st.three.laplace[0],2)}, second derivative of log p ${num(st.three.curvature,2)}, so σ = ${num(st.three.laplace[1],2)}. MCMC: random-walk Metropolis, ${st.three.mcmc.steps.toLocaleString('en')} steps of size ${st.three.mcmc.step_size}, ${Math.round(100*st.three.mcmc.acceptance)}% of proposals accepted. Notebook 1.5 runs each in its own cell.`,
+ transition:'Variational inference, in one picture.'});
 S('vi-idea','bayes','Variational inference: choose q, make it close to the posterior',{builds:3,
  body:stack(viIdeaFig(),
   at(3,`<div class="eq-sm">${eq(R`\begin{aligned}p(y^*\mid x^*,\mathcal D)&=\int p(y^*\mid x^*,\theta)\,\pcol{p(\theta\mid\mathcal D)}\,d\theta&&\text{needs the posterior}\\&\approx\frac1S\sum_{s=1}^{S}p(y^*\mid x^*,\theta_s),\quad\theta_s\sim\qcol{q_\psi(\theta)}&&\text{needs only }q_\psi\end{aligned}`)}</div>`)),
@@ -920,8 +910,8 @@ O('variational-terms','The vocabulary of variational inference',{nb:'sec-1-5-3',
  transition:'The family is our choice.'});
 S('vi-choice','bayes','The family is our choice: one Gaussian, or a mixture of two',{nb:'cell-vi-toy',builds:2,
  body:viChoiceFig(),
- lines:[`One Gaussian has one bump, so it compromises: the closest one stretches across both bumps and puts mass in the gap. KL(q ‖ p) = ${num(st.three.vi_kl,2)}.`,
-  'With a mixture of two Gaussians, the closest q matches both bumps and the KL falls to about 0. A richer family fits better, at the price of more knobs ψ.'],
+ lines:['One Gaussian has one bump, so it compromises: the closest one stretches across both bumps and puts mass in the gap between them.',
+  'With a mixture of two Gaussians, the closest q matches both bumps. A richer family fits better, at the price of more knobs ψ.'],
  ask:['What is wrong with the single Gaussian?','Why not always choose a very rich family?'],
  expected:['It cannot have two bumps: to reach both it spreads wide, misses both peaks and puts mass in the gap, where p is small. KL(q ‖ p) charges for that mass.','More knobs are harder to optimise and slower to sample. For a network with millions of weights, even one Gaussian per weight is a lot of knobs.'],
  point:'Both fits minimise the same KL(q ‖ p) by gradient descent; only the family changes. Part 3 fits mixtures, and normalising flows are richer still.',
@@ -935,9 +925,10 @@ S('vi-family','bayes','Our q for the network: one Gaussian per parameter',{build
  transition:'Part 2: how far apart are two distributions?'});
 
 // ================================================================ Part 2 · How far apart are two distributions?
+partOpener(2,'kl','Part 2 builds one number for how far apart two distributions are, from surprise, entropy and codes: the KL divergence.','Why do we need such a number?','To say which q is closest to the posterior, we must measure how far q is from it.');
 chap('2.1');
 S('pretend-posterior','kl','For now, pretend we know the posterior',{builds:3,
- body:act(2,cols(pretendChart(),stack(eq(R`\pcol{p(\theta\mid\mathcal D)}=\N(1,\,4^2)`),small('A stand-in for the real posterior: known, one-dimensional, one bump.'),
+ body:stack(cols(pretendChart(),stack(eq(R`\pcol{p(\theta\mid\mathcal D)}=\N(1,\,4^2)`),small('A stand-in for the real posterior: known, one-dimensional, one bump.'),
   at(2,eq(R`\qcol{q(\theta)}=\N(\mu,\,\sigma^2)`)),at(2,small('Our approximation: we choose μ and σ. Shown: μ = 0, σ = 2.')),
   at(3,p('How far apart are p and q? We need one number, so that we can make it small.'))),'1.1fr 1fr')),
  lines:['To learn the tools, pretend for a while that we know the posterior: one Gaussian, in one dimension.','Our approximation q is another Gaussian; we choose its mean and its width.','How far apart are p and q? We need one number, and we will build it from scratch, starting from surprise.'],
@@ -1404,9 +1395,10 @@ S('mc-live','kl','Watch the estimate settle',{nb:'cell-kl-sampling',
 
 
 // ================================================================ Part 3 · Find the closest q
+partOpener(3,'fit','Part 3 finds the closest q by gradient descent on KL, with a p we can evaluate: a grid, gradient descent, covariances, mixtures, the reparameterisation trick, and which direction of KL.','What will q’s knobs be?','Its mean and width, and later a covariance or mixture weights.');
 chap('3.1');
 S('six-candidates','fit','Six candidates: which q is closest to p?',{builds:2,nb:'cell-grid',
- body:act(3,sixCandidates()),
+ body:sixCandidates(),
  lines:['Six Gaussians against the same target p = N(1, 4²). Vote: which is closest?',`Smallest KL: N(1, 3²) at ${num(candKL[1])}, then N(2, 5²) at ${num(candKL[5])}. Could another q do better?`],
  ask:['Vote: which q is closest?','Could another (μ, σ) do better?'],
  expected:['Most pick N(1, 3²) or N(2, 5²). The formula says N(1, 3²), narrowly.','Yes: N(1, 4²), which is p itself, has KL 0. We need a way to search.'],
@@ -1582,9 +1574,10 @@ S('kl-lesson','fit','What to learn: the direction decides what q is punished for
 // ================================================================ Part 4 · Back to Bayes
 // Part 4 colours, kept from step 1 to step 4: q purple, likelihood orange, prior green, evidence blue, posterior teal.
 const LQ=R`\qcol{\log q(\theta)}`,LL=R`\ncol{\log p(\mathcal D\mid\theta)}`,LP=R`\textcolor{#147737}{\log p(\theta)}`,LE=R`\dcol{\log p(\mathcal D)}`,LPOST=R`\pcol{\log p(\theta\mid\mathcal D)}`;
+partOpener(4,'elbo','Part 4 returns to the real posterior, which we cannot evaluate. Four small steps turn KL to the posterior into the ELBO, which we can.','What blocked us in Part 1?','The evidence p(𝒟): the posterior needs it, and we cannot compute it.');
 chap('4.1');
 S('back-bayes','elbo','Back to Bayes: what we wanted',{builds:2,
- body:act(4,eq(R`\pcol{p(\theta\mid\mathcal D)}=\frac{\overbrace{\ncol{p(\mathcal D\mid\theta)}}^{\text{easy}}\ \ \overbrace{\textcolor{#147737}{p(\theta)}}^{\text{easy}}}{\underbrace{\dcol{p(\mathcal D)}}_{10^{14}\text{ grid points}}}`),
+ body:stack(eq(R`\pcol{p(\theta\mid\mathcal D)}=\frac{\overbrace{\ncol{p(\mathcal D\mid\theta)}}^{\text{easy}}\ \ \overbrace{\textcolor{#147737}{p(\theta)}}^{\text{easy}}}{\underbrace{\dcol{p(\mathcal D)}}_{10^{14}\text{ grid points}}}`),
   at(2,eq(R`\text{VI: choose }\qcol{q_\psi(\theta)},\ \text{then}\ \ \psi^*=\arg\min_\psi\ \KL\big(\qcol{q_\psi(\theta)}\,\|\,\pcol{p(\theta\mid\mathcal D)}\big)`))),
  lines:['Back to Part 1’s problem. The posterior needs the evidence p(𝒟), and for our seven numbers that is a grid of 10¹⁴ points.',
   'VI’s plan from Section 1.5.3: choose a q we control and make it as close as possible to the posterior, measured by KL(q ‖ posterior).'],
@@ -1709,9 +1702,10 @@ S('elbo-slider','elbo','Check the identity where p(𝒟) is known: a coin',{nb:'
  transition:'Part 5: implement the ELBO for the network.'});
 
 // ================================================================ Part 5 · Implement it
+partOpener(5,'impl','Part 5 puts it in code: VI for our network, in a few lines of PyTorch, and its predictions with error bars against the MCMC reference.','What will we compare against?','The long MCMC run of Section 1.5: a reference for the posterior predictive.');
 chap('5.1');
 S('bnn-elbo-code','impl','The ELBO for our network, in code',{builds:2,nb:'cell-bnn-vi',
- body:act(5,code('mu  = Parameter(0.5 * randn(7))         # 7 means\nrho = Parameter(full((7,), log(0.1)))   # 7 log-widths\nq = Normal(mu, rho.exp())               # one bell per parameter\ntheta = q.rsample((16,))                # 16 sampled networks\nlog_lik = log_likelihood(theta).mean()  # forward pass\nkl = kl_divergence(q, prior).sum()      # closed form\nloss = -(log_lik - kl)                  # minus the ELBO'),
+ body:stack(code('mu  = Parameter(0.5 * randn(7))         # 7 means\nrho = Parameter(full((7,), log(0.1)))   # 7 log-widths\nq = Normal(mu, rho.exp())               # one bell per parameter\ntheta = q.rsample((16,))                # 16 sampled networks\nlog_lik = log_likelihood(theta).mean()  # forward pass\nkl = kl_divergence(q, prior).sum()      # closed form\nloss = -(log_lik - kl)                  # minus the ELBO'),
   at(2,p('Adam, learning rate 0.02, 4,000 steps; best of five random starts. No p(𝒟) anywhere.'))),
  lines:['Fourteen parameters, sixteen sampled networks per step, and the closed-form KL to the prior.','Every line is computable: rsample, a forward pass and a formula. Never p(𝒟).'],
  ask:['Which line uses the reparameterisation trick?','Which line uses the Gaussian KL formula?'],
@@ -1981,6 +1975,7 @@ S('contents','map','Lecture 1 at a glance: five parts, twenty-two sections',{nb:
  transition:'Part 1: Bayes’ rule for a neural network.'});
 
 // The contents slide goes first, once every section knows its first slide.
+for(const [sl,k] of partOpeners)sl.body=act(k,partFig(k),`<ol class="pb-grid">${CHAPTERS.filter(([n])=>n.startsWith(k+'.')).map(([n,t])=>`<li><span class="pb-num">${n}</span><a href="#${firstOf[n]}/1">${t}</a><a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(n)}" target="_blank" rel="noopener" aria-label="notebook ${n}">▶</a></li>`).join('')}</ol>`);
 slides.unshift(slides.pop());
 slides[0].body=`<div class="toc toc-flow">${PARTS.map(([k,t])=>`<h3>Part ${k} · ${t}</h3><ol>${CHAPTERS.filter(([num])=>num.startsWith(k+'.')).map(([num,title])=>
  `<li><a href="#${firstOf[num]}/1">${num} ${title}</a><a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(num)}" target="_blank" rel="noopener" aria-label="notebook ${num}">▶</a></li>`+

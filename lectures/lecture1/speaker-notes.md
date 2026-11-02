@@ -23,6 +23,14 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 
 **Transition:** Part 1: Bayes’ rule for a neural network.
 
+## part-1: Part 1 · Bayes’ rule for a neural network
+
+**Build 1, ask:** What do we want to end up with?
+
+**Expected:** A distribution over the network’s weights, the posterior, and from it predictions with error bars.
+
+**Transition:** Section 1.1.
+
 ## bayes-rule: Bayes’ rule: update what you believe, using data
 
 **Build 1, ask:** Which term is the belief before seeing B?
@@ -261,63 +269,17 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 
 **Expected:** The second bump: it only looks at the peak it climbed to.
 
-**Build 2, ask:** What does MCMC cost?
+**Build 2, ask:** Why does MCMC not need the evidence? What does it cost?
 
-**Expected:** Many steps, each evaluating the model on the data; hard to scale to large models and datasets.
+**Expected:** It only uses the ratio p(θ′)/p(θ), in which p(𝒟) cancels. It costs many steps, each evaluating the model on all the data.
 
 **Build 3, ask:** What does VI trade away?
 
 **Expected:** Exactness, unless the family contains the posterior. In return it is fast and uses the same gradient tools as deep learning.
 
-**Point here:** Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 1.5. The next slides take each method in turn.
+**Point here:** Target 0.7·N(−2, 1) + 0.3·N(2, 1). Laplace: θ_MAP = −2.00, second derivative of log p −1.00, so σ = 1.00. MCMC: random-walk Metropolis, 20,000 steps of size 2, 61% of proposals accepted. Notebook 1.5 runs each in its own cell.
 
-**Transition:** 1.5.1: Laplace, step by step.
-
-## laplace-steps: Laplace: climb to the peak, then fit a Gaussian there
-
-**Build 1, ask:** Why can we climb without knowing the evidence?
-
-**Expected:** p(𝒟) is a constant: dividing by it rescales the curve without moving its peak.
-
-**Build 2, ask:** What does a sharper bend mean for σ?
-
-**Expected:** A larger second derivative gives a smaller σ: a narrow, confident Gaussian.
-
-**Build 3, ask:** When is Laplace a good approximation?
-
-**Expected:** When the posterior has one bump that is close to Gaussian, as often happens with plenty of data.
-
-**Point here:** Start the climb at θ = 1 instead and it ends at 1.99: the smaller bump. Laplace only sees the peak it climbs to. With seven parameters, the second derivative becomes the 7 × 7 Hessian matrix, and σ² becomes its inverse.
-
-**Transition:** 1.5.2: MCMC.
-
-## mcmc-idea: MCMC: a random walk that follows the posterior
-
-**Build 1, ask:** Why not always move uphill?
-
-**Expected:** Then the walker would climb to the nearest peak and stop: an optimiser, not a sampler. Sometimes going downhill is what lets it visit every bump in the right proportion.
-
-**Build 2, ask:** Why does the evidence not matter?
-
-**Expected:** It divides both p(θ′) and p(θ), so it cancels in the ratio: likelihood × prior is enough.
-
-**Build 3, ask:** What does MCMC cost?
-
-**Expected:** Many steps, each evaluating the model on all the data, and neighbouring steps are correlated.
-
-**Point here:** This is random-walk Metropolis (Metropolis et al., 1953). The posterior predictive of Section 1.5 came from a smarter walker, Hamiltonian Monte Carlo, which uses gradients to propose long moves.
-
-**Transition:** Walk it yourself.
-
-## mcmc-live: Walk it yourself: the visits build up the posterior
-
-**Build 1, ask:** What happens with step size 0.1? With 5?
-
-**Expected:** 0.1: nearly every proposal is accepted, but the walker crawls and may not reach the second bump for a long time. 5: most proposals land far out, where p is tiny, and are rejected. In between mixes best.
-
-**Notebook demonstration:** Notebook 1.5.2 runs the same walk for 20,000 steps with step size 2 and compares the visits with the target.
-
-**Transition:** 1.5.3: variational inference.
+**Transition:** Variational inference, in one picture.
 
 ## vi-idea: Variational inference: choose q, make it close to the posterior
 
@@ -394,6 +356,14 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 **Expected:** A number for the distance between two distributions. That is Part 2.
 
 **Transition:** Part 2: how far apart are two distributions?
+
+## part-2: Part 2 · How far apart are two distributions?
+
+**Build 1, ask:** Why do we need such a number?
+
+**Expected:** To say which q is closest to the posterior, we must measure how far q is from it.
+
+**Transition:** Section 2.1.
 
 ## pretend-posterior: For now, pretend we know the posterior
 
@@ -1205,6 +1175,14 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 
 **Transition:** Part 3: use the score to find the best q.
 
+## part-3: Part 3 · Find the closest q
+
+**Build 1, ask:** What will q’s knobs be?
+
+**Expected:** Its mean and width, and later a covariance or mixture weights.
+
+**Transition:** Section 3.1.
+
 ## six-candidates: Six candidates: which q is closest to p?
 
 **Build 1, ask:** Vote: which q is closest?
@@ -1501,6 +1479,14 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 
 **Transition:** Part 4: back to Bayes.
 
+## part-4: Part 4 · Back to Bayes: the ELBO
+
+**Build 1, ask:** What blocked us in Part 1?
+
+**Expected:** The evidence p(𝒟): the posterior needs it, and we cannot compute it.
+
+**Transition:** Section 4.1.
+
 ## back-bayes: Back to Bayes: what we wanted
 
 **Build 1, ask:** Why could we not just compute the posterior?
@@ -1710,6 +1696,14 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 **Notebook demonstration:** Notebook 4.2: the coin cells compute log p(𝒟) exactly, then fit a Beta q using only the joint, and check ELBO + KL = log p(𝒟) for every candidate.
 
 **Transition:** Part 5: implement the ELBO for the network.
+
+## part-5: Part 5 · Implement it
+
+**Build 1, ask:** What will we compare against?
+
+**Expected:** The long MCMC run of Section 1.5: a reference for the posterior predictive.
+
+**Transition:** Section 5.1.
 
 ## bnn-elbo-code: The ELBO for our network, in code
 

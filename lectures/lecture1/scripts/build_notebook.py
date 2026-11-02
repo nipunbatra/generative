@@ -40,7 +40,7 @@ This notebook computes every number, figure and animation in the Lecture 1 slide
 
 | Part | Sections |
 |---|---|
-| **1 · Bayes’ rule for a neural network** | [1.1 Bayes’ rule]({DECK}#bayes-rule/1) · [1.2 A tiny network and its prior]({DECK}#tiny-net/1) · [1.3 Likelihood and training]({DECK}#data-likelihood/1) · [1.4 The evidence is intractable]({DECK}#evidence-area/1) · [1.5 Approximating the posterior]({DECK}#predictive/1): [1.5.1 Laplace]({DECK}#laplace-steps/1) · [1.5.2 MCMC]({DECK}#mcmc-idea/1) · [1.5.3 VI]({DECK}#vi-idea/1) |
+| **1 · Bayes’ rule for a neural network** | [1.1 Bayes’ rule]({DECK}#bayes-rule/1) · [1.2 A tiny network and its prior]({DECK}#tiny-net/1) · [1.3 Likelihood and training]({DECK}#data-likelihood/1) · [1.4 The evidence is intractable]({DECK}#evidence-area/1) · [1.5 Approximating the posterior]({DECK}#predictive/1) |
 | **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 KL at work: 2.5.1 classification, 2.5.2 distillation]({DECK}#apps-map/1) · [2.6 Closed forms and PyTorch]({DECK}#densities/1) · [2.7 KL by sampling]({DECK}#kl-expectation/1) |
 | **3 · Find the closest q** | [3.1 Search a grid]({DECK}#six-candidates/1) · [3.2 Gradient descent]({DECK}#walk-downhill/1) · [3.3 Covariance in 2-D]({DECK}#cov-families/1) · [3.4 Mixtures: no formula]({DECK}#mixture-what/1) · [3.5 The reparameterisation trick]({DECK}#missing-path/1) · [3.6 Which direction of KL?]({DECK}#fwdrev/1) |
 | **4 · Back to Bayes: the ELBO** | [4.1 Deriving the ELBO]({DECK}#can-we/1) · [4.2 Checking it on a coin]({DECK}#elbo-slider/1) |
@@ -287,7 +287,7 @@ savefig("bnn-evidence-mc")
 md(r"""
 ### 1.5 Approximating the posterior: why, and three ways
 
-Slides: [1.5 Predictions with error bars]({DECK}#predictive/1) · [the core problem]({DECK}#core-problem/1) · [three ways]({DECK}#three-ways/1). The three ways have their own sub-sections: 1.5.1 Laplace, 1.5.2 MCMC, 1.5.3 variational inference.
+Slides: [1.5 Predictions with error bars]({DECK}#predictive/1) · [the core problem]({DECK}#core-problem/1) · [three ways]({DECK}#three-ways/1). Below, each of the three ways has its own cell.
 
 What we want in the end is the **posterior predictive**, every network’s prediction averaged with posterior weights:
 $$p(y^*\mid x^*,\mathcal D)=\int p(y^*\mid x^*,\theta)\,p(\theta\mid\mathcal D)\,d\theta.$$
@@ -346,9 +346,9 @@ Slides: [three ways]({DECK}#three-ways/1)
 
 A two-bump target, $0.7\,\mathcal N(-2,1)+0.3\,\mathcal N(2,1)$, stands in for a posterior: we can evaluate it at any $\theta$, as we can evaluate likelihood × prior. Three ways to approximate it:
 
-- **1.5.1 Laplace**: climb to the highest peak, then fit a Gaussian to its curvature.
-- **1.5.2 MCMC**: a random walk whose visits follow the target.
-- **1.5.3 Variational inference**: the member of a family we choose that is closest to the target in $\mathrm{KL}(q\,\|\,p)$, found by gradient descent.
+- **Laplace**: climb to the highest peak, then fit a Gaussian to its curvature.
+- **MCMC**: a random walk whose visits follow the target.
+- **Variational inference**: the member of a family we choose that is closest to the target in $\mathrm{KL}(q\,\|\,p)$, found by gradient descent.
 """)
 code(r"""
 three_target = dist.MixtureSameFamily(dist.Categorical(probs=torch.tensor([.7, .3])),
@@ -362,9 +362,9 @@ fixtures["story"]["three"] = dict(weights=[.7, .3], means=[-2., 2.], scales=[1.,
     plot=dict(x=x3.tolist(), p=three_target.log_prob(x3).exp().tolist()))
 """, anchor="cell-three-ways")
 md(r"""
-#### 1.5.1 Laplace: climb to the peak, then fit a Gaussian there
+#### Laplace: climb to the peak, then fit a Gaussian there
 
-Slides: [1.5.1 Laplace, step by step]({DECK}#laplace-steps/1)
+Slides: [three ways]({DECK}#three-ways/1)
 
 1. **Climb.** Gradient ascent on $\log p(\theta)$. The evidence only rescales the posterior, so likelihood × prior has the same peaks: $\theta_{\text{MAP}}$ needs no evidence.
 2. **Measure the bend.** The second derivative of $\log p$ at the peak.
@@ -398,9 +398,9 @@ fixtures["story"]["three"].update(laplace=[number(laplace.loc), number(laplace.s
 fixtures["story"]["three"]["plot"]["laplace"] = laplace.log_prob(x3).exp().tolist()
 """, anchor="cell-laplace")
 md(r"""
-#### 1.5.2 MCMC: a random walk that visits each θ in proportion to the posterior
+#### MCMC: a random walk that visits each θ in proportion to the posterior
 
-Slides: [1.5.2 The walker’s rule]({DECK}#mcmc-idea/1) · [walk it yourself]({DECK}#mcmc-live/1)
+Slides: [three ways]({DECK}#three-ways/1)
 
 From the current $\theta$, propose a random step $\theta'$. Uphill: always move. Downhill: move with probability $p(\theta')/p(\theta)$, otherwise stay. Only the **ratio** is needed, so the unknown evidence cancels. In the long run the visits follow the target.
 """, anchor="sec-1-5-2")
@@ -420,9 +420,9 @@ fixtures["story"]["three"]["mcmc"] = dict(steps=20_000, step_size=2.0, seed=7, a
     mean=float(chain.mean()), hist=hist.tolist(), edges=edges.tolist())
 """, anchor="cell-mcmc")
 md(r"""
-#### 1.5.3 Variational inference: the closest member of a family we choose
+#### Variational inference: the closest member of a family we choose
 
-Slides: [1.5.3 Use a q we control]({DECK}#vi-idea/1) · [the family is our choice]({DECK}#vi-choice/1) · [our q for the network]({DECK}#vi-family/1)
+Slides: [use a q we control]({DECK}#vi-idea/1) · [the family is our choice]({DECK}#vi-choice/1) · [our q for the network]({DECK}#vi-family/1)
 
 The family is ours to choose. One Gaussian can cover only one bump; a mixture of two Gaussians can match both. Both are fitted the same way: minimise $\mathrm{KL}(q\,\|\,p)$ by gradient descent on the family’s knobs.
 """, anchor="sec-1-5-3")

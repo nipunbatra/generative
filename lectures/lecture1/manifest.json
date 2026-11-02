@@ -42,13 +42,20 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 122,
+  "coreSlides": 124,
   "optionalSlides": 28,
   "slides": [
     {
       "id": "contents",
       "title": "Lecture 1 at a glance: five parts, twenty-two sections",
       "section": "map",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "part-1",
+      "title": "Part 1 · Bayes’ rule for a neural network",
+      "section": "bayes",
       "builds": 1,
       "optional": false
     },
@@ -172,27 +179,6 @@
       "optional": false
     },
     {
-      "id": "laplace-steps",
-      "title": "Laplace: climb to the peak, then fit a Gaussian there",
-      "section": "bayes",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "mcmc-idea",
-      "title": "MCMC: a random walk that follows the posterior",
-      "section": "bayes",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "mcmc-live",
-      "title": "Walk it yourself: the visits build up the posterior",
-      "section": "bayes",
-      "builds": 1,
-      "optional": false
-    },
-    {
       "id": "vi-idea",
       "title": "Variational inference: choose q, make it close to the posterior",
       "section": "bayes",
@@ -225,6 +211,13 @@
       "title": "Our q for the network: one Gaussian per parameter",
       "section": "bayes",
       "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "part-2",
+      "title": "Part 2 · How far apart are two distributions?",
+      "section": "kl",
+      "builds": 1,
       "optional": false
     },
     {
@@ -620,6 +613,13 @@
       "optional": false
     },
     {
+      "id": "part-3",
+      "title": "Part 3 · Find the closest q",
+      "section": "fit",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "six-candidates",
       "title": "Six candidates: which q is closest to p?",
       "section": "fit",
@@ -760,6 +760,13 @@
       "optional": false
     },
     {
+      "id": "part-4",
+      "title": "Part 4 · Back to Bayes: the ELBO",
+      "section": "elbo",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "back-bayes",
       "title": "Back to Bayes: what we wanted",
       "section": "elbo",
@@ -861,6 +868,13 @@
       "id": "elbo-slider",
       "title": "Check the identity where p(𝒟) is known: a coin",
       "section": "elbo",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "part-5",
+      "title": "Part 5 · Implement it",
+      "section": "impl",
       "builds": 1,
       "optional": false
     },
@@ -1096,5 +1110,5 @@
       "optional": true
     }
   ],
-  "totalStates": 333
+  "totalStates": 331
 }

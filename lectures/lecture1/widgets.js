@@ -290,48 +290,6 @@ function mclive(el,ctx){
  el.querySelector('[data-reset]').addEventListener('click',()=>{reset(10);draw();});
 }
 
-// ---- Section 1.5.2: a random-walk sampler you can drive ------------------------------------------
-function mcwalk(el,ctx,d){
- const t=d.story.three,xs=t.plot.x,py=t.plot.p,W=1150,H=330,BIN=.25,NB=48;
- const dens=u=>t.weights.reduce((a,w,k)=>a+w*normalPdf(u,{mu:t.means[k],sigma:t.scales[k]}),0);
- const state={step:1};let rng,theta,steps,accepted,sum,counts,last,trace,timer=null;
- const reset=()=>{rng=mulberry32(20261102);theta=0;steps=0;accepted=0;sum=0;counts=new Array(NB).fill(0);last=null;trace=[0];};
- const walk=k=>{for(let i=0;i<k;i++){
-   const prop=theta+state.step*gauss(rng),ok=rng()<dens(prop)/dens(theta);   // uphill always; downhill with the ratio
-   last={from:theta,to:prop,ok};if(ok){theta=prop;accepted++;}
-   steps++;sum+=theta;const b=Math.floor((theta+6)/BIN);if(b>=0&&b<NB)counts[b]++;
-   trace.push(theta);if(trace.length>301)trace.shift();}};
- const render=()=>{
-  const A=panel({W:700,H,L:16,R:14,T:62,B:56,xMin:-6,xMax:6,yMax:.36,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
-  let s=A.axes+A.area(xs,py,TINT.p);
-  if(steps)counts.forEach((c,i)=>{if(!c)return;const h=c/steps/BIN,x0=A.x(-6+i*BIN),x1=A.x(-6+(i+1)*BIN);
-   s+=`<rect x="${(x0+.5).toFixed(1)}" y="${A.y(Math.min(h,.36)).toFixed(1)}" width="${(x1-x0-1).toFixed(1)}" height="${(A.y(0)-A.y(Math.min(h,.36))).toFixed(1)}" fill="${palette.data}" fill-opacity=".45"/>`;});
-  s+=A.line(xs,py,palette.p);
-  if(last){const c=last.ok?palette.d:palette.loss,y=A.y(0)-14;
-   s+=`<line x1="${A.x(last.from).toFixed(1)}" y1="${y}" x2="${A.x(Math.max(-6,Math.min(6,last.to))).toFixed(1)}" y2="${y}" stroke="${c}" stroke-width="2.5" stroke-dasharray="5 4"/>`+
-    `<circle cx="${A.x(Math.max(-6,Math.min(6,last.to))).toFixed(1)}" cy="${A.y(dens(last.to)).toFixed(1)}" r="7" fill="${palette.paper}" stroke="${c}" stroke-width="3"/>`;}
-  s+=`<circle cx="${A.x(theta).toFixed(1)}" cy="${A.y(dens(theta)).toFixed(1)}" r="9" fill="${palette.noise}"/>`+
-   legend(16,30,[['target',palette.p],['visits',palette.data]])+
-   label(684,30,last?(last.ok?'last proposal: moved':'last proposal: stayed'):'press a button to walk',{fill:last?(last.ok?palette.d:palette.loss):MUTED,size:20,anchor:'end',weight:600});
-  const T=panel({ox:740,W:410,H,L:52,R:14,T:82,B:56,xMin:0,xMax:300,yMin:-6,yMax:6,ticksY:[-4,-2,0,2,4],xLabel:'last 300 steps'});
-  const pts=trace.map((v,i)=>`${T.x(i).toFixed(1)},${T.y(Math.max(-6,Math.min(6,v))).toFixed(1)}`).join(' ');
-  s+=T.axes+`<polyline points="${pts}" fill="none" stroke="${palette.noise}" stroke-width="1.6"/>`+label(792,30,'θ over time',{fill:palette.noise,size:20,weight:600})+
-   label(1150,58,steps?`${steps.toLocaleString('en')} steps · ${Math.round(100*accepted/steps)}% moved · mean ${num(sum/steps,2)}`:'',{size:18,anchor:'end'});
-  return svg(W,H,s,'A random-walk sampler on a two-bump target: the walker, its last proposal, the histogram of its visits against the target, and the trace of theta over the last 300 steps.');
- };
- if(ctx.printing){reset();walk(5000);el.innerHTML=render();return;}
- reset();
- const controls=[1,10,100,1000].map(k=>`<button type="button" data-walk="${k}">+${k.toLocaleString('en')} step${k>1?'s':''}</button>`).join('')+
-  `<button type="button" data-play>Play</button><button type="button" data-reset>Reset</button>`+slider('step','step size',.1,5,.1,1);
- const draw=interactive(el,ctx,{controls,render});
- const stop=()=>{if(timer){clearInterval(timer);timer=null;el.querySelector('[data-play]').textContent='Play';}};
- bindSliders(el,state,draw);
- el.querySelectorAll('[data-walk]').forEach(b=>b.addEventListener('click',()=>{stop();if(steps<50000)walk(Number(b.dataset.walk));draw();}));
- el.querySelector('[data-play]').addEventListener('click',e=>{if(timer){stop();return;}e.target.textContent='Pause';
-  timer=setInterval(()=>{if(!el.isConnected||steps>=20000){stop();return;}walk(5);draw();},40);});
- el.querySelector('[data-reset]').addEventListener('click',()=>{stop();reset();draw();});
-}
-
 // ---- Part 2: KL as an expectation, estimated by sampling grades -----------------------------------
 export const GRADE_COLORS=[palette.d,palette.loss,MUTED];
 function mcgrades(el,ctx,d){
@@ -619,7 +577,7 @@ function bnnvi(el,ctx,d){
 }
 
 export function mount(stage,ctx,d){
- const make={klarea,fwdrev,olive,elboslider,mclive,mcwalk,bnnvi,priorfuncs,mapfit,mcgrades,klgrid,cov3,mixsample,surprise,entropy2,distill,'days-entropy':(e,c)=>days(e,c,d,'entropy'),'days-codes':(e,c)=>days(e,c,d,'codes'),'days-logratio':(e,c)=>days(e,c,d,'logratio'),'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
+ const make={klarea,fwdrev,olive,elboslider,mclive,bnnvi,priorfuncs,mapfit,mcgrades,klgrid,cov3,mixsample,surprise,entropy2,distill,'days-entropy':(e,c)=>days(e,c,d,'entropy'),'days-codes':(e,c)=>days(e,c,d,'codes'),'days-logratio':(e,c)=>days(e,c,d,'logratio'),'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
  for(const el of stage.querySelectorAll('[data-widget]')){
   const f=make[el.dataset.widget];if(!f)throw new Error('Unknown widget '+el.dataset.widget);f(el,ctx,d);
  }
