@@ -14,11 +14,11 @@ const n=d.normal,c=d.coin,g=d.gradients,mc=d.monte_carlo,st=d.story,b=st.bnn,ink
 const A=b.theta_A,Bt=b.theta_B,E=b.evidence,H=b.hmc,V=b.vi,VF=b.vi_full;
 export const meta={
  id:'lecture1',number:1,title:'KL and variational inference',
- subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:140,
+ subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:148,
  notebook:'lecture1-variational-inference.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
-  {id:'bayes',title:'Part 1 · Bayes’ rule for a neural network',minutes:22},
+  {id:'bayes',title:'Part 1 · Bayes’ rule for a neural network',minutes:30},
   {id:'kl',title:'Part 2 · How far apart are two distributions?',minutes:74},
   {id:'fit',title:'Part 3 · Find the closest q',minutes:22},
   {id:'elbo',title:'Part 4 · Back to Bayes: the ELBO',minutes:13},
@@ -35,8 +35,8 @@ const CHAPTERS=[
  ['4.1','Deriving the ELBO'],['4.2','Checking it on a coin'],
  ['5.1','VI for the tiny network'],['5.2','Wrap-up'],
 ];
-/** Sub-sections: the three applications of Section 2.5; subsec(null) returns to the section itself. */
-const SUBS=[['2.5.1','Classification'],['2.5.2','Maximum likelihood'],['2.5.3','Knowledge distillation']];
+/** Sub-sections: the three approximations of Section 1.5 and the three applications of Section 2.5; subsec(null) returns to the section itself. */
+const SUBS=[['1.5.1','Laplace'],['1.5.2','MCMC'],['1.5.3','VI'],['2.5.1','Classification'],['2.5.2','Maximum likelihood'],['2.5.3','Knowledge distillation']];
 const PARTS=[['1','Bayes’ rule for a neural network'],['2','How far apart are two distributions?'],['3','Find the closest q'],['4','Back to Bayes: the ELBO'],['5','Implement it']];
 const COLAB='https://colab.research.google.com/github/nipunbatra/generative/blob/main/lectures/lecture1/lecture1-variational-inference.ipynb';
 const secAnchor=k=>`sec-${k.replaceAll('.','-')}`;
@@ -86,18 +86,26 @@ function threeWay(k){
  const t=st.three,xs=t.plot.x,P=panel({W:370,H:300,L:14,R:12,T:60,B:52,xMin:-6,xMax:6,yMax:.44,ticksX:[-4,0,4],yAxis:false});
  let inner=P.axes+P.area(xs,t.plot.p,TINT.p)+P.line(xs,t.plot.p,palette.p);
  if(k==='laplace')inner+=P.line(xs,t.plot.laplace,palette.noise);
- if(k==='vi')inner+=P.line(xs,t.plot.vi,palette.q);
+ if(k==='vi')inner+=P.line(xs,t.plot.vi,palette.q,'stroke-dasharray="7 5"')+P.line(xs,t.plot.vi_mix,palette.q);
  if(k==='mcmc'){const e=t.mcmc.edges;t.mcmc.hist.forEach((h,i)=>{const x0=P.x(e[i]),x1=P.x(e[i+1]);inner+=`<rect x="${(x0+1).toFixed(1)}" y="${P.y(h).toFixed(1)}" width="${(x1-x0-2).toFixed(1)}" height="${(P.y(0)-P.y(h)).toFixed(1)}" fill="${palette.data}" fill-opacity=".45"/>`;});}
  const title={laplace:['Laplace',palette.noise],mcmc:['MCMC',palette.data],vi:['Variational inference',palette.q]}[k];
  return fig(370,300,inner+label(14,30,title[0],{fill:title[1],size:24,weight:600}),`${title[0]} approximation of a two-bump target.`);
 }
 function gridDots(){
- let row='',square='';
- for(let i=0;i<100;i++)row+=`M${(14+i*2.9).toFixed(1)},150h1.6v1.6h-1.6z`;
- for(let i=0;i<50;i++)for(let j=0;j<50;j++)square+=`M${(420+i*4.6).toFixed(1)},${(56+j*4.6).toFixed(1)}h2v2h-2z`;
- return fig(700,330,label(10,32,'1 unknown',{fill:palette.ink,size:24,weight:600})+`<path d="${row}" fill="${palette.ink}"/>`+
-  label(10,230,'100 points',{size:22})+label(410,32,'2 unknowns',{fill:palette.ink,size:24,weight:600})+`<path d="${square}" fill="${palette.ink}"/>`+
-  label(410,318,'100 × 100 = 10,000 points',{size:22}),'A grid of 100 points for one unknown, and 10,000 for two.');
+ // schematic grids: 100 points along one unknown, a square for two, a cube for three
+ const dot=(x,y)=>`M${x.toFixed(1)},${y.toFixed(1)}h2v2h-2z`;
+ let row='',square='',cube='';
+ for(let i=0;i<100;i++)row+=dot(10+i*5.4,58);
+ for(let i=0;i<30;i++)for(let j=0;j<30;j++)square+=dot(10+i*6,150+j*6);
+ const face=(o,u,v)=>{for(let i=0;i<10;i++)for(let j=0;j<10;j++)cube+=dot(o[0]+(i+.5)/10*u[0]+(j+.5)/10*v[0],o[1]+(i+.5)/10*u[1]+(j+.5)/10*v[1]);};
+ const F=[300,200],S=130,D=[55,-45];
+ face(F,[S,0],[0,S]);face(F,[S,0],D);face([F[0]+S,F[1]],D,[0,S]);
+ const edges=[[F,[F[0]+S,F[1]]],[F,[F[0],F[1]+S]],[[F[0]+S,F[1]],[F[0]+S,F[1]+S]],[[F[0],F[1]+S],[F[0]+S,F[1]+S]],[F,[F[0]+D[0],F[1]+D[1]]],[[F[0]+S,F[1]],[F[0]+S+D[0],F[1]+D[1]]],[[F[0]+S,F[1]+S],[F[0]+S+D[0],F[1]+S+D[1]]],[[F[0]+D[0],F[1]+D[1]],[F[0]+S+D[0],F[1]+D[1]]],[[F[0]+S+D[0],F[1]+D[1]],[F[0]+S+D[0],F[1]+S+D[1]]]];
+ const outline=edges.map(([a,b2])=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b2[0]}" y2="${b2[1]}" stroke="${MUTED}" stroke-width="1.5"/>`).join('');
+ return fig(560,380,label(10,30,'1 unknown: 100 points',{fill:palette.ink,size:22,weight:600})+`<path d="${row}" fill="${palette.ink}"/>`+
+  `<g data-at="2">${label(10,132,'2 unknowns',{fill:palette.ink,size:22,weight:600})+`<path d="${square}" fill="${palette.ink}"/>`+label(10,362,'100 × 100 = 10⁴',{size:20})}</g>`+
+  `<g data-at="3">${label(300,132,'3 unknowns',{fill:palette.ink,size:22,weight:600})+outline+`<path d="${cube}" fill="${palette.ink}"/>`+label(300,362,'100 × 100 × 100 = 10⁶',{size:20})}</g>`,
+  'A grid of 100 points for one unknown, a 100 by 100 square for two, and a 100 by 100 by 100 cube for three. The dots are schematic.');
 }
 function evidenceChart(){
  const k=st.coinkl.kl,ns=lin(0,30,61),P=panel({W:600,H:330,L:74,R:14,xMin:0,xMax:30,yMax:3,ticksX:[0,10,20,30],ticksY:[0,1,2,3],fmtY:v=>['1×','10×','100×','1000×'][v],xLabel:'tosses of the 0.8 coin'});
@@ -131,15 +139,18 @@ function gapLine(row){
 
 // ---------------------------------------------------------------- Part 1 figures: the tiny network
 function nnDiagram(theta=null){
- const W=640,H=330,X=[70,320,570],yH=[95,235],yO=165,rIn=34,rH=42;
+ const W=680,H=340,X=[70,340,610],yH=[95,245],yO=170,rIn=34,rH=42;
+ // every label sits on a paper-coloured halo, so lines never run through text
+ const halo=t=>t.replace('<text ','<text paint-order="stroke" stroke="#FAFAFB" stroke-width="7" stroke-linejoin="round" ');
  const node=(cx,cy,r,text,color,size=26)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${palette.paper}" stroke="${color}" stroke-width="3"/>`+label(cx,cy+9,text,{fill:color,size,anchor:'middle'});
- const edge=(x1,y1,x2,y2,name,lx,ly)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${palette.noise}" stroke-width="3"/>`+label(lx,ly,name,{fill:palette.noise,size:26,anchor:'middle',weight:600});
- const bias=(x,y,text)=>label(x,y,text,{fill:palette.noise,size:24,anchor:'middle',weight:600});
- const nv=(name,j)=>theta?`${name} = ${num(theta[j])}`:name;
- let s=edge(X[0]+rIn,yO,X[1]-rH,yH[0],nv('w₁',0),185,108)+edge(X[0]+rIn,yO,X[1]-rH,yH[1],nv('w₂',1),185,242)+
-  edge(X[1]+rH,yH[0],X[2]-rIn,yO,nv('v₁',4),455,108)+edge(X[1]+rH,yH[1],X[2]-rIn,yO,nv('v₂',5),455,242);
+ const line=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${palette.noise}" stroke-width="3"/>`;
+ // a weight's name, with its value on the line below
+ const tag=(x,y,name,j)=>halo(label(x,y,name,{fill:palette.noise,size:26,anchor:'middle',weight:600}))+(theta?halo(label(x,y+26,num(theta[j]),{fill:palette.noise,size:22,anchor:'middle',weight:500})):'');
+ const bias=(x,y,name,j)=>halo(label(x,y,theta?`+ ${name} = ${num(theta[j])}`:`+ ${name}`,{fill:palette.noise,size:24,anchor:'middle',weight:600}));
+ let s=line(X[0]+rIn,yO,X[1]-rH,yH[0])+line(X[0]+rIn,yO,X[1]-rH,yH[1])+line(X[1]+rH,yH[0],X[2]-rIn,yO)+line(X[1]+rH,yH[1],X[2]-rIn,yO);
  s+=node(X[0],yO,rIn,'x',palette.data)+node(X[1],yH[0],rH,'tanh',ink,22)+node(X[1],yH[1],rH,'tanh',ink,22)+node(X[2],yO,rIn,'f',palette.q);
- s+=bias(X[1],yH[0]-54,`+ ${nv('b₁',2)}`)+bias(X[1],yH[1]+70,`+ ${nv('b₂',3)}`)+bias(X[2],yO-50,`+ ${nv('c',6)}`);
+ s+=tag(165,88,'w₁',0)+tag(165,240,'w₂',1)+tag(490,86,'v₁',4)+tag(490,240,'v₂',5);
+ s+=bias(X[1],40,'b₁',2)+bias(X[1],318,'b₂',3)+bias(X[2],118,'c',6);
  s+=label(X[0],yO+62,'input',{size:20,anchor:'middle'})+label(X[2],yO+62,'output',{size:20,anchor:'middle'});
  return fig(W,H,s,'A network with one input, two tanh hidden units and one output. Its seven parameters are the weights w1, w2, v1, v2 and the biases b1, b2, c.');
 }
@@ -210,6 +221,52 @@ function predictiveChart(){
   legend(52,30,[['mean ± 2 sd, and 20 posterior draws',palette.p]]),'The posterior predictive: a band that widens away from the data, and twenty functions drawn from the posterior.');
 }
 /** One Gaussian per parameter. With fitted values, drawn against the N(0, 1) prior in grey. */
+/** The two-bump target of Section 1.5, as a function we can evaluate. */
+const threeDens=u=>st.three.weights.reduce((a,w,k)=>a+w*normalPdf(u,{mu:st.three.means[k],sigma:st.three.scales[k]}),0);
+/** Laplace in three steps: climb to the peak, read the bend of log p there, and draw the matching Gaussian. */
+function laplaceFig(){
+ const t=st.three,xs=t.plot.x,[mode,sd]=t.laplace;
+ const A=panel({W:640,H:300,L:16,R:14,T:52,B:50,xMin:-6,xMax:6,yMax:.32,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
+ const path=t.climb.map(u=>[A.x(u),A.y(threeDens(u))]),last=path.at(-1);
+ let s=A.axes+A.area(xs,t.plot.p,TINT.p)+A.line(xs,t.plot.p,palette.p)+label(16,30,'likelihood × prior: the posterior’s shape',{fill:palette.p,size:20,weight:600})+
+  `<polyline points="${path.map(([x,y])=>`${x.toFixed(1)},${y.toFixed(1)}`).join(' ')}" fill="none" stroke="${palette.noise}" stroke-width="2"/>`+
+  path.map(([x,y],k)=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${k===path.length-1?7:4.5}" fill="${palette.noise}"/>`).join('')+
+  // labels sit in empty space, joined to their dots by thin leader lines
+  `<line x1="${A.x(1.15).toFixed(1)}" y1="${(A.y(.18)+6).toFixed(1)}" x2="${path[0][0].toFixed(1)}" y2="${path[0][1].toFixed(1)}" stroke="${palette.noise}" stroke-width="1.2"/>`+label(A.x(1.2),A.y(.18),'start: θ = 0',{fill:palette.noise,size:18})+
+  `<line x1="${A.x(-4.3).toFixed(1)}" y1="${(A.y(.25)+6).toFixed(1)}" x2="${last[0].toFixed(1)}" y2="${last[1].toFixed(1)}" stroke="${palette.noise}" stroke-width="1.2"/>`+label(A.x(-5.8),A.y(.25),`θ${sub('MAP')} = ${num(mode,2)}`,{fill:palette.noise,size:19,weight:600});
+ s+=`<g data-at="3">${A.line(xs,t.plot.laplace,palette.noise,'stroke-dasharray="8 5"')+label(A.x(-5.8),A.y(.19),`dashed: N(${num(mode,2)}, ${num(sd,2)}²)`,{fill:palette.noise,size:19,weight:600})}</g>`;
+ const B=panel({ox:680,W:470,H:300,L:56,R:14,T:52,B:50,xMin:-4.5,xMax:.5,yMin:-5,yMax:-.5,ticksX:[-4,-3,-2,-1,0],ticksY:[-5,-3,-1],xLabel:'θ'});
+ const zs=lin(-4.5,.5,101),top=Math.log(threeDens(mode));
+ s+=`<g data-at="2">${B.axes+B.line(zs,zs.map(u=>Math.log(threeDens(u))),palette.p)+B.line(zs,zs.map(u=>top-(u-mode)**2/(2*sd*sd)),palette.noise,'stroke-dasharray="8 5"')+
+  label(736,30,'log p near the peak, and a parabola',{fill:ink,size:19,weight:600})}</g>`;
+ return fig(1150,300,s,'Laplace in three steps: gradient ascent climbs from theta = 0 to the highest peak; near the peak the log density is matched by a parabola; the Gaussian with that peak and that bend.');
+}
+/** The walker's rule: from θ, propose θ′; uphill always, downhill with probability p(θ′)/p(θ); in the long run the visits follow p. */
+function mcmcRuleFig(){
+ const t=st.three,xs=t.plot.x,cur=-1,up=-1.6,down=.8,ratio=threeDens(down)/threeDens(cur);
+ const A=panel({W:1150,H:290,L:16,R:14,T:46,B:50,xMin:-6,xMax:6,yMax:.32,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
+ const e=t.mcmc.edges,pt=u=>[A.x(u),A.y(threeDens(u))],[cx,cy]=pt(cur),[ux,uy]=pt(up),[dx,dy]=pt(down);
+ let bars='';t.mcmc.hist.forEach((h,i)=>{if(!h)return;const x0=A.x(e[i]),x1=A.x(e[i+1]);bars+=`<rect x="${(x0+1).toFixed(1)}" y="${A.y(h).toFixed(1)}" width="${(x1-x0-2).toFixed(1)}" height="${(A.y(0)-A.y(h)).toFixed(1)}" fill="${palette.data}" fill-opacity=".4"/>`;});
+ let s=A.axes+`<g data-at="3">${bars}${label(A.x(5.9),A.y(.24),`${t.mcmc.steps.toLocaleString('en')} steps: where the walker spent its time`,{fill:palette.data,size:20,anchor:'end',weight:600})}</g>`+A.area(xs,t.plot.p,'none')+A.line(xs,t.plot.p,palette.p);
+ const hollow=(x,y,c)=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="8" fill="${palette.paper}" stroke="${c}" stroke-width="3"/>`;
+ const guide=(x1,x2,y)=>`<line x1="${x1.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${MUTED}" stroke-width="2" stroke-dasharray="5 5"/>`;
+ s+=`<g data-only="1-2">${guide(cx,ux,A.y(0)-18)+guide(cx,dx,A.y(0)-18)}</g>`+
+  hollow(ux,uy,palette.d)+hollow(dx,dy,palette.loss)+`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="9" fill="${palette.noise}"/>`+
+  label(cx-14,cy+34,'θ: the walker',{fill:palette.noise,size:19,anchor:'end',weight:600})+
+  label(ux-14,uy-18,'θ′',{fill:palette.d,size:20,anchor:'end',weight:600})+label(dx+14,dy-16,'θ′',{fill:palette.loss,size:20,weight:600})+
+  `<g data-only="2">${label(ux-14,uy-44,'higher: always move',{fill:palette.d,size:19,anchor:'end',weight:600})+
+   label(dx+14,dy-62,`lower: move with probability`,{fill:palette.loss,size:19,weight:600})+label(dx+14,dy-38,`p(θ′) / p(θ) = ${num(ratio,2)}, else stay`,{fill:palette.loss,size:19,weight:600})}</g>`;
+ return fig(1150,290,s,'A random walk on the two-bump target. The walker at theta proposes a step; a higher proposal is always accepted, a lower one with probability equal to the ratio of densities. The histogram of a long walk matches the target.');
+}
+/** VI's family is a choice: the closest single Gaussian, and the closest mixture of two Gaussians. */
+function viChoiceFig(){
+ const t=st.three,xs=t.plot.x;
+ const one=(ox,ys,title,kl)=>{const P=panel({ox,W:560,H:280,L:16,R:14,T:70,B:50,xMin:-6,xMax:6,yMax:.32,ticksX:[-4,-2,0,2,4],yAxis:false,xLabel:'θ'});
+  return P.axes+P.area(xs,t.plot.p,TINT.p)+P.line(xs,t.plot.p,palette.p,'stroke-opacity=".45"')+P.line(xs,ys,palette.q)+
+   label(ox+16,28,title,{fill:palette.q,size:21,weight:600})+label(ox+16,54,`closest member: KL(q ‖ p) ${kl}`,{size:19});};
+ return fig(1150,280,one(0,t.plot.vi,'family: one Gaussian',`= ${num(t.vi_kl,2)}`)+`<g data-at="2">${one(590,t.plot.vi_mix,'family: mixtures of two Gaussians',t.vi_mix.kl<5e-4?'≈ 0':`= ${num(t.vi_mix.kl,3)}`)}</g>`,
+  'Variational inference with two families on the two-bump target: the closest single Gaussian covers only the big bump; the closest mixture of two Gaussians matches both bumps.');
+}
 /** Variational inference in one picture: the posterior we need but cannot compute, and a q we control, tuned to sit close to it. */
 function viIdeaFig(){
  const t=st.three,xs=t.plot.x,Pc=palette.p,Q=palette.q;let s=graphDefs('vi');
@@ -283,7 +340,7 @@ function swapContrib(){
 }
 const box=(x,y,w,h,color=ink)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${palette.paper}" stroke="${color}" stroke-width="2.5"/>`;
 const arrow=(x1,y,x2,color=ink)=>`<line x1="${x1}" y1="${y}" x2="${x2-12}" y2="${y}" stroke="${color}" stroke-width="2.5"/><polygon points="${x2},${y} ${x2-14},${y-7} ${x2-14},${y+7}" fill="${color}"/>`;
-const bitBox=(x,y,bit,color=palette.q)=>`<rect x="${x}" y="${y}" width="40" height="46" rx="5" fill="${TINT.q}" stroke="${color}" stroke-width="2"/>`+label(x+20,y+32,bit,{fill:color,size:24,anchor:'middle',weight:600});
+const bitBox=(x,y,bit,color=palette.q)=>`<rect x="${x}" y="${y}" width="40" height="46" rx="5" fill="${palette.paper}"/><rect x="${x}" y="${y}" width="40" height="46" rx="5" fill="${TINT.q}" stroke="${color}" stroke-width="2"/>`+label(x+20,y+32,bit,{fill:color,size:24,anchor:'middle',weight:600});
 function channelDiagram(){
  let s=box(10,40,270,170)+label(145,72,'weather station',{fill:ink,size:22,anchor:'middle',weight:600})+weather('sunny',75,135)+weather('cloudy',145,135)+weather('rainy',215,130)+label(145,196,'today: cloudy',{size:20,anchor:'middle'});
  s+=box(870,40,270,170)+label(1005,72,'receiver',{fill:ink,size:22,anchor:'middle',weight:600})+weather('cloudy',1005,135)+label(1005,196,'reads: cloudy',{size:20,anchor:'middle'});
@@ -346,6 +403,8 @@ function diagEllipses(){
 // ---------------------------------------------------------------- Part 2 figures: surprise, entropy, codes, classifiers, data
 const inf=st.info,wb=st.bits,cl=st.classify,ml=st.mle,half=v=>v===.5?'½':v===.25?'¼':num(v,2);
 const log2=x=>Math.log(x)/Math.LN2,bitsOf=pr=>-log2(pr);
+/** Coloured numbers for tables: the truth p in teal, the belief q in purple, extra bits in red. */
+const cp=v=>`<span class="p">${v}</span>`,cq=v=>`<span class="q">${v}</span>`,cx=v=>`<span class="loss">${v}</span>`,fracOf=v=>v===1?'1':v===2?'2':half(v);
 const HUANG='Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)';
 const SUN='#E8A317';
 /** The forecast: sun 0.9 and rain 0.1 as icons over probability bars, optionally with each surprise. */
@@ -370,21 +429,26 @@ function fiveDays(withRain){
  return fig(W,H,s,withRain?'Four sunny days and one rainy day: the probabilities multiply to 0.066 and the surprises add to 3.93 bits.':'Five sunny days: the probabilities multiply to 0.59 and the surprises add to 0.76 bits.');
 }
 const qNode=(x,y,w,t)=>`<rect x="${x-w/2}" y="${y-26}" width="${w}" height="52" rx="26" fill="${palette.paper}" stroke="${ink}" stroke-width="2.5"/>`+label(x,y+8,t,{fill:ink,size:21,anchor:'middle',weight:600});
-const leafNode=(x,y,kind,t)=>`<rect x="${x-62}" y="${y-36}" width="124" height="86" rx="10" fill="${palette.paper}" stroke="${MUTED}" stroke-width="2"/>`+weather(kind,x,y-6,.62)+label(x,y+38,t,{fill:ink,size:18,anchor:'middle'});
-const treeEdge=(x1,y1,x2,y2,t,bit,at)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${MUTED}" stroke-width="2.5"/>`+label((x1+x2)/2+(x2<x1?-22:22),(y1+y2)/2,t,{fill:MUTED,size:18,anchor:'middle'})+
- (bit?`<g data-at="${at}">${label((x1+x2)/2+(x2<x1?-22:22),(y1+y2)/2+24,bit,{fill:palette.q,size:22,anchor:'middle',weight:600})}</g>`:'');
+const leafNode=(x,y,kind,t,w=Math.max(124,String(t).length*9.6+22))=>`<rect x="${x-w/2}" y="${y-36}" width="${w}" height="86" rx="10" fill="${palette.paper}" stroke="${MUTED}" stroke-width="2"/>`+weather(kind,x,y-6,.62)+label(x,y+38,t,{fill:ink,size:18,anchor:'middle'});
+/** A label sitting on a wire: a small pill centred on the line, so the line runs behind it instead of through it. */
+const wireTag=(x,y,text,color,{size=19,weight=600}={})=>{const w=Math.max(30,String(text).length*size*.6+18);
+ return `<rect x="${(x-w/2).toFixed(1)}" y="${(y-size*.8).toFixed(1)}" width="${w.toFixed(1)}" height="${(size*1.5).toFixed(1)}" rx="${(size*.75).toFixed(1)}" fill="${palette.paper}" stroke="${color}" stroke-width="1.5"/>`+label(x,y+size*.36,text,{fill:color,size,anchor:'middle',weight});};
+/** A tree edge with its answer on the wire; from build `at` the answer also shows its bit. */
+const treeEdge=(x1,y1,x2,y2,t,bit,at)=>{const mx=(x1+x2)/2,my=(y1+y2)/2;
+ return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${MUTED}" stroke-width="2.5"/>`+
+  (bit?`<g data-only="1-${at-1}">${wireTag(mx,my,t,MUTED,{weight:500})}</g><g data-at="${at}">${wireTag(mx,my,`${t} = ${bit}`,palette.q)}</g>`:wireTag(mx,my,t,MUTED,{weight:500}));};
 /** The question game: ask about the likeliest weather first; each answer is one bit. */
 function questionTree(){
- let s=treeEdge(200,62,110,190,'yes','0',3)+treeEdge(200,62,390,140,'no','1',3)+treeEdge(390,140,300,250,'yes','0',3)+treeEdge(390,140,480,250,'no','1',3);
- s+=qNode(200,48,210,'Is it sunny?')+qNode(390,140,210,'Is it cloudy?')+leafNode(110,226,'sunny','1 question · ½')+leafNode(300,286,'cloudy','2 questions · ¼')+leafNode(480,286,'rainy','2 questions · ¼');
- return fig(560,340,s,'A yes/no question tree: is it sunny? if not, is it cloudy? Sunny takes one question, cloudy and rainy two.');
+ let s=treeEdge(180,66,90,254,'yes','0',3)+treeEdge(180,66,410,134,'no','1',3)+treeEdge(410,186,290,264,'yes','0',3)+treeEdge(410,186,530,264,'no','1',3);
+ s+=qNode(180,40,210,'Is it sunny?')+qNode(410,160,210,'Is it cloudy?')+leafNode(90,290,'sunny','1 question · ½')+leafNode(290,300,'cloudy','2 questions · ¼')+leafNode(530,300,'rainy','2 questions · ¼');
+ return fig(620,380,s,'A yes/no question tree: is it sunny? if not, is it cloudy? Sunny takes one question, cloudy and rainy two.');
 }
 /** Huffman’s algorithm on sunny ½, cloudy ¼, rainy ¼, one merge per build. */
 function huffmanSteps(){
  const L=[[90,'sunny','½'],[300,'cloudy','¼'],[470,'rainy','¼']],y=262;
  let s=L.map(([x,kind,pr])=>leafNode(x,y,kind,`${kind} ${pr}`)).join('');
- const node=(x,yy,t)=>`<circle cx="${x}" cy="${yy}" r="26" fill="${TINT.q}" stroke="${palette.q}" stroke-width="2.5"/>`+label(x,yy+8,t,{fill:palette.q,size:20,anchor:'middle',weight:600});
- const e=(x1,y1,x2,y2,bit)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${palette.q}" stroke-width="2.5"/><g data-at="4">${label((x1+x2)/2+(x2<x1?-16:16),(y1+y2)/2,bit,{fill:palette.q,size:22,anchor:'middle',weight:600})}</g>`;
+ const node=(x,yy,t)=>`<circle cx="${x}" cy="${yy}" r="26" fill="${palette.paper}"/><circle cx="${x}" cy="${yy}" r="26" fill="${TINT.q}" stroke="${palette.q}" stroke-width="2.5"/>`+label(x,yy+8,t,{fill:palette.q,size:20,anchor:'middle',weight:600});
+ const e=(x1,y1,x2,y2,bit)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${palette.q}" stroke-width="2.5"/><g data-at="4">${wireTag((x1+x2)/2,(y1+y2)/2,bit,palette.q,{size:21})}</g>`;
  s+=`<g data-at="2">${e(385,150,300,226,'0')+e(385,150,470,226,'1')+node(385,150,'½')}</g>`;
  s+=`<g data-at="3">${e(240,50,90,226,'0')+e(240,50,385,124,'1')+node(240,50,'1')}</g>`;
  s+=`<g data-at="4">${[[90,'0'],[300,'10'],[470,'11']].map(([x,c])=>label(x,y+80,c,{fill:palette.q,size:24,anchor:'middle',weight:700})).join('')}</g>`;
@@ -759,12 +823,20 @@ S('evidence-area','bayes','The evidence is an area: add up thin rectangles',{nb:
  expected:['p(𝒟 | w₂) p(w₂) at its centre: the likelihood times the prior.','A grid of squares: 20 × 20 = 400, or 100 × 100 if each axis needs 100.'],
  point:'A one-dimensional slice of our network’s evidence, for illustration only: the curve is computed in the browser from θ<sub>A</sub> and the data.',
  transition:'And with all seven unknowns?'});
-S('intractable','bayes','Intractable: why the rectangles do not scale',{builds:2,
- body:cols(gridDots(),stack(p('<b>Intractable</b>: no formula, and a cost that grows exponentially with the number of unknowns.'),
-  at(2,table(['unknowns','grid points'],[['1','100'],['2','10,000'],['7, our network','10<sup>14</sup>: a day'],['10<sup>6</sup>','10<sup>2,000,000</sup>: never']]))),'1fr 1fr'),
- lines:['With 100 rectangles per unknown, two unknowns already need 10,000 boxes.','Our seven need 10¹⁴; a real network, 10<sup>2,000,000</sup>. That is what intractable means.'],
- ask:['How long would 10¹⁴ evaluations take at a billion a second?','So what does intractable mean?'],
- expected:['About 28 hours: possible, just. For 10^2,000,000: never.','No closed form, and no feasible numerical computation: the cost explodes with the number of unknowns.'],
+S('intractable','bayes','Intractable: why the rectangles do not scale',{builds:4,
+ body:cols(gridDots(),stack(p('<b>d</b> unknowns: 100 × 100 × ⋯ × 100 = 100<sup>d</sup> points'),
+  `<div class="table-sm"><div class="table-scroll"><table><thead><tr><th>unknowns</th><th>grid points</th><th>at 10⁹ a second</th></tr></thead><tbody>
+   <tr><td>1</td><td>100</td><td>instant</td></tr>
+   <tr data-at="2"><td>2</td><td>100² = 10⁴</td><td>instant</td></tr>
+   <tr data-at="3"><td>3</td><td>100³ = 10⁶</td><td>a millisecond</td></tr>
+   <tr data-at="4"><td>7 (our network)</td><td>100⁷ = 10¹⁴</td><td>≈ 28 hours</td></tr>
+   <tr data-at="4"><td>10⁶ (a real one)</td><td>10<sup>2,000,000</sup></td><td>never</td></tr></tbody></table></div></div>`),'0.85fr 1.15fr'),
+ lines:['To add up the evidence on a grid, put 100 points along each unknown. One unknown: 100 evaluations.',
+  'Two unknowns: each of the 100 values of the first pairs with each of the 100 values of the second. 100 × 100 = 10,000.',
+  'Three unknowns: 100 × 100 × 100 = a million. Every extra unknown multiplies the count by another 100.',
+  'Our seven: 100⁷ = 10¹⁴, about 28 hours at a billion a second. A real network: 10<sup>2,000,000</sup>, never. That is what intractable means.'],
+ ask:['How many evaluations for one unknown?','Why 10,000 and not 200?','What does one more unknown do to the count?','How long do 10¹⁴ evaluations take at a billion a second?'],
+ expected:['100: one per grid point.','Every value of the first unknown has to be paired with every value of the second: 100 × 100.','It multiplies it by 100: d unknowns need 100<sup>d</sup> points.','10¹⁴ / 10⁹ = 10⁵ seconds, about 28 hours: possible, just. A million unknowns: 10<sup>2,000,000</sup>, never.'],
  point:'Sampling θ from the prior and averaging p(𝒟 | θ) does not rescue it: almost every draw explains the data terribly. The optional slide on prior sampling shows the numbers: with ten draws the estimate is off by about 1,000 nats, and of ten million draws only about 100 matter.',
  transition:'Why do we want the posterior at all?'});
 chap('1.5');
@@ -785,14 +857,45 @@ S('core-problem','bayes','The core problem of probabilistic machine learning',{b
  expected:['The likelihood and the prior, as we did for θ<sub>A</sub>. Not the evidence.','In every Bayesian model with many unknowns, including the VAE in Lecture 2.'],
  transition:'Three ways to approach it.'});
 S('three-ways','bayes','Three ways to approximate the posterior; we take the third',{nb:'cell-three-ways',builds:3,
- body:grid3(stack(threeWay('laplace'),small(`A Gaussian at the highest peak: N(${num(st.three.laplace[0],1)}, ${num(st.three.laplace[1],1)}²). It never sees the second bump.`)),
-  at(2,stack(threeWay('mcmc'),small(`20,000 random-walk steps. Their mean, ${num(st.three.mcmc.mean)}, matches the true ${num(st.three.true_mean)}.`))),
-  at(3,stack(threeWay('vi'),small(`The closest Gaussian, found by optimisation: N(${num(st.three.vi[0])}, ${num(st.three.vi[1])}²).`)))),
- lines:['Laplace: fit a Gaussian to the curvature at the highest peak.','MCMC: a random walk whose visits follow the posterior. Right in the long run, but slow.','Variational inference: the closest member of a simple family, found by optimisation. The rest of the lecture develops only this one.'],
+ body:grid3(stack(threeWay('laplace'),small(`Climb to the highest peak, then fit a Gaussian there: N(${num(st.three.laplace[0],1)}, ${num(st.three.laplace[1],1)}²). It never sees the second bump.`)),
+  at(2,stack(threeWay('mcmc'),small(`A random walk, 20,000 steps. The visits follow the target: mean ${num(st.three.mcmc.mean)}, true ${num(st.three.true_mean)}.`))),
+  at(3,stack(threeWay('vi'),small('The closest member of a family we choose: one Gaussian (dashed) must stretch across both bumps; a mixture of two (solid) matches them.')))),
+ lines:['Laplace: climb to the highest peak, then fit a Gaussian to its shape there.','MCMC: a random walk whose visits follow the posterior. Right in the long run, but slow.','Variational inference: choose a family, then find its member closest to the posterior by optimisation. The family need not be Gaussian.'],
  ask:['What does Laplace miss here?','What does MCMC cost?','What does VI trade away?'],
- expected:['The second bump: it only looks at the peak.','Many steps, each evaluating the model on the data; hard to scale to large models and datasets.','Exactness. The answer is limited to the family, here one Gaussian. In return it is fast and uses the same gradient tools as deep learning.'],
- point:'Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 0.',
- transition:'Variational inference, in one picture.'});
+ expected:['The second bump: it only looks at the peak it climbed to.','Many steps, each evaluating the model on the data; hard to scale to large models and datasets.','Exactness, unless the family contains the posterior. In return it is fast and uses the same gradient tools as deep learning.'],
+ point:'Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 1.5. The next slides take each method in turn.',
+ transition:'1.5.1: Laplace, step by step.'});
+subsec('1.5.1');
+S('laplace-steps','bayes','Laplace: climb to the peak, then fit a Gaussian there',{nb:'cell-laplace',builds:3,
+ body:stack(laplaceFig(),`<div class="state-slot eq-sm">${[
+   R`\theta_{\text{MAP}}=\arg\max_\theta\ \log\big[p(\mathcal D\mid\theta)\,p(\theta)\big]=${num(st.three.laplace[0],2)}`,
+   R`\frac{d^2}{d\theta^2}\log p(\theta)\Big|_{\theta_{\text{MAP}}}=${num(st.three.curvature,2)}\quad\Longrightarrow\quad\sigma=\frac{1}{\sqrt{${num(-st.three.curvature,2)}}}=${num(st.three.laplace[1],2)}`,
+   R`q_{\text{Laplace}}(\theta)=\mathcal N\big(\theta_{\text{MAP}},\ \sigma^2\big)=\mathcal N\big(${num(st.three.laplace[0],2)},\ ${num(st.three.laplace[1],2)}^2\big)`].map((x,k)=>`<div data-only="${k+1}">${eq(x)}</div>`).join('')}</div>`),
+ lines:['Step 1, climb. Likelihood × prior has the same peaks as the posterior: the evidence only rescales it. Gradient ascent from θ = 0 reaches θ<sub>MAP</sub>.',
+  'Step 2, measure the bend. Near the peak, log p looks like a parabola. Its second derivative sets the width: the sharper the bend, the narrower the Gaussian.',
+  'Step 3, fit. The Gaussian with that centre and that width matches the peak well, and never sees the second bump.'],
+ ask:['Why can we climb without knowing the evidence?','What does a sharper bend mean for σ?','When is Laplace a good approximation?'],
+ expected:['p(𝒟) is a constant: dividing by it rescales the curve without moving its peak.','A larger second derivative gives a smaller σ: a narrow, confident Gaussian.','When the posterior has one bump that is close to Gaussian, as often happens with plenty of data.'],
+ point:`Start the climb at θ = 1 instead and it ends at ${num(st.three.climb_right.at(-1),2)}: the smaller bump. Laplace only sees the peak it climbs to. With seven parameters, the second derivative becomes the 7 × 7 Hessian matrix, and σ² becomes its inverse.`,
+ transition:'1.5.2: MCMC.'});
+subsec('1.5.2');
+S('mcmc-idea','bayes','MCMC: a random walk that follows the posterior',{nb:'cell-mcmc',builds:3,
+ body:stack(mcmcRuleFig(),`<div class="state-slot eq-sm"><div data-only="1">${eq(R`\theta'=\theta+\text{a small random step}`)}</div><div data-only="2">${eq(R`\text{move with probability}\ \min\Big(1,\ \frac{p(\mathcal D\mid\theta')\,p(\theta')\,/\,\cancel{p(\mathcal D)}}{p(\mathcal D\mid\theta)\,p(\theta)\,/\,\cancel{p(\mathcal D)}}\Big)`)}</div><div data-only="3">${p(`After ${st.three.mcmc.steps.toLocaleString('en')} steps the visits follow the posterior, both bumps included: their mean is ${num(st.three.mcmc.mean)}, the true mean ${num(st.three.true_mean)}.`)}</div></div>`),
+ lines:['MCMC is a walker. From where it stands, θ, it proposes a random step to a nearby θ′.',
+  'Uphill: always move. Downhill: move with probability p(θ′)/p(θ), otherwise stay put. Only the ratio matters, so the unknown evidence cancels.',
+  'Count where the walker spends its time. In the long run the counts follow the posterior: more visits where it is high.'],
+ ask:['Why not always move uphill?','Why does the evidence not matter?','What does MCMC cost?'],
+ expected:['Then the walker would climb to the nearest peak and stop: an optimiser, not a sampler. Sometimes going downhill is what lets it visit every bump in the right proportion.','It divides both p(θ′) and p(θ), so it cancels in the ratio: likelihood × prior is enough.','Many steps, each evaluating the model on all the data, and neighbouring steps are correlated.'],
+ point:'This is random-walk Metropolis (Metropolis et al., 1953). The posterior predictive of Section 1.5 came from a smarter walker, Hamiltonian Monte Carlo, which uses gradients to propose long moves.',
+ transition:'Walk it yourself.'});
+S('mcmc-live','bayes','Walk it yourself: the visits build up the posterior',{nb:'cell-mcmc',
+ body:widget('mcwalk','A random-walk sampler on the two-bump target: the walker, its last proposal, the histogram of its visits and the trace of θ over the last 300 steps'),
+ lines:['Take single steps first, then hundreds. Then try a tiny step size and a huge one: tiny steps crawl and rarely cross the gap; huge steps are mostly rejected.'],
+ ask:['What happens with step size 0.1? With 5?'],
+ expected:['0.1: nearly every proposal is accepted, but the walker crawls and may not reach the second bump for a long time. 5: most proposals land far out, where p is tiny, and are rejected. In between mixes best.'],
+ demo:'Notebook 1.5.2 runs the same walk for 20,000 steps with step size 2 and compares the visits with the target.',
+ transition:'1.5.3: variational inference.'});
+subsec('1.5.3');
 S('vi-idea','bayes','Variational inference: choose q, make it close to the posterior',{builds:3,
  body:stack(viIdeaFig(),
   at(3,`<div class="eq-sm">${eq(R`\begin{aligned}p(y^*\mid x^*,\mathcal D)&=\int p(y^*\mid x^*,\theta)\,\pcol{p(\theta\mid\mathcal D)}\,d\theta&&\text{needs the posterior}\\&\approx\frac1S\sum_{s=1}^{S}p(y^*\mid x^*,\theta_s),\quad\theta_s\sim\qcol{q_\psi(\theta)}&&\text{needs only }q_\psi\end{aligned}`)}</div>`)),
@@ -802,6 +905,14 @@ S('vi-idea','bayes','Variational inference: choose q, make it close to the poste
  ask:['What do we need the posterior for?','What can we change about q<sub>ψ</sub>?','Why is the second line easy to compute?'],
  expected:['Predictions that average over every plausible network, with their error bars.','Only its knobs ψ: for a Gaussian, a mean and a width for each parameter.','Drawing θ from q<sub>ψ</sub> is easy, and each draw costs one forward pass of the network.'],
  point:'The same q<sub>ψ</sub> is called the variational distribution, the approximate posterior, or, in Pyro and NumPyro, the guide.',
+ transition:'The family is our choice.'});
+S('vi-choice','bayes','The family is our choice: one Gaussian, or a mixture of two',{nb:'cell-vi-toy',builds:2,
+ body:viChoiceFig(),
+ lines:[`One Gaussian has one bump, so it compromises: the closest one stretches across both bumps and puts mass in the gap. KL(q ‖ p) = ${num(st.three.vi_kl,2)}.`,
+  'With a mixture of two Gaussians, the closest q matches both bumps and the KL falls to about 0. A richer family fits better, at the price of more knobs ψ.'],
+ ask:['What is wrong with the single Gaussian?','Why not always choose a very rich family?'],
+ expected:['It cannot have two bumps: to reach both it spreads wide, misses both peaks and puts mass in the gap, where p is small. KL(q ‖ p) charges for that mass.','More knobs are harder to optimise and slower to sample. For a network with millions of weights, even one Gaussian per weight is a lot of knobs.'],
+ point:'Both fits minimise the same KL(q ‖ p) by gradient descent; only the family changes. Part 3 fits mixtures, and normalising flows are richer still.',
  transition:'Our q for the tiny network.'});
 S('vi-family','bayes','Our q for the network: one Gaussian per parameter',{builds:3,
  body:stack(eq(R`q_\psi(\theta)=\prod_{j=1}^{7}\N(\theta_j;\,\mu_j,\,\sigma_j^2),\qquad\psi=(\mu_1,\dots,\mu_7,\ \sigma_1,\dots,\sigma_7)`),at(2,qFactors()),
@@ -929,20 +1040,37 @@ S('efficient-code','kl','Each codeword is exactly as long as its surprise',{buil
  expected:['3 bits: log₂ 8.','No: by Shannon’s source coding theorem, H(p) is the minimum.'],
  source:HUANG,transition:'What if the code was built for the wrong weather?'});
 chap('2.4');
-S('wrong-belief','kl','A code built on a wrong belief',{builds:2,nb:'cell-huffman',
- body:cols(weatherBars([wb.p,wb.q],['our weather, p','their belief, q'],[palette.p,palette.q]),stack(p('The station was designed for a town where rain is the common weather: q = (¼, ¼, ½).'),
-  at(2,table(['weather',m('q'),'their code',m(R`\log_2\frac1q`)],wb.names.map((nm,i)=>[nm,half(wb.q[i]),`<code>${wb.wrong_code[i]}</code>`,`${num(bitsOf(wb.q[i]),0)} bit${bitsOf(wb.q[i])===1?'':'s'}`])))),'1.1fr 1fr'),
- lines:['Suppose the station’s code was built for another town, where rain is common: q = (¼, ¼, ½). Our weather is still p = (½, ¼, ¼).','Huffman on q gives rainy the short codeword: sunny 10, cloudy 11, rainy 0. Each length is log₂ 1/q: the surprise under the wrong belief.'],
- ask:['Which of our days does their code make expensive?','Whose probabilities set the code lengths?'],
- expected:['Sunny days: half of our days now cost 2 bits instead of 1.','q’s: a code built for q spends log₂ 1/q(x) bits on x.'],
+S('q-code','kl','Another town: weather q, and the best code for it',{builds:2,nb:'cell-huffman',
+ body:cols(weatherBars([wb.q],['their weather, q'],[palette.q]),stack(
+  `<div class="table-sm">${table(['weather',cq('q'),'Huffman code',`length: ${cq('log₂ 1/q')}`],wb.names.map((nm,i)=>[nm,cq(half(wb.q[i])),`<code>${wb.wrong_code[i]}</code>`,cq(num(bitsOf(wb.q[i]),0))]))}</div>`,
+  at(2,eq(R`H(\qcol q)=\qcol{\tfrac14}\cdot\qcol{2}+\qcol{\tfrac14}\cdot\qcol{2}+\qcol{\tfrac12}\cdot\qcol{1}=1.5\ \text{bits}`))),'1fr 1.2fr'),
+ lines:['A town where rain is common has weather q = (¼, ¼, ½). Huffman on q gives rainy the short codeword: sunny 10, cloudy 11, rainy 0.',
+  'In their own town this code is perfect: it averages H(q) = 1.5 bits a day, the entropy of q. Each length is log₂ 1/q, the surprise under q.'],
+ ask:['Which day gets the shortest codeword in their town, and why?','What is the entropy of their weather?'],
+ expected:['Rainy: it is their most common day, so Huffman merges it last.','H(q) = ¼·2 + ¼·2 + ½·1 = 1.5 bits, the same as ours: both towns have one common day and two rarer ones.'],
+ point:'The notebook’s Huffman cell builds both codes: 0, 10, 11 for p and 10, 11, 0 for q.',
+ source:HUANG,transition:'Now send our weather with their code.'});
+S('wrong-belief','kl','Their code, our weather: a code that expects q',{builds:2,nb:'cell-huffman',
+ body:cols(weatherBars([wb.p,wb.q],['our weather, p','their weather, q'],[palette.p,palette.q]),stack(
+  `<div class="table-sm">${table(['weather',`how often here: ${cp('p')}`,'their code',`its length: ${cq('log₂ 1/q')}`],wb.names.map((nm,i)=>[nm,cp(half(wb.p[i])),`<code>${wb.wrong_code[i]}</code>`,cq(num(bitsOf(wb.q[i]),0))]))}</div>`,
+  at(2,p(`The code <b>expects q</b>: its lengths are right only if days arrive with ${cq('q')}’s frequencies. Ours arrive with ${cp('p')}’s, so our common sunny days get a long codeword.`))),'1fr 1.25fr'),
+ lines:['Now their station sends our weather. The days come from p, ours. The codeword lengths come from q, theirs.',
+  '“The code expects q” means it was built for days that follow q. Here sunny, half of our days, costs 2 bits instead of 1.'],
+ ask:['Which of our days does their code make expensive?','Whose probabilities set the lengths, and whose say how often each length is paid?'],
+ expected:['Sunny: half of our days, now 2 bits each instead of 1.','q sets the lengths; p says how often each is paid.'],
  source:HUANG,transition:'Average the cost over our weather.'});
-S('cross-entropy','kl','Cross-entropy: the average cost when the code expects q',{builds:3,nb:'cell-cross-entropy',
- body:stack(eq(R`H(\pcol p,\qcol q)=\sum_x \pcol{p(x)}\,\log_2\frac{1}{\qcol{q(x)}}`),
-  at(2,eq(R`=\tfrac12(2)+\tfrac14(2)+\tfrac14(1)=1.75\ \text{bits per day}`)),
-  at(3,cols(p(`<b class="p">weights</b> from the truth p: how often each day happens`),p(`<b class="q">lengths</b> from the belief q: what each day costs`),'1fr 1fr'))),
- lines:['Cross-entropy: average, over our real weather p, of the code lengths built from q.','½ × 2 + ¼ × 2 + ¼ × 1 = 1.75 bits per day, against 1.5 with the right code.','The two play different roles: p decides how often, q decides how much. Entropy is the special case q = p.'],
- ask:['Which distribution supplies the weights?','Compute it.','What is H(p, p)?'],
- expected:['p, the real weather.','½(2) + ¼(2) + ¼(1) = 1.75.','H(p): the right code, 1.5 bits.'],
+S('cross-entropy','kl','Cross-entropy: the average cost when the code expects q',{builds:4,nb:'cell-cross-entropy',
+ body:stack(`<div class="table-sm">${table(['weather',`how often: ${cp('p(x)')}`,`bits paid: ${cq('log₂ 1/q(x)')}`,'contribution'],[
+   ...wb.names.map((nm,i)=>[nm,cp(half(wb.p[i])),cq(num(bitsOf(wb.q[i]),0)),at(2,`${cp(half(wb.p[i]))} × ${cq(num(bitsOf(wb.q[i]),0))} = ${fracOf(wb.p[i]*bitsOf(wb.q[i]))}`)]),
+   ['<b>average per day</b>','','',at(2,`<b>${num(wb.cross_entropy,2)} bits</b>`)]])}</div>`,
+  at(3,`<div class="eq-sm">${eq(R`H(\pcol p,\qcol q)=\sum_x \pcol{p(x)}\,\log_2\frac{1}{\qcol{q(x)}}=\pcol{\tfrac12}\cdot\qcol{2}+\pcol{\tfrac14}\cdot\qcol{2}+\pcol{\tfrac14}\cdot\qcol{1}=${num(wb.cross_entropy,2)}\ \text{bits}`)}</div>`),
+  at(4,`<div class="eq-sm">${eq(R`H(\pcol p,\pcol p)=H(\pcol p)=\pcol{\tfrac12}\cdot\pcol{1}+\pcol{\tfrac14}\cdot\pcol{2}+\pcol{\tfrac14}\cdot\pcol{2}=${num(wb.entropy,1)}\ \text{bits}`)}</div>`)),
+ lines:['How many bits a day does their code cost on our weather? For each kind of day: how often it happens here, p, and what it costs with their code, log₂ 1/q.',
+  'Multiply and add: ½ × 2 + ¼ × 2 + ¼ × 1 = 1.75 bits per day.',
+  'That is the cross-entropy formula: teal weights from the truth p, purple lengths from the belief q.',
+  'With our own code, q = p, the same formula gives the entropy, 1.5 bits. Their code costs 0.25 bits more per day.'],
+ ask:['Which column comes from our town, which from theirs?','What is the average cost per day?','In the formula, which distribution weights and which sets the lengths?','What is H(p, p)?'],
+ expected:['How often: p, ours. Bits paid: q, theirs.','1.75 bits.','p weights: how often. q sets the lengths: how much.','H(p) = 1.5 bits: the right code.'],
  source:HUANG,transition:'Watch it happen, day by day.'});
 S('bits-days','kl','Watch it happen: our weather through both codes',{nb:'cell-huffman',
  body:widget('days-codes','Days of our weather sent through the code for p and the code for q'),
@@ -952,12 +1080,16 @@ S('bits-days','kl','Watch it happen: our weather through both codes',{nb:'cell-h
  demo:'Notebook 2.3: the Huffman cell sends 1,000 days through both codes and prints the bit counts and the start of each bit stream.',
  transition:'Name the wasted bits.'});
 S('kl-extra-bits','kl','KL divergence: the extra bits we waste',{builds:3,nb:'cell-cross-entropy',
- body:stack(eq(R`\KL(\pcol p\,\|\,\qcol q)=H(\pcol p,\qcol q)-H(\pcol p)=1.75-1.5=0.25\ \text{bits}`),
-  at(2,eq(R`=\sum_x p(x)\Big(\log_2\frac1{q(x)}-\log_2\frac1{p(x)}\Big)`)),
-  at(3,eq(R`=\sum_x p(x)\log_2\frac{p(x)}{q(x)}=\tfrac12(1)+\tfrac14(0)+\tfrac14(-1)=0.25`))),
- lines:['The KL divergence is the waste: cross-entropy minus entropy, here 0.25 bits per day.','Both are sums over the same outcomes with the same weights p(x), so subtract term by term.','A difference of logs is the log of a ratio: KL(p‖q) = Σ p log p/q. For our weather ½(1) + ¼(0) + ¼(−1) = 0.25.'],
- ask:['What would the waste be if q = p?','Why can the two sums be combined?','Which outcome saves bits? Does the total still lose?'],
- expected:['Zero: the right code wastes nothing.','Same outcomes, same weights p(x).','Rainy: its codeword got shorter (−1 bit, on a quarter of days). Sunny loses a bit on half the days, so the total is +0.25.'],
+ body:stack(`<div class="table-sm">${table(['weather',`how often: ${cp('p')}`,`their code: ${cq('log₂ 1/q')}`,`our code: ${cp('log₂ 1/p')}`,cx('extra bits')],[
+   ...wb.names.map((nm,i)=>{const ex=bitsOf(wb.q[i])-bitsOf(wb.p[i]);return [nm,cp(half(wb.p[i])),cq(num(bitsOf(wb.q[i]),0)),cp(num(bitsOf(wb.p[i]),0)),cx(ex>0?`+${ex}`:ex<0?`−${-ex}`:'0')];}),
+   ['<b>average</b>','',cq(`<b>${num(wb.cross_entropy,2)}</b>`),cp(`<b>${num(wb.entropy,1)}</b>`),cx(`<b>+${num(wb.kl,2)}</b>`)]])}</div>`,
+  `<div class="state-slot eq-sm">${[2,3].map(b2=>{const last=R`=\sum_x\pcol{p(x)}\,\log_2\frac{\pcol{p(x)}}{\qcol{q(x)}}&&=${num(wb.kl,2)}\ \text{bits per day}`;
+   return `<div data-only="${b2}">${eq(R`\begin{aligned}\KL(\pcol p\,\|\,\qcol q)&=H(\pcol p,\qcol q)-H(\pcol p)&&=1.75-1.5\\&=\sum_x\pcol{p(x)}\Big(\log_2\frac{1}{\qcol{q(x)}}-\log_2\frac{1}{\pcol{p(x)}}\Big)&&=\pcol{\tfrac12}(\lcol{+1})+\pcol{\tfrac14}(\lcol{0})+\pcol{\tfrac14}(\lcol{-1})\\&${b2===3?last:R`\phantom{${last.replace('&&','')}}`}\end{aligned}`)}</div>`;}).join('')}</div>`),
+ lines:['Day by day: bits with their code, bits with ours, and the difference, the extra bits. A sunny day costs 1 extra, a cloudy day the same, a rainy day saves 1.',
+  'KL averages the extra bits over our weather, with the same weights p: ½(+1) + ¼(0) + ¼(−1) = 0.25 bits per day. Cross-entropy minus entropy.',
+  'A difference of logs is the log of a ratio: KL(p ‖ q) = Σ p log p/q. Inside, p/q compares the two beliefs on each day; outside, p says how often that day comes.'],
+ ask:['On which day does their code waste bits, and on which does it save?','Why weight the extra bits by p and not by q?','Can the total be negative?'],
+ expected:['Sunny wastes 1 bit; rainy saves 1; cloudy is the same.','The days come from our town, so each extra is paid as often as p says.','No: the savings on days q overrates never outweigh the waste on days it underrates. Next slide.'],
  source:HUANG,transition:'Two facts about KL.'});
 S('kl-properties','kl','Never negative, and zero only for the right code',{builds:2,nb:'cell-cross-entropy',
  body:stack(eq(R`H(p,q)\ \ge\ H(p)\quad\Longrightarrow\quad\KL(p\,\|\,q)\ \ge\ 0`),small('No code averages fewer than H(p) bits, so a code built for q can only waste bits.'),
@@ -965,7 +1097,19 @@ S('kl-properties','kl','Never negative, and zero only for the right code',{build
  lines:['The right code is the best possible, so any other code can only cost more: KL is never negative.','And it is zero only when the belief matches the truth.'],
  ask:['Can KL be negative?','If KL(p‖q) = 0, what do we know?'],
  expected:['No: that would beat the best possible code.','q = p: the belief is right.'],
- transition:'Does it matter which one is the truth?'});
+ transition:'How to read KL(p ‖ q).'});
+S('kl-reading','kl','Reading KL(p ‖ q): data from the left, code from the right',{builds:2,nb:'cell-cross-entropy',
+ body:stack(eq(R`\KL(\pcol p\,\|\,\qcol q)=\sum_x\ \underbrace{\pcol{p(x)}}_{\text{how often: the data}}\ \log_2\frac{\pcol{p(x)}}{\underbrace{\qcol{q(x)}}_{\text{the code, or model}}}`),
+  `<div class="table-sm">${table(['',`left: ${cp('p')}`,`right: ${cq('q')}`],[
+   ['its role',cp('the reference: where the data come from'),cq('the model: the code we use')],
+   ['in the sum','supplies the weights','supplies the lengths'],
+   ['our weather','our weather','their code']])}</div>`,
+  at(2,p(`Read KL(${cp('p')} ‖ ${cq('q')}) as <b>data from ${cp('p')}, coded with ${cq('q')}</b>. In Section 2.5 the left slot holds the truth (a label, the data) and the right slot the model.`))),
+ lines:['The two arguments play different roles. The left one, p, is where the data come from: it supplies the weights. The right one, q, is the code or model we use: it supplies the lengths.',
+  'So read KL(p ‖ q) as: data from p, coded with q. The reference on the left, the model on the right. Swap them and you ask a different question.'],
+ ask:['In KL(p ‖ q), which distribution generates the days?','Which one is the model?'],
+ expected:['p, the left one: it supplies the weights.','q, the right one: the code was built from it.'],
+ transition:'What if we swap them?'});
 S('kl-asymmetry','kl','Which one is the truth? KL is not symmetric',{builds:2,nb:'cell-cross-entropy',
  body:cols(weatherBars([wb.p,inf.kl.asym.q],['our weather, p','a sunny town, q'],[palette.p,palette.q]),
   table(['','bits wasted per day'],[[`our weather, their code: ${m(R`\KL(p\|q)`)}`,num(inf.kl.asym.fwd,2)],[at(2,`their weather, our code: ${m(R`\KL(q\|p)`)}`),at(2,num(inf.kl.asym.rev,2))]]),'1fr 1fr'),
@@ -1012,12 +1156,15 @@ S('ce-surprise','kl','③ The usual loss: surprise at the true label',{builds:3,
  ask:['Which terms survive?','In words, what is the loss?','What loss would q(cat) = 1 give?'],
  expected:['Only the true class.','How surprised the model is by the right answer.','0: no surprise.'],
  source:HUANG,transition:'④ Where is the KL?'});
-S('ce-is-kl','kl','④ As KL: with a one-hot label, cross-entropy = KL',{builds:3,nb:'cell-classifier',
- body:stack(eq(R`\KL(p\,\|\,q)=H(p,q)-H(p)`),at(2,eq(R`H(p)=1\cdot\log\tfrac11+0+0+0=0`)),at(2,small('A one-hot label is certain, so it has no surprise (0 · log 1/0 counts as 0).')),
-  at(3,`<div class="code-sm">${code('F.cross_entropy(logits, target)   # 0.511 nats: here equal to KL(p ‖ q)')}</div>`)),
- lines:['From Section 2.4: KL is cross-entropy minus entropy.','The entropy of a one-hot label is 0: a certain outcome carries no surprise.','So the classification loss is exactly KL(label ‖ prediction). PyTorch computes it in nats: 0.511 for our cat.'],
- ask:['What is H(p) for a one-hot label?','So what does training minimise?','Why does PyTorch compute cross-entropy rather than KL?'],
- expected:['0.','KL(label ‖ prediction): the bits the prediction wastes on the true labels.','They are equal here, and in general differ by H(p), which training cannot change. Cross-entropy avoids the log of the labels.'],
+S('ce-is-kl','kl','④ As KL: with a one-hot label, cross-entropy = KL',{builds:4,nb:'cell-classifier',
+ body:stack(eq(R`\KL(\pcol{\text{label}}\,\|\,\qcol{\text{prediction}})=H(\pcol p,\qcol q)-H(\pcol p)`),at(2,eq(R`H(\pcol p)=1\cdot\log\tfrac11+0+0+0=0`)),at(2,small('A one-hot label is certain, so it has no surprise (0 · log 1/0 counts as 0).')),
+  at(3,`<div class="code-sm">${code('F.cross_entropy(logits, target)   # 0.511 nats: here equal to KL(p ‖ q)')}</div>`),
+  at(4,small(`Why label ‖ prediction? The label is the ${cp('reference')}: the data come from it, so it goes on the left. The prediction is the ${cq('model')}, on the right. Swapped, KL(prediction ‖ label) would need log q/0 for every wrong class: infinite.`))),
+ lines:['From Section 2.4: KL is cross-entropy minus entropy. The label is p, the truth; the prediction is q, the model.','The entropy of a one-hot label is 0: a certain outcome carries no surprise.','So the classification loss is exactly KL(label ‖ prediction). PyTorch computes it in nats: 0.511 for our cat.',
+  'Why this order? Data from the left, code from the right: the label generates the data, the prediction encodes it. The other order divides by the label’s zeros.'],
+ ask:['What is H(p) for a one-hot label?','So what does training minimise?','Why does PyTorch compute cross-entropy rather than KL?','Why KL(label ‖ prediction) and not KL(prediction ‖ label)?'],
+ expected:['0.','KL(label ‖ prediction): the bits the prediction wastes on the true labels.','They are equal here, and in general differ by H(p), which training cannot change. Cross-entropy avoids the log of the labels.',
+  'The truth goes on the left, the model on the right, as with our weather. The reverse is Σ q log q/p with p = 0 on every wrong class: infinite, so useless as a loss.'],
  demo:'Notebook 2.5.1: F.cross_entropy prints 0.511 nats, −log 0.6, the same number as KL(one-hot ‖ q).',
  source:HUANG,transition:'⑤ Check: the loss as the prediction changes.'});
 S('loss-curve','kl','⑤ Check: the loss is the surprise curve',{builds:2,nb:'cell-classifier',

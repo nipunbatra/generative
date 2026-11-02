@@ -40,7 +40,7 @@ This notebook computes every number, figure and animation in the Lecture 1 slide
 
 | Part | Sections |
 |---|---|
-| **1 · Bayes’ rule for a neural network** | [1.1 Bayes’ rule]({DECK}#bayes-rule/1) · [1.2 A tiny network and its prior]({DECK}#tiny-net/1) · [1.3 Likelihood and training]({DECK}#data-likelihood/1) · [1.4 The evidence is intractable]({DECK}#evidence-area/1) · [1.5 Approximating the posterior]({DECK}#predictive/1) |
+| **1 · Bayes’ rule for a neural network** | [1.1 Bayes’ rule]({DECK}#bayes-rule/1) · [1.2 A tiny network and its prior]({DECK}#tiny-net/1) · [1.3 Likelihood and training]({DECK}#data-likelihood/1) · [1.4 The evidence is intractable]({DECK}#evidence-area/1) · [1.5 Approximating the posterior]({DECK}#predictive/1): [1.5.1 Laplace]({DECK}#laplace-steps/1) · [1.5.2 MCMC]({DECK}#mcmc-idea/1) · [1.5.3 VI]({DECK}#vi-idea/1) |
 | **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 KL at work: 2.5.1 classification, 2.5.2 maximum likelihood, 2.5.3 distillation]({DECK}#apps-map/1) · [2.6 Closed forms and PyTorch]({DECK}#densities/1) · [2.7 KL by sampling]({DECK}#kl-expectation/1) |
 | **3 · Find the closest q** | [3.1 Search a grid]({DECK}#six-candidates/1) · [3.2 Gradient descent]({DECK}#walk-downhill/1) · [3.3 Covariance in 2-D]({DECK}#cov-families/1) · [3.4 Mixtures: no formula]({DECK}#mixture-what/1) · [3.5 The reparameterisation trick]({DECK}#missing-path/1) · [3.6 Which direction of KL?]({DECK}#fwdrev/1) |
 | **4 · Back to Bayes: the ELBO** | [4.1 Deriving the ELBO]({DECK}#can-we/1) · [4.2 Checking it on a coin]({DECK}#elbo-slider/1) |
@@ -287,7 +287,7 @@ savefig("bnn-evidence-mc")
 md(r"""
 ### 1.5 Approximating the posterior: why, and three ways
 
-Slides: [1.5 Predictions with error bars]({DECK}#predictive/1) · [the core problem]({DECK}#core-problem/1) · [three ways]({DECK}#three-ways/1) · [the VI idea]({DECK}#vi-idea/1)
+Slides: [1.5 Predictions with error bars]({DECK}#predictive/1) · [the core problem]({DECK}#core-problem/1) · [three ways]({DECK}#three-ways/1). The three ways have their own sub-sections: 1.5.1 Laplace, 1.5.2 MCMC, 1.5.3 variational inference.
 
 What we want in the end is the **posterior predictive**, every network’s prediction averaged with posterior weights:
 $$p(y^*\mid x^*,\mathcal D)=\int p(y^*\mid x^*,\theta)\,p(\theta\mid\mathcal D)\,d\theta.$$
@@ -342,11 +342,13 @@ savefig("bnn-posterior-predictive")
 md(r"""
 #### Three ways around an intractable posterior
 
-On a two-bump target, $0.7\,\mathcal N(-2,1)+0.3\,\mathcal N(2,1)$:
+Slides: [three ways]({DECK}#three-ways/1)
 
-- **Laplace**: find the highest peak and fit a Gaussian to its curvature.
-- **MCMC**: a random walk whose visits follow the target (random-walk Metropolis).
-- **Variational inference**: the Gaussian $q$ closest to the target in $\mathrm{KL}(q\,\|\,p)$, found by gradient descent.
+A two-bump target, $0.7\,\mathcal N(-2,1)+0.3\,\mathcal N(2,1)$, stands in for a posterior: we can evaluate it at any $\theta$, as we can evaluate likelihood × prior. Three ways to approximate it:
+
+- **1.5.1 Laplace**: climb to the highest peak, then fit a Gaussian to its curvature.
+- **1.5.2 MCMC**: a random walk whose visits follow the target.
+- **1.5.3 Variational inference**: the member of a family we choose that is closest to the target in $\mathrm{KL}(q\,\|\,p)$, found by gradient descent.
 """)
 code(r"""
 three_target = dist.MixtureSameFamily(dist.Categorical(probs=torch.tensor([.7, .3])),
@@ -355,8 +357,32 @@ def grid_kl(a, b, grid):
     # KL(a || b) by the trapezoid rule on a fixed grid
     la, lb = a.log_prob(grid), b.log_prob(grid)
     return torch.trapezoid(la.exp() * (la - lb), grid)
-# Laplace: the highest peak, then the curvature there
-peak = torch.tensor(-1.0, requires_grad=True)
+x3 = torch.linspace(-6, 6, 241)
+fixtures["story"]["three"] = dict(weights=[.7, .3], means=[-2., 2.], scales=[1., 1.], true_mean=.7 * -2 + .3 * 2,
+    plot=dict(x=x3.tolist(), p=three_target.log_prob(x3).exp().tolist()))
+""", anchor="cell-three-ways")
+md(r"""
+#### 1.5.1 Laplace: climb to the peak, then fit a Gaussian there
+
+Slides: [1.5.1 Laplace, step by step]({DECK}#laplace-steps/1)
+
+1. **Climb.** Gradient ascent on $\log p(\theta)$. The evidence only rescales the posterior, so likelihood × prior has the same peaks: $\theta_{\text{MAP}}$ needs no evidence.
+2. **Measure the bend.** The second derivative of $\log p$ at the peak.
+3. **Fit.** The Gaussian with centre $\theta_{\text{MAP}}$ and variance $-1/\text{(second derivative)}$: its log is a parabola with the same bend.
+
+The climb finds the peak nearest its start: started at $\theta=1$ it ends on the smaller bump.
+""", anchor="sec-1-5-1")
+code(r"""
+def climb(theta0, lr=.4, steps=12):
+    theta, path = torch.tensor(theta0, requires_grad=True), [theta0]
+    for _ in range(steps):
+        grad, = torch.autograd.grad(three_target.log_prob(theta), theta)
+        with torch.no_grad():
+            theta += lr * grad
+        path.append(number(theta))
+    return path
+path_left, path_right = climb(0.), climb(1.)          # two starts, two different peaks
+peak = torch.tensor(-1.0, requires_grad=True)         # polish the peak to full precision
 peak_opt = torch.optim.Adam([peak], lr=.05)
 for _ in range(2000):
     loss = -three_target.log_prob(peak)
@@ -364,44 +390,81 @@ for _ in range(2000):
 mode = peak.detach()
 curvature = torch.autograd.functional.hessian(lambda t: three_target.log_prob(t), mode)
 laplace = dist.Normal(mode, (-curvature).rsqrt())
-# MCMC: random-walk Metropolis
+print("climb from 0:", np.round(path_left, 3))
+print("climb from 1 ends at", round(path_right[-1], 3), "(the smaller bump)")
+print(f"theta_MAP = {number(mode):.4f}, second derivative = {number(curvature):.4f}, sigma = {number(laplace.scale):.4f}")
+fixtures["story"]["three"].update(laplace=[number(laplace.loc), number(laplace.scale)], curvature=number(curvature),
+    climb=path_left, climb_right=path_right)
+fixtures["story"]["three"]["plot"]["laplace"] = laplace.log_prob(x3).exp().tolist()
+""", anchor="cell-laplace")
+md(r"""
+#### 1.5.2 MCMC: a random walk that visits each θ in proportion to the posterior
+
+Slides: [1.5.2 The walker’s rule]({DECK}#mcmc-idea/1) · [walk it yourself]({DECK}#mcmc-live/1)
+
+From the current $\theta$, propose a random step $\theta'$. Uphill: always move. Downhill: move with probability $p(\theta')/p(\theta)$, otherwise stay. Only the **ratio** is needed, so the unknown evidence cancels. In the long run the visits follow the target.
+""", anchor="sec-1-5-2")
+code(r"""
 torch.manual_seed(7)
 state = torch.tensor(0.); state_lp = three_target.log_prob(state); chain = []; accepted = 0
 for _ in range(20_000):
     proposal = state + 2.0 * torch.randn(())
     proposal_lp = three_target.log_prob(proposal)
-    if torch.log(torch.rand(())) < proposal_lp - state_lp:
+    if torch.log(torch.rand(())) < proposal_lp - state_lp:     # accept with probability min(1, ratio)
         state, state_lp, accepted = proposal, proposal_lp, accepted + 1
     chain.append(number(state))
 chain = np.array(chain)
-# VI: minimise KL(q || p) on a grid
+hist, edges = np.histogram(chain, bins=np.linspace(-6, 6, 49), density=True)
+print("acceptance", accepted / 20_000, "· mean of the visits", round(float(chain.mean()), 3), "· true mean", .7 * -2 + .3 * 2)
+fixtures["story"]["three"]["mcmc"] = dict(steps=20_000, step_size=2.0, seed=7, acceptance=accepted / 20_000,
+    mean=float(chain.mean()), hist=hist.tolist(), edges=edges.tolist())
+""", anchor="cell-mcmc")
+md(r"""
+#### 1.5.3 Variational inference: the closest member of a family we choose
+
+Slides: [1.5.3 Use a q we control]({DECK}#vi-idea/1) · [the family is our choice]({DECK}#vi-choice/1) · [our q for the network]({DECK}#vi-family/1)
+
+The family is ours to choose. One Gaussian can cover only one bump; a mixture of two Gaussians can match both. Both are fitted the same way: minimise $\mathrm{KL}(q\,\|\,p)$ by gradient descent on the family’s knobs.
+""", anchor="sec-1-5-3")
+code(r"""
 grid3 = torch.linspace(-8, 8, 2001)
+# family 1: one Gaussian, knobs (mean, log width)
 m3 = torch.nn.Parameter(torch.tensor(-.5)); rho3 = torch.nn.Parameter(torch.tensor(0.))
 opt3 = torch.optim.Adam([m3, rho3], lr=.05)
 for _ in range(600):
     loss = grid_kl(dist.Normal(m3, rho3.exp()), three_target, grid3)
     opt3.zero_grad(); loss.backward(); opt3.step()
 vi3 = dist.Normal(m3.detach(), rho3.detach().exp())
-x3 = torch.linspace(-6, 6, 241)
-hist, edges = np.histogram(chain, bins=np.linspace(-6, 6, 49), density=True)
+# family 2: a mixture of two Gaussians, started from equal weights at -1 and +1
+mix_logit = torch.nn.Parameter(torch.zeros(2))
+mix_loc = torch.nn.Parameter(torch.tensor([-1., 1.]))
+mix_rho = torch.nn.Parameter(torch.tensor([.4, .4]))
+def mixture_q():
+    return dist.MixtureSameFamily(dist.Categorical(logits=mix_logit), dist.Normal(mix_loc, mix_rho.exp()))
+opt_mix = torch.optim.Adam([mix_logit, mix_loc, mix_rho], lr=.05)
+for _ in range(1500):
+    loss = grid_kl(mixture_q(), three_target, grid3)
+    opt_mix.zero_grad(); loss.backward(); opt_mix.step()
+mix_weights, mix_means, mix_sds = torch.softmax(mix_logit.detach(), 0), mix_loc.detach(), mix_rho.detach().exp()
+vi_mix = dist.MixtureSameFamily(dist.Categorical(probs=mix_weights), dist.Normal(mix_means, mix_sds))
+kl_gauss, kl_mix = number(grid_kl(vi3, three_target, grid3)), number(grid_kl(vi_mix, three_target, grid3))
+print(f"one Gaussian: N({number(vi3.loc):.3f}, {number(vi3.scale):.3f}^2), KL(q||p) = {kl_gauss:.4f}")
+print("mixture of two: weights", mix_weights.numpy().round(3), "means", mix_means.numpy().round(3),
+      "sds", mix_sds.numpy().round(3), f"KL(q||p) = {kl_mix:.5f}")
+fixtures["story"]["three"].update(vi=[number(vi3.loc), number(vi3.scale)], vi_kl=kl_gauss,
+    vi_mix=dict(weights=mix_weights.tolist(), means=mix_means.tolist(), scales=mix_sds.tolist(), kl=kl_mix))
+fixtures["story"]["three"]["plot"].update(vi=vi3.log_prob(x3).exp().tolist(), vi_mix=vi_mix.log_prob(x3).exp().tolist())
+# the three approximations side by side
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.6), sharey=True)
-for ax, title in zip(axes, ["Laplace", "MCMC", "VI"]):
+for ax, title in zip(axes, ["Laplace", "MCMC", "VI: one Gaussian (dashed), a mixture of two (solid)"]):
     ax.fill_between(x3, 0, three_target.log_prob(x3).exp(), color="#D9F2EF")
     ax.set_title(title, loc="left")
 axes[0].plot(x3, laplace.log_prob(x3).exp(), color=C["noise"])
 axes[1].hist(chain, bins=edges, density=True, color=C["noise"], alpha=.5)
-axes[2].plot(x3, vi3.log_prob(x3).exp(), color=C["q"])
+axes[2].plot(x3, vi3.log_prob(x3).exp(), color=C["q"], ls="--")
+axes[2].plot(x3, vi_mix.log_prob(x3).exp(), color=C["q"])
 savefig("three-ways")
-fixtures["story"]["three"] = dict(weights=[.7, .3], means=[-2., 2.], scales=[1., 1.],
-    laplace=[number(laplace.loc), number(laplace.scale)],
-    mcmc=dict(steps=20_000, step_size=2.0, seed=7, acceptance=accepted / 20_000,
-              mean=float(chain.mean()), hist=hist.tolist(), edges=edges.tolist()),
-    vi=[number(vi3.loc), number(vi3.scale)], true_mean=.7 * -2 + .3 * 2,
-    plot=dict(x=x3.tolist(), p=three_target.log_prob(x3).exp().tolist(),
-              laplace=laplace.log_prob(x3).exp().tolist(), vi=vi3.log_prob(x3).exp().tolist()))
-print("Laplace:", fixtures["story"]["three"]["laplace"], "· MCMC mean", round(float(chain.mean()), 3),
-      "acceptance", accepted / 20_000, "· VI:", fixtures["story"]["three"]["vi"])
-""", anchor="cell-three-ways")
+""", anchor="cell-vi-toy")
 md(r"""
 ## Part 2 · How far apart are two distributions?
 

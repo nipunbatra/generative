@@ -247,6 +247,11 @@ check('VI frames start far below and end near the final ELBO',vq.frames[0][1]<-5
 near('Three-ways target mean',st.three.true_mean,-.8,1e-12);
 check('Three-ways MCMC mean near the target mean',Math.abs(st.three.mcmc.mean+.8)<.1);
 check('Three-ways Laplace sits on the big bump',Math.abs(st.three.laplace[0]+2)<.01&&Math.abs(st.three.laplace[1]-1)<.01);
+check('Laplace climb from 0 reaches the peak',Math.abs(st.three.climb.at(-1)-st.three.laplace[0])<.02);
+check('Laplace climb from 1 reaches the smaller bump',Math.abs(st.three.climb_right.at(-1)-2)<.05);
+near('Laplace width is 1/sqrt(-second derivative)',st.three.laplace[1],1/Math.sqrt(-st.three.curvature),1e-6);
+check('A mixture of two fits better than one Gaussian',st.three.vi_mix.kl<st.three.vi_kl/10);
+check('The mixture fit recovers the two bumps',st.three.vi_mix.means.every(m=>Math.abs(Math.abs(m)-2)<.05));
 const numeric=records.filter(r=>r.kind==='numerical');
 const report={
  status:'passed',assertions:records.length,numericalComparisons:numeric.length,

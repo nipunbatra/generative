@@ -1,13 +1,13 @@
 # KL and variational inference: speaker notes
 
-Planned main route: 140 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 148 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
 | Lecture map | 1 |
-| Part 1 · Bayes’ rule for a neural network | 22 |
+| Part 1 · Bayes’ rule for a neural network | 30 |
 | Part 2 · How far apart are two distributions? | 74 |
 | Part 3 · Find the closest q | 22 |
 | Part 4 · Back to Bayes: the ELBO | 13 |
@@ -209,13 +209,21 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 ## intractable: Intractable: why the rectangles do not scale
 
-**Build 1, ask:** How long would 10¹⁴ evaluations take at a billion a second?
+**Build 1, ask:** How many evaluations for one unknown?
 
-**Expected:** About 28 hours: possible, just. For 10^2,000,000: never.
+**Expected:** 100: one per grid point.
 
-**Build 2, ask:** So what does intractable mean?
+**Build 2, ask:** Why 10,000 and not 200?
 
-**Expected:** No closed form, and no feasible numerical computation: the cost explodes with the number of unknowns.
+**Expected:** Every value of the first unknown has to be paired with every value of the second: 100 × 100.
+
+**Build 3, ask:** What does one more unknown do to the count?
+
+**Expected:** It multiplies it by 100: d unknowns need 100<sup>d</sup> points.
+
+**Build 4, ask:** How long do 10¹⁴ evaluations take at a billion a second?
+
+**Expected:** 10¹⁴ / 10⁹ = 10⁵ seconds, about 28 hours: possible, just. A million unknowns: 10<sup>2,000,000</sup>, never.
 
 **Point here:** Sampling θ from the prior and averaging p(𝒟 | θ) does not rescue it: almost every draw explains the data terribly. The optional slide on prior sampling shows the numbers: with ten draws the estimate is off by about 1,000 nats, and of ten million draws only about 100 matter.
 
@@ -251,7 +259,7 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Build 1, ask:** What does Laplace miss here?
 
-**Expected:** The second bump: it only looks at the peak.
+**Expected:** The second bump: it only looks at the peak it climbed to.
 
 **Build 2, ask:** What does MCMC cost?
 
@@ -259,11 +267,57 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Build 3, ask:** What does VI trade away?
 
-**Expected:** Exactness. The answer is limited to the family, here one Gaussian. In return it is fast and uses the same gradient tools as deep learning.
+**Expected:** Exactness, unless the family contains the posterior. In return it is fast and uses the same gradient tools as deep learning.
 
-**Point here:** Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 0.
+**Point here:** Target 0.7·N(−2, 1) + 0.3·N(2, 1). Every number is computed in notebook section 1.5. The next slides take each method in turn.
 
-**Transition:** Variational inference, in one picture.
+**Transition:** 1.5.1: Laplace, step by step.
+
+## laplace-steps: Laplace: climb to the peak, then fit a Gaussian there
+
+**Build 1, ask:** Why can we climb without knowing the evidence?
+
+**Expected:** p(𝒟) is a constant: dividing by it rescales the curve without moving its peak.
+
+**Build 2, ask:** What does a sharper bend mean for σ?
+
+**Expected:** A larger second derivative gives a smaller σ: a narrow, confident Gaussian.
+
+**Build 3, ask:** When is Laplace a good approximation?
+
+**Expected:** When the posterior has one bump that is close to Gaussian, as often happens with plenty of data.
+
+**Point here:** Start the climb at θ = 1 instead and it ends at 1.99: the smaller bump. Laplace only sees the peak it climbs to. With seven parameters, the second derivative becomes the 7 × 7 Hessian matrix, and σ² becomes its inverse.
+
+**Transition:** 1.5.2: MCMC.
+
+## mcmc-idea: MCMC: a random walk that follows the posterior
+
+**Build 1, ask:** Why not always move uphill?
+
+**Expected:** Then the walker would climb to the nearest peak and stop: an optimiser, not a sampler. Sometimes going downhill is what lets it visit every bump in the right proportion.
+
+**Build 2, ask:** Why does the evidence not matter?
+
+**Expected:** It divides both p(θ′) and p(θ), so it cancels in the ratio: likelihood × prior is enough.
+
+**Build 3, ask:** What does MCMC cost?
+
+**Expected:** Many steps, each evaluating the model on all the data, and neighbouring steps are correlated.
+
+**Point here:** This is random-walk Metropolis (Metropolis et al., 1953). The posterior predictive of Section 1.5 came from a smarter walker, Hamiltonian Monte Carlo, which uses gradients to propose long moves.
+
+**Transition:** Walk it yourself.
+
+## mcmc-live: Walk it yourself: the visits build up the posterior
+
+**Build 1, ask:** What happens with step size 0.1? With 5?
+
+**Expected:** 0.1: nearly every proposal is accepted, but the walker crawls and may not reach the second bump for a long time. 5: most proposals land far out, where p is tiny, and are rejected. In between mixes best.
+
+**Notebook demonstration:** Notebook 1.5.2 runs the same walk for 20,000 steps with step size 2 and compares the visits with the target.
+
+**Transition:** 1.5.3: variational inference.
 
 ## vi-idea: Variational inference: choose q, make it close to the posterior
 
@@ -280,6 +334,20 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 **Expected:** Drawing θ from q<sub>ψ</sub> is easy, and each draw costs one forward pass of the network.
 
 **Point here:** The same q<sub>ψ</sub> is called the variational distribution, the approximate posterior, or, in Pyro and NumPyro, the guide.
+
+**Transition:** The family is our choice.
+
+## vi-choice: The family is our choice: one Gaussian, or a mixture of two
+
+**Build 1, ask:** What is wrong with the single Gaussian?
+
+**Expected:** It cannot have two bumps: to reach both it spreads wide, misses both peaks and puts mass in the gap, where p is small. KL(q ‖ p) charges for that mass.
+
+**Build 2, ask:** Why not always choose a very rich family?
+
+**Expected:** More knobs are harder to optimise and slower to sample. For a network with millions of weights, even one Gaussian per weight is a lot of knobs.
+
+**Point here:** Both fits minimise the same KL(q ‖ p) by gradient descent; only the family changes. Part 3 fits mixtures, and normalising flows are richer still.
 
 **Transition:** Our q for the tiny network.
 
@@ -529,15 +597,31 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-## wrong-belief: A code built on a wrong belief
+## q-code: Another town: weather q, and the best code for it
+
+**Build 1, ask:** Which day gets the shortest codeword in their town, and why?
+
+**Expected:** Rainy: it is their most common day, so Huffman merges it last.
+
+**Build 2, ask:** What is the entropy of their weather?
+
+**Expected:** H(q) = ¼·2 + ¼·2 + ½·1 = 1.5 bits, the same as ours: both towns have one common day and two rarer ones.
+
+**Point here:** The notebook’s Huffman cell builds both codes: 0, 10, 11 for p and 10, 11, 0 for q.
+
+**Transition:** Now send our weather with their code.
+
+**Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
+
+## wrong-belief: Their code, our weather: a code that expects q
 
 **Build 1, ask:** Which of our days does their code make expensive?
 
-**Expected:** Sunny days: half of our days now cost 2 bits instead of 1.
+**Expected:** Sunny: half of our days, now 2 bits each instead of 1.
 
-**Build 2, ask:** Whose probabilities set the code lengths?
+**Build 2, ask:** Whose probabilities set the lengths, and whose say how often each length is paid?
 
-**Expected:** q’s: a code built for q spends log₂ 1/q(x) bits on x.
+**Expected:** q sets the lengths; p says how often each is paid.
 
 **Transition:** Average the cost over our weather.
 
@@ -545,17 +629,21 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 ## cross-entropy: Cross-entropy: the average cost when the code expects q
 
-**Build 1, ask:** Which distribution supplies the weights?
+**Build 1, ask:** Which column comes from our town, which from theirs?
 
-**Expected:** p, the real weather.
+**Expected:** How often: p, ours. Bits paid: q, theirs.
 
-**Build 2, ask:** Compute it.
+**Build 2, ask:** What is the average cost per day?
 
-**Expected:** ½(2) + ¼(2) + ¼(1) = 1.75.
+**Expected:** 1.75 bits.
 
-**Build 3, ask:** What is H(p, p)?
+**Build 3, ask:** In the formula, which distribution weights and which sets the lengths?
 
-**Expected:** H(p): the right code, 1.5 bits.
+**Expected:** p weights: how often. q sets the lengths: how much.
+
+**Build 4, ask:** What is H(p, p)?
+
+**Expected:** H(p) = 1.5 bits: the right code.
 
 **Transition:** Watch it happen, day by day.
 
@@ -573,17 +661,17 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 ## kl-extra-bits: KL divergence: the extra bits we waste
 
-**Build 1, ask:** What would the waste be if q = p?
+**Build 1, ask:** On which day does their code waste bits, and on which does it save?
 
-**Expected:** Zero: the right code wastes nothing.
+**Expected:** Sunny wastes 1 bit; rainy saves 1; cloudy is the same.
 
-**Build 2, ask:** Why can the two sums be combined?
+**Build 2, ask:** Why weight the extra bits by p and not by q?
 
-**Expected:** Same outcomes, same weights p(x).
+**Expected:** The days come from our town, so each extra is paid as often as p says.
 
-**Build 3, ask:** Which outcome saves bits? Does the total still lose?
+**Build 3, ask:** Can the total be negative?
 
-**Expected:** Rainy: its codeword got shorter (−1 bit, on a quarter of days). Sunny loses a bit on half the days, so the total is +0.25.
+**Expected:** No: the savings on days q overrates never outweigh the waste on days it underrates. Next slide.
 
 **Transition:** Two facts about KL.
 
@@ -599,7 +687,19 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 
 **Expected:** q = p: the belief is right.
 
-**Transition:** Does it matter which one is the truth?
+**Transition:** How to read KL(p ‖ q).
+
+## kl-reading: Reading KL(p ‖ q): data from the left, code from the right
+
+**Build 1, ask:** In KL(p ‖ q), which distribution generates the days?
+
+**Expected:** p, the left one: it supplies the weights.
+
+**Build 2, ask:** Which one is the model?
+
+**Expected:** q, the right one: the code was built from it.
+
+**Transition:** What if we swap them?
 
 ## kl-asymmetry: Which one is the truth? KL is not symmetric
 
@@ -678,6 +778,10 @@ Planned main route: 140 minutes. Timing includes student responses and the speci
 **Build 3, ask:** Why does PyTorch compute cross-entropy rather than KL?
 
 **Expected:** They are equal here, and in general differ by H(p), which training cannot change. Cross-entropy avoids the log of the labels.
+
+**Build 4, ask:** Why KL(label ‖ prediction) and not KL(prediction ‖ label)?
+
+**Expected:** The truth goes on the left, the model on the right, as with our weather. The reverse is Σ q log q/p with p = 0 on every wrong class: infinite, so useless as a loss.
 
 **Notebook demonstration:** Notebook 2.5.1: F.cross_entropy prints 0.511 nats, −log 0.6, the same number as KL(one-hot ‖ q).
 

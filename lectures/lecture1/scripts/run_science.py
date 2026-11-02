@@ -232,8 +232,20 @@ def grid_kl(a, b, grid):
     # KL(a || b) by the trapezoid rule on a fixed grid
     la, lb = a.log_prob(grid), b.log_prob(grid)
     return torch.trapezoid(la.exp() * (la - lb), grid)
-# Laplace: the highest peak, then the curvature there
-peak = torch.tensor(-1.0, requires_grad=True)
+x3 = torch.linspace(-6, 6, 241)
+fixtures["story"]["three"] = dict(weights=[.7, .3], means=[-2., 2.], scales=[1., 1.], true_mean=.7 * -2 + .3 * 2,
+    plot=dict(x=x3.tolist(), p=three_target.log_prob(x3).exp().tolist()))
+
+def climb(theta0, lr=.4, steps=12):
+    theta, path = torch.tensor(theta0, requires_grad=True), [theta0]
+    for _ in range(steps):
+        grad, = torch.autograd.grad(three_target.log_prob(theta), theta)
+        with torch.no_grad():
+            theta += lr * grad
+        path.append(number(theta))
+    return path
+path_left, path_right = climb(0.), climb(1.)          # two starts, two different peaks
+peak = torch.tensor(-1.0, requires_grad=True)         # polish the peak to full precision
 peak_opt = torch.optim.Adam([peak], lr=.05)
 for _ in range(2000):
     loss = -three_target.log_prob(peak)
@@ -241,43 +253,64 @@ for _ in range(2000):
 mode = peak.detach()
 curvature = torch.autograd.functional.hessian(lambda t: three_target.log_prob(t), mode)
 laplace = dist.Normal(mode, (-curvature).rsqrt())
-# MCMC: random-walk Metropolis
+print("climb from 0:", np.round(path_left, 3))
+print("climb from 1 ends at", round(path_right[-1], 3), "(the smaller bump)")
+print(f"theta_MAP = {number(mode):.4f}, second derivative = {number(curvature):.4f}, sigma = {number(laplace.scale):.4f}")
+fixtures["story"]["three"].update(laplace=[number(laplace.loc), number(laplace.scale)], curvature=number(curvature),
+    climb=path_left, climb_right=path_right)
+fixtures["story"]["three"]["plot"]["laplace"] = laplace.log_prob(x3).exp().tolist()
+
 torch.manual_seed(7)
 state = torch.tensor(0.); state_lp = three_target.log_prob(state); chain = []; accepted = 0
 for _ in range(20_000):
     proposal = state + 2.0 * torch.randn(())
     proposal_lp = three_target.log_prob(proposal)
-    if torch.log(torch.rand(())) < proposal_lp - state_lp:
+    if torch.log(torch.rand(())) < proposal_lp - state_lp:     # accept with probability min(1, ratio)
         state, state_lp, accepted = proposal, proposal_lp, accepted + 1
     chain.append(number(state))
 chain = np.array(chain)
-# VI: minimise KL(q || p) on a grid
+hist, edges = np.histogram(chain, bins=np.linspace(-6, 6, 49), density=True)
+print("acceptance", accepted / 20_000, "· mean of the visits", round(float(chain.mean()), 3), "· true mean", .7 * -2 + .3 * 2)
+fixtures["story"]["three"]["mcmc"] = dict(steps=20_000, step_size=2.0, seed=7, acceptance=accepted / 20_000,
+    mean=float(chain.mean()), hist=hist.tolist(), edges=edges.tolist())
+
 grid3 = torch.linspace(-8, 8, 2001)
+# family 1: one Gaussian, knobs (mean, log width)
 m3 = torch.nn.Parameter(torch.tensor(-.5)); rho3 = torch.nn.Parameter(torch.tensor(0.))
 opt3 = torch.optim.Adam([m3, rho3], lr=.05)
 for _ in range(600):
     loss = grid_kl(dist.Normal(m3, rho3.exp()), three_target, grid3)
     opt3.zero_grad(); loss.backward(); opt3.step()
 vi3 = dist.Normal(m3.detach(), rho3.detach().exp())
-x3 = torch.linspace(-6, 6, 241)
-hist, edges = np.histogram(chain, bins=np.linspace(-6, 6, 49), density=True)
+# family 2: a mixture of two Gaussians, started from equal weights at -1 and +1
+mix_logit = torch.nn.Parameter(torch.zeros(2))
+mix_loc = torch.nn.Parameter(torch.tensor([-1., 1.]))
+mix_rho = torch.nn.Parameter(torch.tensor([.4, .4]))
+def mixture_q():
+    return dist.MixtureSameFamily(dist.Categorical(logits=mix_logit), dist.Normal(mix_loc, mix_rho.exp()))
+opt_mix = torch.optim.Adam([mix_logit, mix_loc, mix_rho], lr=.05)
+for _ in range(1500):
+    loss = grid_kl(mixture_q(), three_target, grid3)
+    opt_mix.zero_grad(); loss.backward(); opt_mix.step()
+mix_weights, mix_means, mix_sds = torch.softmax(mix_logit.detach(), 0), mix_loc.detach(), mix_rho.detach().exp()
+vi_mix = dist.MixtureSameFamily(dist.Categorical(probs=mix_weights), dist.Normal(mix_means, mix_sds))
+kl_gauss, kl_mix = number(grid_kl(vi3, three_target, grid3)), number(grid_kl(vi_mix, three_target, grid3))
+print(f"one Gaussian: N({number(vi3.loc):.3f}, {number(vi3.scale):.3f}^2), KL(q||p) = {kl_gauss:.4f}")
+print("mixture of two: weights", mix_weights.numpy().round(3), "means", mix_means.numpy().round(3),
+      "sds", mix_sds.numpy().round(3), f"KL(q||p) = {kl_mix:.5f}")
+fixtures["story"]["three"].update(vi=[number(vi3.loc), number(vi3.scale)], vi_kl=kl_gauss,
+    vi_mix=dict(weights=mix_weights.tolist(), means=mix_means.tolist(), scales=mix_sds.tolist(), kl=kl_mix))
+fixtures["story"]["three"]["plot"].update(vi=vi3.log_prob(x3).exp().tolist(), vi_mix=vi_mix.log_prob(x3).exp().tolist())
+# the three approximations side by side
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.6), sharey=True)
-for ax, title in zip(axes, ["Laplace", "MCMC", "VI"]):
+for ax, title in zip(axes, ["Laplace", "MCMC", "VI: one Gaussian (dashed), a mixture of two (solid)"]):
     ax.fill_between(x3, 0, three_target.log_prob(x3).exp(), color="#D9F2EF")
     ax.set_title(title, loc="left")
 axes[0].plot(x3, laplace.log_prob(x3).exp(), color=C["noise"])
 axes[1].hist(chain, bins=edges, density=True, color=C["noise"], alpha=.5)
-axes[2].plot(x3, vi3.log_prob(x3).exp(), color=C["q"])
+axes[2].plot(x3, vi3.log_prob(x3).exp(), color=C["q"], ls="--")
+axes[2].plot(x3, vi_mix.log_prob(x3).exp(), color=C["q"])
 savefig("three-ways")
-fixtures["story"]["three"] = dict(weights=[.7, .3], means=[-2., 2.], scales=[1., 1.],
-    laplace=[number(laplace.loc), number(laplace.scale)],
-    mcmc=dict(steps=20_000, step_size=2.0, seed=7, acceptance=accepted / 20_000,
-              mean=float(chain.mean()), hist=hist.tolist(), edges=edges.tolist()),
-    vi=[number(vi3.loc), number(vi3.scale)], true_mean=.7 * -2 + .3 * 2,
-    plot=dict(x=x3.tolist(), p=three_target.log_prob(x3).exp().tolist(),
-              laplace=laplace.log_prob(x3).exp().tolist(), vi=vi3.log_prob(x3).exp().tolist()))
-print("Laplace:", fixtures["story"]["three"]["laplace"], "· MCMC mean", round(float(chain.mean()), 3),
-      "acceptance", accepted / 20_000, "· VI:", fixtures["story"]["three"]["vi"])
 
 def surprise(p, base=2):
     "Self-information log(1/p): in bits for base 2, in nats for base e."

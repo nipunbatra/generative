@@ -1,7 +1,7 @@
 {
   "status": "passed",
-  "assertions": 6721,
-  "numericalComparisons": 5706,
+  "assertions": 6726,
+  "numericalComparisons": 5707,
   "maximumAbsoluteError": 0.017600000000000005,
   "source": "Independent JavaScript formulae versus executed float64 PyTorch notebook; no new training in this check.",
   "tolerances": {
@@ -56438,6 +56438,35 @@
     },
     {
       "name": "Three-ways Laplace sits on the big bump",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Laplace climb from 0 reaches the peak",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Laplace climb from 1 reaches the smaller bump",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "Laplace width is 1/sqrt(-second derivative)",
+      "kind": "numerical",
+      "actual": 1.001154476066346,
+      "expected": 1.001154476066346,
+      "error": 0,
+      "tolerance": 0.000001,
+      "passed": true
+    },
+    {
+      "name": "A mixture of two fits better than one Gaussian",
+      "kind": "assertion",
+      "passed": true
+    },
+    {
+      "name": "The mixture fit recovers the two bumps",
       "kind": "assertion",
       "passed": true
     }

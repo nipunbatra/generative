@@ -3,7 +3,7 @@
   "number": 1,
   "title": "KL and variational inference",
   "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
-  "minutes": 140,
+  "minutes": 148,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
@@ -14,7 +14,7 @@
     {
       "id": "bayes",
       "title": "Part 1 · Bayes’ rule for a neural network",
-      "minutes": 22
+      "minutes": 30
     },
     {
       "id": "kl",
@@ -42,7 +42,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 120,
+  "coreSlides": 126,
   "optionalSlides": 26,
   "slides": [
     {
@@ -147,7 +147,7 @@
       "id": "intractable",
       "title": "Intractable: why the rectangles do not scale",
       "section": "bayes",
-      "builds": 2,
+      "builds": 4,
       "optional": false
     },
     {
@@ -172,10 +172,38 @@
       "optional": false
     },
     {
+      "id": "laplace-steps",
+      "title": "Laplace: climb to the peak, then fit a Gaussian there",
+      "section": "bayes",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mcmc-idea",
+      "title": "MCMC: a random walk that follows the posterior",
+      "section": "bayes",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "mcmc-live",
+      "title": "Walk it yourself: the visits build up the posterior",
+      "section": "bayes",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "vi-idea",
       "title": "Variational inference: choose q, make it close to the posterior",
       "section": "bayes",
       "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vi-choice",
+      "title": "The family is our choice: one Gaussian, or a mixture of two",
+      "section": "bayes",
+      "builds": 2,
       "optional": false
     },
     {
@@ -291,8 +319,15 @@
       "optional": false
     },
     {
+      "id": "q-code",
+      "title": "Another town: weather q, and the best code for it",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "wrong-belief",
-      "title": "A code built on a wrong belief",
+      "title": "Their code, our weather: a code that expects q",
       "section": "kl",
       "builds": 2,
       "optional": false
@@ -301,7 +336,7 @@
       "id": "cross-entropy",
       "title": "Cross-entropy: the average cost when the code expects q",
       "section": "kl",
-      "builds": 3,
+      "builds": 4,
       "optional": false
     },
     {
@@ -321,6 +356,13 @@
     {
       "id": "kl-properties",
       "title": "Never negative, and zero only for the right code",
+      "section": "kl",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "kl-reading",
+      "title": "Reading KL(p ‖ q): data from the left, code from the right",
       "section": "kl",
       "builds": 2,
       "optional": false
@@ -364,7 +406,7 @@
       "id": "ce-is-kl",
       "title": "④ As KL: with a one-hot label, cross-entropy = KL",
       "section": "kl",
-      "builds": 3,
+      "builds": 4,
       "optional": false
     },
     {
@@ -1068,5 +1110,5 @@
       "optional": true
     }
   ],
-  "totalStates": 323
+  "totalStates": 340
 }
