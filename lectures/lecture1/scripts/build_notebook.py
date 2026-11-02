@@ -41,7 +41,7 @@ This notebook computes every number, figure and animation in the Lecture 1 slide
 | Part | Sections |
 |---|---|
 | **1 · Bayes’ rule for a neural network** | [1.1 Bayes’ rule]({DECK}#bayes-rule/1) · [1.2 A tiny network and its prior]({DECK}#tiny-net/1) · [1.3 Likelihood and training]({DECK}#data-likelihood/1) · [1.4 The evidence is intractable]({DECK}#evidence-area/1) · [1.5 Approximating the posterior]({DECK}#predictive/1): [1.5.1 Laplace]({DECK}#laplace-steps/1) · [1.5.2 MCMC]({DECK}#mcmc-idea/1) · [1.5.3 VI]({DECK}#vi-idea/1) |
-| **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 KL at work: 2.5.1 classification, 2.5.2 maximum likelihood, 2.5.3 distillation]({DECK}#apps-map/1) · [2.6 Closed forms and PyTorch]({DECK}#densities/1) · [2.7 KL by sampling]({DECK}#kl-expectation/1) |
+| **2 · How far apart are two distributions?** | [2.1 Surprise]({DECK}#surprise-forecast/1) · [2.2 Entropy]({DECK}#entropy-average/1) · [2.3 Codes]({DECK}#channel/1) · [2.4 Cross-entropy and KL]({DECK}#wrong-belief/1) · [2.5 KL at work: 2.5.1 classification, 2.5.2 distillation]({DECK}#apps-map/1) · [2.6 Closed forms and PyTorch]({DECK}#densities/1) · [2.7 KL by sampling]({DECK}#kl-expectation/1) |
 | **3 · Find the closest q** | [3.1 Search a grid]({DECK}#six-candidates/1) · [3.2 Gradient descent]({DECK}#walk-downhill/1) · [3.3 Covariance in 2-D]({DECK}#cov-families/1) · [3.4 Mixtures: no formula]({DECK}#mixture-what/1) · [3.5 The reparameterisation trick]({DECK}#missing-path/1) · [3.6 Which direction of KL?]({DECK}#fwdrev/1) |
 | **4 · Back to Bayes: the ELBO** | [4.1 Deriving the ELBO]({DECK}#can-we/1) · [4.2 Checking it on a coin]({DECK}#elbo-slider/1) |
 | **5 · Implement it** | [5.1 VI for the tiny network]({DECK}#bnn-elbo-code/1) · [5.2 Wrap-up]({DECK}#five-tools/1) |
@@ -621,14 +621,14 @@ fixtures["story"]["info"].update(kl=dict(terms=terms.tolist(), library_bits=libr
 md(r"""
 ### 2.5 KL at work in machine learning
 
-Slides: [2.5 One recipe, three applications]({DECK}#apps-map/1) · [one principle in many disguises]({DECK}#apps-same/1)
+Slides: [2.5 One recipe, two applications]({DECK}#apps-map/1) · [one principle in many disguises]({DECK}#apps-same/1)
 
-Three losses you may know separately are the same idea. Each application follows one recipe: **① the problem**, **② the data and the model**, **③ the usual loss**, **④ the same loss written as a KL**, **⑤ a check with numbers**.
+Two losses you may know separately are the same idea. Each application follows one recipe: **① the problem**, **② the data and the model**, **③ the usual loss**, **④ the same loss written as a KL**, **⑤ a check with numbers**.
 
-| | 2.5.1 Classification | 2.5.2 Maximum likelihood | 2.5.3 Knowledge distillation |
-|---|---|---|---|
-| usual loss | cross-entropy | negative log-likelihood | cross-entropy with soft labels |
-| the same as | KL(label ‖ prediction) | KL(data ‖ model) | KL(teacher ‖ student) |
+| | 2.5.1 Classification | 2.5.2 Knowledge distillation |
+|---|---|---|
+| usual loss | cross-entropy | cross-entropy with soft labels |
+| the same as | KL(label ‖ prediction) | KL(teacher ‖ student) |
 
 KL also appears in many other places, for example in fine-tuning chatbots with human feedback (RLHF), where a KL term keeps the model close to where it started; and in variational inference, Parts 3–5.
 """, anchor="sec-2-5")
@@ -662,54 +662,12 @@ fixtures["story"]["classify"] = dict(classes=classes, pred=q_pred.tolist(), labe
     curve={str(x): -math.log(x) for x in (1., .9, .6, .3, .05, .01)})
 """, anchor="cell-classifier")
 md(r"""
-#### 2.5.2 Maximum likelihood: learn a distribution from twenty days
+#### 2.5.2 Knowledge distillation: a small student learns a big teacher
 
-Slides: [2.5.2 The problem]({DECK}#mle-problem/1) · [the data]({DECK}#mle-data/1) · [their likelihood]({DECK}#mle-likelihood/1) · [average surprise]({DECK}#mle-surprise/1) · [group the days]({DECK}#mle-group/1) · [find the best q]({DECK}#mle-fit/1) · [four formulations, one answer]({DECK}#mle-same-answer/1) · [the general statement]({DECK}#mle-kl/1)
-
-**The problem:** the weather comes from a distribution we cannot see, and we have a record of days drawn from it. Fit a model $q$ to the record, to predict tomorrow or to simulate new days: generative modelling in its simplest form. Twenty recorded days: 10 sunny, 5 cloudy, 5 rainy. A model $q$ gives these data the probability $\prod_i q(x_i)$. Per day, minus its log is the data’s average surprise under $q$. Grouping the days by weather turns it into a cross-entropy with the data’s own frequencies $\hat p$:
-$$-\frac1N\sum_{i=1}^{N}\log_2 q(x_i)=\sum_x\hat p(x)\log_2\frac1{q(x)}=H(\hat p,q)=H(\hat p)+\mathrm{KL}(\hat p\,\|\,q).$$
-$H(\hat p)$ is fixed by the data, so **maximising the likelihood minimises $\mathrm{KL}(\hat p\|q)$**, and the best $q$ is $\hat p$, the frequencies. The second cell finds it by gradient descent on the average surprise, without being told.
-""", anchor="sec-2-5-2")
-code(r"""
-rng = np.random.default_rng(2026)
-data = rng.permutation([0] * 10 + [1] * 5 + [2] * 5)            # 0 = sunny, 1 = cloudy, 2 = rainy
-counts = np.bincount(data, minlength=3)
-p_hat = counts / len(data)
-print("the data:", " ".join(["☀", "⛅", "🌧"][k] for k in data))
-print("counts:", dict(zip(weather_names, counts.tolist())), "→ frequencies p̂ =", p_hat)
-def avg_surprise(q):
-    return float(np.mean(np.log2(1 / np.asarray(q, float)[data])))
-for name, q in [("q = (¼, ¼, ½)", weather_q), ("q = p̂ = (½, ¼, ¼)", p_hat)]:
-    log_lik = float(np.log2(np.asarray(q)[data]).sum())
-    print(f"{name}: log₂ p(D | q) = {log_lik:.1f} bits, p(D | q) = {2 ** log_lik:.3g}; average surprise {avg_surprise(q):.3f} bits"
-          f" = H(p̂) {entropy(p_hat):.3f} + KL {kl_bits(p_hat, q):.3f}")
-    assert abs(avg_surprise(q) - entropy(p_hat) - kl_bits(p_hat, q)) < 1e-12
-ratio = 2 ** (len(data) * (avg_surprise(weather_q) - avg_surprise(p_hat)))
-print(f"the data are {ratio:.0f} times more probable under p̂ than under q = (¼, ¼, ½)")
-fixtures["story"]["mle"] = dict(seed=2026, data=data.tolist(), counts=counts.tolist(), p_hat=p_hat.tolist(), q=weather_q.tolist(),
-    log_lik_q=float(np.log2(weather_q[data]).sum()), log_lik_hat=float(np.log2(p_hat[data]).sum()),
-    avg_q=avg_surprise(weather_q), avg_hat=avg_surprise(p_hat), ratio=ratio)
-""", anchor="cell-mle")
-code(r"""
-# Maximum likelihood by gradient descent: three logits, a softmax, and the data's average surprise as the loss.
-logits_w = torch.nn.Parameter(torch.zeros(3))
-opt_w = torch.optim.Adam([logits_w], lr=.05)
-data_t = torch.tensor(data)
-for step in range(2000):
-    nll = -torch.log_softmax(logits_w, 0)[data_t].mean()
-    opt_w.zero_grad(); nll.backward(); opt_w.step()
-fitted = torch.softmax(logits_w.detach(), 0)
-print("gradient descent finds q =", fitted.numpy().round(4), "· the frequencies were", p_hat)
-assert torch.allclose(fitted, torch.tensor(p_hat), atol=1e-3)
-fixtures["story"]["mle"]["fitted"] = fitted.tolist()
-""", anchor="cell-mle-fit")
-md(r"""
-#### 2.5.3 Knowledge distillation: a small student learns a big teacher
-
-Slides: [2.5.3 The problem]({DECK}#distill-why/1) · [two networks]({DECK}#distill-match/1) · [the usual loss]({DECK}#distill-soft/1) · [the same loss as KL]({DECK}#distill-loss/1) · [a real student]({DECK}#distill-demo/1)
+Slides: [2.5.2 The problem]({DECK}#distill-why/1) · [two networks]({DECK}#distill-match/1) · [the usual loss]({DECK}#distill-soft/1) · [the same loss as KL]({DECK}#distill-loss/1) · [a real student]({DECK}#distill-demo/1)
 
 **Knowledge distillation** ([Hinton, Vinyals and Dean, 2015](https://arxiv.org/abs/1503.02531)): a big, accurate *teacher* is too slow to deploy, so a small *student* learns to reproduce the teacher’s output distribution. The usual loss is cross-entropy with the teacher’s probabilities as soft labels; since the teacher is fixed, that is $\mathrm{KL}(p_{\text{teacher}}\,\|\,q_{\text{student}})$ plus a constant. The teacher’s soft labels say more than a one-hot label: which wrong classes are plausible.
-""", anchor="sec-2-5-3")
+""", anchor="sec-2-5-2")
 code(r"""
 # Knowledge distillation on a toy problem: three overlapping classes in the plane.
 centres = torch.tensor([[-1.3, -.4], [1.3, -.4], [0., 1.5]])
@@ -1432,7 +1390,7 @@ savefig("mixture-fit")
 md(r"""
 ### 3.6 Which direction of KL?
 
-Slides: [3.6 The price: reverse KL picks one bump]({DECK}#fwdrev/1)
+Slides: [3.6 The price: reverse KL picks one bump]({DECK}#fwdrev/1) · [why one bump]({DECK}#kl-why/1) · [what to learn]({DECK}#kl-lesson/1)
 
 Target $p=0.7\,\mathcal N(-2,w^2)+0.3\,\mathcal N(2,w^2)$. Fit a Gaussian $q$ by gradient descent on each direction of the KL, computed on a grid. $\mathrm{KL}(p\|q)$ averages under $p$, so $q$ must cover both bumps. $\mathrm{KL}(q\|p)$ averages under $q$, so mass in the gap is expensive and $q$ settles on one bump; which one depends on where it starts.
 """, anchor="sec-3-6")
@@ -1465,6 +1423,14 @@ for width in [1.0, 0.5]:
     print(f"bump width {width}: " + "; ".join(
         f"{k}: N({v[-1][1]:.2f}, {v[-1][2]:.2f}^2), KL {v[-1][3]:.3f}" for k, v in runs.items()))
 fixtures["story"]["fwdrev"] = fwdrev
+# score every final fit in both directions: each KL prefers a different q
+narrow_target = bump_mixture(.5)
+fwdrev["cross"] = {}
+for key in ["revl", "fwd", "revr"]:
+    _, m_, s_, _ = fwdrev["0.5"][key][-1]
+    q_ = dist.Normal(torch.tensor(m_), torch.tensor(s_))
+    fwdrev["cross"][key] = dict(reverse=number(grid_kl(q_, narrow_target, grid_fr)), forward=number(grid_kl(narrow_target, q_, grid_fr)))
+    print(f"{key}: N({m_:.2f}, {s_:.2f}^2)  KL(q||p) = {fwdrev['cross'][key]['reverse']:.3f}  KL(p||q) = {fwdrev['cross'][key]['forward']:.3f}")
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.4), sharey=True)
 narrow = bump_mixture(.5)
 for ax, key, title in zip(axes, ["fwd", "revl", "revr"], ["KL(p||q)", "KL(q||p), start left", "KL(q||p), start right"]):
@@ -1482,7 +1448,7 @@ Slides: [Part 4]({DECK}#can-we/1). The real target is the posterior, which we ca
 md(r"""
 ### 4.1 Deriving the ELBO, one rule per line
 
-Slides: [4.1 Minimise KL to the posterior directly?]({DECK}#can-we/1) · [step by step]({DECK}#elbo-step1/1) · [why KL ≥ 0]({DECK}#kl-nonneg/1) · [why “lower bound”]({DECK}#elbo-bound/1)
+Slides: [4.1 Back to Bayes]({DECK}#back-bayes/1) · [minimise KL to the posterior directly?]({DECK}#can-we/1) · [step 1]({DECK}#elbo-step1/1) · [step 2, slowly]({DECK}#elbo-step2/1) · [why “lower bound”]({DECK}#elbo-bound/1)
 
 | step | line | rule used |
 |---|---|---|

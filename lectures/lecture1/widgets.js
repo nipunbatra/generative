@@ -577,32 +577,6 @@ function days(el,ctx,d,mode){
  el.querySelector('[data-reset]').addEventListener('click',()=>{reset(10);draw();});
 }
 /** Maximum likelihood for twenty days: move q and watch the data's average surprise split into H(p̂) + KL. */
-function mlefit(el,ctx,d){
- const m=d.story.mle,ph=m.p_hat,names=['sunny','cloudy','rainy'],N=m.data.length,W=1150,H=330,s={a:.25,b:.25};
- const Hhat=ph.reduce((t,v)=>t+(v>0?v*bitsOf(v):0),0);
- const render=()=>{
-  const q=[s.a,s.b,Math.max(1e-6,1-s.a-s.b)],avg=ph.reduce((t,v,i)=>t+v*bitsOf(q[i]),0),kl=avg-Hhat;
-  let g=label(0,24,'data frequencies p̂ and the model q',{size:20});
-  names.forEach((nm,i)=>{const cx=70+i*170,base=250,sc=v=>v*300;
-   g+=weather(nm,cx,46,.75);
-   for(const [v,color,dx] of [[ph[i],palette.p,-26],[q[i],palette.q,26]]){const h=sc(v);g+=`<rect x="${cx+dx-22}" y="${(base-h).toFixed(1)}" width="44" height="${Math.max(1.5,h).toFixed(1)}" rx="3" fill="${color}"/>`+label(cx+dx,base-h-8,num(v,2),{fill:color,size:18,anchor:'middle'});}});
-  g+=`<line x1="10" y1="250" x2="520" y2="250" stroke="${AX}"/>`+legend(10,290,[['p̂: 10, 5, 5 out of 20',palette.p],['q, the model',palette.q]],19);
-  const X=v=>620+v*190,y0=150;
-  g+=label(600,40,'the data’s average surprise under q',{fill:palette.ink,size:21,weight:600})+
-   `<rect x="${X(0)}" y="${y0}" width="${(X(Hhat)-X(0)).toFixed(1)}" height="54" fill="${TINT.p}" stroke="${palette.p}" stroke-width="2"/>`+
-   `<rect x="${X(Hhat).toFixed(1)}" y="${y0}" width="${Math.max(0,X(avg)-X(Hhat)).toFixed(1)}" height="54" fill="${TINT.loss}" stroke="${palette.loss}" stroke-width="2"/>`+
-   label(X(Hhat/2),y0+34,`H(p̂) = ${num(Hhat,2)}`,{fill:palette.p,size:19,anchor:'middle'})+(X(avg)-X(Hhat)>80?label((X(Hhat)+X(avg))/2,y0+34,`KL ${num(kl,2)}`,{fill:palette.loss,size:19,anchor:'middle'}):'')+
-   label(600,100,`= ${num(avg,3)} bits per day`,{fill:palette.ink,size:26,weight:600})+
-   label(600,250,`KL(p̂ ‖ q) = ${num(kl,3)} bits`,{fill:palette.loss,size:21})+
-   label(600,284,`log₂ p(𝒟 | q) = ${num(-N*avg,1)}: ${kl<5e-4?'the most probable q':`${(2**(N*kl)).toLocaleString('en',{maximumFractionDigits:0})}× less probable than under p̂`}`,{size:19});
-  return svg(W,H,g,`The data frequencies and the model q; the data’s average surprise ${num(avg,3)} bits splits into the entropy of the data and KL ${num(kl,3)}.`);
- };
- const controls=slider('a','q(sunny)',.02,.96,.01,.25)+slider('b','q(cloudy)',.02,.96,.01,.25)+
-  [['(¼, ¼, ½)',[.25,.25]],['(⅓, ⅓, ⅓)',[1/3,1/3]],['p̂ = (½, ¼, ¼)',[.5,.25]]].map(([t,v])=>`<button type="button" data-q="${v.join(',')}">q = ${t}</button>`).join('');
- const draw=interactive(el,ctx,{controls,render});if(!draw)return;
- bindSliders(el,s,draw,()=>{if(s.a+s.b>.98){const k=Object.keys(s).find(x=>x!==document.activeElement?.dataset?.k)||'b';s[k]=Math.max(.02,.98-(k==='a'?s.b:s.a));sync(el,s);}});
- el.querySelectorAll('[data-q]').forEach(bt=>bt.addEventListener('click',()=>{[s.a,s.b]=bt.dataset.q.split(',').map(Number);sync(el,s);draw();}));
-}
 
 // ---- Section 2.7: a small student learns a big teacher's distribution --------------------------
 const CLASS_RGB=[[36,94,219],[190,18,60],[20,119,55]];
@@ -645,7 +619,7 @@ function bnnvi(el,ctx,d){
 }
 
 export function mount(stage,ctx,d){
- const make={klarea,fwdrev,olive,elboslider,mclive,mcwalk,bnnvi,priorfuncs,mapfit,mcgrades,klgrid,cov3,mixsample,surprise,entropy2,mlefit,distill,'days-entropy':(e,c)=>days(e,c,d,'entropy'),'days-codes':(e,c)=>days(e,c,d,'codes'),'days-logratio':(e,c)=>days(e,c,d,'logratio'),'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
+ const make={klarea,fwdrev,olive,elboslider,mclive,mcwalk,bnnvi,priorfuncs,mapfit,mcgrades,klgrid,cov3,mixsample,surprise,entropy2,distill,'days-entropy':(e,c)=>days(e,c,d,'entropy'),'days-codes':(e,c)=>days(e,c,d,'codes'),'days-logratio':(e,c)=>days(e,c,d,'logratio'),'mix-sample':(el,c)=>mixfit(el,c,d,'sample'),'mix-rsample':(el,c)=>mixfit(el,c,d,'rsample')};
  for(const el of stage.querySelectorAll('[data-widget]')){
   const f=make[el.dataset.widget];if(!f)throw new Error('Unknown widget '+el.dataset.widget);f(el,ctx,d);
  }

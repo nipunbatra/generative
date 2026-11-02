@@ -1,6 +1,6 @@
 # KL and variational inference: speaker notes
 
-Planned main route: 148 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 143 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -8,9 +8,9 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 |---|---:|
 | Lecture map | 1 |
 | Part 1 · Bayes’ rule for a neural network | 30 |
-| Part 2 · How far apart are two distributions? | 74 |
-| Part 3 · Find the closest q | 22 |
-| Part 4 · Back to Bayes: the ELBO | 13 |
+| Part 2 · How far apart are two distributions? | 62 |
+| Part 3 · Find the closest q | 25 |
+| Part 4 · Back to Bayes: the ELBO | 17 |
 | Part 5 · Implement it | 8 |
 
 ## contents: Lecture 1 at a glance: five parts, twenty-two sections
@@ -334,6 +334,34 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 **Expected:** Drawing θ from q<sub>ψ</sub> is easy, and each draw costs one forward pass of the network.
 
 **Point here:** The same q<sub>ψ</sub> is called the variational distribution, the approximate posterior, or, in Pyro and NumPyro, the guide.
+
+**Transition:** The family is our choice.
+
+## variational-word: Why “variational”? Optimising over functions (optional)
+
+**Build 1, ask:** What is the unknown in ordinary calculus? In the calculus of variations?
+
+**Expected:** A number x; a whole function, such as a path.
+
+**Build 2, ask:** What is the unknown in VI?
+
+**Expected:** A distribution q: a function of θ. Hence “variational”.
+
+**Build 3, ask:** How does VI turn a search over functions into one over numbers?
+
+**Expected:** It restricts q to a family with knobs ψ, then uses gradient descent on ψ.
+
+**Point here:** The name comes from the calculus of variations (Euler and Lagrange, 18th century), which optimises over functions, and from variational methods in statistical physics. Jordan, Ghahramani, Jaakkola and Saul (1999), “An introduction to variational methods for graphical models”, brought the term to machine learning.
+
+**Transition:** The vocabulary of VI.
+
+## variational-terms: The vocabulary of variational inference (optional)
+
+**Build 1, ask:** Which parameters does VI train: θ or ψ?
+
+**Expected:** ψ, the knobs of q. θ is what q is a distribution over.
+
+**Point here:** Blei, Kucukelbir and McAuliffe (2017), “Variational Inference: A Review for Statisticians”, is a readable overview.
 
 **Transition:** The family is our choice.
 
@@ -717,11 +745,11 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 
 **Source / evidence:** Story after <a href="https://www.youtube.com/watch?v=tXE23653JrU">Jia-Bin Huang, “Fantastic KL Divergence and How to (Actually) Compute It”</a> (YouTube)
 
-## apps-map: KL at work: one recipe, three applications
+## apps-map: KL at work: one recipe, two applications
 
-**Build 1, ask:** What do the three KLs in row ④ have in common?
+**Build 1, ask:** What do the two KLs in row ④ have in common?
 
-**Expected:** The first argument is always the “truth” the model must match: the label, the data, the teacher.
+**Expected:** The first argument is the “truth” the model must match: the label, or the teacher.
 
 **Transition:** 2.5.1: classification.
 
@@ -799,139 +827,9 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 
 **Expected:** Each step towards q(true) = 1 lowers the loss; with no other pressure it heads there.
 
-**Transition:** 2.5.2: maximum likelihood.
+**Transition:** 2.5.2: knowledge distillation.
 
-## app-mle: 2.5.2 Maximum likelihood: the plan
-
-**Build 1, ask:** Where have you used maximum likelihood before?
-
-**Expected:** Whenever a model is fitted by its likelihood: linear regression with Gaussian noise, logistic regression, the classifier of 2.5.1.
-
-**Transition:** ① The problem.
-
-## mle-problem: ① The problem: learn a distribution from data
-
-**Build 1, ask:** What is unknown here, and what is observed?
-
-**Expected:** The distribution p<sub>data</sub> is unknown; the twenty days are observed.
-
-**Build 2, ask:** What could the fitted q be used for?
-
-**Expected:** Predicting tomorrow’s weather, or generating realistic new days: a generative model.
-
-**Transition:** ② The data and the model.
-
-## mle-data: ② The data and the model: twenty days, three numbers
-
-**Build 1, ask:** What would you guess for tomorrow?
-
-**Expected:** Sunny with probability ½: the frequency.
-
-**Build 2, ask:** What should “explains the data best” mean?
-
-**Expected:** Gives the data the highest probability: maximum likelihood. Let us see why that is the frequency.
-
-**Transition:** ③ The usual loss: how probable are the twenty days under q?
-
-## mle-likelihood: ③ The usual loss: how probable are the twenty days?
-
-**Build 1, ask:** Why a product?
-
-**Expected:** Independent days: probabilities multiply.
-
-**Build 2, ask:** Why is it so small?
-
-**Expected:** Any one particular sequence of 20 days is unlikely, even under the right model.
-
-**Build 3, ask:** Why work with the log?
-
-**Expected:** Products of many small numbers underflow; the log turns them into a sum.
-
-**Transition:** Per day, that is a familiar number.
-
-## mle-surprise: ③ Per day: the data’s average surprise under q
-
-**Build 1, ask:** What is minus the log-likelihood per day, in words?
-
-**Expected:** The average surprise of a recorded day under q.
-
-**Build 2, ask:** Where have we seen 1.75?
-
-**Expected:** H(p, q): the wrong code on our weather.
-
-**Build 3, ask:** Coincidence?
-
-**Expected:** No. Next slide: group the days by weather.
-
-**Transition:** Group the days by weather.
-
-## mle-group: ④ Rewrite it: group the days by weather
-
-**Build 1, ask:** How many sunny terms are there?
-
-**Expected:** Ten, all equal to log₂ 1/q(sunny).
-
-**Build 2, ask:** What do 10/20, 5/20 and 5/20 form?
-
-**Expected:** The data’s frequencies p̂ = (½, ¼, ¼): the empirical distribution.
-
-**Build 3, ask:** So what is maximum likelihood minimising?
-
-**Expected:** The cross-entropy H(p̂, q).
-
-**Transition:** Split it, as in 2.4.
-
-## mle-split: ④ As KL: the data’s surprise = H(p̂) + KL(p̂ ‖ q)
-
-**Build 1, ask:** Which part can the model change?
-
-**Expected:** Only KL(p̂ ‖ q).
-
-**Build 2, ask:** What is the smallest possible average surprise?
-
-**Expected:** H(p̂) = 1.5 bits, when KL = 0, that is, q = p̂.
-
-**Transition:** Find the best q yourself.
-
-## mle-fit: ⑤ Check: find the least surprising q
-
-**Build 1, ask:** Start from (⅓, ⅓, ⅓). Which way should q(sunny) move?
-
-**Expected:** Up, to ½: the data have more sun than q expects. At q = p̂ the data are 32 times more probable than under (¼, ¼, ½).
-
-**Notebook demonstration:** Notebook 2.5.2: the second cell runs gradient descent on the data’s average surprise from equal logits and lands on (0.5, 0.25, 0.25) without being told.
-
-**Transition:** ⑤ Four formulations, one answer.
-
-## mle-same-answer: ⑤ Four formulations, one answer
-
-**Build 1, ask:** Why do all four rows agree?
-
-**Expected:** Each row rewrites the one above: take the log and divide by −20, group the days by weather, subtract the fixed H(p̂).
-
-**Build 2, ask:** How many times more probable are the data under p̂?
-
-**Expected:** 2⁵ = 32: twenty days times 0.25 bits per day.
-
-**Transition:** The general statement.
-
-## mle-kl: In general: maximum likelihood = minimum KL(data ‖ model)
-
-**Build 1, ask:** Which distribution comes first in this KL?
-
-**Expected:** The data’s, p̂.
-
-**Build 2, ask:** What happens with more data?
-
-**Expected:** p̂ gets closer to the true distribution of the data.
-
-**Build 3, ask:** What is a training set’s cross-entropy loss?
-
-**Expected:** The average surprise at the true labels: minus the average log-likelihood.
-
-**Transition:** 2.5.3: knowledge distillation.
-
-## app-distill: 2.5.3 Knowledge distillation: the plan
+## app-distill: 2.5.2 Knowledge distillation: the plan
 
 **Build 1, ask:** Why would anyone want a smaller copy of a model?
 
@@ -987,7 +885,7 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** Why does the teacher come first in the KL?
 
-**Expected:** The teacher plays the truth, like the label in 2.5.1 and the data in 2.5.2: its distribution supplies the weights.
+**Expected:** The teacher plays the truth, like the label in 2.5.1: its distribution supplies the weights.
 
 **Build 3, ask:** What does a temperature τ > 1 do?
 
@@ -1019,15 +917,15 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 
 **Expected:** The student copies the teacher’s uncertainty too: where classes overlap, the teacher is unsure, and so is the student.
 
-**Notebook demonstration:** Notebook 2.5.3: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.
+**Notebook demonstration:** Notebook 2.5.2: the distillation cell trains the teacher on labels, then the student on the teacher’s probabilities, and prints both accuracies, the agreement and the KL.
 
 **Transition:** One principle in many disguises.
 
 ## apps-same: One principle in many disguises
 
-**Build 1, ask:** What is the same in the three applications?
+**Build 1, ask:** What is the same in the two applications?
 
-**Expected:** Each minimises a KL from a known “truth” (label, data, teacher) to the model.
+**Expected:** Each minimises a KL from a known “truth” (a label, a teacher) to the model.
 
 **Build 2, ask:** What is different about VI?
 
@@ -1577,7 +1475,51 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 
 **Point here:** PAUSE. Narrow bumps: forward KL 0.72; reverse 0.36 (= −log 0.7) from the left and 1.20 (= −log 0.3) from the right. Then switch to wide bumps: overlapping bumps give one broad reverse-KL fit.
 
+**Transition:** Why does reverse KL pick one bump?
+
+## kl-why: Why: reverse KL charges q for mass where p is empty
+
+**Build 1, ask:** Where does the stretched q pay for reverse KL?
+
+**Expected:** In the gap between the bumps: q is large there, p is nearly 0.
+
+**Build 2, ask:** Where would a one-bump q pay for forward KL?
+
+**Expected:** On the bump it ignores: p is large there, q is nearly 0.
+
+**Transition:** What to learn from this.
+
+## kl-lesson: What to learn: the direction decides what q is punished for
+
+**Build 1, ask:** Which q does each direction prefer?
+
+**Expected:** Reverse: a single bump. Forward: the wide q across both.
+
+**Build 2, ask:** Why does VI not just use forward KL?
+
+**Expected:** Forward KL averages under the posterior, so it needs posterior samples: the very thing we cannot get.
+
 **Transition:** Part 4: back to Bayes.
+
+## back-bayes: Back to Bayes: what we wanted
+
+**Build 1, ask:** Why could we not just compute the posterior?
+
+**Expected:** The evidence p(𝒟) is an integral over all seven parameters: far too many grid points.
+
+**Build 2, ask:** What does VI optimise?
+
+**Expected:** The knobs ψ of q, to make KL(q ‖ posterior) small.
+
+**Transition:** Where we are now.
+
+## where-now: Where we are: the tools, and the one missing piece
+
+**Build 1, ask:** What is different from Part 3?
+
+**Expected:** In Part 3 we could evaluate p everywhere. The posterior we cannot, because of p(𝒟).
+
+**Transition:** So can we just minimise KL to the posterior directly?
 
 ## can-we: Back to Bayes: minimise KL to the posterior directly?
 
@@ -1609,21 +1551,61 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 
 **Transition:** Step 2: put this into the KL.
 
-## elbo-step2: Step 2: substitute into the KL
+## elbo-step2: Step 2a: the KL we want, piece by piece
 
-**Build 1, ask:** What does E_q mean, in words?
+**Build 1, ask:** What does the average over θ ∼ q mean, in words?
 
-**Expected:** Draw θ from q, evaluate, average: the Monte Carlo average of 2.7.
+**Expected:** Draw θ from q, evaluate the bracket, average: the Monte Carlo average of 2.7.
 
-**Build 2, ask:** What is inside the brackets now?
+**Build 2, ask:** Which piece blocks us?
 
-**Expected:** Step 1’s expression for log p(θ | 𝒟).
+**Expected:** The log posterior: it contains log p(𝒟).
 
-**Build 3, ask:** Which signs changed?
+**Transition:** Step 2b: swap in step 1’s three pieces.
 
-**Expected:** All three: the likelihood and prior become minus, the evidence becomes plus.
+## elbo-step2b: Step 2b: swap in step 1’s three pieces
 
-**Transition:** Step 3: the constant leaves the average.
+**Build 1, ask:** Where does the bracket come from?
+
+**Expected:** Step 1: Bayes’ rule in logs.
+
+**Build 2, ask:** Has the value of the KL changed?
+
+**Expected:** No: we only rewrote the log posterior.
+
+**Build 3, ask:** Which piece is still a problem?
+
+**Expected:** The blue one, log p(𝒟). Steps 3 and 4 deal with it.
+
+**Transition:** Step 2c: open the bracket.
+
+## elbo-step2c: Step 2c: open the bracket, one sign at a time
+
+**Build 1, ask:** What happens to each term inside the bracket?
+
+**Expected:** Its sign flips: plus becomes minus, minus becomes plus.
+
+**Build 2, ask:** Check the numbers.
+
+**Expected:** −(5 + 3 − 2) = −6; −5 − 3 + 2 = −6.
+
+**Build 3, ask:** Which sign does the evidence end up with?
+
+**Expected:** Plus: it was subtracted inside a subtracted bracket.
+
+**Transition:** Step 2 in one line.
+
+## elbo-step2d: Step 2, done: four terms inside one average
+
+**Build 1, ask:** Which term does not change with θ?
+
+**Expected:** log p(𝒟): it is fixed by the model and the data.
+
+**Build 2, ask:** Which term can we not compute?
+
+**Expected:** The same one, log p(𝒟). The term we cannot compute is also the term that does not move.
+
+**Transition:** Step 3: a constant comes out of an average.
 
 ## elbo-step3: Step 3: a constant comes out of an average
 
@@ -1667,25 +1649,7 @@ Planned main route: 148 minutes. Timing includes student responses and the speci
 
 **Build 2, ask:** What do we know about the KL even without computing it?
 
-**Expected:** KL ≥ 0. Next slide: why.
-
-**Transition:** Why is KL never negative?
-
-## kl-nonneg: Why KL is never negative
-
-**Build 1, ask:** Where do log t and t − 1 touch?
-
-**Expected:** At t = 1, where both are 0.
-
-**Build 2, ask:** Can a single log ratio log(p/q) be positive?
-
-**Expected:** Yes, wherever p > q. Single terms can have either sign; only the q-weighted average is guaranteed ≥ 0.
-
-**Build 3, ask:** So can the KL be negative?
-
-**Expected:** No. And it is 0 only when p/q = 1 everywhere, that is, q = p.
-
-**Point here:** The same fact via Jensen’s inequality is an optional slide.
+**Expected:** KL ≥ 0, from Section 2.4: no code beats the right one. An optional slide proves it for any distributions.
 
 **Transition:** So the ELBO is a lower bound.
 

@@ -1,7 +1,7 @@
 {
   "status": "passed",
-  "assertions": 6726,
-  "numericalComparisons": 5707,
+  "assertions": 6719,
+  "numericalComparisons": 5701,
   "maximumAbsoluteError": 0.017600000000000005,
   "source": "Independent JavaScript formulae versus executed float64 PyTorch notebook; no new training in this check.",
   "tolerances": {
@@ -22148,65 +22148,6 @@
       "expected": 0.721086333853818,
       "error": 1.1102230246251565e-16,
       "tolerance": 1e-12,
-      "passed": true
-    },
-    {
-      "name": "Twenty days: 10 sunny, 5 cloudy, 5 rainy",
-      "kind": "assertion",
-      "passed": true
-    },
-    {
-      "name": "Average surprise under q = cross-entropy with the frequencies",
-      "kind": "numerical",
-      "actual": 1.75,
-      "expected": 1.75,
-      "error": 0,
-      "tolerance": 1e-12,
-      "passed": true
-    },
-    {
-      "name": "Average surprise under p-hat = entropy of the data",
-      "kind": "numerical",
-      "actual": 1.5,
-      "expected": 1.5,
-      "error": 0,
-      "tolerance": 1e-12,
-      "passed": true
-    },
-    {
-      "name": "Likelihood ratio 2^(20 KL)",
-      "kind": "numerical",
-      "actual": 32,
-      "expected": 32,
-      "error": 0,
-      "tolerance": 1e-9,
-      "passed": true
-    },
-    {
-      "name": "Gradient descent finds the frequency 0",
-      "kind": "numerical",
-      "actual": 0.5,
-      "expected": 0.5,
-      "error": 0,
-      "tolerance": 0.001,
-      "passed": true
-    },
-    {
-      "name": "Gradient descent finds the frequency 1",
-      "kind": "numerical",
-      "actual": 0.25,
-      "expected": 0.25,
-      "error": 0,
-      "tolerance": 0.001,
-      "passed": true
-    },
-    {
-      "name": "Gradient descent finds the frequency 2",
-      "kind": "numerical",
-      "actual": 0.25,
-      "expected": 0.25,
-      "error": 0,
-      "tolerance": 0.001,
       "passed": true
     },
     {

@@ -439,37 +439,6 @@ fixtures["story"]["classify"] = dict(classes=classes, pred=q_pred.tolist(), labe
     kl_onehot=kl_onehot, teacher=teacher.tolist(), ce_soft=ce_soft, entropy_soft=h_soft, kl_soft=kl_soft,
     curve={str(x): -math.log(x) for x in (1., .9, .6, .3, .05, .01)})
 
-rng = np.random.default_rng(2026)
-data = rng.permutation([0] * 10 + [1] * 5 + [2] * 5)            # 0 = sunny, 1 = cloudy, 2 = rainy
-counts = np.bincount(data, minlength=3)
-p_hat = counts / len(data)
-print("the data:", " ".join(["☀", "⛅", "🌧"][k] for k in data))
-print("counts:", dict(zip(weather_names, counts.tolist())), "→ frequencies p̂ =", p_hat)
-def avg_surprise(q):
-    return float(np.mean(np.log2(1 / np.asarray(q, float)[data])))
-for name, q in [("q = (¼, ¼, ½)", weather_q), ("q = p̂ = (½, ¼, ¼)", p_hat)]:
-    log_lik = float(np.log2(np.asarray(q)[data]).sum())
-    print(f"{name}: log₂ p(D | q) = {log_lik:.1f} bits, p(D | q) = {2 ** log_lik:.3g}; average surprise {avg_surprise(q):.3f} bits"
-          f" = H(p̂) {entropy(p_hat):.3f} + KL {kl_bits(p_hat, q):.3f}")
-    assert abs(avg_surprise(q) - entropy(p_hat) - kl_bits(p_hat, q)) < 1e-12
-ratio = 2 ** (len(data) * (avg_surprise(weather_q) - avg_surprise(p_hat)))
-print(f"the data are {ratio:.0f} times more probable under p̂ than under q = (¼, ¼, ½)")
-fixtures["story"]["mle"] = dict(seed=2026, data=data.tolist(), counts=counts.tolist(), p_hat=p_hat.tolist(), q=weather_q.tolist(),
-    log_lik_q=float(np.log2(weather_q[data]).sum()), log_lik_hat=float(np.log2(p_hat[data]).sum()),
-    avg_q=avg_surprise(weather_q), avg_hat=avg_surprise(p_hat), ratio=ratio)
-
-# Maximum likelihood by gradient descent: three logits, a softmax, and the data's average surprise as the loss.
-logits_w = torch.nn.Parameter(torch.zeros(3))
-opt_w = torch.optim.Adam([logits_w], lr=.05)
-data_t = torch.tensor(data)
-for step in range(2000):
-    nll = -torch.log_softmax(logits_w, 0)[data_t].mean()
-    opt_w.zero_grad(); nll.backward(); opt_w.step()
-fitted = torch.softmax(logits_w.detach(), 0)
-print("gradient descent finds q =", fitted.numpy().round(4), "· the frequencies were", p_hat)
-assert torch.allclose(fitted, torch.tensor(p_hat), atol=1e-3)
-fixtures["story"]["mle"]["fitted"] = fitted.tolist()
-
 # Knowledge distillation on a toy problem: three overlapping classes in the plane.
 centres = torch.tensor([[-1.3, -.4], [1.3, -.4], [0., 1.5]])
 def sample_points(n, seed):
@@ -1026,6 +995,14 @@ for width in [1.0, 0.5]:
     print(f"bump width {width}: " + "; ".join(
         f"{k}: N({v[-1][1]:.2f}, {v[-1][2]:.2f}^2), KL {v[-1][3]:.3f}" for k, v in runs.items()))
 fixtures["story"]["fwdrev"] = fwdrev
+# score every final fit in both directions: each KL prefers a different q
+narrow_target = bump_mixture(.5)
+fwdrev["cross"] = {}
+for key in ["revl", "fwd", "revr"]:
+    _, m_, s_, _ = fwdrev["0.5"][key][-1]
+    q_ = dist.Normal(torch.tensor(m_), torch.tensor(s_))
+    fwdrev["cross"][key] = dict(reverse=number(grid_kl(q_, narrow_target, grid_fr)), forward=number(grid_kl(narrow_target, q_, grid_fr)))
+    print(f"{key}: N({m_:.2f}, {s_:.2f}^2)  KL(q||p) = {fwdrev['cross'][key]['reverse']:.3f}  KL(p||q) = {fwdrev['cross'][key]['forward']:.3f}")
 fig, axes = plt.subplots(1, 3, figsize=(13, 3.4), sharey=True)
 narrow = bump_mixture(.5)
 for ax, key, title in zip(axes, ["fwd", "revl", "revr"], ["KL(p||q)", "KL(q||p), start left", "KL(q||p), start right"]):

@@ -3,7 +3,7 @@
   "number": 1,
   "title": "KL and variational inference",
   "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
-  "minutes": 148,
+  "minutes": 143,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
@@ -19,17 +19,17 @@
     {
       "id": "kl",
       "title": "Part 2 · How far apart are two distributions?",
-      "minutes": 74
+      "minutes": 62
     },
     {
       "id": "fit",
       "title": "Part 3 · Find the closest q",
-      "minutes": 22
+      "minutes": 25
     },
     {
       "id": "elbo",
       "title": "Part 4 · Back to Bayes: the ELBO",
-      "minutes": 13
+      "minutes": 17
     },
     {
       "id": "impl",
@@ -42,8 +42,8 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 126,
-  "optionalSlides": 26,
+  "coreSlides": 122,
+  "optionalSlides": 28,
   "slides": [
     {
       "id": "contents",
@@ -198,6 +198,20 @@
       "section": "bayes",
       "builds": 3,
       "optional": false
+    },
+    {
+      "id": "variational-word",
+      "title": "Why “variational”? Optimising over functions",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "variational-terms",
+      "title": "The vocabulary of variational inference",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
     },
     {
       "id": "vi-choice",
@@ -376,7 +390,7 @@
     },
     {
       "id": "apps-map",
-      "title": "KL at work: one recipe, three applications",
+      "title": "KL at work: one recipe, two applications",
       "section": "kl",
       "builds": 1,
       "optional": false
@@ -417,78 +431,8 @@
       "optional": false
     },
     {
-      "id": "app-mle",
-      "title": "2.5.2 Maximum likelihood: the plan",
-      "section": "kl",
-      "builds": 1,
-      "optional": false
-    },
-    {
-      "id": "mle-problem",
-      "title": "① The problem: learn a distribution from data",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mle-data",
-      "title": "② The data and the model: twenty days, three numbers",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mle-likelihood",
-      "title": "③ The usual loss: how probable are the twenty days?",
-      "section": "kl",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "mle-surprise",
-      "title": "③ Per day: the data’s average surprise under q",
-      "section": "kl",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "mle-group",
-      "title": "④ Rewrite it: group the days by weather",
-      "section": "kl",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "mle-split",
-      "title": "④ As KL: the data’s surprise = H(p̂) + KL(p̂ ‖ q)",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mle-fit",
-      "title": "⑤ Check: find the least surprising q",
-      "section": "kl",
-      "builds": 1,
-      "optional": false
-    },
-    {
-      "id": "mle-same-answer",
-      "title": "⑤ Four formulations, one answer",
-      "section": "kl",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "mle-kl",
-      "title": "In general: maximum likelihood = minimum KL(data ‖ model)",
-      "section": "kl",
-      "builds": 3,
-      "optional": false
-    },
-    {
       "id": "app-distill",
-      "title": "2.5.3 Knowledge distillation: the plan",
+      "title": "2.5.2 Knowledge distillation: the plan",
       "section": "kl",
       "builds": 1,
       "optional": false
@@ -802,6 +746,34 @@
       "optional": false
     },
     {
+      "id": "kl-why",
+      "title": "Why: reverse KL charges q for mass where p is empty",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "kl-lesson",
+      "title": "What to learn: the direction decides what q is punished for",
+      "section": "fit",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "back-bayes",
+      "title": "Back to Bayes: what we wanted",
+      "section": "elbo",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "where-now",
+      "title": "Where we are: the tools, and the one missing piece",
+      "section": "elbo",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "can-we",
       "title": "Back to Bayes: minimise KL to the posterior directly?",
       "section": "elbo",
@@ -817,9 +789,30 @@
     },
     {
       "id": "elbo-step2",
-      "title": "Step 2: substitute into the KL",
+      "title": "Step 2a: the KL we want, piece by piece",
+      "section": "elbo",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "elbo-step2b",
+      "title": "Step 2b: swap in step 1’s three pieces",
       "section": "elbo",
       "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "elbo-step2c",
+      "title": "Step 2c: open the bracket, one sign at a time",
+      "section": "elbo",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "elbo-step2d",
+      "title": "Step 2, done: four terms inside one average",
+      "section": "elbo",
+      "builds": 2,
       "optional": false
     },
     {
@@ -841,13 +834,6 @@
       "title": "One fixed number = what we can compute + what we cannot",
       "section": "elbo",
       "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "kl-nonneg",
-      "title": "Why KL is never negative",
-      "section": "elbo",
-      "builds": 3,
       "optional": false
     },
     {
@@ -1110,5 +1096,5 @@
       "optional": true
     }
   ],
-  "totalStates": 340
+  "totalStates": 333
 }
