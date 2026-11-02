@@ -1639,7 +1639,7 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 
 **Transition:** So the ELBO is a lower bound.
 
-## elbo-bound: The ELBO is a lower bound on the log evidence
+## elbo-bound: The ELBO is a lower bound: it sits below log p(𝒟)
 
 **Build 1, ask:** Below what does the ELBO sit?
 

@@ -1,5 +1,5 @@
 {
-  "created": "2026-11-02T15:59:33.768Z",
+  "created": "2026-11-02T16:06:00.457Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -44,8 +44,8 @@
     },
     {
       "path": "lecture1/content.js",
-      "bytes": 239330,
-      "sha256": "587a96817add02b605783213853acba0b6cc921d6212241c4f1cdc4b1922fb0c"
+      "bytes": 241382,
+      "sha256": "1f110783f636e5c6a53d0aaf700d4e39879c38940d3b7cbb40d0d196f454102f"
     },
     {
       "path": "lecture1/data/notebook-anchors.json",
@@ -59,13 +59,13 @@
     },
     {
       "path": "lecture1/exports/all-builds.pdf",
-      "bytes": 6058427,
-      "sha256": "def2973ecfaba61c370cb1a4bce9f5e15d72ce0ed713f684eb254148735e4f81"
+      "bytes": 6065614,
+      "sha256": "c554f45bf580b99a0473b7e6098ff9741933567e17d5279569f505ec4620d468"
     },
     {
       "path": "lecture1/exports/completed.pdf",
-      "bytes": 3767136,
-      "sha256": "f7c78f914d887c82b9ca341ef308802c3f62b65c8b9b8ffb7c6bfdbd56f36af8"
+      "bytes": 3775207,
+      "sha256": "436148b08d2747b442f10738d15bb895cea2992d1b13c8857819598a7d076712"
     },
     {
       "path": "lecture1/figures/bnn-evidence-1d.png",
@@ -335,7 +335,7 @@
     {
       "path": "lecture1/index.html",
       "bytes": 1598,
-      "sha256": "c2a086577acbae0e5fc405c8d9c63d15e8dcd23e470837900b803537ff1624ea"
+      "sha256": "7e84bc612807bceca7e5fdbb5015068a0ea6b2db82c553f3940a8955a5cad9c0"
     },
     {
       "path": "lecture1/lecture1-variational-inference.ipynb",
@@ -344,8 +344,8 @@
     },
     {
       "path": "lecture1/manifest.json",
-      "bytes": 27034,
-      "sha256": "81f5ca4172a9272a99e021f1cfb853465c977c8bc9517a17be10e65996ce609b"
+      "bytes": 27041,
+      "sha256": "df4d0b975a93f90cf1ee9d7f8b75f38e8e0a89d50f2ac6ce572baf62d822990c"
     },
     {
       "path": "lecture1/math.mjs",
@@ -374,8 +374,8 @@
     },
     {
       "path": "lecture1/speaker-notes.md",
-      "bytes": 83804,
-      "sha256": "b353c6af4179b95b0cc7dd67e92905e5fbcae789ce0d1162b10fbdcc09cedd64"
+      "bytes": 83811,
+      "sha256": "2eb5912a7faf724370c7e540d3ddfd5b5af68ca6e5718b3ce02ed01782f3b213"
     },
     {
       "path": "lecture1/widgets.js",

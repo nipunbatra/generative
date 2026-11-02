@@ -845,7 +845,7 @@
     },
     {
       "id": "elbo-bound",
-      "title": "The ELBO is a lower bound on the log evidence",
+      "title": "The ELBO is a lower bound: it sits below log p(𝒟)",
       "section": "elbo",
       "builds": 3,
       "optional": false

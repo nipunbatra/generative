@@ -120,6 +120,17 @@ function mixChart(){
  const P=panel({W:560,H:320,L:16,R:14,xMin:-4,xMax:8,yMax:.62,ticksX:[-4,0,4,8],yAxis:false,xLabel:'θ'});
  return fig(560,320,P.axes+P.area(xs,py,TINT.p)+P.line(xs,py,palette.p)+P.line(xs,qy,palette.q)+legend(16,30,[['p, the PML mixture',palette.p],['q = N(3, 1²)',palette.q]]),'A two-bump mixture target and a Gaussian q.');
 }
+/** "Lower bound", drawn upright: log p(𝒟) is a fixed ceiling, the ELBO sits below it, and the gap between them is the KL. */
+function ceilingFig(row){
+ const W=560,H=360,T=40,B=40,ymin=-22.3,ymax=-21.1,y=v=>T+(ymax-v)/(ymax-ymin)*(H-T-B),ax=90,x0=120,x1=540,E=y(c.log_evidence),Q=y(row.elbo),gx=470;
+ let s=`<line x1="${ax}" y1="${T}" x2="${ax}" y2="${H-B}" stroke="#aab3bc" stroke-width="1.5"/><path d="M${ax-7},${T+12} L${ax},${T} L${ax+7},${T+12}" fill="none" stroke="#aab3bc" stroke-width="1.5"/>`+
+  label(ax-10,T-12,'bigger',{size:19,anchor:'middle'});
+ [-21.4,-21.8,-22.2].forEach(v=>{s+=`<line x1="${ax-5}" y1="${y(v).toFixed(1)}" x2="${ax+5}" y2="${y(v).toFixed(1)}" stroke="#aab3bc"/>`+label(ax-10,y(v)+6,f(v,1),{size:18,anchor:'end'});});
+ s+=`<line x1="${x0}" y1="${E.toFixed(1)}" x2="${x1}" y2="${E.toFixed(1)}" stroke="${palette.data}" stroke-width="5"/>`+label(x0,E-14,`log p(𝒟) = ${f(c.log_evidence,2)}: the ceiling`,{fill:palette.data,size:24,weight:700});
+ s+=`<line x1="${x0}" y1="${Q.toFixed(1)}" x2="${x1-80}" y2="${Q.toFixed(1)}" stroke="${palette.q}" stroke-width="5"/>`+label(x0,Q+32,`ELBO = ${f(row.elbo,2)}`,{fill:palette.q,size:24,weight:700});
+ s+=`<line x1="${gx}" y1="${(E+5).toFixed(1)}" x2="${gx}" y2="${(Q+2).toFixed(1)}" stroke="${palette.loss}" stroke-width="4"/>`+label(gx-14,(E+Q)/2+8,`gap = KL ≈ ${f(row.posterior_kl,2)}`,{fill:palette.loss,size:22,anchor:'end',weight:700});
+ return fig(W,H,s,'An upright scale: the log evidence is a fixed ceiling at about −21.40; the ELBO for q = Beta(10, 10) sits below it at about −22.02; the gap between them is the KL, about 0.62.');
+}
 function gapLine(row){
  const xmin=-22.2,xmax=-21.2,W=1000,L=65,Rm=45,x=v=>L+(v-xmin)/(xmax-xmin)*(W-L-Rm);
  const a=x(row.elbo),b=x(c.log_evidence),close=b-a<110;
@@ -1668,11 +1679,16 @@ S('elbo-pieces','elbo','One fixed number = what we can compute + what we cannot'
  ask:['Which piece does not change when we change q?','What do we know about the KL even without computing it?'],
  expected:['log p(𝒟): it involves the model and the data, not q.','KL ≥ 0, from Section 2.4: no code beats the right one. An optional slide proves it for any distributions.'],
  transition:'So the ELBO is a lower bound.'});
-S('elbo-bound','elbo','The ELBO is a lower bound on the log evidence',{builds:3,
- body:stack(`<p class="lead">In plain words: whatever q we choose, the <b class="q">ELBO</b> never rises above the <b class="data">log evidence log p(𝒟)</b>. It is a lower bound <b>on log p(𝒟)</b>: an <b>E</b>vidence <b>L</b>ower <b>BO</b>und.</p>`,
-  eq(R`\qcol{\ELBO(q)}=\dcol{\log p(\mathcal D)}-\lcol{\underbrace{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}_{\ge0}}\ \le\ \dcol{\log p(\mathcal D)}`),
-  `<div class="state-slot"><div data-only="2">${gapLine(c.candidates[0])}</div><div data-only="3">${table(['','log p(𝒟)','it is the log of …'],[['the coin: discrete data',num(c.log_evidence,2),'a probability: never above 0'],['our network: continuous data',num(E.estimate,2),'a density: either sign']])}</div></div>`),
- lines:['Lower bound on what? On the log evidence, log p(𝒟). The red KL is never negative, so subtracting it can only lower the number: the purple ELBO always sits below the blue log p(𝒟).','A coin with q = Beta(10, 10): the ELBO sits 0.62 nats below log p(𝒟), and the gap is exactly the KL to the posterior.',`“Lower bound” says nothing about signs: a probability is at most 1, but a density can exceed it (log p(𝒟 | θ<sub>A</sub>) = +${num(A.log_lik,1)}). Only the order is guaranteed.`],
+S('elbo-bound','elbo','The ELBO is a lower bound: it sits below log p(𝒟)',{builds:3,
+ body:cols(ceilingFig(c.candidates[0]),stack(
+  eq(R`\dcol{\log p(\mathcal D)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}`),
+  eq(R`\lcol{\KL}\ \ge 0\quad\Longrightarrow\quad\qcol{\ELBO(q)}\ \le\ \dcol{\log p(\mathcal D)}`),
+  `<div class="state-slot"><div data-only="1">${p('Whatever q we choose, the <b class="q">ELBO</b> is <b>below</b> (or at) the <b class="data">log evidence</b>, never above: a <b>lower bound</b> on log p(𝒟). <b>E</b>vidence <b>L</b>ower <b>BO</b>und.')}</div>
+   <div data-only="2">${p(`Both numbers are negative. ${f(c.candidates[0].elbo,2)} is further below zero than ${f(c.log_evidence,2)}, so it is the smaller one: ${f(c.candidates[0].posterior_kl,2)} lower, exactly the KL.`)}</div>
+   <div data-only="3"><div class="table-sm">${table(['','log p(𝒟)','it is the log of …'],[['the coin: discrete data',num(c.log_evidence,2),'a probability: never above 0'],['our network: continuous data',num(E.estimate,2),'a density: either sign']])}</div></div></div>`),'1fr 1fr'),
+ lines:['Picture a ceiling: log p(𝒟), one fixed number set by the model and the data. Every q gives an ELBO, and every ELBO sits below the ceiling, by exactly the KL. That is why it is a lower bound.',
+  `The coin, with q = Beta(10, 10): log p(𝒟) = ${f(c.log_evidence,2)} and the ELBO = ${f(c.candidates[0].elbo,2)}. With negative numbers, “lower” means further below zero: the ELBO is ${f(c.candidates[0].posterior_kl,2)} lower.`,
+  `“Lower bound” says nothing about signs: a probability is at most 1, but a density can exceed it (log p(𝒟 | θ<sub>A</sub>) = +${num(A.log_lik,1)}). Only the order is guaranteed.`],
  ask:['Below what does the ELBO sit?','What is the gap between them?','Is the ELBO always negative? Is log p(𝒟)?'],
  expected:['The log evidence log p(𝒟), for every q: that is the “lower bound”.','The KL from q to the posterior: here 0.62 nats.','No, and no. For discrete data log p(𝒟) ≤ 0; for continuous data it can be positive. Only the order is guaranteed.'],
  point:'A finite-sample ELBO estimate can cross log p(𝒟) on an unlucky draw (optional slide); the exact expectation cannot.',
