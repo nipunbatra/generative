@@ -15,6 +15,7 @@ Open <http://127.0.0.1:8767/>. Serve the files over HTTP: the modules load numer
 - Right/left arrows: next/previous reveal.
 - Shift + arrow: next/previous slide.
 - N: speaker notes. O: outline. R: reset this slide. Home/End: beginning/end.
+- F (or the Present button): present full screen. The controls and cursor fade until the mouse moves; Esc or F leaves. On a touch screen, swipe sideways to step through the reveals.
 - `?reading`: every completed slide, optional extensions and expandable notes.
 - `?all`: include optional extensions during presentation.
 - `#slide-id/2`: open a specific reveal.

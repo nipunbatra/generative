@@ -40,16 +40,34 @@ function next(){if(build<slides[current].builds)goTo(current,build+1);else if(cu
 function prev(){if(build>1)goTo(current,build-1);else if(current>0)goTo(current-1,slides[current-1].builds);}
 function toggle(id){const e=document.querySelector(id);e.hidden=!e.hidden;}
 const reset=()=>goTo(current,1);
+// Present: full screen, the controls fade out and the cursor hides after a moment without the mouse; F toggles it,
+// Esc (or the browser's own exit) leaves it. Where a browser has no full-screen API (iPhone), it still hides the chrome.
+const root=document.documentElement,fsElement=()=>document.fullscreenElement||document.webkitFullscreenElement;
+let wake=null,idleTimer=0;
+function wakeControls(){document.body.classList.remove('idle');clearTimeout(idleTimer);idleTimer=setTimeout(()=>{if(!document.querySelector('.controls:hover'))document.body.classList.add('idle');},2500);}
+function setPresenting(on){document.body.classList.toggle('presenting',on);const b=document.querySelector('[data-action="present"]');if(b){b.textContent=on?'Exit':'Present';b.setAttribute('aria-pressed',on);}if(on){navigator.wakeLock?.request('screen').then(l=>{wake=l;},()=>{});wakeControls();}else{wake?.release().catch(()=>{});wake=null;clearTimeout(idleTimer);document.body.classList.remove('idle');}fit();}
+function present(){
+ if(document.body.classList.contains('presenting')){if(fsElement())(document.exitFullscreen||document.webkitExitFullscreen).call(document);setPresenting(false);return;}
+ document.querySelector('#notes').hidden=true;document.querySelector('#overview').hidden=true;setPresenting(true);
+ const request=root.requestFullscreen||root.webkitRequestFullscreen;if(request)Promise.resolve(request.call(root)).catch(()=>{});
+}
+for(const type of ['fullscreenchange','webkitfullscreenchange'])document.addEventListener(type,()=>{if(!fsElement()&&document.body.classList.contains('presenting'))setPresenting(false);});
+addEventListener('pointermove',e=>{if(e.pointerType==='mouse'&&document.body.classList.contains('presenting'))wakeControls();});
+addEventListener('pointerdown',()=>{if(document.body.classList.contains('presenting'))wakeControls();});
+// Swipe sideways to step through the reveals on a touch screen, unless the swipe starts on a control or a live figure.
+let touch=null;
+addEventListener('touchstart',e=>{touch=!reading&&!printing&&e.touches.length===1&&!e.target.closest('a,button,input,select,textarea,.widget,.panel')?{x:e.touches[0].clientX,y:e.touches[0].clientY}:null;},{passive:true});
+addEventListener('touchend',e=>{if(!touch)return;const t=e.changedTouches[0],dx=t.clientX-touch.x,dy=t.clientY-touch.y;touch=null;if(Math.abs(dx)>50&&Math.abs(dx)>1.5*Math.abs(dy))dx<0?next():prev();},{passive:true});
 document.querySelector('#overview').innerHTML=`<h3>${esc(meta.title)}</h3><p>${meta.minutes} minute planned main route</p><dl>${(meta.sections||[]).filter(s=>s.minutes>0).map(s=>`<dt>${esc(s.title)}</dt><dd>${s.minutes} minutes</dd>`).join('')}</dl><ol>${slides.map((s,i)=>`${s.chapter&&s.chapter!==slides[i-1]?.chapter?`<li class="ov-chapter">${esc(s.chapter)}</li>`:''}<li><a href="#${s.id}/1" data-jump="${i}">${s.title}${s.optional?' (optional)':''}</a></li>`).join('')}</ol>`;
 document.querySelector('#overview').addEventListener('click',e=>{const a=e.target.closest('[data-jump]');if(a){e.preventDefault();goTo(Number(a.dataset.jump),1);toggle('#overview');}});
-document.querySelector('.controls').addEventListener('click',e=>{if(reading||printing)return;const a=e.target.closest('[data-action]')?.dataset.action;({next,prev,reset,notes:()=>toggle('#notes'),scenes:()=>toggle('#overview'),finish:()=>goTo(current,slides[current].builds)})[a]?.();});
+document.querySelector('.controls').addEventListener('click',e=>{if(reading||printing)return;const a=e.target.closest('[data-action]')?.dataset.action;({next,prev,reset,notes:()=>toggle('#notes'),scenes:()=>toggle('#overview'),present,finish:()=>goTo(current,slides[current].builds)})[a]?.();});
 addEventListener('keydown',e=>{
  if(reading||printing||e.target.closest('input,textarea,select')||e.metaKey||e.ctrlKey||e.altKey)return;
  if(['ArrowRight',' ','PageDown'].includes(e.key)){e.preventDefault();e.shiftKey?goTo(current+1,1):next();}
  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();e.shiftKey?goTo(current-1,1):prev();}
  else if(e.key==='Home')goTo(0,1);else if(e.key==='End')goTo(slides.length-1,slides.at(-1).builds);
- else if(e.key.toLowerCase()==='n')toggle('#notes');else if(e.key.toLowerCase()==='o')toggle('#overview');else if(e.key.toLowerCase()==='r')reset();
- else if(e.key==='Escape'){document.querySelector('#notes').hidden=true;document.querySelector('#overview').hidden=true;}
+ else if(e.key.toLowerCase()==='n')toggle('#notes');else if(e.key.toLowerCase()==='o')toggle('#overview');else if(e.key.toLowerCase()==='r')reset();else if(e.key.toLowerCase()==='f')present();
+ else if(e.key==='Escape'){document.querySelector('#notes').hidden=true;document.querySelector('#overview').hidden=true;if(document.body.classList.contains('presenting')&&!fsElement())setPresenting(false);}
 });
 addEventListener('hashchange',fromHash);addEventListener('resize',fit);fit();
 if(reading||printing){
@@ -57,7 +75,7 @@ if(reading||printing){
  if(printing&&params.get('print')==='builds'){
   elements.forEach((el,i)=>{for(let b=1;b<slides[i].builds;b++){const clone=el.cloneNode(true);clone.id=`${slides[i].id}-build-${b}`;const prefix=`${slides[i].id}-${b}-`;for(const n of clone.querySelectorAll('[id]')){const old=n.id;n.id=prefix+old;for(const a of clone.querySelectorAll('[marker-end],[marker-start],[clip-path]'))for(const k of ['marker-end','marker-start','clip-path'])if(a.getAttribute(k)===`url(#${old})`)a.setAttribute(k,`url(#${prefix+old})`);}apply(clone,b);clone.querySelector('.page-number').textContent+=` · ${b}/${slides[i].builds}`;el.before(clone);}el.querySelector('.page-number').textContent+=` · ${slides[i].builds}/${slides[i].builds}`;});
  }
- document.querySelector('#read-link').href='./';document.querySelector('#read-link').textContent='Present';
+ document.querySelector('#read-link').href='./';document.querySelector('#read-link').textContent='Slides';
 }else fromHash();
 document.title=meta.title+' · Generative modelling';
 window.lecture={meta,slides:slides.map(({body,...s})=>s),allSlides:allSlides.map(({body,...s})=>s),goTo,next,prev,reset,finish:()=>goTo(current,slides[current].builds),get current(){return {id:slides[current].id,index:current,build};},mathsErrors,notesRows};

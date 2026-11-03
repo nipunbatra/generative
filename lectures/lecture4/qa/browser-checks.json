@@ -27,6 +27,14 @@
       "pass": true
     },
     {
+      "name": "F starts presenting",
+      "pass": true
+    },
+    {
+      "name": "F stops presenting",
+      "pass": true
+    },
+    {
       "name": "fresh deep link",
       "pass": true
     },

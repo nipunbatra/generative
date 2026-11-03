@@ -1,5 +1,5 @@
 {
-  "created": "2026-11-02T16:06:00.457Z",
+  "created": "2026-11-03T05:20:47.181Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -24,8 +24,8 @@
     },
     {
       "path": "README.md",
-      "bytes": 4059,
-      "sha256": "5306c131ff4acd24ab0a53016b9862b2b5d87c3765945d96fcefe4d4d446d4d6"
+      "bytes": 4241,
+      "sha256": "ef24739e57d3ac1f61de980656e5ba2c4833a9c94a8ea4c820808bba69dc8373"
     },
     {
       "path": "TEACHING-GUIDE.md",
@@ -334,8 +334,8 @@
     },
     {
       "path": "lecture1/index.html",
-      "bytes": 1598,
-      "sha256": "7e84bc612807bceca7e5fdbb5015068a0ea6b2db82c553f3940a8955a5cad9c0"
+      "bytes": 1697,
+      "sha256": "e4160ea19415896245bd1cc699cdc14591a27a3f750308fde59ecd292409a682"
     },
     {
       "path": "lecture1/lecture1-variational-inference.ipynb",
@@ -544,8 +544,8 @@
     },
     {
       "path": "lecture2/index.html",
-      "bytes": 1559,
-      "sha256": "0ec572042fa70a44f35dbc01282bd6a15afc26ba1f038bf02f91b83ae9d5e00b"
+      "bytes": 1658,
+      "sha256": "f61e5dd31679729505a97390cd3e2a0df108592eb98a48e58d1d778eac65232f"
     },
     {
       "path": "lecture2/lecture2-generative-models.ipynb",
@@ -764,8 +764,8 @@
     },
     {
       "path": "lecture3/index.html",
-      "bytes": 1516,
-      "sha256": "bd8e39dc1345c8349ec1474a2b7a209a5c8dc21a64fcfaef9cd3bd68f1709de9"
+      "bytes": 1615,
+      "sha256": "9bb9b8ef75a8e1fb6c895e2ec646b42b7d88ef05b6145dfbe130f227875d7a91"
     },
     {
       "path": "lecture3/lecture3.ipynb",
@@ -1384,8 +1384,8 @@
     },
     {
       "path": "lecture4/index.html",
-      "bytes": 1598,
-      "sha256": "0452344faff64b82f5935048ca4df9a40cd82354efa436f07761d249529b4240"
+      "bytes": 1697,
+      "sha256": "9cf886fed3dd3c0aeab7d73641c58066223157f068e79f2fc18093b726785ba6"
     },
     {
       "path": "lecture4/lecture4-diffusion.ipynb",
@@ -1589,8 +1589,8 @@
     },
     {
       "path": "scripts/scaffold.mjs",
-      "bytes": 1668,
-      "sha256": "729941f55e56c76afbad88bc9a966c1e8d88e16b5d5ff1b949f751e6d8010a58"
+      "bytes": 1767,
+      "sha256": "5f6ff22240434885adfa71d8b0c59a6732a6679c5abce766890efb7531d40456"
     },
     {
       "path": "scripts/stamp-assets.mjs",
@@ -1599,8 +1599,8 @@
     },
     {
       "path": "scripts/verify.mjs",
-      "bytes": 7600,
-      "sha256": "31e5f92aba31e923dd2b0e26126e7d7c99a792bda802a4d830494c2397767205"
+      "bytes": 7924,
+      "sha256": "00c5440691b662c75fb06787700f943426b1875531f1e0367df8f4205293f4ef"
     },
     {
       "path": "shared/author.js",
@@ -1609,13 +1609,13 @@
     },
     {
       "path": "shared/deck.css",
-      "bytes": 12284,
-      "sha256": "d8dc9df72cc08dd4b4097d2ed60dcfa1ff2a05b50a1805c8df1e682a0dad8eca"
+      "bytes": 12645,
+      "sha256": "c0f90bb8e63eb271dc33d678ec9f99e97fe53c976eddeb5ce53b47f326db6d45"
     },
     {
       "path": "shared/deck.js",
-      "bytes": 9023,
-      "sha256": "8db1771643536b5106c4e009ba2ae61516e37de99575f7cb82fe2cc3bf1f8c9e"
+      "bytes": 11588,
+      "sha256": "c860bad08c9ff1eee251f0ef24fd83eab6194c87cda60d8b59f7a670e0d00341"
     },
     {
       "path": "shared/katex/LICENSE",
