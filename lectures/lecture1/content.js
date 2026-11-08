@@ -14,14 +14,14 @@ const n=d.normal,c=d.coin,g=d.gradients,mc=d.monte_carlo,st=d.story,b=st.bnn,ink
 const A=b.theta_A,Bt=b.theta_B,E=b.evidence,H=b.hmc,V=b.vi,VF=b.vi_full;
 export const meta={
  id:'lecture1',number:1,title:'KL and variational inference',
- subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:143,
+ subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:144,
  notebook:'lecture1-variational-inference.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
   {id:'bayes',title:'Part 1 · Bayes’ rule for a neural network',minutes:30},
   {id:'kl',title:'Part 2 · How far apart are two distributions?',minutes:62},
   {id:'fit',title:'Part 3 · Find the closest q',minutes:25},
-  {id:'elbo',title:'Part 4 · Back to Bayes: the ELBO',minutes:17},
+  {id:'elbo',title:'Part 4 · Back to Bayes: the ELBO',minutes:18},
   {id:'impl',title:'Part 5 · Implement it',minutes:8},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
@@ -1608,6 +1608,19 @@ S('can-we','elbo','Back to Bayes: minimise KL to the posterior directly?',{build
  ask:['Why this direction, KL(q‖p), and not KL(p‖q)?','Which piece is missing?'],
  expected:['KL(p‖q) averages under the posterior, so it needs posterior samples: the problem itself. KL(q‖p) averages under q, which we choose.','log p(θ | 𝒟): it contains log p(𝒟).'],
  source:'A careful written derivation: <a href="https://www.gregorygundersen.com/blog/2021/04/16/variational-inference/">Gregory Gundersen, “The ELBO in Variational Inference”</a>',
+ transition:'First, where Part 4 ends up.'});
+S('elbo-goal','elbo','Where Part 4 ends up: maximise the ELBO',{builds:3,
+ body:stack(eq(R`${LE}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}`),
+  small('The ELBO, the evidence lower bound, is the part of log p(𝒟) we can compute. The red KL to the posterior is the part we cannot.'),
+  at(2,eq(R`\qcol{\ELBO(q)}=\underbrace{\E_{\theta\sim q}\big[${LL}\big]}_{\text{fit the data}}-\underbrace{\KL\big(\qcol{q(\theta)}\,\|\,\textcolor{#147737}{p(\theta)}\big)}_{\text{stay near the prior}}`)),
+  at(3,eq(R`\text{the objective:}\quad\psi^*=\arg\max_\psi\ \qcol{\ELBO(q_\psi)}\qquad\text{in code: loss}=-\qcol{\ELBO}`)),
+  at(3,small('log p(𝒟) is one fixed number, so whatever the ELBO gains, the KL to the posterior loses.'))),
+ lines:['Where Part 4 ends up. log p(𝒟) splits into the ELBO, which we can compute, and the KL to the posterior, which we cannot.',
+  'The ELBO has two terms, both computable: fit the data, and stay near the prior.',
+  'The objective: choose ψ to maximise the ELBO; in code, minimise minus the ELBO. The steps that follow show why this works.'],
+ ask:['Which part of log p(𝒟) can we compute?','What does each term of the ELBO ask of q?','Why does maximising the ELBO bring q close to the posterior?'],
+ expected:['The ELBO. The KL to the posterior needs p(𝒟), so we cannot.','The first: put q on θ values that explain the data. The second: do not stray far from the prior.','log p(𝒟) is fixed, so raising the ELBO lowers the KL to the posterior by exactly as much.'],
+ point:'If time is short, state this slide, skip the derivation, and continue at the lower-bound picture (elbo-bound) or the coin check (4.2).',
  transition:'Step 1: Bayes’ rule, in logs.'});
 S('elbo-step1','elbo','Step 1: Bayes’ rule, in logs',{builds:3,
  body:stack(eq(R`\pcol{p(\theta\mid\mathcal D)}=\frac{\ncol{p(\mathcal D\mid\theta)}\,\textcolor{#147737}{p(\theta)}}{\dcol{p(\mathcal D)}}`),
@@ -1703,7 +1716,7 @@ S('elbo-two-terms','elbo','The ELBO in two terms: fit the data, stay near the pr
  body:stack(eq(R`\qcol{\ELBO(q)}=\E_q\big[\log p(\mathcal D\mid\theta)+\log p(\theta)-\log q(\theta)\big]`),
   at(2,eq(R`=\E_q\big[\log p(\mathcal D\mid\theta)\big]+\E_q\big[\log p(\theta)-\log q(\theta)\big]`)),
   at(3,eq(R`=\underbrace{\E_q\big[\log p(\mathcal D\mid\theta)\big]}_{\text{fit the data}}-\underbrace{\KL\big(q(\theta)\,\|\,p(\theta)\big)}_{\text{stay near the prior}}`))),
- lines:['Take the ELBO apart.','The average of a sum is the sum of the averages: a likelihood term and the rest.','The rest is minus a KL, from q to the prior. Fit the data, but stay near the prior. For our network the second term is the diagonal-Gaussian formula of 2.6; the first needs samples.'],
+ lines:['Back to the objective from the start of Part 4. Take the ELBO apart.','The average of a sum is the sum of the averages: a likelihood term and the rest.','The rest is minus a KL, from q to the prior. Fit the data, but stay near the prior. For our network the second term is the diagonal-Gaussian formula of 2.6; the first needs samples.'],
  ask:['Which rule splits the average?','Why is the second average minus a KL?','Which term pulls q towards a narrow, well-fitting θ?'],
  expected:['Linearity: E[a + b] = E[a] + E[b].','E_q[log p − log q] = −E_q[log q − log p] = −KL(q ‖ prior).','The data term. The KL to the N(0, 1) prior pulls the other way: wide, near zero.'],
  transition:'Check the identity where p(𝒟) is known.'});

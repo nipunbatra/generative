@@ -1,6 +1,6 @@
 # KL and variational inference: speaker notes
 
-Planned main route: 143 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 144 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -10,7 +10,7 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 | Part 1 · Bayes’ rule for a neural network | 30 |
 | Part 2 · How far apart are two distributions? | 62 |
 | Part 3 · Find the closest q | 25 |
-| Part 4 · Back to Bayes: the ELBO | 17 |
+| Part 4 · Back to Bayes: the ELBO | 18 |
 | Part 5 · Implement it | 8 |
 
 ## contents: Lecture 1 at a glance: five parts, twenty-two sections
@@ -1517,9 +1517,27 @@ Planned main route: 143 minutes. Timing includes student responses and the speci
 
 **Expected:** log p(θ | 𝒟): it contains log p(𝒟).
 
-**Transition:** Step 1: Bayes’ rule, in logs.
+**Transition:** First, where Part 4 ends up.
 
 **Source / evidence:** A careful written derivation: <a href="https://www.gregorygundersen.com/blog/2021/04/16/variational-inference/">Gregory Gundersen, “The ELBO in Variational Inference”</a>
+
+## elbo-goal: Where Part 4 ends up: maximise the ELBO
+
+**Build 1, ask:** Which part of log p(𝒟) can we compute?
+
+**Expected:** The ELBO. The KL to the posterior needs p(𝒟), so we cannot.
+
+**Build 2, ask:** What does each term of the ELBO ask of q?
+
+**Expected:** The first: put q on θ values that explain the data. The second: do not stray far from the prior.
+
+**Build 3, ask:** Why does maximising the ELBO bring q close to the posterior?
+
+**Expected:** log p(𝒟) is fixed, so raising the ELBO lowers the KL to the posterior by exactly as much.
+
+**Point here:** If time is short, state this slide, skip the derivation, and continue at the lower-bound picture (elbo-bound) or the coin check (4.2).
+
+**Transition:** Step 1: Bayes’ rule, in logs.
 
 ## elbo-step1: Step 1: Bayes’ rule, in logs
 

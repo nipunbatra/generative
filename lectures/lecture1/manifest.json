@@ -3,7 +3,7 @@
   "number": 1,
   "title": "KL and variational inference",
   "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
-  "minutes": 143,
+  "minutes": 144,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
@@ -29,7 +29,7 @@
     {
       "id": "elbo",
       "title": "Part 4 · Back to Bayes: the ELBO",
-      "minutes": 17
+      "minutes": 18
     },
     {
       "id": "impl",
@@ -42,7 +42,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 124,
+  "coreSlides": 125,
   "optionalSlides": 28,
   "slides": [
     {
@@ -788,6 +788,13 @@
       "optional": false
     },
     {
+      "id": "elbo-goal",
+      "title": "Where Part 4 ends up: maximise the ELBO",
+      "section": "elbo",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "elbo-step1",
       "title": "Step 1: Bayes’ rule, in logs",
       "section": "elbo",
@@ -1110,5 +1117,5 @@
       "optional": true
     }
   ],
-  "totalStates": 331
+  "totalStates": 334
 }
