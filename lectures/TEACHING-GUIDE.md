@@ -32,6 +32,7 @@ These are reduced learning contracts, not a recommendation to rush every slide.
 
 - **Lecture 1:** give the Gaussian KL formula; shorten the fitting demo; use prepared Monte Carlo comparisons. Retain scalar reparameterisation intuition, the complete ELBO derivation and the coin check. Assign the full gradient-estimator investigation as a companion activity.
 - **Lecture 2:** teach Part 2 with the one-Gaussian and mixture samplers only, and Part 3 through the four-step generation diagram. Protect the reconstruction versus prior-sampling contrast, the code overlay, both roads to the VAE and one worked loss step; move the β sweep to reading.
+- **Lecture 5** is the one-hour version of Lecture 2’s autoencoders and VAE. It assumes Lecture 1’s ELBO and skips the derivation: the VAE is that ELBO with a code per image. If even an hour is tight, move the β slides to reading.
 - **Lecture 3:** retain both explicit updates and one failure case. Shorten the objective derivation and image architecture segment.
 - **Lecture 4:** retain the forward example, noise-prediction task and one reverse step. Use the prepared architecture/checkpoint; move the variational bridge to reading and limit the text connection to two minutes.
 

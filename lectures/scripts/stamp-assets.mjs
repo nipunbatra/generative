@@ -9,10 +9,12 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const hash=file=>crypto.createHash('sha1').update(fs.readFileSync(file)).digest('hex').slice(0,10);
 const shared=['deck.js','author.js'].map(f=>[`../shared/${f}`,hash(path.join(root,'shared',f))]);
 const css=hash(path.join(root,'shared','deck.css'));
-for(let n=1;n<=4;n++){
+for(let n=1;n<=5;n++){
  const dir=path.join(root,`lecture${n}`),page=path.join(dir,'index.html');
  const local=fs.readdirSync(dir).filter(f=>/\.(m?js)$/.test(f)).map(f=>[`./${f}`,hash(path.join(dir,f))]);
- const imports=Object.fromEntries([...shared,...local].map(([k,h])=>[k,`${k}?v=${h}`]));
+ // A lecture may import another lecture's module (Lecture 5 reuses Lecture 2's widgets.js): stamp those too.
+ const cross=[...new Set([...fs.readFileSync(path.join(dir,'content.js'),'utf8').matchAll(/'(\.\.\/lecture\d\/[\w.-]+\.m?js)'/g)].map(x=>x[1]))].map(k=>[k,hash(path.join(dir,k))]);
+ const imports=Object.fromEntries([...shared,...local,...cross].map(([k,h])=>[k,`${k}?v=${h}`]));
  let html=fs.readFileSync(page,'utf8');
  html=html.replace(/<script type="importmap">[\s\S]*?<\/script>/,'');
  html=html.replace(/href="\.\.\/shared\/deck\.css(\?v=[0-9a-f]+)?"/,`href="../shared/deck.css?v=${css}"`);

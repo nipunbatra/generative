@@ -1,4 +1,4 @@
-# Generative modelling: four complete lectures
+# Generative modelling: four lectures and a one-hour VAE route
 
 Slides lead; short, executed notebooks provide the experiments. The sequence follows the concrete distribution-fitting and debugging approach in PML 2023, with progressive visual reasoning inspired by the attention lectures.
 
@@ -22,7 +22,7 @@ Open <http://127.0.0.1:8767/>. Serve the files over HTTP: the modules load numer
 - Each lecture has editable `content.js`, figures, numerical data, a notebook, speaker notes, and two PDFs under `exports/`.
 - `completed.pdf` has one completed page per slide; `all-builds.pdf` includes every authored reveal. Both include labelled optional extensions at the end.
 
-The recommended main routes are 140, 145, 60 and 138 minutes; Lectures 1, 2 and 4 each fill two class sessions. These include student responses and demonstrations; they are not classroom-rehearsed timings. See [the teaching guide](TEACHING-GUIDE.md) for shorter routes and demonstration choices.
+The recommended main routes are 144, 145, 61 and 138 minutes; Lectures 1, 2 and 4 each fill two class sessions. Lecture 5 is a 60-minute alternative to Lecture 2’s Parts 4–6 (autoencoders and the VAE) for a class that has seen Lecture 1’s ELBO; it reuses Lecture 2’s trained networks, numbers and live figures. These include student responses and demonstrations; they are not classroom-rehearsed timings. See [the teaching guide](TEACHING-GUIDE.md) for shorter routes and demonstration choices.
 
 ## Run a notebook
 
@@ -52,6 +52,6 @@ Set `SERIES_URL` to use another server address. The QA and export scripts also a
 
 The shared palette, mathematical typesetting, diagram helpers and reveal engine are in `shared/`. Figures and numerical fixtures remain lecture-local. [Maths and diagrams](MATHS-AND-DIAGRAMS.md) specifies the conventions; [QA](QA.md) records what was actually checked. `asset-manifest.json` records file hashes. Reference material is attributed in slide footers, notes and lecture data provenance.
 
-The four-lecture series is hosted at <https://nipunbatra.github.io/generative/lectures/>. The hub links to every HTML lecture, reading view, notebook, speaker notes and both PDF editions. The earlier decks remain at their existing URLs.
+The series is hosted at <https://nipunbatra.github.io/generative/lectures/>. The hub links to every HTML lecture, reading view, notebook, speaker notes and both PDF editions. The earlier decks remain at their existing URLs.
 
-For notebook execution, clone <https://github.com/nipunbatra/generative> and keep the `lectures/` directory structure: Lectures 3 and 4 import their bundled helper code and load their bundled data/checkpoints; Lecture 2 loads its three trained networks from `lecture2/models/` (in Colab it downloads them and MNIST). Downloading only an `.ipynb` file is sufficient to inspect its saved outputs, but not to run those four notebooks.
+For notebook execution, clone <https://github.com/nipunbatra/generative> and keep the `lectures/` directory structure: Lectures 3 and 4 import their bundled helper code and load their bundled data/checkpoints; Lectures 2 and 5 load Lecture 2’s three trained networks from `lecture2/models/` (in Colab they download them and MNIST). Downloading only an `.ipynb` file is sufficient to inspect its saved outputs, but not to run those four notebooks.

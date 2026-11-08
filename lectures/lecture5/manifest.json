@@ -1,0 +1,423 @@
+{
+  "id": "lecture5",
+  "number": 5,
+  "title": "Autoencoders and the VAE in one hour",
+  "subtitle": "For a class that knows the ELBO: an autoencoder, why it cannot generate, and the VAE as Lecture 1’s objective with a code per image",
+  "minutes": 59,
+  "notebook": "lecture5-autoencoders-vae.ipynb",
+  "sections": [
+    {
+      "id": "map",
+      "title": "Lecture map",
+      "minutes": 1
+    },
+    {
+      "id": "start",
+      "title": "Part 1 · Where we start: the ELBO",
+      "minutes": 6
+    },
+    {
+      "id": "ae",
+      "title": "Part 2 · Autoencoders: squeeze, then rebuild",
+      "minutes": 16
+    },
+    {
+      "id": "gen",
+      "title": "Part 3 · Can an autoencoder generate?",
+      "minutes": 8
+    },
+    {
+      "id": "vae",
+      "title": "Part 4 · The VAE: Lecture 1’s ELBO, one image at a time",
+      "minutes": 29
+    },
+    {
+      "id": "optional",
+      "title": "Optional depth",
+      "minutes": 0
+    }
+  ],
+  "coreSlides": 43,
+  "optionalSlides": 11,
+  "slides": [
+    {
+      "id": "contents",
+      "title": "Lecture 5 at a glance: four parts, seventeen sections",
+      "section": "map",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "part-1",
+      "title": "Part 1 · Where we start: the ELBO",
+      "section": "start",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "recap-elbo",
+      "title": "From Lecture 1: one objective we can compute",
+      "section": "start",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "recap-tools",
+      "title": "Two tools from Lecture 1 we will use again",
+      "section": "start",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "realfake",
+      "title": "Real or generated? Six of these twelve digits are fake",
+      "section": "start",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "today",
+      "title": "Today: two networks, then Lecture 1’s objective",
+      "section": "start",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "part-2",
+      "title": "Part 2 · Autoencoders: squeeze, then rebuild",
+      "section": "ae",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "mnist",
+      "title": "MNIST: 70,000 handwritten digits, 28 × 28 pixels each",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-arch",
+      "title": "An autoencoder: encoder, short code, decoder",
+      "section": "ae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ae-code",
+      "title": "Two small networks in PyTorch",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-loss",
+      "title": "The loss: how far each rebuilt pixel is from the real one",
+      "section": "ae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "ae-untrained",
+      "title": "Before training: always look at what the network outputs",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-step",
+      "title": "One training step: forward, loss, backward, update",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-train",
+      "title": "Press play: reconstructions sharpen as it trains",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "code-size",
+      "title": "More numbers in the code, sharper rebuilds",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-scatter",
+      "title": "Where the codes land: 1,000 test digits at their 2 numbers",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "part-3",
+      "title": "Part 3 · Can an autoencoder generate?",
+      "section": "gen",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "gen-question",
+      "title": "Keep the decoder, feed it random numbers",
+      "section": "gen",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-random",
+      "title": "Random codes through three autoencoders",
+      "section": "gen",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "overlay",
+      "title": "Put the random codes on top of the real ones",
+      "section": "gen",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-grid",
+      "title": "Decode a whole grid of codes",
+      "section": "gen",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "wishes",
+      "title": "What we saw, and what we want instead",
+      "section": "gen",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "part-4",
+      "title": "Part 4 · The VAE: Lecture 1’s ELBO, one image at a time",
+      "section": "vae",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "vae-pgm",
+      "title": "A generative model with a hidden code",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-draw",
+      "title": "To draw an image, follow the arrows: first z, then x",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "sigma",
+      "title": "The likelihood, in numbers: a squared error",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-wall",
+      "title": "Which codes made our 3? Bayes’ rule, and Lecture 1’s wall",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "posterior3",
+      "title": "For our 3: which codes could have made it?",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "cast",
+      "title": "Same problem as Lecture 1, new names",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "vae-elbo",
+      "title": "Lecture 1’s ELBO, for one image",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "encoder-q",
+      "title": "The encoder is q: one network gives q for every image",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-arch",
+      "title": "The network: an encoder that outputs a cloud, then tool ①",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-loss",
+      "title": "The loss for one image is minus the ELBO",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-worked",
+      "title": "One step for our 3, with numbers",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-code",
+      "title": "The VAE in PyTorch: three changes to the autoencoder",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "vae-tug",
+      "title": "Two terms pull in opposite directions",
+      "section": "vae",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "vae-samples",
+      "title": "Now sample: z ~ N(0, I), then decode",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-scatter",
+      "title": "The codes now fill N(0, I)",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "vae-grid",
+      "title": "Decode a grid of codes: digits everywhere",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "beta-what",
+      "title": "Put a weight on the KL: β",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "beta",
+      "title": "Seven VAEs, β from 0 to 256: try them",
+      "section": "vae",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "summary",
+      "title": "Autoencoder and VAE, side by side",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "next",
+      "title": "Next: can we drop the pixel likelihood altogether?",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "opt-ae-test",
+      "title": "Did the autoencoder memorise? Training against test error",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-linear-ae",
+      "title": "Without the ReLUs and the sigmoid, an autoencoder rediscovers PCA",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-std-normal",
+      "title": "N(0, I) in two dimensions: two independent standard bells",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-explore-ae",
+      "title": "Choose a code yourself: the autoencoder",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "opt-ae-interp",
+      "title": "The autoencoder: walk in a straight line from a 1 to a 0",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "opt-clouds",
+      "title": "Another road to the same loss: points become clouds",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-q3",
+      "title": "Check the encoder: its q for our 3, against the true posterior",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-vae-curves",
+      "title": "While training: reconstruction falls, the KL settles",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "opt-explore-vae",
+      "title": "Choose a code yourself: the VAE against the autoencoder",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "opt-beta-zero",
+      "title": "β = 0: is it just an autoencoder?",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "opt-beta-collapse",
+      "title": "β = 256: every code decodes to the same blur",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    }
+  ],
+  "totalStates": 116
+}
