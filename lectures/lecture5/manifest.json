@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 80,
+  "minutes": 86,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -24,16 +24,21 @@
     {
       "id": "gen",
       "title": "Part 3 · Can an autoencoder generate?",
-      "minutes": 9
+      "minutes": 8
+    },
+    {
+      "id": "idea",
+      "title": "Part 4 · From an autoencoder to a VAE: three fixes",
+      "minutes": 12
     },
     {
       "id": "vae",
-      "title": "Part 4 · The VAE: Lecture 1’s ELBO, one image at a time",
-      "minutes": 35
+      "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
+      "minutes": 30
     },
     {
       "id": "end",
-      "title": "Part 5 · Putting it together",
+      "title": "Part 6 · Putting it together",
       "minutes": 6
     },
     {
@@ -42,12 +47,12 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 61,
-  "optionalSlides": 9,
+  "coreSlides": 66,
+  "optionalSlides": 7,
   "slides": [
     {
       "id": "contents",
-      "title": "Lecture 5 at a glance: five parts, twenty-one sections",
+      "title": "Lecture 5 at a glance: six parts, twenty-five sections",
       "section": "map",
       "builds": 1,
       "optional": false
@@ -271,7 +276,56 @@
     },
     {
       "id": "part-4",
-      "title": "Part 4 · The VAE: Lecture 1’s ELBO, one image at a time",
+      "title": "Part 4 · From an autoencoder to a VAE: three fixes",
+      "section": "idea",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "fix-prior",
+      "title": "Fix 1: choose where the codes live, before training",
+      "section": "idea",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "fix-cloud",
+      "title": "Fix 2: send each image to a small cloud of codes, not a point",
+      "section": "idea",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "fix-net",
+      "title": "How a network outputs a cloud: a mean, a spread and a random draw",
+      "section": "idea",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "fix-kl",
+      "title": "Fix 3: a penalty that pulls every cloud towards N(0, I)",
+      "section": "idea",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "fix-loss",
+      "title": "The three fixes give a loss",
+      "section": "idea",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "vae-tug",
+      "title": "Two terms pull in opposite directions",
+      "section": "idea",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "part-5",
+      "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
       "section": "vae",
       "builds": 1,
       "optional": false
@@ -281,13 +335,6 @@
       "title": "From Lecture 1: one objective we can compute",
       "section": "vae",
       "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "recap-tools",
-      "title": "Two tools from Lecture 1 we will use again",
-      "section": "vae",
-      "builds": 2,
       "optional": false
     },
     {
@@ -340,6 +387,13 @@
       "optional": false
     },
     {
+      "id": "elbo-read",
+      "title": "Read the ELBO term by term: it is Part 4’s three fixes",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "vi3",
       "title": "Lecture 1’s VI on one image: fit q for our 3, press play",
       "section": "vae",
@@ -348,21 +402,14 @@
     },
     {
       "id": "encoder-q",
-      "title": "The encoder is q: one network gives q for every image",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "vae-arch",
-      "title": "The network: an encoder that outputs a cloud, then tool ①",
+      "title": "The encoder’s cloud is q: one network gives q for every image",
       "section": "vae",
       "builds": 3,
       "optional": false
     },
     {
       "id": "vae-loss",
-      "title": "The loss for one image is minus the ELBO",
+      "title": "Minus the ELBO is Part 4’s loss, with its weight decided",
       "section": "vae",
       "builds": 3,
       "optional": false
@@ -379,13 +426,6 @@
       "title": "The VAE in PyTorch: three changes to the autoencoder",
       "section": "vae",
       "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "vae-tug",
-      "title": "Two terms pull in opposite directions",
-      "section": "vae",
-      "builds": 4,
       "optional": false
     },
     {
@@ -438,8 +478,8 @@
       "optional": false
     },
     {
-      "id": "part-5",
-      "title": "Part 5 · Putting it together",
+      "id": "part-6",
+      "title": "Part 6 · Putting it together",
       "section": "end",
       "builds": 1,
       "optional": false
@@ -487,24 +527,10 @@
       "optional": true
     },
     {
-      "id": "opt-std-normal",
-      "title": "N(0, I) in two dimensions: two independent standard bells",
-      "section": "optional",
-      "builds": 2,
-      "optional": true
-    },
-    {
       "id": "opt-ae-interp",
       "title": "The autoencoder: walk in a straight line from a 1 to a 0",
       "section": "optional",
       "builds": 1,
-      "optional": true
-    },
-    {
-      "id": "opt-clouds",
-      "title": "Another road to the same loss: points become clouds",
-      "section": "optional",
-      "builds": 2,
       "optional": true
     },
     {
@@ -536,5 +562,5 @@
       "optional": true
     }
   ],
-  "totalStates": 152
+  "totalStates": 161
 }

@@ -1,6 +1,6 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 80 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 86 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -9,17 +9,18 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 | Lecture map | 1 |
 | Part 1 · Why generate? | 14 |
 | Part 2 · Autoencoders: squeeze, then rebuild | 15 |
-| Part 3 · Can an autoencoder generate? | 9 |
-| Part 4 · The VAE: Lecture 1’s ELBO, one image at a time | 35 |
-| Part 5 · Putting it together | 6 |
+| Part 3 · Can an autoencoder generate? | 8 |
+| Part 4 · From an autoencoder to a VAE: three fixes | 12 |
+| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 30 |
+| Part 6 · Putting it together | 6 |
 
-## contents: Lecture 5 at a glance: five parts, twenty-one sections
+## contents: Lecture 5 at a glance: six parts, twenty-five sections
 
 **Build 1, ask:** Which part leans most on Lecture 1?
 
-**Expected:** Part 4: the VAE is Lecture 1’s ELBO with a code per image. Part 5 traces every term back to it.
+**Expected:** Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.
 
-**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech and science; in Part 2 skip ae-untrained, ae-step and code-size; in Part 3 skip ae-grid; in Part 4 skip vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
+**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech and science; in Part 2 skip ae-untrained, ae-step and code-size; in Part 3 skip ae-grid; keep all of Part 4; in Part 5 skip posterior3, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
 
 **Transition:** Part 1: why generate?
 
@@ -209,7 +210,7 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** The KL to N(0, I): Lecture 1’s KL to the prior. The squared error turns out to be the likelihood term.
 
-**Point here:** The loss on this slide drops a constant (784 log(σ√2π)); Sections 4.5 and 5.1 show where every term comes from.
+**Point here:** The loss on this slide drops a constant (784 log(σ√2π)); Sections 5.5 and 6.1 show where every term comes from.
 
 **Transition:** Part 2: autoencoders.
 
@@ -443,17 +444,131 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Build 3, ask:** Which tool from Lecture 1 will we need?
 
-**Expected:** Variational inference and the ELBO, with the two tools recalled in Section 4.1.
+**Expected:** Variational inference and the ELBO (Part 5), with its reparameterisation trick and Gaussian KL (Part 4).
 
-**Transition:** Part 4: the VAE.
+**Transition:** Part 4: three fixes, one at a time.
 
-## part-4: Part 4 · The VAE: Lecture 1’s ELBO, one image at a time
+## part-4: Part 4 · From an autoencoder to a VAE: three fixes
+
+**Build 1, ask:** Which problem from Part 3 would you fix first?
+
+**Expected:** Where the codes live: random codes from N(0, I) missed the real codes.
+
+**Transition:** Section 4.1.
+
+## fix-prior: Fix 1: choose where the codes live, before training
+
+**Build 1, ask:** Why not let the network choose the code distribution itself?
+
+**Expected:** Then we would not know how to sample from it: that was the autoencoder’s problem.
+
+**Build 2, ask:** Why N(0, I) and not, say, a uniform square?
+
+**Expected:** Any simple, known distribution would do. N(0, I) is smooth, has no edges, and its KL has a formula (Fix 3).
+
+**Build 3, ask:** What must training now achieve?
+
+**Expected:** The codes of real images must spread over N(0, I), with no large holes.
+
+**Point here:** In Part 5 this choice becomes the prior p(z), and it keeps the green colour of Lecture 1’s prior.
+
+**Transition:** Fix 2: fill the gaps.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## fix-cloud: Fix 2: send each image to a small cloud of codes, not a point
+
+**Build 1, ask:** Which parts of the code plane does an autoencoder’s decoder see in training?
+
+**Expected:** Only the exact codes of training images.
+
+**Build 2, ask:** What does the decoder learn when clouds overlap?
+
+**Expected:** To draw something sensible everywhere the clouds reach, including between images.
+
+**Point here:** A sketch, not data. Lecture 2, Section 6.2 calls Part 4 “Road 1” to the VAE.
+
+**Transition:** How a network outputs a cloud.
+
+## fix-net: How a network outputs a cloud: a mean, a spread and a random draw
+
+**Build 1, ask:** Why output log σ² instead of σ?
+
+**Expected:** Any real number is a valid log variance; σ = exp(½ log σ²) is then positive.
+
+**Build 2, ask:** Why reparameterise instead of sampling z directly?
+
+**Expected:** sample() blocks the gradient path from the loss to μ and σ.
+
+**Build 3, ask:** At test time, which code do we use to rebuild?
+
+**Expected:** Usually the mean μ.
+
+**Transition:** Fix 3: what stops the clouds drifting apart?
+
+## fix-kl: Fix 3: a penalty that pulls every cloud towards N(0, I)
+
+**Build 1, ask:** What would the encoder do without this penalty?
+
+**Expected:** Make clouds tiny and far apart: reconstruction is easiest that way.
+
+**Build 2, ask:** Why a KL and not just μ²?
+
+**Expected:** μ² would pull clouds to the centre but let σ shrink to 0. The KL stops both, and Part 5 shows it is exactly what Lecture 1’s ELBO asks for.
+
+**Build 3, ask:** Which term punishes a shrinking cloud?
+
+**Expected:** −log σ²: it grows without limit as σ → 0.
+
+**Transition:** Put the three fixes together.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## fix-loss: The three fixes give a loss
+
+**Build 1, ask:** Which term is the autoencoder’s loss?
+
+**Expected:** The first: squared error between the image and its rebuild.
+
+**Build 2, ask:** What would a weight of 0 on the KL give?
+
+**Expected:** An autoencoder with noisy codes; in practice the clouds shrink to points (Section 5.8, β = 0).
+
+**Build 3, ask:** What would a probability model add?
+
+**Expected:** A reason for the loss and its weights, and a score for images: a lower bound on log p(x).
+
+**Transition:** The two terms pull against each other.
+
+## vae-tug: Two terms pull in opposite directions
+
+**Build 1, ask:** What does the reconstruction term want the clouds to do?
+
+**Expected:** Shrink (less noise in z) and spread apart (no confusion between images).
+
+**Build 2, ask:** What does the KL term want?
+
+**Expected:** Move to the centre and widen to σ = 1.
+
+**Build 3, ask:** Where does the balance land?
+
+**Expected:** Clouds near the centre, small but not tiny, slightly overlapping.
+
+**Build 4, ask:** Why does sampling now work?
+
+**Expected:** The codes fill the region N(0, I) samples from, and the decoder was trained across it.
+
+**Point here:** A sketch, not data. Section 5.6 is the real version for our 3, and Section 5.8 shows β = 0 (panel one) and β = 256 (panel two).
+
+**Transition:** Part 5: why this loss is the right one.
+
+## part-5: Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time
 
 **Build 1, ask:** Which wall did Lecture 1 hit?
 
 **Expected:** The evidence p(𝒟): an integral with no formula, so the posterior was out of reach.
 
-**Transition:** Section 4.1.
+**Transition:** Section 5.1.
 
 ## recap-elbo: From Lecture 1: one objective we can compute
 
@@ -470,18 +585,6 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 **Expected:** ψ: the means and log-widths of q, one bell per weight of the tiny network.
 
 **Point here:** Colours follow Lecture 1’s Part 4: q purple, likelihood orange, prior green, evidence blue, the KL to the posterior red.
-
-**Transition:** Two tools we will need again.
-
-## recap-tools: Two tools from Lecture 1 we will use again
-
-**Build 1, ask:** Why not sample z directly?
-
-**Expected:** A sample() call cuts the gradient path from the loss back to μ and σ.
-
-**Build 2, ask:** What is the KL for μ = 2, σ = 1?
-
-**Expected:** ½(4 + 1 − 0 − 1) = 2 nats.
 
 **Transition:** A model with a hidden code.
 
@@ -599,6 +702,22 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Transition:** Who computes q for each image?
 
+## elbo-read: Read the ELBO term by term: it is Part 4’s three fixes
+
+**Build 1, ask:** Which fix does the average over q correspond to?
+
+**Expected:** Fix 2: drawing z from the image’s cloud, q_φ(z | x).
+
+**Build 2, ask:** Which term was the autoencoder’s whole loss?
+
+**Expected:** log p(x | z): the reconstruction, up to the 1/2σ² weight.
+
+**Build 3, ask:** Where did Fix 1 go?
+
+**Expected:** Into the prior p(z) = N(0, I), inside the KL.
+
+**Transition:** Fitting q for one image, as Lecture 1 did.
+
 ## vi3: Lecture 1’s VI on one image: fit q for our 3, press play
 
 **Build 1, ask:** What happens to the ELBO at first? Why?
@@ -615,7 +734,7 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## encoder-q: The encoder is q: one network gives q for every image
+## encoder-q: The encoder’s cloud is q: one network gives q for every image
 
 **Build 1, ask:** Which way does each arrow point?
 
@@ -631,25 +750,9 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Point here:** Kingma and Welling (2014), figure 1: solid = generative model p_θ, dashed = variational approximation q_φ.
 
-**Transition:** The network, with a cloud in the middle.
-
-## vae-arch: The network: an encoder that outputs a cloud, then tool ①
-
-**Build 1, ask:** Why output log σ² instead of σ?
-
-**Expected:** Any real number is a valid log variance; σ = exp(½ log σ²) is then positive.
-
-**Build 2, ask:** Why reparameterise instead of sampling z directly?
-
-**Expected:** sample() blocks the gradient path from the loss to μ and σ.
-
-**Build 3, ask:** At test time, which code do we use to rebuild?
-
-**Expected:** Usually the mean μ.
-
 **Transition:** Write the loss.
 
-## vae-loss: The loss for one image is minus the ELBO
+## vae-loss: Minus the ELBO is Part 4’s loss, with its weight decided
 
 **Build 1, ask:** Which term pulls the codes towards N(0, I)?
 
@@ -697,29 +800,7 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Expected:** None: only the model and the loss.
 
-**Transition:** Why does adding the KL make sampling work?
-
-## vae-tug: Two terms pull in opposite directions
-
-**Build 1, ask:** What does the reconstruction term want the clouds to do?
-
-**Expected:** Shrink (less noise in z) and spread apart (no confusion between images).
-
-**Build 2, ask:** What does the KL term want?
-
-**Expected:** Move to the centre and widen to σ = 1.
-
-**Build 3, ask:** Where does the balance land?
-
-**Expected:** Clouds near the centre, small but not tiny, slightly overlapping.
-
-**Build 4, ask:** Why does sampling now work?
-
-**Expected:** The codes fill the region N(0, I) samples from, and the decoder was trained across it.
-
-**Point here:** A sketch, not data. The next slide is the real version for our 3, and Section 4.8 shows β = 0 (panel one) and β = 256 (panel two).
-
-**Transition:** Now try it yourself, on the real model.
+**Transition:** Both terms on the real model, live.
 
 ## elbo-explorer: Your turn: choose q for our 3, and watch both terms
 
@@ -817,13 +898,13 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## part-5: Part 5 · Putting it together
+## part-6: Part 6 · Putting it together
 
 **Build 1, ask:** Which Lecture 1 ideas does the VAE’s loss use?
 
 **Expected:** The ELBO, the KL and its formula for Gaussians, and the reparameterisation trick.
 
-**Transition:** Section 5.1.
+**Transition:** Section 6.1.
 
 ## maths-chain: The whole lecture in five lines of maths
 
@@ -917,18 +998,6 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## opt-std-normal: N(0, I) in two dimensions: two independent standard bells (optional)
-
-**Build 1, ask:** What does the I in N(0, I) say?
-
-**Expected:** Unit variance and no correlation between the numbers.
-
-**Build 2, ask:** Where will almost all random codes land?
-
-**Expected:** Within about 2 or 3 of the origin.
-
-**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
-
 ## opt-ae-interp: The autoencoder: walk in a straight line from a 1 to a 0 (optional)
 
 **Build 1, ask:** Why might the 16-number path cross empty space?
@@ -936,18 +1005,6 @@ Planned main route: 80 minutes. Timing includes student responses and the specif
 **Expected:** The straight line between two codes need not stay where real codes are; in 16 dimensions most of the space between them is empty.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
-
-## opt-clouds: Another road to the same loss: points become clouds (optional)
-
-**Build 1, ask:** Which parts of the code plane does an autoencoder’s decoder see in training?
-
-**Expected:** Only the exact codes of training images.
-
-**Build 2, ask:** What does the decoder learn when clouds overlap?
-
-**Expected:** To draw something sensible everywhere the clouds reach, including between images.
-
-**Point here:** Lecture 2, Section 6.2 takes this road first (“Road 1”) and shows that the ELBO gives the same loss.
 
 ## opt-q3: Check the encoder: its q for our 3, against the true posterior (optional)
 

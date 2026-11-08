@@ -22,7 +22,7 @@ Open <http://127.0.0.1:8767/>. Serve the files over HTTP: the modules load numer
 - Each lecture has editable `content.js`, figures, numerical data, a notebook, speaker notes, and two PDFs under `exports/`.
 - `completed.pdf` has one completed page per slide; `all-builds.pdf` includes every authored reveal. Both include labelled optional extensions at the end.
 
-The recommended main routes are 144, 145, 61 and 138 minutes; Lectures 1, 2 and 4 each fill two class sessions. Lecture 5 (about 80 minutes, with a 60-minute cut in its README) condenses Lecture 2 for a class that has seen Lecture 1’s ELBO: the generation story, autoencoders and the VAE, ending with every term of the loss traced back to KL and the ELBO; it reuses Lecture 2’s trained networks, numbers and live figures. These include student responses and demonstrations; they are not classroom-rehearsed timings. See [the teaching guide](TEACHING-GUIDE.md) for shorter routes and demonstration choices.
+The recommended main routes are 144, 145, 61 and 138 minutes; Lectures 1, 2 and 4 each fill two class sessions. Lecture 5 (about 85 minutes, with a 60-minute cut in its README) condenses Lecture 2 for a class that has seen Lecture 1’s ELBO: the generation story, autoencoders, three fixes that turn an autoencoder into a VAE, why the resulting loss is Lecture 1’s ELBO, and every term traced back to KL and the ELBO; it reuses Lecture 2’s trained networks, numbers and live figures. These include student responses and demonstrations; they are not classroom-rehearsed timings. See [the teaching guide](TEACHING-GUIDE.md) for shorter routes and demonstration choices.
 
 ## Run a notebook
 
