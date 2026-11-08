@@ -1,5 +1,5 @@
 {
-  "created": "2026-11-08T07:43:53.253Z",
+  "created": "2026-11-08T08:07:50.516Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -24,18 +24,18 @@
     },
     {
       "path": "README.md",
-      "bytes": 4468,
-      "sha256": "967a3ecbccf8328a345abd8c6091e985187cb4227c102361c58c2d68632ee551"
+      "bytes": 4575,
+      "sha256": "98783ab4063de6ba823d19e50ba5679578a867a90ff8b3346cf771a032c28b02"
     },
     {
       "path": "TEACHING-GUIDE.md",
-      "bytes": 5580,
-      "sha256": "9364f2deb0bfee5d20c72ce1544d27325abf2c948492bd3642d72b4c6426def1"
+      "bytes": 5643,
+      "sha256": "c9af02dee04a9ab4b698af52d54077eac50d8f40138cb8f14d3d20f3219aefa0"
     },
     {
       "path": "index.html",
-      "bytes": 6121,
-      "sha256": "e26864ed8e71ceaab354c3790aabee18f2934ed7ea51907fc2b293d091a8d6d2"
+      "bytes": 6186,
+      "sha256": "9e064c29a9a61f6fa9484eab8f340a61f33b94fe851826035edf2963f72f92f6"
     },
     {
       "path": "lecture1/README.md",
@@ -1519,53 +1519,58 @@
     },
     {
       "path": "lecture5/README.md",
-      "bytes": 4333,
-      "sha256": "aa02ebbcc27a1e237764dbe467d6cb0af871858d5aafff8ec5013f9c29c7c29a"
+      "bytes": 5722,
+      "sha256": "eb6bf6b946ecddf89c4c9ec85da064a953161a7ac90568c92eb9b24921b18ad2"
     },
     {
       "path": "lecture5/content.js",
-      "bytes": 88831,
-      "sha256": "680caf8105227a501ca8df21b0069a99dfcc2125df6b112f42fe0bed0435fdbc"
+      "bytes": 115928,
+      "sha256": "22c231d8c3ccf55e09ca618f9e99c4fab07bca4c17cabbae734c84f66d18e593"
     },
     {
       "path": "lecture5/data/notebook-anchors.json",
-      "bytes": 271,
-      "sha256": "c89d0ad2576e9fe92a732be6231ea3f268c20f95c0b94e7ef039647717ade2cc"
+      "bytes": 330,
+      "sha256": "52b71354b9951094dc8be639bfeba769cda9b6c1ce88bcc680f26be0d32a2c88"
     },
     {
       "path": "lecture5/exports/all-builds.pdf",
-      "bytes": 6887771,
-      "sha256": "7b2a8fc53e56aaa3cb998151146ab5456288649b6e49a050f79304a8154dbc6d"
+      "bytes": 8715085,
+      "sha256": "63479bc0882868794260e0bf535a8690e2b60b6ad752788fbc26ee894be71417"
     },
     {
       "path": "lecture5/exports/completed.pdf",
-      "bytes": 4643148,
-      "sha256": "765a7bfe57c41b60b750398abe207377cef270721377fb6919b617741857790b"
+      "bytes": 5914250,
+      "sha256": "da1f659854df2e64063cebe91ad61f4495675eff26fe307aaf408c469b5ecf60"
     },
     {
       "path": "lecture5/index.html",
-      "bytes": 1678,
-      "sha256": "44635540d465d0ea9e1019a0842921646a567370f0d8166b6f08656a4008ab40"
+      "bytes": 1721,
+      "sha256": "1d3c8cfd0e8764d6ce1ba83f48dd840b8fe62d723537a21e65078c922a50878f"
     },
     {
       "path": "lecture5/lecture5-autoencoders-vae.ipynb",
-      "bytes": 647853,
-      "sha256": "0c3509ae9d29774a512a563d285e223d22438da651d9f5e95feb095c6b2cc8ce"
+      "bytes": 680247,
+      "sha256": "d5b60c4ac0dcd3f821d438973a0d77479f4acfe520b751c76a3c09b4ba3023f3"
     },
     {
       "path": "lecture5/manifest.json",
-      "bytes": 10208,
-      "sha256": "df32628235e6858202f260ab30ec8b0ed9fa17b4c694fb78f2ae1bdfb635128c"
+      "bytes": 12955,
+      "sha256": "addeea945f18c5fb5e56a5480404fa6c863b1e9250de16547ab682b14f0560de"
     },
     {
       "path": "lecture5/scripts/build_notebook.py",
-      "bytes": 21260,
-      "sha256": "46dc5bbce8fca2b8871d496719e2e4a3160ff3e43df8378e6859b4cf5c1ef0b6"
+      "bytes": 26422,
+      "sha256": "0e8a446afbaf9125a8c6e275fc738cafb40ac04b960b4783c731ef254039daf5"
     },
     {
       "path": "lecture5/speaker-notes.md",
-      "bytes": 28971,
-      "sha256": "072ca57c324f6a02ab5536790d4d6f3569b0fa25f2438a92a884255691e41464"
+      "bytes": 38597,
+      "sha256": "b90cbf196d5cb9c273b8efe91a5e1e7888a0fb69adac9fbfb7839fdfbb1a7b92"
+    },
+    {
+      "path": "lecture5/widgets.js",
+      "bytes": 8651,
+      "sha256": "a36373ddb1ffdfd9b643421cb7ba7618815e41994c23538cdc700de562874462"
     },
     {
       "path": "notebook-verification.json",
@@ -1624,8 +1629,8 @@
     },
     {
       "path": "scripts/package.mjs",
-      "bytes": 5223,
-      "sha256": "63674b66dc0eb27fe669a52af91a9223afac3054a669fd253c883d242d9dfa85"
+      "bytes": 5229,
+      "sha256": "3ae6647797ec792b872f6c9629cc90c00c4216b837ef1203f054ec30543d5ad8"
     },
     {
       "path": "scripts/pdf_qa.py",
@@ -1635,7 +1640,7 @@
     {
       "path": "scripts/quality-report.mjs",
       "bytes": 7029,
-      "sha256": "18f00adafce0cf013229d1392667566e7cb633b4f569671e21270a4bcf47ec16"
+      "sha256": "9ce06b0c782e036fa32e491d983655787e76de65b82d0cd9de32c36e59697428"
     },
     {
       "path": "scripts/scaffold.mjs",

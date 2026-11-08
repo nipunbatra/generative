@@ -1,15 +1,17 @@
-// Lecture 5: autoencoders and the VAE in one hour, for a class that already knows the ELBO (Lecture 1).
+// Lecture 5: why generate, autoencoders and the VAE, for a class that already knows the ELBO (Lecture 1).
 // A condensed route through Lecture 2's Parts 4–6. It reuses Lecture 2's trained networks, numbers, images
 // and live figures (lecture2/data, lecture2/widgets.js), so every number here is one Lecture 2 computed.
 import {m,eq,at,cols,code,table,palette} from '../shared/author.js';
-import {init,mount as mountWidgets,panel,label,fig,widget,num,comma,digits,digit,digitSrc,imgs,scatterSVG,posteriorSVG,squareW,CLASS,MUTED,LINE} from '../lecture2/widgets.js';
+import {init,mount as mountWidgets,panel,label,fig,widget,num,comma,lin,digits,digit,digitSrc,rawDigit,imgs,scatterSVG,posteriorSVG,squareW,CLASS,MUTED,LINE} from '../lecture2/widgets.js';
+import {init as init5,mount as mount5,widget5} from './widgets.js';
 
 const get=(f,base=import.meta.url)=>fetch(new URL(f,base),{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(`${f}: ${r.status}`);return r.json();});
 const L2=new URL('../lecture2/',import.meta.url);
-const [d,DG,NETS]=await Promise.all([get('data/science.json',L2),get('data/digits.json',L2),get('data/nets.json',L2)]);
+const [d,DG,NETS,NW,WAVE]=await Promise.all([get('data/science.json',L2),get('data/digits.json',L2),get('data/nets.json',L2),get('assets/examples/next-word.json',L2),get('assets/examples/tts-wave.json',L2)]);
+const LLM=await Promise.all([1,2,3].map(i=>fetch(new URL(`assets/examples/llm-sample-${i}.txt`,L2)).then(r=>r.text())));
 const ANCHORS=new Set(await get('./data/notebook-anchors.json').catch(()=>[]));
-init(d,DG,NETS);
-export const mount=(stage,ctx)=>mountWidgets(stage,ctx);
+init(d,DG,NETS);init5(d,NETS);
+export const mount=(stage,ctx)=>{mountWidgets(stage,ctx);mount5(stage,ctx);};
 
 // ---------------------------------------------------------------- lecture-local styles (the digit grids and cards of Lecture 2)
 const CSS=`
@@ -34,7 +36,15 @@ const CSS=`
 .mini{font-size:20px;line-height:1.35}
 .dflex{display:flex;gap:22px;align-items:center}
 .mh .diagram,.mh .plot{max-height:var(--mh)}
-@media(max-width:760px){.reading .dgrid,.reading .digit-rows>div,.reading .pix-table{overflow-x:auto;max-width:100%}.reading .cards{grid-template-columns:1fr!important}.reading .dflex{flex-wrap:wrap}.reading .dflex>*{min-width:0;max-width:100%}.reading .digit-rows{grid-template-columns:1fr}.reading .pix-table{display:block}}
+.mchain{display:grid;grid-template-columns:auto auto 1fr auto;gap:22px 20px;align-items:center;font-size:24px}.mchain>div{min-width:0}.mchain .math{font-size:1.12em;white-space:nowrap}.mc-h{font-size:17px;font-weight:650;color:${MUTED};border-bottom:1.5px solid ${LINE};padding-bottom:4px}.mc-n{font-weight:700}.mc-w{color:${MUTED}}.mc-s{font-size:18px;color:${palette.q};font-weight:600;white-space:nowrap}
+@media(max-width:760px){.reading .mchain{grid-template-columns:auto 1fr;overflow-x:auto}.reading .mchain .mc-h:nth-child(-n+2){display:none}}
+.card .src{font-size:14px;color:${MUTED}}
+.prompt-box{font-size:21px;line-height:1.4;border-left:4px solid ${palette.q};background:#8B2CDE0D;padding:10px 16px;border-radius:6px}
+.sample-text{font-size:20px;line-height:1.42;border:1px solid ${LINE};border-radius:10px;padding:10px 14px;background:#fff}.sample-text b{color:${palette.q}}
+.photo{border-radius:8px;display:block;width:100%;height:auto}
+.photo-row{display:grid;gap:14px;align-items:end}.photo-row figure{margin:0;display:flex;flex-direction:column;gap:6px}.photo-row figcaption{font-size:17px;color:${MUTED};line-height:1.25}
+.audio-row{display:flex;align-items:center;gap:18px}.audio-row audio{height:38px}
+@media(max-width:760px){.reading .photo-row{grid-template-columns:repeat(2,minmax(0,1fr))!important}.reading .dgrid,.reading .digit-rows>div,.reading .pix-table{overflow-x:auto;max-width:100%}.reading .cards{grid-template-columns:1fr!important}.reading .dflex{flex-wrap:wrap}.reading .dflex>*{min-width:0;max-width:100%}.reading .digit-rows{grid-template-columns:1fr}.reading .pix-table{display:block}}
 `;
 if(!document.getElementById('lecture5-style')){const st=document.createElement('style');st.id='lecture5-style';st.textContent=CSS;document.head.append(st);}
 
@@ -49,7 +59,10 @@ const grid=(n,...a)=>`<div class="cards" style="grid-template-columns:repeat(${n
 const bigGrid=(n,...a)=>`<div class="cards big" style="grid-template-columns:repeat(${n},minmax(0,1fr))">${a.join('')}</div>`;
 /** A card holding display maths, a line of text and a link. */
 const tool=(title,maths,text,link,color)=>`<div class="card" style="border-color:${color}66"><h4 style="color:${color}">${title}</h4>${maths}<p>${text}</p><div>${link}</div></div>`;
-const card=(title,body,color=palette.ink)=>`<div class="card" style="border-color:${color}66"><h4 style="color:${color}">${title}</h4><p>${body}</p></div>`;
+const card=(title,body,color=palette.ink,src='')=>`<div class="card" style="border-color:${color}66"><h4 style="color:${color}">${title}</h4><p>${body}</p>${src?`<span class="src">${src}</span>`:''}</div>`;
+/** A file in Lecture 2's folder (its gallery and generated examples). */
+const L2A=f=>`../lecture2/${f}`;
+const photo=(src,caption='')=>`<figure><img class="photo" src="${L2A(src)}" alt="${caption.replace(/<[^>]+>/g,'')}">${caption?`<figcaption>${caption}</figcaption>`:''}</figure>`;
 const takeaway=s=>`<div class="takeaway"><b>Takeaway.</b> ${s}</div>`;
 const maxH=(h,html)=>`<div class="mh" style="--mh:${h}px">${html}</div>`;
 /** A link back to the Lecture 1 slide where an idea was taught. */
@@ -66,27 +79,29 @@ const OURS='Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py
 
 // ---------------------------------------------------------------- sections and the slide builder
 export const meta={
- id:'lecture5',number:5,title:'Autoencoders and the VAE in one hour',
- subtitle:'For a class that knows the ELBO: an autoencoder, why it cannot generate, and the VAE as Lecture 1’s objective with a code per image',minutes:60,
+ id:'lecture5',number:5,title:'Autoencoders and the VAE, from the ELBO',
+ subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:80,
  notebook:'lecture5-autoencoders-vae.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
-  {id:'start',title:'Part 1 · Where we start: the ELBO',minutes:6},
-  {id:'ae',title:'Part 2 · Autoencoders: squeeze, then rebuild',minutes:16},
-  {id:'gen',title:'Part 3 · Can an autoencoder generate?',minutes:8},
-  {id:'vae',title:'Part 4 · The VAE: Lecture 1’s ELBO, one image at a time',minutes:29},
+  {id:'why',title:'Part 1 · Why generate?',minutes:14},
+  {id:'ae',title:'Part 2 · Autoencoders: squeeze, then rebuild',minutes:15},
+  {id:'gen',title:'Part 3 · Can an autoencoder generate?',minutes:9},
+  {id:'vae',title:'Part 4 · The VAE: Lecture 1’s ELBO, one image at a time',minutes:35},
+  {id:'end',title:'Part 5 · Putting it together',minutes:6},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
 };
 export const slides=[];
-/** Numbered sections. The notebook uses the same numbers, with anchors sec-1-1 … sec-4-8. */
+/** Numbered sections. The notebook uses the same numbers, with anchors sec-1-1 … sec-5-2. */
 const CHAPTERS=[
- ['1.1','What Lecture 1 gave us'],['1.2','Today’s question'],
+ ['1.1','Things that do not exist'],['1.2','Text, pictures and sound'],['1.3','What generative models are for'],['1.4','What they all share'],
  ['2.1','An image is 784 numbers'],['2.2','Encoder, code, decoder'],['2.3','The loss, and training'],['2.4','What the code holds'],
  ['3.1','Decode random codes'],['3.2','Where the codes are'],['3.3','What we want instead'],
- ['4.1','A model with a hidden code'],['4.2','The same wall as Lecture 1'],['4.3','The ELBO for one image'],['4.4','The loss, term by term'],['4.5','Two terms pull against each other'],['4.6','What the VAE learned'],['4.7','The KL weight β'],['4.8','Wrap-up'],
+ ['4.1','What Lecture 1 gave us'],['4.2','A model with a hidden code'],['4.3','The same wall as Lecture 1'],['4.4','The ELBO for one image'],['4.5','The loss, term by term'],['4.6','Two terms pull against each other'],['4.7','What the VAE learned'],['4.8','The KL weight β'],
+ ['5.1','The whole hour in maths'],['5.2','Wrap-up'],
 ];
-const PARTS=[['1','Where we start: the ELBO'],['2','Autoencoders: squeeze, then rebuild'],['3','Can an autoencoder generate?'],['4','The VAE: Lecture 1’s ELBO, one image at a time']];
+const PARTS=[['1','Why generate?'],['2','Autoencoders: squeeze, then rebuild'],['3','Can an autoencoder generate?'],['4','The VAE: Lecture 1’s ELBO, one image at a time'],['5','Putting it together']];
 const COLAB='https://colab.research.google.com/github/nipunbatra/generative/blob/main/lectures/lecture5/lecture5-autoencoders-vae.ipynb';
 const secAnchor=k=>`sec-${k.replaceAll('.','-')}`;
 let chapter=null;const firstOf={};
@@ -110,8 +125,8 @@ function S(id,section,title,o){
 }
 /** An optional slide: off the main route, shown in the reading view and the PDF. */
 const O=(id,title,o)=>S(id,'optional',title,{nb:'optional',...o,optional:true});
-const ACTS=['Where we start','Autoencoders','Can it generate?','The VAE'];
-const acts=k=>`<div class="act-strip" role="img" aria-label="Lecture map: part ${k} of 4">${ACTS.map((a,i)=>`<span class="${i+1<k?'done':i+1===k?'now':''}">${i+1} · ${a}</span>`).join('')}</div>`;
+const ACTS=['Why generate?','Autoencoders','Can it generate?','The VAE','Putting it together'];
+const acts=k=>`<div class="act-strip" role="img" aria-label="Lecture map: part ${k} of 5">${ACTS.map((a,i)=>`<span class="${i+1<k?'done':i+1===k?'now':''}">${i+1} · ${a}</span>`).join('')}</div>`;
 const act=(k,...a)=>`${acts(k)}<div class="act-body">${a.join('')}</div>`;
 const partOpeners=[];
 /** A full opening slide for a part: its question, a diagram, and its sections. The section list is filled in at the end. */
@@ -189,7 +204,7 @@ function inferPgm(stage){
   `<circle cx="450" cy="120" r="46" fill="#D9DEE5" stroke="${palette.data}" stroke-width="3"/>`+label(450,130,'x',{fill:palette.data,size:30,anchor:'middle',weight:650})+
   `<line x1="216" y1="104" x2="394" y2="104" stroke="${palette.ink}" stroke-width="2.5"/><path d="M404,104 l-14,-7 v14 z" fill="${palette.ink}"/>`+label(310,90,`${sub('p','θ')}(x | z): decoder`,{fill:palette.noise,size:17,anchor:'middle'});
  if(stage>=2)g+=`<path d="M404,140 Q310,190 222,142" fill="none" stroke="${palette.q}" stroke-width="2.5" stroke-dasharray="8 6"/><path d="M216,138 l14,0 l-6,12 z" fill="${palette.q}"/>`+label(310,206,`${sub('q','φ')}(z | x): encoder`,{fill:palette.q,size:18,anchor:'middle',weight:650});
- g+=label(630,46,'the posterior p(z | x): which codes made this x?',{fill:palette.p,size:19,weight:650})+label(630,74,'it needs p(x), the integral of Section 4.2',{size:17});
+ g+=label(630,46,'the posterior p(z | x): which codes made this x?',{fill:palette.p,size:19,weight:650})+label(630,74,'it needs p(x), the integral of Section 4.3',{size:17});
  if(stage>=2)g+=label(630,124,'approximate it, as in Lecture 1, with',{fill:palette.q,size:19,weight:650})+label(630,152,`${sub('q','φ')}(z | x) = N(${sub('μ','φ')}(x), ${sub('σ','φ')}(x)²), a Gaussian whose`,{fill:palette.q,size:17})+label(630,176,'mean and spread the encoder computes from x',{fill:palette.q,size:17});
  if(stage>=3)g+=label(630,226,'train θ and φ together: maximise the ELBO',{fill:palette.ink,size:19,weight:650})+label(630,252,'summed over the 60,000 images',{size:17});
  return fig(W,H,g,'The VAE graphical model with the dashed inference arrow: the encoder q_φ(z | x) approximates the posterior.');
@@ -265,49 +280,153 @@ function lineChart({series,W=640,H=340,xMin,xMax,yMin,yMax,ticksX,ticksY,xLabel,
 const AE_LIM=(()=>{const c=A.ae2_codes,xs=c.map(v=>v[0]),ys=c.map(v=>v[1]),pad=(a,b)=>[Math.floor(a-1.5),Math.ceil(b+1.5)];return [...pad(Math.min(...xs),Math.max(...xs)),...pad(Math.min(...ys),Math.max(...ys))];})();
 const wideMark=()=>{const W_=posteriorSVG({S:400,prior:true}),P_=W_.P,cx=P_.x(V.grid.post_mean[0]),cy=P_.y(V.grid.post_mean[1]);return W_.s+`<circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="${palette.loss}" stroke-width="2.5"/>`+label(cx,cy+40,'the posterior: a tiny patch',{fill:palette.loss,size:17,weight:600,anchor:'middle'});};
 const RF=V.realfake_is_fake,rfMarks=RF.map(x=>x?palette.loss:palette.p);
+/** Randomness in, a learned network, a sample out; optionally a condition (Lecture 2). */
+function recipeDiagram(stage=1){
+ const W=1100,H=stage>=2?300:230;let s='';
+ const box=(x,y,w,h,t,s_,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${palette.paper}" stroke="${c}" stroke-width="2.5"/>`+label(x+w/2,y+h/2+(s_?-4:9),t,{fill:c,size:26,anchor:'middle',weight:600})+(s_?label(x+w/2,y+h/2+24,s_,{size:19,anchor:'middle'}):'');
+ const arrow=(x1,y1,x2,y2,c=palette.ink)=>`<line x1="${x1}" y1="${y1}" x2="${x2-8}" y2="${y2}" stroke="${c}" stroke-width="2.5"/><path d="M${x2},${y2} l-12,-7 v14 z" fill="${c}"/>`;
+ s+=box(20,60,250,100,'random numbers','z ~ N(0, I)',palette.noise)+arrow(270,110,400,110)+box(400,50,300,120,'a learned network','weights θ, fitted to data',palette.p)+arrow(700,110,830,110)+box(830,60,250,100,'a sample x','text, image, sound…',palette.data);
+ if(stage>=2)s+=box(400,214,300,72,'a condition c','prompt, label, sketch…',palette.q)+arrow(550,214,550,176,palette.q);
+ return fig(W,H,s,'Random numbers go into a learned network, which outputs a sample; optionally a condition steers it.');
+}
+/** A language model's probabilities for the next word (Lecture 2's SmolLM2 numbers). */
+function nextWordChart(){
+ const top=NW.top,W=1000,H=360,maxP=.2,x0=230,w=640;let s=label(0,26,`“${NW.prefix} …”`,{fill:palette.ink,size:22,weight:600});
+ top.forEach(([t,pr],i)=>{const y=52+i*34;s+=label(x0-14,y+22,t.trim(),{fill:palette.ink,size:21,anchor:'end'})+`<rect x="${x0}" y="${y+4}" width="${(pr/maxP*w).toFixed(1)}" height="24" fill="${palette.q}" fill-opacity="${i===0?.85:.45}"/>`+label(x0+pr/maxP*w+10,y+23,`${f(100*pr,1)}%`,{size:19});});
+ s+=label(x0,52+top.length*34+24,`every other word in the vocabulary: ${f(100*NW.rest,0)}% in total`,{size:19});
+ return fig(W,H,s,'Probabilities of the next word after a prompt, from a small language model.');
+}
+/** The waveform of a generated sentence of speech. */
+function waveFig(){
+ const W=1100,H=230,P=panel({W,H,L:20,R:14,T:20,B:46,xMin:0,xMax:WAVE.seconds,yMin:-1,yMax:1,ticksX:[0,2,4,6],yAxis:false,xLabel:'seconds',fs:18});
+ const n=WAVE.max.length,xs=lin(0,WAVE.seconds,n);
+ const pts=xs.map((x,i)=>`${P.x(x).toFixed(1)},${P.y(WAVE.max[i]).toFixed(1)}`).join(' ')+' '+xs.map((x,i)=>`${P.x(xs[n-1-i]).toFixed(1)},${P.y(WAVE.min[n-1-i]).toFixed(1)}`).join(' ');
+ return fig(W,H,P.axes+`<polygon points="${pts}" fill="${palette.p}" fill-opacity=".55"/>`,'The waveform of a generated sentence of speech.');
+}
+const threes=M.display_labels.map((l,i)=>l===3?i:-1).filter(i=>i>=0);
+const mean3=(()=>{const s_=imgs('display'),out=new Float32Array(784);for(const i of threes)for(let k=0;k<784;k++)out[k]+=s_.px[i*784+k]/255/threes.length;return out;})();
+/** The VAE's loss with every term traced to where it came from. */
+function lossMap(){
+ const W=1150,H=420,A=[40,520],B=[630,500],y0=58;
+ const chip=(x,y,w,t,src,c)=>`<rect x="${x}" y="${y}" width="${w}" height="40" rx="8" fill="${palette.paper}" stroke="${c}" stroke-width="1.8"/>`+label(x+14,y+27,t,{fill:palette.ink,size:18})+label(x+w-12,y+27,src,{fill:c,size:16,anchor:'end',weight:650});
+ const branch=(x,ys,c)=>`<line x1="${x}" y1="${y0+70}" x2="${x}" y2="${ys.at(-1)+20}" stroke="${c}" stroke-width="2"/>`+ys.map(y=>`<line x1="${x}" y1="${y+20}" x2="${x+20}" y2="${y+20}" stroke="${c}" stroke-width="2"/>`).join('');
+ let s=label(A[0],y0-18,'reconstruction',{fill:palette.noise,size:19,weight:650})+`<rect x="${A[0]}" y="${y0}" width="${A[1]}" height="70" rx="10" fill="${palette.noise}10" stroke="${palette.noise}" stroke-width="2.5"/>`+label(A[0]+A[1]/2,y0+45,'‖x − f(μ + σ ⊙ ε)‖² / 2σ²',{fill:palette.noise,size:27,anchor:'middle',weight:600})+
+  label(A[0]+A[1]+35,y0+46,'+',{fill:palette.ink,size:34,anchor:'middle'})+
+  label(B[0],y0-18,'KL(q(z | x) ‖ N(0, I))',{fill:palette.q,size:19,weight:650})+`<rect x="${B[0]}" y="${y0}" width="${B[1]}" height="70" rx="10" fill="${palette.q}10" stroke="${palette.q}" stroke-width="2.5"/>`+label(B[0]+B[1]/2,y0+45,'½ Σ (μ² + σ² − log σ² − 1)',{fill:palette.q,size:27,anchor:'middle',weight:600});
+ const ys=[150,200,250];
+ s+=`<g data-at="2">${branch(A[0]+16,ys,palette.noise)+chip(A[0]+36,ys[0],A[1]-36,'Gaussian pixels: it is −log p(x | z) + const','4.2',palette.noise)+chip(A[0]+36,ys[1],A[1]-36,'the autoencoder’s squared error, rescaled','2.3',palette.noise)+chip(A[0]+36,ys[2],A[1]-36,'z = μ + σ ⊙ ε: tool ①','Lecture 1, 3.5',palette.noise)}</g>`;
+ s+=`<g data-at="3">${branch(B[0]+16,ys,palette.q)+chip(B[0]+36,ys[0],B[1]-36,'the formula is tool ②','Lecture 1, 2.6',palette.q)+chip(B[0]+36,ys[1],B[1]-36,'from q to the prior p(z) = N(0, I)','4.2',palette.q)+chip(B[0]+36,ys[2],B[1]-36,'a KL: extra cost, never negative','Lecture 1, 2.4',palette.q)}</g>`;
+ s+=`<g data-at="4"><rect x="${A[0]}" y="318" width="${B[0]+B[1]-A[0]}" height="76" rx="12" fill="${palette.data}0F" stroke="${palette.data}" stroke-width="2.5"/>`+
+  label((A[0]+B[0]+B[1])/2,348,'together: −ELBO(x) + const, Lecture 1’s objective for one image (4.4)',{fill:palette.ink,size:21,anchor:'middle',weight:650})+
+  label((A[0]+B[0]+B[1])/2,378,'a smaller loss means a higher lower bound on log p(x), and q closer to the posterior',{size:19,anchor:'middle'})+`</g>`;
+ return fig(W,H,s,'The VAE loss: a reconstruction term and a KL term, each traced to the slide or Lecture 1 section it came from, and together minus the ELBO.');
+}
 
-// ================================================================= Part 1 · Where we start: the ELBO
-partOpener(1,'start','Lecture 1 ended with one objective we can compute: the ELBO. Today it trains two networks that squeeze, rebuild and invent handwritten digits.',
- 'What did Lecture 1 maximise, and why did that help?','The ELBO. log p(𝒟) is fixed, so raising the ELBO lowers the KL from q to the posterior.');
+// ================================================================= Part 1 · Why generate?
+partOpener(1,'why','Generative models make new text, pictures and sound. A quick tour, what they are good for, and the one recipe they all share.',
+ 'What do a chatbot, an image generator and a weather model have in common?','Each turns random numbers into a new sample, through a network fitted to data.');
 chap('1.1');
-S('recap-elbo','start','From Lecture 1: one objective we can compute',{builds:3,
- body:stack(eq(R`\dcol{\log p(\mathcal D)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}`),
-  small('log p(𝒟) is one fixed number. Whatever the ELBO gains, the KL to the posterior loses.'),
-  at(2,eq(R`\qcol{\ELBO(q)}=\underbrace{\E_{\theta\sim q}\big[\ncol{\log p(\mathcal D\mid\theta)}\big]}_{\text{fit the data}}-\underbrace{\KL\big(\qcol{q(\theta)}\,\|\,${PRI(R`p(\theta)`)}\big)}_{\text{stay near the prior}}`)),
-  at(3,eq(R`\text{train:}\quad\psi^*=\arg\max_\psi\ \qcol{\ELBO(q_\psi)}\qquad\text{loss}=-\qcol{\ELBO}`)),
-  at(3,`<div>${l1('elbo-goal','4.1','the objective')}${l1('elbo-two-terms','4.1','the ELBO in two terms')}</div>`)),
- lines:['Lecture 1’s budget: the fixed log evidence splits into the ELBO, which we can compute, and the KL to the posterior, which we cannot.',
-  'The ELBO in two terms: an average log-likelihood, to fit the data, minus a KL from q to the prior, to stay near it.',
-  'The objective: tune q’s knobs ψ to maximise the ELBO, by gradient descent on minus the ELBO. Today reuses this line unchanged.'],
- ask:['Which part of log p(𝒟) could we compute?','What does each ELBO term ask of q?','What did gradient descent change in Lecture 1?'],
- expected:['The ELBO. The KL to the posterior needs p(𝒟), which we cannot compute.','The first: put q on θ values that explain the data. The second: do not stray far from the prior.','ψ: the means and log-widths of q, one bell per weight of the tiny network.'],
- point:'Colours follow Lecture 1’s Part 4: q purple, likelihood orange, prior green, evidence blue, the KL to the posterior red.',
- transition:'Two tools we will need again.'});
-S('recap-tools','start','Two tools from Lecture 1 we will use again',{builds:2,
- body:bigGrid(2,tool('① A random draw that gradients pass through',eq(R`z=\mu+\sigma\odot\epsilon,\qquad\epsilon\sim\N(0,I)`),'The randomness sits in ε, so the gradient reaches μ and σ.',l1('reparam','3.5','reparameterisation'),palette.noise),
-  at(2,tool('② The KL from a Gaussian to N(0, 1), by formula',eq(R`\begin{aligned}&\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,1)\big)\\&\quad=\tfrac12\big(\mu^2+\sigma^2-\log\sigma^2-1\big)\end{aligned}`),'Zero only at μ = 0, σ = 1. With several code numbers, add one such term per number.',l1('diag-kl','2.6','diagonal Gaussians'),palette.q))),
- lines:['Tool one, the reparameterisation trick: draw ε from N(0, I), then shift and scale it. Gradients flow back to μ and σ.','Tool two: the KL from a Gaussian to N(0, 1) has a formula, zero exactly when μ = 0 and σ = 1.'],
- ask:['Why not sample z directly?','What is the KL for μ = 2, σ = 1?'],
- expected:['A sample() call cuts the gradient path from the loss back to μ and σ.','½(4 + 1 − 0 − 1) = 2 nats.'],
- transition:'What we are building towards.'});
-chap('1.2');
-S('realfake','start','Real or generated? Six of these twelve digits are fake',{builds:2,
+S('faces','why','Who are these people?',{builds:2,
+ body:stack(`<figure class="evidence"><img src="${L2A('assets/gallery/stylegan-faces.jpg')}" alt="A grid of photographs of faces" style="max-height:330px"></figure>`,at(2,p('None of them exist. A network turned random numbers into each face.'))),
+ lines:['Look closely: ages, hair, glasses, backgrounds. Who are these people?','Nobody. Each face is a sample from a generative model (StyleGAN, 2019): random numbers in, a face out.'],
+ ask:['Who are these people? Would you have known?','What did the network need, to make these?'],
+ expected:['Students guess celebrities or stock photos. None exist.','Many real photographs to learn from, and a way to turn random numbers into new ones. That is today’s subject.'],
+ transition:'A smaller test, on the digits we will use all lecture.',
+ source:'Faces generated by StyleGAN: Karras, Laine and Aila, “A Style-Based Generator Architecture for GANs”, CVPR 2019. NVIDIA, CC BY-NC 4.0.'});
+S('realfake','why','Real or generated? Six of these twelve digits are fake',{builds:2,
  body:cols(`<div class="state-slot"><div data-only="1">${digits('realfake',{cols:6,size:104,gap:14})}</div><div data-only="2">${digits('realfake',{cols:6,size:104,gap:14,marks:rfMarks,labels:RF.map(x=>x?'<span class="tag fake">generated</span>':'<span class="tag real">real</span>')})}</div></div>`,
-  stack(p('Six are handwritten MNIST test digits. Six come from a network.'),at(2,p(`The fakes: numbers ${RF.map((x,i)=>x?i+1:null).filter(Boolean).join(', ')}, counting left to right, top to bottom.`)),at(2,small('By the end of the hour you will know how the network that made them was trained: a VAE with 16 numbers per code.'))),'1.55fr 1fr'),
+  stack(p('Six are handwritten MNIST test digits. Six come from a network.'),at(2,p(`The fakes: numbers ${RF.map((x,i)=>x?i+1:null).filter(Boolean).join(', ')}, counting left to right, top to bottom.`)),at(2,small('By the end of today you will know how the network that made them was trained: a VAE with 16 numbers per code.'))),'1.55fr 1fr'),
  lines:['Six are real, six are generated. Write down which six you think are fake.','The six outlined in red are generated. Some give themselves away with broken strokes; some fool most people.'],
  ask:['Which six are fake? Write the positions.','Which fakes gave themselves away, and how?'],
  expected:['Answers vary; take a quick show of hands for two or three digits.','Broken or doubled strokes and blurry edges give some away; the cleanest fakes are hard to tell.'],
  point:'Real digits: six random MNIST test images. Fakes: the first six draws z ~ N(0, I) through Lecture 2’s 16-number VAE, not chosen by hand.',
- transition:'The route to that network.',source:OURS});
-S('today','start','Today: two networks, then Lecture 1’s objective',{builds:3,
- body:stack(bigGrid(3,card('Part 2 · Autoencoder','One network squeezes a digit into 2 numbers; a second rebuilds it. The loss is squared error.',palette.p),
+ transition:'Generative models are everywhere now: a quick tour, then the common idea.',source:OURS});
+chap('1.2');
+S('llm','why','A chatbot is a generative model: one prompt, three different answers',{builds:2,
+ body:stack(`<div class="prompt-box"><b>Prompt:</b> Write one sentence that opens a short story about the first monsoon rain in Gandhinagar.</div>`,
+  `<div class="cards" style="grid-template-columns:1fr 1fr 1fr">${LLM.map((t,i)=>(i===0?'':'<div data-at="2">')+`<div class="sample-text"><b>Sample ${i+1}.</b> ${t.trim()}</div>`+(i===0?'':'</div>')).join('')}</div>`),
+ lines:['We sent the same prompt to a language model three times. Here is the first reply.','Same prompt, three different replies. Each is a sample from a distribution over sentences.'],
+ ask:['If we send the same prompt again, do we get the same sentence?','Why would we want different answers each time?'],
+ expected:['No: the model samples, so each run differs.','Variety: one prompt has many good answers. A model that always gave the single most likely sentence would be repetitive.'],
+ transition:'How does it choose? One word at a time.',
+ source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.5 Flash, temperature 1 (<code>lecture2/assets/examples/provenance.json</code>).'});
+S('next-word','why','Under the hood: a probability for every possible next word',{builds:2,
+ body:cols(nextWordChart(),stack(at(2,p('Sampling = pick a word with these probabilities, append it, repeat.')),at(2,small(`The same model’s three continuations: “${NW.samples.map(x=>x.split('\n')[0].trim()).join('”, “')}”.`))),'1.45fr 1fr'),
+ lines:['A small language model (SmolLM2, 360 million weights) scores every word it knows as the next word. “wet” gets 17%.','Sample a word, append it, repeat. That is all a chatbot does when it writes, at a much larger scale.'],
+ ask:['Which word would the model pick if it always took the most likely one?','What is the model a distribution over?'],
+ expected:['“wet”: 17%, but 83% of the time something else is sampled.','The next word given the words so far. Chaining them gives a distribution over whole sentences.'],
+ point:'Probabilities are real: SmolLM2-360M-Instruct, computed locally for Lecture 2. The point is only that generation = repeated sampling.',
+ transition:'Pictures: one prompt, many images.',
+ source:'SmolLM2-360M-Instruct (Hugging Face), next-token probabilities and three samples at temperature 1, computed for Lecture 2.'});
+S('t2i','why','Text to image: one prompt, four samples',{builds:2,
+ body:stack(`<div class="prompt-box"><b>Prompt:</b> A watercolour painting of a camel walking across the white salt desert of the Rann of Kutch at sunrise, soft light, wide view.</div>`,
+  `<div class="photo-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${[1,2,3,4].map(i=>(i===1?'':`<div data-at="2">`)+photo(`assets/examples/t2i-sample-${i}.jpg`,`sample ${i}`)+(i===1?'':'</div>')).join('')}</div>`),
+ lines:['Same idea for pictures. One prompt, and the first picture the model returned.','Three more runs, same prompt: a rider appears, a walker, a different horizon. Four samples.'],
+ ask:['What stayed the same across the four, and what changed?','Where does the variety come from?'],
+ expected:['Same: camel, salt flat, sunrise, watercolour. Changed: rider, framing, sky.','From random numbers fed into the model; the prompt only narrows what is plausible.'],
+ transition:'Images can also be the input.',
+ source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3 Pro Image (<code>lecture2/assets/examples/provenance.json</code>).'});
+S('img2img','why','Image in, image out',{builds:2,
+ body:`<div class="state-slot"><div data-only="1"><div class="photo-row" style="grid-template-columns:repeat(6,minmax(0,1fr))">${photo('assets/gallery/shoe-input.jpg','edges of a shoe')+photo('assets/gallery/shoe-output.jpg','pix2pix: a photo')+photo('assets/gallery/spade-layout.jpg','a label map')+photo('assets/gallery/spade-out-0.jpg','SPADE: a landscape')+photo('assets/gallery/horse.jpg','a horse')+photo('assets/gallery/zebra.jpg','CycleGAN: a zebra')}</div></div>`+
+  `<div data-only="2"><div class="photo-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${photo('assets/gallery/spade-layout.jpg','one label map')+photo('assets/gallery/spade-out-0.jpg','sample 1')+photo('assets/gallery/spade-out-1.jpg','sample 2')+photo('assets/gallery/spade-out-2.jpg','sample 3')}</div></div></div>`,
+ lines:['The input can be an image: a sketch becomes a photo, a coloured map becomes a landscape, a horse becomes a zebra.','The same label map, sampled three times: three different photographs. Still a distribution, now given an input.'],
+ ask:['Is there one right answer for “photo of this sketch”?','So what is the model a distribution over?'],
+ expected:['No: colour, texture and lighting are not in the sketch.','Over images, given the input image: p(photo | sketch).'],
+ transition:'Sound works the same way.',
+ source:'Isola et al., pix2pix (CVPR 2017); Park et al., SPADE (CVPR 2019); Zhu et al., CycleGAN (ICCV 2017). Attributed teaching excerpts; copyright with the authors.'});
+S('speech','why','Sound: text in, 24,000 numbers per second out',{builds:2,
+ body:stack(`<div class="prompt-box"><b>Text:</b> “A generative model turns a few random numbers into a new example: a sentence, a picture, or this voice.”</div>`,waveFig(),
+  `<div class="audio-row"><audio controls preload="none" src="${L2A('assets/examples/tts-sample.mp3')}"></audio>${at(2,`<span class="mini">${comma(WAVE.samples)} numbers for ${f(WAVE.seconds,1)} seconds. A few of them: ${WAVE.first.slice(0,6).map(v=>f(v,3)).join(', ')}, …</span>`)}</div>`),
+ lines:['A text-to-speech model read this sentence aloud. Press play.','The output is just a long list of numbers: the air pressure, 24,000 times a second. Generating sound = generating that list.'],
+ ask:['What exactly does the model output?','Is there one right way to say this sentence?'],
+ expected:['About 191,000 numbers: a waveform sampled 24,000 times a second.','No: speed, pitch, pauses and voice all vary. Another sample would sound different.'],
+ transition:'Generative models also matter far from art and chat.',
+ source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.8 Flash TTS, voice “Kore”.'});
+chap('1.3');
+S('science','why','Beyond pictures: generative models in science',{builds:2,
+ body:`<div class="cards big" style="grid-template-columns:1fr 1fr">${card('Weather','GenCast samples 50 possible futures for the next 15 days. The spread of the samples says how sure the forecast is.',palette.data,'Price et al., Nature 2025')+card('Proteins','RFdiffusion generates new protein shapes, for example ones that bind a chosen target.',palette.p,'Watson et al., Nature 2023')}${at(2,card('Materials','MatterGen proposes new crystal structures with properties you ask for.',palette.q,'Zeni et al., Nature 2025'))}${at(2,card('Missing data','Sensors drop readings. A model of p(x) fills the gap with plausible values instead of a flat average, and says how unsure it is.',palette.noise,'for example, air-quality and smart-meter records'))}</div>`,
+ lines:['Weather and proteins: the output is a sample, and many samples together describe what could happen.','Materials, and the everyday case: filling in missing sensor readings with plausible values.'],
+ ask:['Why would a forecaster want 50 samples instead of one best forecast?','Why not fill a gap in a sensor record with the average value?'],
+ expected:['The samples show the range of possible futures: if they disagree, the forecast is uncertain.','The average is smooth and typical-looking but may never happen, and it hides the uncertainty. A sample looks like real data.'],
+ transition:'Collect the uses.',
+ source:'Price et al., “Probabilistic weather forecasting with machine learning” (GenCast), Nature 2025; Watson et al., “De novo design of protein structure and function with RFdiffusion”, Nature 2023; Zeni et al., “A generative model for inorganic materials design” (MatterGen), Nature 2025.'});
+S('uses','why','What a model of p(x) is good for',{builds:2,
+ body:`<div class="cards big" style="grid-template-columns:repeat(3,minmax(0,1fr))">${card('Create','new text, images, sound, designs',palette.q)+card('Fill in','missing pixels, missing readings, the rest of a sentence',palette.noise)+card('Simulate','many plausible futures instead of one average',palette.data)}${at(2,card('Spot the odd one out','a reading with very low p(x) is suspicious: a faulty sensor, a fraud',palette.loss))}${at(2,card('Compress','likely data needs fewer bits: Lecture 1’s codes',palette.p))}${at(2,card('Make more data','extra training examples, or shareable synthetic records',GREEN))}</div>`,
+ lines:['Three uses that need samples: create, fill in, simulate.','Three that need scores: spot anomalies, compress, and generate extra data when real data is scarce or private.'],
+ ask:['Which of these needs only samples? Which needs a score p(x)?','Which use connects to Lecture 1?'],
+ expected:['Create, simulate, augment: samples. Anomalies and compression: a score.','Compression: an event with probability p costs log₂(1/p) bits, Lecture 1’s codes.'],
+ transition:'What do all these models have in common?'});
+chap('1.4');
+S('recipe','why','What they share: random numbers in, a learned network, a sample out',{builds:2,
+ body:`<div class="state-slot"><div data-only="1">${recipeDiagram(1)}</div><div data-only="2">${recipeDiagram(2)}</div></div>`,
+ lines:['Every model on the tour: random numbers z go in, a network with learned weights θ turns them into a sample x.','Most also take a condition c that steers the sample: a prompt, a class label, a sketch. Today we drop c and learn p(x) for digits.'],
+ ask:['What plays the role of z in the chatbot?','What is the condition for the camel pictures?'],
+ expected:['The random choices made when sampling each next word.','The text prompt.'],
+ transition:'Two jobs such a model can do.'});
+S('two-jobs','why','A model of p(x) can do two jobs: score and sample',{builds:2,
+ body:cols(stack(p(`<b class="p">Score:</b> how plausible is this x?`),eq(R`p(\text{a clean }3)\ \text{high},\qquad p(\text{static})\ \text{tiny}`),at(2,p(`<b class="q">Sample:</b> make a new x that looks like the data.`))),
+  `<div class="dflex" style="align-items:end">${digit('example',0,150)}${digit('uniform',0,150)}${at(2,digit('vae16_prior_samples',3,150))}</div>`,'1.1fr 1fr'),
+ lines:['Job one, score: a number that is high for a real-looking 3 and tiny for random static.','Job two, sample: produce a new x. Both jobs come from the same fitted distribution.'],
+ ask:['Which job does the chatbot do when it writes?','Which job does anomaly detection need?'],
+ expected:['Sample.','Score: flag inputs with low p(x).'],
+ transition:'Why not just output the average example?'});
+S('why-not-mean','why','Why not just output the average?',{builds:2,
+ body:cols(digits('display',{idx:threes.slice(0,5),cols:5,size:84}),
+  stack(`<div class="dflex"><span class="lead">average of ${threes.length} threes:</span>${rawDigit(mean3,120)}</div>`,at(2,p('Nobody writes this 3. The average is the blur in the middle of many real 3s.'))),'1.1fr 1fr'),
+ lines:[`Five real 3s, and the pixel-by-pixel average of ${threes.length} of them.`,'The average looks like no real 3. We need the whole distribution, so we can draw one sharp 3 at a time.'],
+ ask:['Would you accept the average as a new handwritten 3?','When is the average still useful?'],
+ expected:['No: it is a ghost of many 3s.','As a summary, or a prediction scored by squared error. Not as a sample.'],
+ transition:'Today’s route.'});
+S('today','why','Today: two networks, then Lecture 1’s objective',{builds:3,
+ body:stack(bigGrid(2,card('Part 2 · Autoencoder','One network squeezes a digit into 2 numbers; a second rebuilds it. The loss is squared error.',palette.p),
   at(2,card('Part 3 · Can it generate?','Feed the second network random numbers instead. We will see what comes out, and why.',palette.loss)),
-  at(3,card('Part 4 · The VAE','A model with a hidden code, trained by maximising Lecture 1’s ELBO, one image at a time.',palette.q))),
+  at(3,card('Part 4 · The VAE','A model with a hidden code, trained by maximising Lecture 1’s ELBO, one image at a time.',palette.q)),
+  at(3,card('Part 5 · Putting it together','Every term of the loss traced back to KL and the ELBO.',palette.data))),
   at(3,small('The VAE’s loss for one image:')),at(3,`<div>${eq(R`\underbrace{\tfrac{1}{2\sigma^2}\big\lVert \pcol{x}-\qcol{\hat x}\big\rVert^2}_{\text{rebuild it}}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,${PRI(R`\N(0,I)`)}\big)}_{\text{Lecture 1’s KL to the prior}}`)}</div>`)),
- lines:['First an autoencoder: two networks that squeeze each digit into 2 numbers and rebuild it.','Then the question for generation: can the second network turn random numbers into digits?','Then the VAE. Its loss is minus Lecture 1’s ELBO: a rebuild term plus a KL to the prior. The hour ends there.'],
+ lines:['First an autoencoder: two networks that squeeze each digit into 2 numbers and rebuild it.','Then the question for generation: can the second network turn random numbers into digits?','Then the VAE, whose loss is minus Lecture 1’s ELBO, and a last part that traces every term back to KL and the ELBO.'],
  ask:['What will the autoencoder’s 2 numbers have to keep?','What would “generate” mean for the second network?','Which piece of this loss have you seen before?'],
- expected:['Whatever is needed to rebuild the digit: which digit, its slant, its thickness.','Turn numbers we invent into a new, convincing digit.','The KL to N(0, I): Lecture 1’s KL to the prior, with tool ② as its formula. The squared error turns out to be the likelihood term.'],
- point:'The loss on this slide drops a constant (784 log(σ√2π)); Section 4.4 shows where every term comes from.',
+ expected:['Whatever is needed to rebuild the digit: which digit, its slant, its thickness.','Turn numbers we invent into a new, convincing digit.','The KL to N(0, I): Lecture 1’s KL to the prior. The squared error turns out to be the likelihood term.'],
+ point:'The loss on this slide drops a constant (784 log(σ√2π)); Sections 4.5 and 5.1 show where every term comes from.',
  transition:'Part 2: autoencoders.'});
 
 // ================================================================= Part 2 · Autoencoders
@@ -427,7 +546,12 @@ S('overlay','gen','Put the random codes on top of the real ones',{builds:2,
  ask:['Hover a red dot near the origin, then one in an empty area. What does the decoder draw?','For the 128-number model, where would the red points fall?'],
  expected:['Near real codes: a digit; in empty places: blurs or odd strokes.','Even further from the real codes: in 128 numbers the space is mostly empty.'],
  point:'The decoder runs in the browser from lecture2/data/nets.json.',
- transition:'Decode a whole grid of codes.',source:OURS});
+ transition:'Try choosing codes yourself.',source:OURS});
+S('explore-ae','gen','Your turn: three ways to choose a code',{builds:1,
+ body:widget('explorer','Choose a code for the autoencoder and see its decoder output.',{net:'ae2',lim:AE_LIM.join(',')}),
+ lines:['Draw a random code from N(0, I), encode a real test digit, or click anywhere on the plane. The decoder runs live in the browser.'],
+ ask:['Which of the three ways gives the best digits?'],expected:['Encoding a real digit. Random codes and clicks far from the dots mostly give smudges.'],
+ transition:'Decode a whole grid of codes at once.',source:OURS});
 S('ae-grid','gen','Decode a whole grid of codes',{builds:2,
  body:cols(fig(squareW([-12,30,-13,18],400),400,scatterSVG('ae2',{W:squareW([-12,30,-13,18],400),H:400,lim:[-12,30,-13,18],ticks:[[-10,0,10,20,30],[-10,0,10]],box:G.ae2_grid_box,r:3,opacity:.45}).s,'Codes with the decoded grid’s area marked.'),
   stack(digits('ae2_grid',{cols:12,size:23,gap:1}),at(2,takeaway('Good digits only where real codes are. Away from them the decoder only extrapolates.'))),'1.15fr 1fr'),
@@ -443,13 +567,34 @@ S('wishes','gen','What we saw, and what we want instead',{builds:3,
   [at(3,'no way to say how likely an image is'),at(3,'one probability model that can score and sample'),at(3,'a prior and a decoder, trained with Lecture 1’s ELBO')]])}</div>`,
  lines:['Problem one: random codes from N(0, I) land away from the real codes. We want codes that fill N(0, I).','Problem two: gaps between codes decode to junk. We want each image to own a small cloud, so the gaps get trained.','Problem three: the autoencoder cannot score an image. We want a probability model. The VAE does all three.'],
  ask:['How could we push codes towards N(0, I)?','How could each image own a cloud instead of a point?','Which tool from Lecture 1 will we need?'],
- expected:['Penalise codes that stray from it, for example with a KL to N(0, I).','Let the encoder output a mean and a spread, and draw the code from them.','Variational inference and the ELBO, with both tools from Section 1.1.'],
+ expected:['Penalise codes that stray from it, for example with a KL to N(0, I).','Let the encoder output a mean and a spread, and draw the code from them.','Variational inference and the ELBO, with the two tools recalled in Section 4.1.'],
  transition:'Part 4: the VAE.'});
 
 // ================================================================= Part 4 · The VAE
 partOpener(4,'vae','Write a model with a hidden code, hit the same wall as Lecture 1, and get past it the same way: maximise the ELBO, one image at a time.',
  'Which wall did Lecture 1 hit?','The evidence p(𝒟): an integral with no formula, so the posterior was out of reach.');
 chap('4.1');
+S('recap-elbo','vae','From Lecture 1: one objective we can compute',{builds:3,
+ body:stack(eq(R`\dcol{\log p(\mathcal D)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}`),
+  small('log p(𝒟) is one fixed number. Whatever the ELBO gains, the KL to the posterior loses.'),
+  at(2,eq(R`\qcol{\ELBO(q)}=\underbrace{\E_{\theta\sim q}\big[\ncol{\log p(\mathcal D\mid\theta)}\big]}_{\text{fit the data}}-\underbrace{\KL\big(\qcol{q(\theta)}\,\|\,${PRI(R`p(\theta)`)}\big)}_{\text{stay near the prior}}`)),
+  at(3,eq(R`\text{train:}\quad\psi^*=\arg\max_\psi\ \qcol{\ELBO(q_\psi)}\qquad\text{loss}=-\qcol{\ELBO}`)),
+  at(3,`<div>${l1('elbo-goal','4.1','the objective')}${l1('elbo-two-terms','4.1','the ELBO in two terms')}</div>`)),
+ lines:['Lecture 1’s budget: the fixed log evidence splits into the ELBO, which we can compute, and the KL to the posterior, which we cannot.',
+  'The ELBO in two terms: an average log-likelihood, to fit the data, minus a KL from q to the prior, to stay near it.',
+  'The objective: tune q’s knobs ψ to maximise the ELBO, by gradient descent on minus the ELBO. Today reuses this line unchanged.'],
+ ask:['Which part of log p(𝒟) could we compute?','What does each ELBO term ask of q?','What did gradient descent change in Lecture 1?'],
+ expected:['The ELBO. The KL to the posterior needs p(𝒟), which we cannot compute.','The first: put q on θ values that explain the data. The second: do not stray far from the prior.','ψ: the means and log-widths of q, one bell per weight of the tiny network.'],
+ point:'Colours follow Lecture 1’s Part 4: q purple, likelihood orange, prior green, evidence blue, the KL to the posterior red.',
+ transition:'Two tools we will need again.'});
+S('recap-tools','vae','Two tools from Lecture 1 we will use again',{builds:2,
+ body:bigGrid(2,tool('① A random draw that gradients pass through',eq(R`z=\mu+\sigma\odot\epsilon,\qquad\epsilon\sim\N(0,I)`),'The randomness sits in ε, so the gradient reaches μ and σ.',l1('reparam','3.5','reparameterisation'),palette.noise),
+  at(2,tool('② The KL from a Gaussian to N(0, 1), by formula',eq(R`\begin{aligned}&\KL\big(\N(\mu,\sigma^2)\,\|\,\N(0,1)\big)\\&\quad=\tfrac12\big(\mu^2+\sigma^2-\log\sigma^2-1\big)\end{aligned}`),'Zero only at μ = 0, σ = 1. With several code numbers, add one such term per number.',l1('diag-kl','2.6','diagonal Gaussians'),palette.q))),
+ lines:['Tool one, the reparameterisation trick: draw ε from N(0, I), then shift and scale it. Gradients flow back to μ and σ.','Tool two: the KL from a Gaussian to N(0, 1) has a formula, zero exactly when μ = 0 and σ = 1.'],
+ ask:['Why not sample z directly?','What is the KL for μ = 2, σ = 1?'],
+ expected:['A sample() call cuts the gradient path from the loss back to μ and σ.','½(4 + 1 − 0 − 1) = 2 nats.'],
+ transition:'A model with a hidden code.'});
+chap('4.2');
 S('vae-pgm','vae','A generative model with a hidden code',{builds:3,
  body:`<div class="state-slot">${[1,2,3].map(k=>`<div data-only="${k}">${vaePgm(k)}</div>`).join('')}</div>`,
  lines:['Start with the prior: every image has a hidden code z, and before seeing any image we say z ~ N(0, I).','Then the likelihood: the decoder turns z into a mean image, and the image x is that mean plus a little Gaussian noise per pixel.','The decoder’s weights θ sit outside the box: one set, shared by every image, learned from the data.'],
@@ -470,11 +615,11 @@ S('vae-draw','vae','To draw an image, follow the arrows: first z, then x',{build
 S('sigma','vae','The likelihood, in numbers: a squared error',{builds:3,
  body:stack(eq(R`\ncol{\log p_\theta(x\mid z)}=\sum_{j=1}^{784}\log\N\big(x_j;\,f_\theta(z)_j,\ \sigma^2\big)`),at(2,eq(R`=-\frac{1}{2\sigma^2}\,\big\lVert x-f_\theta(z)\big\rVert^2\;-\;784\log\big(\sigma\sqrt{2\pi}\big)`)),
   at(3,p(`We use σ = ${f(d.meta.sigma,1)}, about the typical pixel error of a 2-number code: √(31 / 784) ≈ 0.2. The constant −784 log(σ√2π) is +${f(-V.loglik_const,1)}.`))),
- lines:['Each pixel is an independent Gaussian around the decoder’s output, so the log-likelihood is a sum over 784 pixels.','Expand the Gaussian: minus the squared error over 2σ², plus a constant. The autoencoder’s loss was a likelihood all along.','σ = 0.2 is a modelling choice, matched to a typical pixel error. Section 4.7 shows what changing the balance does.'],
+ lines:['Each pixel is an independent Gaussian around the decoder’s output, so the log-likelihood is a sum over 784 pixels.','Expand the Gaussian: minus the squared error over 2σ², plus a constant. The autoencoder’s loss was a likelihood all along.','σ = 0.2 is a modelling choice, matched to a typical pixel error. Section 4.8 shows what changing the balance does.'],
  ask:['What happens to the first term if σ is small?','Where have you seen squared error = Gaussian likelihood before?','Is σ learned here?'],
  expected:['Errors cost more: the model is pushed to rebuild precisely.','Linear regression: least squares is maximum likelihood with Gaussian noise.','No, fixed at 0.2. It can be learned; we keep it fixed for clarity.'],
  transition:'To learn θ we need p(x). Can we get it?'});
-chap('4.2');
+chap('4.3');
 S('vae-wall','vae','Which codes made our 3? Bayes’ rule, and Lecture 1’s wall',{builds:3,
  body:stack(eq(R`\pcol{p(z\mid x)}=\frac{\ncol{p_\theta(x\mid z)}\ \ ${PRI('p(z)')}}{\dcol{p_\theta(x)}}`),
   at(2,eq(R`\dcol{p_\theta(x)}=\int \ncol{p_\theta(x\mid z)}\ ${PRI('p(z)')}\,dz`)),at(2,small('An integral over every possible code, through a neural network: no formula.')),
@@ -504,7 +649,7 @@ S('cast','vae','Same problem as Lecture 1, new names',{builds:2,
  expected:['The approximation: one q became a q for every image, produced by a network.','It would take a separate optimisation for every image, and again for every new image. One encoder pass is instant.'],
  point:'Fitting one network that outputs q for any input is called amortised inference.',
  transition:'Lecture 1’s ELBO with the new names.'});
-chap('4.3');
+chap('4.4');
 S('vae-elbo','vae','Lecture 1’s ELBO, for one image',{builds:3,
  body:stack(small('Lecture 1'),eq(R`\qcol{\ELBO(q)}=\E_{\theta\sim q}\big[\ncol{\log p(\mathcal D\mid\theta)}\big]-\KL\big(\qcol{q(\theta)}\,\|\,${PRI(R`p(\theta)`)}\big)`),
   at(2,small('today: swap the names')),at(2,eq(R`\qcol{\ELBO(x)}=\E_{z\sim q_\phi(z\mid x)}\big[\ncol{\log p_\theta(x\mid z)}\big]-\KL\big(\qcol{q_\phi(z\mid x)}\,\|\,${PRI(R`p(z)`)}\big)`)),
@@ -515,9 +660,16 @@ S('vae-elbo','vae','Lecture 1’s ELBO, for one image',{builds:3,
  expected:['None: every term has a counterpart. Only the names changed.','The first: the expected log-likelihood of the image.','θ: the images become more probable under the model. φ: q moves towards the true posterior.'],
  point:'The same derivation as Lecture 1, Section 4.1, with θ → z and 𝒟 → x; Lecture 2, Section 6.3 writes it out for one image.',
  transition:'Who computes q for each image?'});
+S('vi3','vae','Lecture 1’s VI on one image: fit q for our 3, press play',{builds:2,
+ body:widget('vi3','Variational inference for one image.'),
+ lines:['Lecture 1’s recipe on one image: start q at the prior N(0, I), draw codes with tool ①, and climb the ELBO with Adam.',`q moves into the posterior’s patch and shrinks to fit it. The ELBO ends at ${f(V.vi3.final_elbo,2)}, just below the ceiling log p(x) = ${f(V.grid.log_px,2)}.`],
+ ask:['What happens to the ELBO at first? Why?','How big is the final gap?'],
+ expected:['It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.',`About ${f(V.grid.log_px-V.vi3.final_elbo,2)} nats: q is nearly the exact posterior.`],
+ point:'Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step. Left: all codes, prior circles at radius 1 and 2; middle: zoomed on the posterior.',
+ transition:'1,200 steps for one image. For 60,000 images, a network does it in one pass.',source:OURS});
 S('encoder-q','vae','The encoder is q: one network gives q for every image',{builds:3,
  body:`<div class="state-slot">${[1,2,3].map(k=>`<div data-only="${k}">${inferPgm(k)}</div>`).join('')}</div>`,
- lines:['The decoder is the solid arrow, from z to x. The posterior, which codes made this x, is out of reach.','The dashed arrow is the encoder: it reads x and outputs the mean and spread of a Gaussian q for that image.','Decoder θ and encoder φ are trained together, by one objective: the ELBO, summed over all images.'],
+ lines:['The decoder is the solid arrow, from z to x. The posterior, which codes made this x, is out of reach.','The dashed arrow is the encoder: it reads x and outputs the mean and spread of q for that image, in one pass instead of 1,200 steps.','Decoder θ and encoder φ are trained together, by one objective: the ELBO, summed over all images.'],
  ask:['Which way does each arrow point?','What does the encoder output for one image?','What is variational about the VAE?'],
  expected:['Decoder: z to x (generate). Encoder: x to z (infer).','Two means and two log variances: q_φ(z | x) = N(μ, σ²).','q is a member of a simple family (diagonal Gaussians), fitted by maximising the ELBO: Lecture 1’s variational inference.'],
  point:'Kingma and Welling (2014), figure 1: solid = generative model p_θ, dashed = variational approximation q_φ.',
@@ -528,7 +680,7 @@ S('vae-arch','vae','The network: an encoder that outputs a cloud, then tool ①'
  ask:['Why output log σ² instead of σ?','Why reparameterise instead of sampling z directly?','At test time, which code do we use to rebuild?'],
  expected:['Any real number is a valid log variance; σ = exp(½ log σ²) is then positive.','sample() blocks the gradient path from the loss to μ and σ.','Usually the mean μ.'],
  transition:'Write the loss.'});
-chap('4.4');
+chap('4.5');
 S('vae-loss','vae','The loss for one image is minus the ELBO',{builds:3,
  body:stack(`<div>${eq(R`-\qcol{\ELBO(x)}=\underbrace{\E_{q}\Big[\tfrac{1}{2\sigma^2}\big\lVert \pcol{x}-\qcol{f_\theta(z)}\big\rVert^2\Big]}_{\text{from }-\ncol{\log p_\theta(x\mid z)}}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,${PRI(R`\N(0,I)`)}\big)}_{\text{stay near the prior}}+\underbrace{\text{const}}_{-541.4}`)}</div>`,
   at(2,`<div>${eq(R`\E_q\big[\cdots\big]\approx\tfrac{1}{2\sigma^2}\big\lVert \pcol{x}-\qcol{f_\theta(\mu+\sigma\odot\epsilon)}\big\rVert^2,\qquad\epsilon\sim\N(0,I)\ \text{(one draw, tool ①)}`)}</div>`),
@@ -567,15 +719,22 @@ loss = (recon + kl).mean()`)}</div>`,stack(at(2,p('(1) the encoder outputs 2z nu
  ask:['What are the three changes?','How many lines of the training loop change?'],
  expected:['Two outputs per code number, a random draw of z, and the KL term.','None: only the model and the loss.'],
  transition:'Why does adding the KL make sampling work?'});
-chap('4.5');
+chap('4.6');
 S('vae-tug','vae','Two terms pull in opposite directions',{builds:4,
  body:stack(tugFig(),at(4,takeaway('A VAE is an autoencoder whose codes are noisy clouds held near N(0, I). To generate, draw z ~ N(0, I) and decode.'))),
  lines:['With only the reconstruction term, the best clouds are tiny and far apart: each image keeps a private, exact code. That is Part 3’s autoencoder.','With only the KL term, every cloud becomes N(0, I) itself: all images share one cloud, and the decoder can only draw the average digit.','Together they balance: clouds sit near the centre and overlap a little, yet stay distinct enough to rebuild each image.','So a random draw from N(0, I) usually lands on or near some cloud, and the decoder has been trained to draw something there.'],
  ask:['What does the reconstruction term want the clouds to do?','What does the KL term want?','Where does the balance land?','Why does sampling now work?'],
  expected:['Shrink (less noise in z) and spread apart (no confusion between images).','Move to the centre and widen to σ = 1.','Clouds near the centre, small but not tiny, slightly overlapping.','The codes fill the region N(0, I) samples from, and the decoder was trained across it.'],
- point:'A sketch, not data. Section 4.7 shows the real version: β = 0 is panel one, β = 256 is panel two.',
- transition:'What the trained VAE does.'});
-chap('4.6');
+ point:'A sketch, not data. The next slide is the real version for our 3, and Section 4.8 shows β = 0 (panel one) and β = 256 (panel two).',
+ transition:'Now try it yourself, on the real model.'});
+S('elbo-explorer','vae','Your turn: choose q for our 3, and watch both terms',{builds:2,
+ body:widget5('elbo-explorer','Choose q for our 3: the reconstruction term, the KL to the prior, and the ELBO below log p(x).'),
+ lines:['Start at the encoder’s q. Widen σ: draws from q decode to other digits, so reconstruction rises while the KL to the prior falls.','Try q = N(0, I), then q on the 1s. Every q stays below the ceiling log p(x); the red gap is the KL to the posterior.'],
+ ask:['What happens to each term as σ grows?','Can any q push the ELBO above log p(x)?'],
+ expected:['Reconstruction rises as the draws turn into other digits; the KL to the prior falls until σ reaches 1.','No: the gap is a KL, never negative. The encoder’s q comes within about 0.7.'],
+ point:'The decoder is Lecture 2’s 2-number VAE, run in the browser. Averages over ε use 8 × 8 Gauss–Hermite quadrature, so the numbers match the notebook to about 0.01. q has one σ for both code numbers here.',
+ transition:'What the trained VAE does.',source:OURS});
+chap('4.7');
 S('vae-samples','vae','Now sample: z ~ N(0, I), then decode',{builds:3,
  body:rows(['autoencoder, 2',digits('ae2_prior_samples',{cols:16,size:58,gap:4})],['VAE, 2',at(2,digits('vae2_prior_samples',{cols:16,size:58,gap:4}))],['VAE, 16',at(3,digits('vae16_prior_samples',{cols:16,size:58,gap:4}))]),
  lines:['The same 16 draws from N(0, I) as in Part 3, through the autoencoder’s decoder.','Through the 2-number VAE: almost every draw is a digit, and all ten digits appear.','Through the 16-number VAE: sharper and more varied. The fakes at the start of the hour came from this model.'],
@@ -594,8 +753,13 @@ S('vae-grid','vae','Decode a grid of codes: digits everywhere',{builds:2,
  lines:['Every point of a 12 × 12 grid over [−3, 3]² decodes to a digit, morphing smoothly into the next.','Walk from a 1 to a 0: every step is a plausible digit. The space between images was trained, because each image owned a cloud.'],
  ask:['Compare with the autoencoder’s grid. What is different?','Why are the in-between images plausible now?'],
  expected:['No junk: the whole region N(0, I) samples from is used.','During training each image owned a small cloud of codes, so the decoder learned to draw something sensible everywhere in between.'],
+ transition:'Your turn: choose codes for the VAE.',source:OURS});
+S('explore-vae','vae','Your turn again: choose a code for the VAE',{builds:1,
+ body:widget('explorer','Choose a code for the VAE or the autoencoder and see its decoder output.',{net:'vae2',both:'1',limae:'-6,24,-9,14',limvae:'-4.5,4.5,-4.5,4.5'}),
+ lines:['Random codes, encoded test digits, or click anywhere. Switch between the VAE and the autoencoder to compare.'],
+ ask:['Click in the gaps between digit groups. What do you see now?'],expected:['Plausible in-between shapes: the space between digits is filled.'],
  transition:'One knob: the weight on the KL.',source:OURS});
-chap('4.7');
+chap('4.8');
 S('beta-what','vae','Put a weight on the KL: β',{builds:2,
  body:stack(eq(R`L_\beta=\E_{q}\Big[\tfrac{1}{2\sigma^2}\big\lVert x-f_\theta(z)\big\rVert^2\Big]+\beta\,\KL\big(q_\phi(z\mid x)\,\|\,${PRI(R`\N(0,I)`)}\big)`),p('β = 1 is the true ELBO. Changing β is the same as assuming noisier or cleaner pixels, a different σ.'),
   at(2,grid(2,card('Small β','codes free to spread: close to an autoencoder',palette.p),card('Large β','codes squeezed towards the prior: closer to N(0, I), less detail',palette.q)))),
@@ -610,8 +774,37 @@ S('beta','vae','Seven VAEs, β from 0 to 256: try them',{builds:1,
  expected:[`Around β = 1 to 4. By β = 64 reconstructions blur; at 256 the KL is ${f(BETA['256'].test_kl,2)}, every code decodes to the same blob (posterior collapse).`],
  point:`KL per image: β = 0 gives ${f(BETA['0'].test_kl,1)}, β = 1 gives ${f(BETA['1'].test_kl,1)}, β = 256 gives ${f(BETA['256'].test_kl,2)}. The optional slides take the two extremes apart.`,
  transition:'Wrap-up.',source:OURS});
-chap('4.8');
-S('summary','vae','Autoencoder and VAE, side by side',{builds:2,
+// ================================================================= Part 5 · Putting it together
+partOpener(5,'end','Every piece of the hour on one page: the VAE’s loss, term by term, traced back to KL and the ELBO.',
+ 'Which Lecture 1 ideas does the VAE’s loss use?','The ELBO, the KL and its formula for Gaussians, and the reparameterisation trick.');
+chap('5.1');
+S('maths-chain','end','The whole lecture in five lines of maths',{builds:5,
+ body:`<div class="mchain"><div class="mc-h"></div><div class="mc-h"></div><div class="mc-h">the maths</div><div class="mc-h">where we met it</div>${[
+  ['①','KL',R`\KL(q\,\|\,p)=\E_{q}\big[\log q-\log p\big]\ \ge\ 0`,'Lecture 1, 2.4'],
+  ['②','the budget',R`\dcol{\log p_\theta(x)}=\qcol{\ELBO(x)}+\lcol{\KL\big(q_\phi(z\mid x)\,\|\,p(z\mid x)\big)}`,'Lecture 1, 4.1 · today 4.4'],
+  ['③','its two terms',R`\qcol{\ELBO(x)}=\E_q\big[\ncol{\log p_\theta(x\mid z)}\big]-\KL\big(q_\phi(z\mid x)\,\|\,${PRI('p(z)')}\big)`,'Lecture 1, 4.1 · today 4.4'],
+  ['④','Gaussian pixels',R`-\ncol{\log p_\theta(x\mid z)}=\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2+\text{const}`,'today 4.2 and 2.3'],
+  ['⑤','the two tools',R`z=\mu+\sigma\odot\epsilon,\qquad\KL\ \text{to}\ ${PRI(R`\N(0,1)`)}=\tfrac12\big(\mu^2+\sigma^2-\log\sigma^2-1\big)`,'Lecture 1, 3.5 and 2.6']
+ ].map(([n,w,t,src],k)=>{const c=x=>k?`<div data-at="${k+1}">${x}</div>`:`<div>${x}</div>`;return c(`<span class="mc-n">${n}</span>`)+c(`<span class="mc-w">${w}</span>`)+c(m(t))+c(`<span class="mc-s">${src}</span>`);}).join('')}</div>`,
+ lines:['① Lecture 1’s KL: the average extra cost of using q where p is right. Never negative.',
+  '② The budget for one image: log p(x) splits into the ELBO and a KL to the posterior. So the ELBO is a lower bound on log p(x).',
+  '③ The ELBO’s two terms: rebuild x from codes drawn from q, and keep q near the prior.',
+  '④ With Gaussian pixels, the first term is the autoencoder’s squared error, scaled by 1/2σ².',
+  '⑤ The two tools make the loss computable: draw z by reparameterisation, and take the KL by formula.'],
+ ask:['Why is the KL never negative?','Why does ② make the ELBO a lower bound?','Which term would an autoencoder keep?','Where does the 1/2σ² come from?','Which of the two terms needs sampling?'],
+ expected:['The right code is never beaten on average: Lecture 1, 2.4.','The KL on the right is ≥ 0, so the ELBO is at most log p(x).','The first, the reconstruction term.','The Gaussian density of each pixel around the decoder’s output, with σ = 0.2.','Only the reconstruction term, through z = μ + σ ⊙ ε. The KL has a formula.'],
+ transition:'The same five lines as one picture.'});
+S('maths-map','end','Where each term of the VAE’s loss comes from',{builds:4,
+ body:lossMap(),
+ lines:['The loss we train, written out: a reconstruction term plus a KL term.',
+  'The reconstruction term: Gaussian pixels turn −log p(x | z) into the autoencoder’s squared error, and tool ① lets gradients through the draw.',
+  'The KL term: a KL from q to the prior N(0, I), which tool ② gives by formula, and which is never negative.',
+  'Together they are minus Lecture 1’s ELBO for one image. Making the loss smaller pushes up a lower bound on log p(x).'],
+ ask:['Which term is the autoencoder’s loss?','Why is the draw of z written as μ + σ ⊙ ε?','What would happen without the KL term?','Why does a smaller loss help log p(x)?'],
+ expected:['The reconstruction term, divided by 2σ².','So the gradient reaches μ and σ: Lecture 1’s reparameterisation trick.','The clouds shrink to points and spread out: an autoencoder again, which cannot generate (Part 3).','The loss is minus the ELBO, a lower bound on log p(x): raising the bound raises what it can certify, and the gap is the KL to the posterior.'],
+ transition:'Wrap-up.'});
+chap('5.2');
+S('summary','end','Autoencoder and VAE, side by side',{builds:2,
  body:stack(`<div class="table-sm">${table(['','autoencoder','VAE'],[
   ['the encoder outputs','a code z: 2 numbers','a cloud: μ and log σ², that is q<sub>φ</sub>(z | x)'],
   ['the decoder gets','z','a draw z = μ + σ ⊙ ε (tool ①)'],
@@ -623,7 +816,7 @@ S('summary','vae','Autoencoder and VAE, side by side',{builds:2,
  ask:['Which row explains why sampling works?','Which Lecture 1 ideas did the VAE use?'],
  expected:['The loss row: the KL pulls codes into N(0, I), where random draws land.','Variational inference and the ELBO, reparameterisation, and the closed-form KL between Gaussians.'],
  transition:'What comes next.'});
-S('next','vae','Next: can we drop the pixel likelihood altogether?',{builds:2,
+S('next','end','Next: can we drop the pixel likelihood altogether?',{builds:2,
  body:stack(p('VAE samples are soft because each pixel is an independent Gaussian around a mean image.'),at(2,p('Next: a generator trained against a second network that judges real from fake (GANs). Then many small denoising steps (diffusion).'))),
  lines:['The pixel-wise Gaussian likelihood is the VAE’s weak point: it rewards the safe average stroke.','Lectures 3 and 4 replace it: a learned critic, then repeated denoising.'],
  ask:['Why does a pixel-wise Gaussian encourage soft images?','What else could tell a generator its images are wrong?'],
@@ -648,10 +841,6 @@ O('opt-std-normal','N(0, I) in two dimensions: two independent standard bells',{
  lines:['N(0, I): each number is a standard bell, drawn independently. “I” is the identity covariance.','Most draws land close to the origin. That is all torch.randn does.'],
  ask:['What does the I in N(0, I) say?','Where will almost all random codes land?'],
  expected:['Unit variance and no correlation between the numbers.','Within about 2 or 3 of the origin.'],source:OURS});
-O('opt-explore-ae','Choose a code yourself: the autoencoder',{builds:1,
- body:widget('explorer','Choose a code for the autoencoder and see its decoder output.',{net:'ae2',lim:AE_LIM.join(',')}),
- lines:['Draw a random code from N(0, I), encode a real test digit, or click anywhere on the plane. The decoder runs live in the browser.'],
- ask:['Which of the three ways gives the best digits?'],expected:['Encoding a real digit. Random codes and clicks far from the dots mostly give smudges.'],source:OURS});
 O('opt-ae-interp','The autoencoder: walk in a straight line from a 1 to a 0',{builds:1,
  body:rows(['ends',digits('interp_ends',{cols:2,size:60,gap:6})],['2 numbers',digits('ae2_interp',{cols:9,size:60,gap:6})],['16 numbers',digits('ae16_interp',{cols:9,size:60,gap:6})]),
  lines:['With 2 numbers the path crosses the clusters of other digits; with 16 the middle passes through blobs that are no digit.'],
@@ -672,10 +861,6 @@ O('opt-vae-curves','While training: reconstruction falls, the KL settles',{build
  body:fig(1100,320,lineChart({W:540,H:320,xMin:1,xMax:50,yMin:300,yMax:600,ticksX:[1,25,50],ticksY:[300,400,500,600],xLabel:'epoch',yLabel:'reconstruction term',series:[{x:V.curve.epoch,y:V.curve.recon,color:palette.noise}]})+lineChart({ox:560,W:540,H:320,xMin:1,xMax:50,yMin:0,yMax:12,ticksX:[1,25,50],ticksY:[0,4,8,12],xLabel:'epoch',yLabel:'KL term',series:[{x:V.curve.epoch,y:V.curve.kl,color:palette.q}]}),'The two terms of the VAE loss during training.'),
  lines:[`After 50 epochs: reconstruction ${f(V.curve.recon.at(-1),0)}, KL ${f(V.curve.kl.at(-1),1)} per image. The KL never falls to zero: then the code would say nothing about the image.`],
  ask:['What would a KL of zero mean?'],expected:['q equals the prior for every image: the code ignores the image. That is the β = 256 collapse.'],source:OURS});
-O('opt-explore-vae','Choose a code yourself: the VAE against the autoencoder',{builds:1,
- body:widget('explorer','Choose a code for the VAE or the autoencoder and see its decoder output.',{net:'vae2',both:'1',limae:'-6,24,-9,14',limvae:'-4.5,4.5,-4.5,4.5'}),
- lines:['Random codes, encoded test digits, or click anywhere. Switch between the VAE and the autoencoder to compare.'],
- ask:['Click in the gaps between digit groups. What do you see now?'],expected:['Plausible in-between shapes: the space between digits is filled.'],source:OURS});
 O('opt-beta-zero','β = 0: is it just an autoencoder?',{builds:2,
  body:cols(table(['β','KL per image','average σ of q','spread of codes'],['0','1','256'].map(b=>[b,f(BETA[b].test_kl,1),f(BETA[b].sd_mean,4),f(BETA[b].code_spread,2)])),stack(p('With β = 0 nothing stops q from shrinking.'),at(2,p(`It still draws z = μ + σε, unlike an autoencoder. But training drives σ to ${f(BETA['0'].sd_mean,4)}, so it behaves like one.`))),'1.3fr 1fr'),
  lines:['β = 0 keeps the random draw z = μ + σε, so by construction it is a different model from an autoencoder.','But training drives σ almost to zero, and then it behaves like one: spread-out codes and poor samples.'],
@@ -689,18 +874,18 @@ O('opt-beta-collapse','β = 256: every code decodes to the same blur',{builds:2,
  expected:['β × KL dominates the loss; reconstruction error is worth less than any information in the code.','The KL term falls to about 0 and samples all look the same.'],source:OURS});
 
 // ================================================================= Lecture map, filled in once every section knows its first slide
-S('contents','map','Lecture 5 at a glance: four parts, seventeen sections',{nb:'top',
+S('contents','map','Lecture 5 at a glance: five parts, twenty-one sections',{nb:'top',
  body:'',
- lines:['Four parts, seventeen numbered sections, about an hour. The ▶ Notebook link on every slide opens its section in Colab.'],
+ lines:['Five parts, twenty-one numbered sections, about 80 minutes. The ▶ Notebook link on every slide opens its section in Colab.'],
  ask:['Which part leans most on Lecture 1?'],
- expected:['Part 4: the VAE is Lecture 1’s ELBO with a code per image.'],
- point:'Short on time: the optional slides carry the detours (PCA, the two extremes of β, the encoder against the exact posterior). Lecture 2 has the full two-session version.',
- transition:'Part 1: where we start.'});
+ expected:['Part 4: the VAE is Lecture 1’s ELBO with a code per image. Part 5 traces every term back to it.'],
+ point:'A 60-minute cut: in Part 1 skip next-word, img2img, speech and science; in Part 2 skip ae-untrained, ae-step and code-size; in Part 3 skip ae-grid; in Part 4 skip vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.',
+ transition:'Part 1: why generate?'});
 for(const [sl,k] of partOpeners){
- const figs={1:budgetFig(),2:maxH(250,aeDiagram({stage:4})),3:genDiagram('ae'),4:castFig()};
+ const figs={1:`<div class="photo-row" style="grid-template-columns:2.1fr 1fr 1fr 1fr">${photo('assets/gallery/stylegan-faces.jpg','faces (StyleGAN)')+photo('assets/examples/t2i-sample-1.jpg','text to image')+photo('assets/gallery/spade-out-0.jpg','a map to a landscape')}<figure>${digits('vae16_prior_samples',{idx:[0,1,2,3],cols:2,size:76,gap:6})}<figcaption>digits: today</figcaption></figure></div>`,2:maxH(250,aeDiagram({stage:4})),3:genDiagram('ae'),4:castFig(),5:budgetFig(true)};
  sl.body=act(k,figs[k],`<ol class="pb-grid">${CHAPTERS.filter(([n])=>n.startsWith(k+'.')).map(([n,t])=>`<li><span class="pb-num">${n}</span><a href="#${firstOf[n]}/1">${t}</a>${ANCHORS.size?`<a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(n)}" target="_blank" rel="noopener" aria-label="notebook ${n}">▶</a>`:''}</li>`).join('')}</ol>`);
 }
 slides.unshift(slides.pop());
-slides[0].body=`<div class="toc">${PARTS.map(([k,t])=>`<div><h3><a href="#part-${k}/1">Part ${k} · ${t}</a></h3><ol>${CHAPTERS.filter(([num])=>num.startsWith(k+'.')).map(([num,title])=>
- `<li><a href="#${firstOf[num]}/1">${num} ${title}</a>${ANCHORS.size?`<a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(num)}" target="_blank" rel="noopener" aria-label="notebook ${num}">▶</a>`:''}</li>`).join('')}</ol></div>`).join('')}</div>`;
+slides[0].body=`<div class="toc toc-flow">${PARTS.map(([k,t])=>`<h3><a href="#part-${k}/1">Part ${k} · ${t}</a></h3><ol>${CHAPTERS.filter(([num])=>num.startsWith(k+'.')).map(([num,title])=>
+ `<li><a href="#${firstOf[num]}/1">${num} ${title}</a>${ANCHORS.size?`<a class="toc-nb" href="${COLAB}#scrollTo=${secAnchor(num)}" target="_blank" rel="noopener" aria-label="notebook ${num}">▶</a>`:''}</li>`).join('')}</ol>`).join('')}</div>`;
 for(const [num] of CHAPTERS)if(!firstOf[num])throw new Error('Section '+num+' has no slides');

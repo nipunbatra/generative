@@ -1,9 +1,9 @@
 {
   "id": "lecture5",
   "number": 5,
-  "title": "Autoencoders and the VAE in one hour",
-  "subtitle": "For a class that knows the ELBO: an autoencoder, why it cannot generate, and the VAE as Lecture 1’s objective with a code per image",
-  "minutes": 59,
+  "title": "Autoencoders and the VAE, from the ELBO",
+  "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
+  "minutes": 80,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -12,24 +12,29 @@
       "minutes": 1
     },
     {
-      "id": "start",
-      "title": "Part 1 · Where we start: the ELBO",
-      "minutes": 6
+      "id": "why",
+      "title": "Part 1 · Why generate?",
+      "minutes": 14
     },
     {
       "id": "ae",
       "title": "Part 2 · Autoencoders: squeeze, then rebuild",
-      "minutes": 16
+      "minutes": 15
     },
     {
       "id": "gen",
       "title": "Part 3 · Can an autoencoder generate?",
-      "minutes": 8
+      "minutes": 9
     },
     {
       "id": "vae",
       "title": "Part 4 · The VAE: Lecture 1’s ELBO, one image at a time",
-      "minutes": 29
+      "minutes": 35
+    },
+    {
+      "id": "end",
+      "title": "Part 5 · Putting it together",
+      "minutes": 6
     },
     {
       "id": "optional",
@@ -37,48 +42,111 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 43,
-  "optionalSlides": 11,
+  "coreSlides": 61,
+  "optionalSlides": 9,
   "slides": [
     {
       "id": "contents",
-      "title": "Lecture 5 at a glance: four parts, seventeen sections",
+      "title": "Lecture 5 at a glance: five parts, twenty-one sections",
       "section": "map",
       "builds": 1,
       "optional": false
     },
     {
       "id": "part-1",
-      "title": "Part 1 · Where we start: the ELBO",
-      "section": "start",
+      "title": "Part 1 · Why generate?",
+      "section": "why",
       "builds": 1,
       "optional": false
     },
     {
-      "id": "recap-elbo",
-      "title": "From Lecture 1: one objective we can compute",
-      "section": "start",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "recap-tools",
-      "title": "Two tools from Lecture 1 we will use again",
-      "section": "start",
+      "id": "faces",
+      "title": "Who are these people?",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
       "id": "realfake",
       "title": "Real or generated? Six of these twelve digits are fake",
-      "section": "start",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "llm",
+      "title": "A chatbot is a generative model: one prompt, three different answers",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "next-word",
+      "title": "Under the hood: a probability for every possible next word",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "t2i",
+      "title": "Text to image: one prompt, four samples",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "img2img",
+      "title": "Image in, image out",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "speech",
+      "title": "Sound: text in, 24,000 numbers per second out",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "science",
+      "title": "Beyond pictures: generative models in science",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "uses",
+      "title": "What a model of p(x) is good for",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "recipe",
+      "title": "What they share: random numbers in, a learned network, a sample out",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "two-jobs",
+      "title": "A model of p(x) can do two jobs: score and sample",
+      "section": "why",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "why-not-mean",
+      "title": "Why not just output the average?",
+      "section": "why",
       "builds": 2,
       "optional": false
     },
     {
       "id": "today",
       "title": "Today: two networks, then Lecture 1’s objective",
-      "section": "start",
+      "section": "why",
       "builds": 3,
       "optional": false
     },
@@ -181,6 +249,13 @@
       "optional": false
     },
     {
+      "id": "explore-ae",
+      "title": "Your turn: three ways to choose a code",
+      "section": "gen",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "ae-grid",
       "title": "Decode a whole grid of codes",
       "section": "gen",
@@ -199,6 +274,20 @@
       "title": "Part 4 · The VAE: Lecture 1’s ELBO, one image at a time",
       "section": "vae",
       "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "recap-elbo",
+      "title": "From Lecture 1: one objective we can compute",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
+      "id": "recap-tools",
+      "title": "Two tools from Lecture 1 we will use again",
+      "section": "vae",
+      "builds": 2,
       "optional": false
     },
     {
@@ -251,6 +340,13 @@
       "optional": false
     },
     {
+      "id": "vi3",
+      "title": "Lecture 1’s VI on one image: fit q for our 3, press play",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "encoder-q",
       "title": "The encoder is q: one network gives q for every image",
       "section": "vae",
@@ -293,6 +389,13 @@
       "optional": false
     },
     {
+      "id": "elbo-explorer",
+      "title": "Your turn: choose q for our 3, and watch both terms",
+      "section": "vae",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "vae-samples",
       "title": "Now sample: z ~ N(0, I), then decode",
       "section": "vae",
@@ -314,6 +417,13 @@
       "optional": false
     },
     {
+      "id": "explore-vae",
+      "title": "Your turn again: choose a code for the VAE",
+      "section": "vae",
+      "builds": 1,
+      "optional": false
+    },
+    {
       "id": "beta-what",
       "title": "Put a weight on the KL: β",
       "section": "vae",
@@ -328,16 +438,37 @@
       "optional": false
     },
     {
+      "id": "part-5",
+      "title": "Part 5 · Putting it together",
+      "section": "end",
+      "builds": 1,
+      "optional": false
+    },
+    {
+      "id": "maths-chain",
+      "title": "The whole lecture in five lines of maths",
+      "section": "end",
+      "builds": 5,
+      "optional": false
+    },
+    {
+      "id": "maths-map",
+      "title": "Where each term of the VAE’s loss comes from",
+      "section": "end",
+      "builds": 4,
+      "optional": false
+    },
+    {
       "id": "summary",
       "title": "Autoencoder and VAE, side by side",
-      "section": "vae",
+      "section": "end",
       "builds": 2,
       "optional": false
     },
     {
       "id": "next",
       "title": "Next: can we drop the pixel likelihood altogether?",
-      "section": "vae",
+      "section": "end",
       "builds": 2,
       "optional": false
     },
@@ -360,13 +491,6 @@
       "title": "N(0, I) in two dimensions: two independent standard bells",
       "section": "optional",
       "builds": 2,
-      "optional": true
-    },
-    {
-      "id": "opt-explore-ae",
-      "title": "Choose a code yourself: the autoencoder",
-      "section": "optional",
-      "builds": 1,
       "optional": true
     },
     {
@@ -398,13 +522,6 @@
       "optional": true
     },
     {
-      "id": "opt-explore-vae",
-      "title": "Choose a code yourself: the VAE against the autoencoder",
-      "section": "optional",
-      "builds": 1,
-      "optional": true
-    },
-    {
       "id": "opt-beta-zero",
       "title": "β = 0: is it just an autoencoder?",
       "section": "optional",
@@ -419,5 +536,5 @@
       "optional": true
     }
   ],
-  "totalStates": 116
+  "totalStates": 152
 }

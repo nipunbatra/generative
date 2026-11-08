@@ -52,11 +52,11 @@ def section(k, title, first, text=''):
 
 # ------------------------------------------------------------------------------------------------ title
 md(r"""
-# Lecture 5 · Autoencoders and the VAE in one hour
+# Lecture 5 · Autoencoders and the VAE, from the ELBO
 
 [▶ Open in Colab]({COLAB}) · [Slides]({DECK}) · [Lecture 5 at a glance]({DECK}#contents/1) · ES 667 Deep Learning, IIT Gandhinagar
 
-This notebook runs the experiments behind the Lecture 5 slides, **in the same order and with the same section numbers** (1.1 … 4.8). Every slide's **▶ Notebook** link jumps to its section here.
+This notebook runs the experiments behind the Lecture 5 slides, **in the same order and with the same section numbers** (1.1 … 5.2). Every slide's **▶ Notebook** link jumps to its section here.
 
 The networks are Lecture 2's: a 2-number autoencoder, and 2-number and 16-number VAEs, trained there for 30 and 50 epochs. This notebook loads them and trains only a few small extra models for a few epochs each.
 
@@ -90,36 +90,17 @@ def show_digits(x, ncol=8, size=0.9, title=None):
 """)
 
 # ------------------------------------------------------------------------------------------------ Part 1
-part('1', 'Where we start: the ELBO', 'Lecture 1 ended with one objective we can compute, the ELBO. Two of its tools come back today.')
-section('1.1', 'What Lecture 1 gave us', 'recap-elbo',
-        'Tool ①, the reparameterisation trick: z = μ + σ ⊙ ε with ε ~ N(0, I), so gradients reach μ and σ. '
-        'Tool ②, the KL from a Gaussian to N(0, 1) by formula: ½(μ² + σ² − log σ² − 1).')
-code(r"""
-# Tool 1: a random draw that gradients pass through.
-mu = torch.tensor([0.5, -1.0], requires_grad=True)
-log_sigma = torch.tensor([0.0, -0.5], requires_grad=True)
-eps = torch.randn(2, generator=torch.Generator().manual_seed(0))
-z = mu + log_sigma.exp() * eps          # the randomness sits in eps
-z.sum().backward()
-print('z =', z.detach().numpy().round(3))
-print('dz/dmu =', mu.grad.numpy(), '  dz/dlog_sigma =', log_sigma.grad.numpy().round(3), '(= sigma * eps)')
-
-# Tool 2: the KL from N(mu, sigma^2) to N(0, 1), three ways.
-def kl_to_std_normal(m, s):
-    return 0.5 * (m ** 2 + s ** 2 - math.log(s ** 2) - 1)
-m_, s_ = 2.0, 1.0
-draws = Normal(m_, s_).sample((200_000,), )
-mc = float((Normal(m_, s_).log_prob(draws) - Normal(0., 1.).log_prob(draws)).mean())
-print(f'formula {kl_to_std_normal(m_, s_):.4f}   torch {float(kl_divergence(Normal(m_, s_), Normal(0., 1.))):.4f}   Monte Carlo {mc:.4f}')
-print(f'at mu = 0, sigma = 1 the KL is {kl_to_std_normal(0.0, 1.0):.1f}')
-""")
-section('1.2', 'Today’s question', 'realfake',
-        'Six of the twelve digits on the slide come from a network: the first six draws z ~ N(0, I) through Lecture 2’s 16-number VAE. '
-        'Section 4.6 makes more of them.')
-
-# ------------------------------------------------------------------------------------------------ Part 2
-part('2', 'Autoencoders: squeeze, then rebuild', 'Squeeze each digit into 2 numbers, then rebuild it from them.')
-section('2.1', 'An image is 784 numbers', 'mnist', 'MNIST, grey levels scaled to [0, 1]. Our running example is test digit #90, a 3.')
+part('1', 'Why generate?', 'Generative models make new text, pictures and sound: a quick tour, what they are good for, and the one recipe they share.')
+section('1.1', 'Things that do not exist', 'faces',
+        'StyleGAN faces, then six real and six generated digits. The fakes are the first six draws z ~ N(0, I) through Lecture 2’s 16-number VAE; Section 4.7 makes more of them.')
+section('1.2', 'Text, pictures and sound', 'llm',
+        'A chatbot, a text-to-image model, image-to-image models and text to speech. Each one samples: the same prompt gives a different output every time. '
+        'A language model gives a probability to every possible next word; generating is “sample a word, append it, repeat”.')
+section('1.3', 'What generative models are for', 'science',
+        'Samples: create, fill in missing values, simulate many futures. Scores p(x): spot anomalies, compress (Lecture 1’s codes). And extra or synthetic data.')
+section('1.4', 'What they all share', 'recipe',
+        'Random numbers in, a learned network, a sample out. A model of p(x) can score and sample. The average example is not a sample: '
+        'load MNIST and look at the pixel-by-pixel average of the test 3s.')
 code(r"""
 from torchvision.datasets import MNIST
 MNIST_ROOT = os.environ.get('MNIST_ROOT', 'data')
@@ -129,6 +110,16 @@ test_set = MNIST(MNIST_ROOT, train=False, download=not have)
 Xtr = train_set.data.reshape(-1, 784).double() / 255; ytr = train_set.targets
 Xte = test_set.data.reshape(-1, 784).double() / 255; yte = test_set.targets
 x3 = Xte[90]
+print(f'{len(Xtr):,} training and {len(Xte):,} test digits, {Xtr.shape[1]} numbers each; test digit #90 is a {int(yte[90])}')
+threes = Xte[yte == 3]
+show_digits(threes[:5], ncol=5, size=1.2, title='five real 3s')
+show_digits(threes.mean(0)[None], ncol=1, size=2, title=f'the average of all {len(threes):,} test 3s: no one writes this')
+""")
+
+# ------------------------------------------------------------------------------------------------ Part 2
+part('2', 'Autoencoders: squeeze, then rebuild', 'Squeeze each digit into 2 numbers, then rebuild it from them.')
+section('2.1', 'An image is 784 numbers', 'mnist', 'MNIST, grey levels scaled to [0, 1]. Our running example is test digit #90, a 3.')
+code(r"""
 print(f'{len(Xtr):,} training and {len(Xte):,} test digits, {Xtr.shape[1]} numbers each; test digit #90 is a {int(yte[90])}')
 show_digits(Xtr[:16], title='the first 16 training digits')
 show_digits(x3[None], ncol=1, size=2, title='our 3')
@@ -265,7 +256,30 @@ section('3.3', 'What we want instead', 'wishes',
 # ------------------------------------------------------------------------------------------------ Part 4
 part('4', 'The VAE: Lecture 1’s ELBO, one image at a time',
      'A model with a hidden code: z ~ N(0, I), x | z ~ N(decoder(z), 0.2² I). Lecture 2’s trained VAEs (50 epochs).')
-section('4.1', 'A model with a hidden code', 'vae-pgm', 'To draw an image, follow the arrows: first z from the prior, then the decoder, then pixel noise.')
+section('4.1', 'What Lecture 1 gave us', 'recap-elbo',
+        'The objective: maximise the ELBO = E_q[log-likelihood] − KL(q ‖ prior). '
+        'Tool ①, the reparameterisation trick: z = μ + σ ⊙ ε with ε ~ N(0, I), so gradients reach μ and σ. '
+        'Tool ②, the KL from a Gaussian to N(0, 1) by formula: ½(μ² + σ² − log σ² − 1).')
+code(r"""
+# Tool 1: a random draw that gradients pass through.
+mu = torch.tensor([0.5, -1.0], requires_grad=True)
+log_sigma = torch.tensor([0.0, -0.5], requires_grad=True)
+eps = torch.randn(2, generator=torch.Generator().manual_seed(0))
+z = mu + log_sigma.exp() * eps          # the randomness sits in eps
+z.sum().backward()
+print('z =', z.detach().numpy().round(3))
+print('dz/dmu =', mu.grad.numpy(), '  dz/dlog_sigma =', log_sigma.grad.numpy().round(3), '(= sigma * eps)')
+
+# Tool 2: the KL from N(mu, sigma^2) to N(0, 1), three ways.
+def kl_to_std_normal(m, s):
+    return 0.5 * (m ** 2 + s ** 2 - math.log(s ** 2) - 1)
+m_, s_ = 2.0, 1.0
+draws = Normal(m_, s_).sample((200_000,), )
+mc = float((Normal(m_, s_).log_prob(draws) - Normal(0., 1.).log_prob(draws)).mean())
+print(f'formula {kl_to_std_normal(m_, s_):.4f}   torch {float(kl_divergence(Normal(m_, s_), Normal(0., 1.))):.4f}   Monte Carlo {mc:.4f}')
+print(f'at mu = 0, sigma = 1 the KL is {kl_to_std_normal(0.0, 1.0):.1f}')
+""")
+section('4.2', 'A model with a hidden code', 'vae-pgm', 'To draw an image, follow the arrows: first z from the prior, then the decoder, then pixel noise.')
 code(r"""
 vae2 = load_trained('vae2', 2, True); vae16 = load_trained('vae16', 16, True)
 z = torch.randn(1, 2, generator=torch.Generator().manual_seed(3))
@@ -279,7 +293,7 @@ def log_lik(net, x, Z):                     # log p(x | z) for a batch of codes 
     return -((net.decoder(Z.float()).double() - x) ** 2).sum(1) / (2 * SIGMA ** 2) - const
 print(f'the constant 784 log(sigma sqrt(2 pi)) = {const:.2f}')
 """)
-section('4.2', 'The same wall as Lecture 1', 'vae-wall',
+section('4.3', 'The same wall as Lecture 1', 'vae-wall',
         'p(x) is an integral over every code. With only 2 numbers we can still add up rectangles on a fine grid; with 16 we could not.')
 code(r"""
 with torch.no_grad(): mu3, lv3 = vae2.encode(x3[None].float())
@@ -296,7 +310,7 @@ print(f'log p(x) by adding rectangles: {log_px:.2f}')
 print('posterior of our 3: mean', pm.numpy().round(4), ' sd', ps.numpy().round(4))
 plt.figure(figsize=(4, 3.6)); plt.contourf(ax_x, ax_y, post.reshape(n, n), levels=20, cmap='Greens'); plt.title('p(z | our 3), zoomed'); plt.show()
 """)
-section('4.3', 'The ELBO for one image', 'vae-elbo',
+section('4.4', 'The ELBO for one image', 'vae-elbo',
         'ELBO(x) = E_q[log p(x | z)] − KL(q(z | x) ‖ p(z)). The encoder gives q for our 3 in one pass; its ELBO sits just below log p(x).')
 code(r"""
 def elbo(net, x, m_, s_, draws=20000, seed=21):
@@ -308,7 +322,24 @@ print('encoder q for our 3: mean', mu3.numpy().round(4), ' sd', sd3.numpy().roun
 e3 = elbo(vae2, x3, mu3, sd3)
 print(f'log p(x) {log_px:.2f}  |  ELBO with the encoder’s q {e3:.2f}  |  gap = KL to the posterior {log_px - e3:.2f}')
 """)
-section('4.4', 'The loss, term by term', 'vae-loss', 'One reparameterised draw for our 3, with ε = (0.5, −1.0).')
+md("### Lecture 1’s variational inference on this one image: fit q(z) = N(m, diag s²) by maximising the ELBO")
+code(r"""
+torch.manual_seed(23)
+m_q = torch.zeros(2, requires_grad=True); log_s = torch.zeros(2, requires_grad=True)     # start at the prior N(0, I)
+opt = torch.optim.Adam([m_q, log_s], lr=0.05)
+sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda t: 1.0 if t < 800 else 0.2)
+x3f = x3.float()
+for step in range(1200):
+    zq = m_q + log_s.exp() * torch.randn(64, 2)                                  # tool 1: reparameterised draws
+    log_lik_q = -((vae2.decoder(zq) - x3f) ** 2).sum(1) / (2 * SIGMA ** 2) - const
+    kl_q = 0.5 * (m_q ** 2 + (2 * log_s).exp() - 2 * log_s - 1).sum()                # tool 2: the KL by formula
+    loss = -(log_lik_q.mean() - kl_q)                                             # minus the ELBO
+    opt.zero_grad(); loss.backward(); opt.step(); sched.step()
+m_vi, s_vi = m_q.detach().double(), log_s.detach().double().exp()
+print('per-image q: mean', m_vi.numpy().round(4), ' sd', s_vi.numpy().round(4))
+print(f'log p(x) {log_px:.2f}  |  ELBO, q fitted to this image {elbo(vae2, x3, m_vi, s_vi):.2f}  |  ELBO, encoder in one pass {e3:.2f}')
+""")
+section('4.5', 'The loss, term by term', 'vae-loss', 'One reparameterised draw for our 3, with ε = (0.5, −1.0).')
 code(r"""
 eps = torch.tensor([0.5, -1.0], dtype=F64)
 z = mu3 + sd3 * eps
@@ -317,7 +348,7 @@ sse = float(((xh - x3) ** 2).sum()); kl = 0.5 * float((mu3 ** 2 + sd3 ** 2 - 2 *
 print(f'z = {z.numpy().round(4)}')
 print(f'squared error {sse:.2f}; reconstruction term {sse / (2 * SIGMA ** 2):.1f}; KL {kl:.2f}; loss {sse / (2 * SIGMA ** 2) + kl:.1f}')
 """)
-section('4.5', 'Two terms pull against each other', 'vae-tug',
+section('4.6', 'Two terms pull against each other', 'vae-tug',
         'The reconstruction term wants tiny, separated clouds; the KL wants every cloud to be N(0, I). Averages over the 10,000 test digits:')
 code(r"""
 with torch.no_grad():
@@ -326,7 +357,23 @@ with torch.no_grad():
 print(f'2-number VAE: squared error {test_sse(vae2):.2f}, KL {kl_te:.2f} per image, average sigma of q {torch.exp(0.5 * lv_).mean():.4f}')
 print(f'2-number autoencoder: squared error {test_sse(ae2):.2f}')
 """)
-section('4.6', 'What the VAE learned', 'vae-samples', 'Sample z ~ N(0, I) and decode; look at where the codes are.')
+md("### Choose q for our 3 yourself, as on the slide: the reconstruction term, the KL to the prior and the ELBO")
+code(r"""
+xs_gh, ws_gh = np.polynomial.hermite.hermgauss(8)                 # 8 x 8 Gauss-Hermite nodes for E over eps ~ N(0, I)
+E_gh = torch.tensor([[math.sqrt(2) * a, math.sqrt(2) * b] for a in xs_gh for b in xs_gh], dtype=F64)
+W_gh = torch.tensor([wa * wb / math.pi for wa in ws_gh for wb in ws_gh], dtype=F64)
+@torch.no_grad()
+def terms(mu, s):
+    mu = torch.as_tensor(mu, dtype=F64)
+    recon = float((W_gh * ((vae2.decoder((mu + s * E_gh).float()).double() - x3) ** 2).sum(1)).sum()) / (2 * SIGMA ** 2)
+    kl = 0.5 * float((mu ** 2).sum() + 2 * s ** 2 - 2 * math.log(s ** 2) - 2)
+    return recon, kl, -recon - kl - const
+for name, mu, s in (('the encoder’s q', mu3, float((sd3[0] * sd3[1]).sqrt())), ('q = N(0, I)', [0.0, 0.0], 1.0),
+                    ('q on the 1s', [0.0, 3.2], 0.05)):                 # mu = (0, 3.2): where the VAE puts its 1s
+    r, k, e = terms(mu, s)
+    print(f'{name:16s} reconstruction {r:8.1f}   KL {k:6.1f}   ELBO {e:8.1f}   gap to log p(x) {log_px - e:7.1f}')
+""")
+section('4.7', 'What the VAE learned', 'vae-samples', 'Sample z ~ N(0, I) and decode; look at where the codes are.')
 code(r"""
 with torch.no_grad():
     show_digits(ae2.decoder(torch.randn(16, 2, generator=torch.Generator().manual_seed(5))), ncol=16, size=.6, title='2-number autoencoder: z ~ N(0, I), decoded')
@@ -337,7 +384,7 @@ print('VAE codes of all test digits: mean', V2.mean(0).numpy().round(2), ' sd', 
 plt.figure(figsize=(5, 4)); plt.scatter(*V2[:2000].T, c=yte[:2000], cmap='tab10', s=5); plt.scatter(*prior.T, s=4, c='red')
 plt.title('VAE codes and N(0, I) draws (red)'); plt.show()
 """)
-section('4.7', 'The KL weight β', 'beta-what',
+section('4.8', 'The KL weight β', 'beta-what',
         'Train 2-number VAEs with β = 0 and β = 256 (5 epochs each here; 50 in Lecture 2) and compare with β = 1.')
 code(r"""
 for beta, net in ((0.0, train(AutoEncoder(2, True), epochs=5, beta=0.0, seed=40)), (1.0, vae2), (256.0, train(AutoEncoder(2, True), epochs=5, beta=256.0, seed=41))):
@@ -346,7 +393,26 @@ for beta, net in ((0.0, train(AutoEncoder(2, True), epochs=5, beta=0.0, seed=40)
         kl = 0.5 * (mu_ ** 2 + lv_.exp() - lv_ - 1).sum(1).mean()
     print(f'beta = {beta:5.0f}: KL per image {kl:6.2f}, average sigma of q {torch.exp(0.5 * lv_).mean():.4f}, spread of codes {mu_.std(0).mean():.2f}')
 """)
-section('4.8', 'Wrap-up', 'summary',
+# ------------------------------------------------------------------------------------------------ Part 5
+part('5', 'Putting it together', 'Every piece of the hour on one page: the VAE’s loss, term by term, traced back to KL and the ELBO.')
+section('5.1', 'The whole hour in maths', 'maths-chain',
+        '① KL(q ‖ p) = E_q[log q − log p] ≥ 0. ② log p(x) = ELBO(x) + KL(q(z | x) ‖ p(z | x)). '
+        '③ ELBO(x) = E_q[log p(x | z)] − KL(q(z | x) ‖ p(z)). ④ −log p(x | z) = ‖x − f(z)‖² / 2σ² + const. '
+        '⑤ z = μ + σ ⊙ ε and the Gaussian KL by formula. Below, all five for our 3 from scratch.')
+code(r"""
+x = x3.float()[None]
+with torch.no_grad():
+    mu, logvar = vae2.encode(x)                                     # the encoder: q(z | x) = N(mu, diag sigma^2)
+    sigma = (0.5 * logvar).exp()
+    eps = torch.randn(1000, 2, generator=torch.Generator().manual_seed(7))
+    z = mu + sigma * eps                                            # (5) tool 1: reparameterised draws
+    recon = ((vae2.decoder(z) - x) ** 2).sum(1) / (2 * SIGMA ** 2)  # (4) Gaussian pixels: -log p(x | z) - const
+    kl = 0.5 * (mu ** 2 + sigma ** 2 - logvar - 1).sum()            # (5) tool 2: the KL to N(0, I), by formula
+    elbo_x = -(recon.mean() + kl) - const                           # (3) the ELBO's two terms
+print(f'reconstruction {recon.mean():.1f} + KL {kl:.2f} = loss {recon.mean() + kl:.1f}')
+print(f'ELBO {elbo_x:.2f} <= log p(x) {log_px:.2f}: the gap {log_px - float(elbo_x):.2f} is the KL to the posterior (1, 2)')
+""")
+section('5.2', 'Wrap-up', 'summary',
         'A VAE is an autoencoder trained with Lecture 1’s objective: the encoder outputs a cloud, the code is a reparameterised draw, and the loss adds a KL to N(0, I). '
         'Next lectures replace the pixel-wise Gaussian likelihood: GANs, then diffusion.')
 
