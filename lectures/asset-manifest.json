@@ -1,5 +1,5 @@
 {
-  "created": "2026-11-08T08:32:25.805Z",
+  "created": "2026-11-08T11:36:38.854Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -25,17 +25,17 @@
     {
       "path": "README.md",
       "bytes": 4638,
-      "sha256": "09fbee5e7713ac1cd1f12e3a86f70bb01a297b237af024493523f3674d121a67"
+      "sha256": "cee20ffb130ec66c0b68db757aa6c9360d298ad839ca3ddf6b93a52a5240357f"
     },
     {
       "path": "TEACHING-GUIDE.md",
       "bytes": 5739,
-      "sha256": "14d9c0ec00cc4e072bbeacfef95a4dbdb106f2e71bc468d7bd8e04036a33a670"
+      "sha256": "42a9930aadad68c9ce42ddeb6a1d201c343c13aa17279eaec7e056a28d70a708"
     },
     {
       "path": "index.html",
       "bytes": 6186,
-      "sha256": "dd32e2bef2dcc328a2911016bbb7b6db300c6eef1d8e84167208350652570a96"
+      "sha256": "686d2347c0312f647de759d9c357a6f0abe7c2741c1cecf4f8b643c261160129"
     },
     {
       "path": "lecture1/README.md",
@@ -1519,13 +1519,18 @@
     },
     {
       "path": "lecture5/README.md",
-      "bytes": 6545,
-      "sha256": "a30db127255ae2f9b34bf9b5d03a740bd26eac9fbfd372f831b7994ba0df7275"
+      "bytes": 7790,
+      "sha256": "7fe0c93d8e965215e67cfc603bce6d263f2b0d1b5c2e21dd4e33439525eef2e9"
     },
     {
       "path": "lecture5/content.js",
-      "bytes": 122886,
-      "sha256": "1a58bb7a59938099c8d03d8db09ea01c54a43f862626241ecdfd496c5f5e4e8e"
+      "bytes": 139556,
+      "sha256": "fa3404750d1d9d487107fd09bb51a69c4da27c60e47b6d046d3431d83fafdd4d"
+    },
+    {
+      "path": "lecture5/data/epochs.json",
+      "bytes": 240008,
+      "sha256": "d54bdc9c856c17d3fb7df0c3c69cf424096ce8ad66508ed96aca1848e81f8d18"
     },
     {
       "path": "lecture5/data/notebook-anchors.json",
@@ -1534,43 +1539,48 @@
     },
     {
       "path": "lecture5/exports/all-builds.pdf",
-      "bytes": 9002366,
-      "sha256": "6712e3a4557205b8ee0baad84db092a87c2d018243bd883459ff40621237ce60"
+      "bytes": 13561041,
+      "sha256": "030d9564876902e0025eae6d3e700b52fbfff7cd511f638960316fc794145c88"
     },
     {
       "path": "lecture5/exports/completed.pdf",
-      "bytes": 5997831,
-      "sha256": "a025d455bf5800b76633d2699228c6f7a7455fd8f8a2f1b0534b3eff629ea6fe"
+      "bytes": 8259625,
+      "sha256": "ec9a50750a68fe0df708acd56831b93e4883e2fcf828aaa7968b857eb5ad474a"
     },
     {
       "path": "lecture5/index.html",
       "bytes": 1721,
-      "sha256": "5e25145098d09585509c56433455512dc57f2c803ef09d066162ae724c00d43f"
+      "sha256": "64120ccfa630a4ed100bc0184e00cbc745c399ec1d5e20dc5e776c46b0d4bde7"
     },
     {
       "path": "lecture5/lecture5-autoencoders-vae.ipynb",
-      "bytes": 711709,
-      "sha256": "666eff210bb33e203e976a792d982f54b69f912fa66faf724b749b0569bd9f3b"
+      "bytes": 904238,
+      "sha256": "efbe0b7beae0cbaa359d0c5a2d87babe6650b78d408bdba9164b860b8b38f82b"
     },
     {
       "path": "lecture5/manifest.json",
-      "bytes": 13630,
-      "sha256": "c30797791d1f627b6054bb4ae588300a7eb20e94b4c7f3597913389c4469e581"
+      "bytes": 14186,
+      "sha256": "17bdf8ebaaf6753f1fcb706bba92ae6334e4e551bc417fcddf99b25c719b0312"
     },
     {
       "path": "lecture5/scripts/build_notebook.py",
-      "bytes": 28378,
-      "sha256": "fec3d2de6dc8507cd1f744ba9203f815e1e4185e66a574dfdf8d2b82e28be5a0"
+      "bytes": 33159,
+      "sha256": "48c73f3f4840499d27a288d535e82096eeccedaabb18ecacadc6379b8ad90027"
+    },
+    {
+      "path": "lecture5/scripts/epochs.py",
+      "bytes": 7110,
+      "sha256": "2bba257b24dde362fe0403dee7e4201dba251f8c77c0d2a4ac92bd2a176f6801"
     },
     {
       "path": "lecture5/speaker-notes.md",
-      "bytes": 40935,
-      "sha256": "0142cc923d691b65288bd7a3f3dcd6c7a11457b9c5fa1ae920913039897c0625"
+      "bytes": 44509,
+      "sha256": "880f489993693738ceed77f2fcfda028bf3ed9ab1d6aa99c3f1ece9d21d8aa72"
     },
     {
       "path": "lecture5/widgets.js",
-      "bytes": 8651,
-      "sha256": "a36373ddb1ffdfd9b643421cb7ba7618815e41994c23538cdc700de562874462"
+      "bytes": 16542,
+      "sha256": "a52c3d4d2eed1d1fea6f3261769a6ef8ad6f07c023cf25e9ec4bd0cd0998c6c4"
     },
     {
       "path": "notebook-verification.json",

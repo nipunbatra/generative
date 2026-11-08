@@ -1,6 +1,6 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 86 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 92 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -8,10 +8,10 @@ Planned main route: 86 minutes. Timing includes student responses and the specif
 |---|---:|
 | Lecture map | 1 |
 | Part 1 · Why generate? | 14 |
-| Part 2 · Autoencoders: squeeze, then rebuild | 15 |
+| Part 2 · Autoencoders: squeeze, then rebuild | 18 |
 | Part 3 · Can an autoencoder generate? | 8 |
 | Part 4 · From an autoencoder to a VAE: three fixes | 12 |
-| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 30 |
+| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 33 |
 | Part 6 · Putting it together | 6 |
 
 ## contents: Lecture 5 at a glance: six parts, twenty-five sections
@@ -20,7 +20,7 @@ Planned main route: 86 minutes. Timing includes student responses and the specif
 
 **Expected:** Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.
 
-**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech and science; in Part 2 skip ae-untrained, ae-step and code-size; in Part 3 skip ae-grid; keep all of Part 4; in Part 5 skip posterior3, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
+**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech and science; in Part 2 skip ae-untrained, ae-step and code-size; in Part 3 skip ae-grid; keep all of Part 4; in Part 5 skip vae-pgm, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
 
 **Transition:** Part 1: why generate?
 
@@ -350,9 +350,41 @@ Planned main route: 86 minutes. Timing includes student responses and the specif
 
 **Expected:** Not for rebuilding. For generating, Part 3 will show it is.
 
-**Transition:** Part 3: can the decoder generate?
+**Transition:** How did the codes get there? Watch them during training.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## ae-epochs: During training: clusters form, then the codes drift out
+
+**Build 1, ask:** What stops the codes from drifting further out?
+
+**Expected:** Nothing in the loss: it scores only the rebuild, so any position and any scale of the codes is equally good.
+
+**Build 2, ask:** Is this autoencoder overfitting?
+
+**Expected:** No: with 60,000 digits the training and test errors stay within about 4 of each other.
+
+**Point here:** Lecture 2’s training of this exact network, replayed step for step (same seed and batches), then continued from epoch 30 to 300. “Same axes throughout” uses the epoch-300 window.
+
+**Transition:** Now give it far too little data, and train for far too long.
+
+**Source / evidence:** Lecture 2’s network and training, replayed and extended by <code>lecture5/scripts/epochs.py</code>.
+
+## ae-overfit: Overfitting: too few digits, and the codes fly apart
+
+**Build 1, ask:** Why does the training error keep falling while the test error rises?
+
+**Expected:** The network memorises its 200 digits: it pushes their codes apart, so each gets a private spot the decoder can draw exactly. New digits were never part of that.
+
+**Build 2, ask:** Why does our 3 come back as a 2?
+
+**Expected:** The decoder only learned to draw its 200 training digits. Our 3’s code lands near a training 2’s, so the rebuild is closer to that 2 (error 33.7) than to our 3 (65.6).
+
+**Point here:** Every step uses all 200 digits (no batches), Adam with step size 0.001, on the CPU. “Zoom to fit” rescales each epoch, so you can see the shape; “same axes” shows the drift.
+
+**Transition:** Part 3: can the decoder generate?
+
+**Source / evidence:** <code>lecture5/scripts/epochs.py</code> (MNIST, fixed seeds).
 
 ## part-3: Part 3 · Can an autoencoder generate?
 
@@ -588,6 +620,26 @@ Planned main route: 86 minutes. Timing includes student responses and the specif
 
 **Transition:** A model with a hidden code.
 
+## vae-draw: The model’s story: first a code from the prior, then an image
+
+**Build 1, ask:** What does the prior describe?
+
+**Expected:** Where codes come from before any image is seen: N(0, I), chosen by us.
+
+**Build 2, ask:** Why is this code a 9?
+
+**Expected:** Because of where z sits: the decoder learned which region of codes draws which digit.
+
+**Build 3, ask:** Does generating need the encoder?
+
+**Expected:** No: only the prior and the decoder.
+
+**Point here:** We usually display the mean image: the pixel noise is independent speckle and says nothing about the digit. Colours as in Lecture 1: prior green, likelihood orange.
+
+**Transition:** The same story in two circles.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
 ## vae-pgm: A generative model with a hidden code
 
 **Build 1, ask:** Which circle is observed?
@@ -604,67 +656,57 @@ Planned main route: 86 minutes. Timing includes student responses and the specif
 
 **Point here:** Graphical-model notation (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter. Prior green, likelihood orange, as in Lecture 1.
 
-**Transition:** How to draw a new image from this model.
-
-## vae-draw: To draw an image, follow the arrows: first z, then x
-
-**Build 1, ask:** Does generating need the encoder?
-
-**Expected:** No: only the prior and the decoder.
-
-**Build 2, ask:** Why is this a 9 and not another digit?
-
-**Expected:** Because of where this z sits: the decoder has learned which region of codes means which digit.
-
-**Build 3, ask:** Why display the mean image?
-
-**Expected:** The noise carries no information about the digit; it only makes speckle.
-
 **Transition:** The likelihood, in numbers.
 
-**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+## sigma: The likelihood scores a code: how well does it draw our 3?
 
-## sigma: The likelihood, in numbers: a squared error
-
-**Build 1, ask:** What happens to the first term if σ is small?
-
-**Expected:** Errors cost more: the model is pushed to rebuild precisely.
-
-**Build 2, ask:** Where have you seen squared error = Gaussian likelihood before?
+**Build 1, ask:** Where have you seen squared error = Gaussian likelihood before?
 
 **Expected:** Linear regression: least squares is maximum likelihood with Gaussian noise.
+
+**Build 2, ask:** Why are the three scores so far apart?
+
+**Expected:** Every unit of squared error costs 1/2σ² = 12.5 nats, summed over 784 pixels.
 
 **Build 3, ask:** Is σ learned here?
 
 **Expected:** No, fixed at 0.2. It can be learned; we keep it fixed for clarity.
 
-**Transition:** To learn θ we need p(x). Can we get it?
+**Transition:** Now run the story backwards.
 
-## vae-wall: Which codes made our 3? Bayes’ rule, and Lecture 1’s wall
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-**Build 1, ask:** Why do we need the posterior?
+## vae-wall: Run the story backwards: which codes made our 3?
 
-**Expected:** To know which codes explain each image, so the decoder can be trained on them; and log p(x) is what training should maximise.
+**Build 1, ask:** Why do we want the posterior?
 
-**Build 2, ask:** Why can we not compute p(x)?
+**Expected:** To know which codes explain each image, so the decoder can be trained on them.
 
-**Expected:** The decoder is a neural network: the integral has no closed form.
-
-**Build 3, ask:** What did Lecture 1 do instead?
-
-**Expected:** Chose a simple q and maximised the ELBO.
-
-**Transition:** What the posterior looks like for our 3.
-
-## posterior3: For our 3: which codes could have made it?
-
-**Build 1, ask:** Why is the patch so small?
+**Build 2, ask:** Why is the patch so small?
 
 **Expected:** 784 pixels with σ = 0.2 pin the code down very precisely.
 
-**Build 2, ask:** Why does the grid trick fail for 16 numbers?
+**Build 3, ask:** Why can we not compute p(x) in general?
 
-**Expected:** A grid of 100 points per number would need 100¹⁶ points: the same count as Lecture 1’s 10¹⁴.
+**Expected:** The integral through a network has no formula, and with 16 code numbers a grid of 100 points per number needs 100¹⁶ points.
+
+**Point here:** Colours as in Lecture 1: posterior teal, likelihood orange, prior green, evidence blue.
+
+**Transition:** Can we at least estimate the evidence?
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## evidence: The evidence p(x): average the likelihood over the prior
+
+**Build 1, ask:** Why is the estimate so poor with few draws?
+
+**Expected:** Nearly every draw explains the 3 badly; the few that matter are rarely drawn.
+
+**Build 2, ask:** Where should we draw codes from instead?
+
+**Expected:** From near the posterior: that is the job q will do.
+
+**Point here:** Naive Monte Carlo, 30 repeats for each S; log of the average computed stably (log-sum-exp).
 
 **Transition:** Line Lecture 1 up with today.
 
@@ -682,7 +724,27 @@ Planned main route: 86 minutes. Timing includes student responses and the specif
 
 **Point here:** Fitting one network that outputs q for any input is called amortised inference.
 
-**Transition:** Lecture 1’s ELBO with the new names.
+**Transition:** Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.
+
+## var-approx: The variational approximation: the closest Gaussian
+
+**Build 1, ask:** Why is the prior a poor q?
+
+**Expected:** It spreads over the whole plane, while the posterior is a tiny patch.
+
+**Build 2, ask:** Which q is closest, and how can you tell without the posterior?
+
+**Expected:** The VI fit: it has the highest ELBO, so the smallest gap, which is its KL to the posterior.
+
+**Build 3, ask:** Why Gaussians?
+
+**Expected:** Easy to sample (tool ①), and their KL to N(0, I) has a formula (tool ②).
+
+**Point here:** Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers.
+
+**Transition:** That ELBO, written for one image.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
 ## vae-elbo: Lecture 1’s ELBO, for one image
 
@@ -748,9 +810,11 @@ Planned main route: 86 minutes. Timing includes student responses and the specif
 
 **Expected:** q is a member of a simple family (diagonal Gaussians), fitted by maximising the ELBO: Lecture 1’s variational inference.
 
-**Point here:** Kingma and Welling (2014), figure 1: solid = generative model p_θ, dashed = variational approximation q_φ.
+**Point here:** Kingma and Welling (2014), figure 1: solid arrow = generative model p_θ, dashed = variational approximation q_φ.
 
 **Transition:** Write the loss.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
 ## vae-loss: Minus the ELBO is Part 4’s loss, with its weight decided
 

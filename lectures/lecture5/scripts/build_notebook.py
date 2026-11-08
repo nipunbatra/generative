@@ -230,6 +230,42 @@ with torch.no_grad(): C2 = ae2.encode(Xte[:2000].float())[0]
 plt.figure(figsize=(5, 4)); plt.scatter(*C2.T, c=yte[:2000], cmap='tab10', s=5); plt.colorbar(label='digit')
 plt.title('2-number autoencoder codes of 2,000 test digits'); plt.show()
 """)
+md('### The codes while training: one pass against thirty, on the same axes')
+code(r"""
+with torch.no_grad(): C1 = demo.encode(Xte[:2000].float())[0]
+fig, ax = plt.subplots(1, 2, figsize=(8, 3.6), sharex=True, sharey=True)
+for a, C, t in zip(ax, (C1, C2), ('after 1 pass (the demo above)', 'after 30 passes (Lecture 2)')):
+    a.scatter(*C.T, c=yte[:2000], cmap='tab10', s=4); a.set_title(t, fontsize=10)
+plt.show()
+width = lambda C: float((C.quantile(0.99, 0) - C.quantile(0.01, 0)).max())   # the larger side of the 1st-99th percentile box
+print(f'width of the code cloud: {width(C1):.1f} after 1 pass, {width(C2):.1f} after 30')
+""")
+md('### Overfitting: the same network on only 200 training digits (20 of each), all 200 in every step, for 10,000 steps')
+code(r"""
+g = torch.Generator().manual_seed(5)
+pick = torch.cat([torch.nonzero(ytr == c).squeeze(1)[torch.randperm(int((ytr == c).sum()), generator=g)[:20]] for c in range(10)])
+X200 = Xtr[pick].float()
+torch.manual_seed(5)
+small = AutoEncoder(z=2)                     # on the CPU, as on the slide
+opt = torch.optim.Adam(small.parameters(), lr=1e-3)
+history = {}
+for step in range(1, 10001):
+    loss = ((small.decoder(small.encode(X200)[0]) - X200) ** 2).sum(1).mean()
+    opt.zero_grad(); loss.backward(); opt.step()
+    if step in (100, 200, 1000, 10000):
+        with torch.no_grad(): codes = small.encode(Xte[:2000].float())[0]
+        history[step] = (test_sse(small, X200), test_sse(small), codes)
+        print(f'step {step:5d}: error on the 200 training digits {history[step][0]:6.2f}, on test digits {history[step][1]:6.2f}, '
+              f'width of the code cloud {width(codes):6.1f}')
+fig, ax = plt.subplots(1, 2, figsize=(8, 3.6), sharex=True, sharey=True)
+for a, k in zip(ax, (200, 10000)):
+    a.scatter(*history[k][2].T, c=yte[:2000], cmap='tab10', s=4); a.set_title(f'200 training digits, step {k:,}', fontsize=10)
+plt.show()
+with torch.no_grad(): r3 = small.decoder(small.encode(x3[None].float())[0])[0]
+j = int(((X200 - r3) ** 2).sum(1).argmin())
+print(f'our 3 rebuilt: squared error {float(((r3 - x3.float()) ** 2).sum()):.1f} to our 3, {float(((r3 - X200[j]) ** 2).sum()):.1f} to training digit {j} (a {int(ytr[pick[j]])})')
+show_digits(torch.stack([x3.float(), r3, X200[j]]), ncol=3, size=1.4, title='our 3, its rebuild after 10,000 steps, the nearest training digit')
+""")
 
 # ------------------------------------------------------------------------------------------------ Part 3
 part('3', 'Can an autoencoder generate?', 'Keep the decoder, throw the encoder away, and invent the code.')
@@ -301,7 +337,7 @@ part('5', 'Why this loss: Lecture 1’s ELBO, one image at a time',
      'A model with a hidden code: z ~ N(0, I), x | z ~ N(decoder(z), 0.2² I). Lecture 2’s trained VAEs (50 epochs).')
 section('5.1', 'What Lecture 1 gave us', 'recap-elbo',
         'The objective: maximise the ELBO = E_q[log-likelihood] − KL(q ‖ prior). log p(𝒟) = ELBO + KL(q ‖ posterior), so raising the ELBO lowers the KL to the posterior.')
-section('5.2', 'A model with a hidden code', 'vae-pgm', 'To draw an image, follow the arrows: first z from the prior, then the decoder, then pixel noise.')
+section('5.2', 'A model with a hidden code', 'vae-draw', 'The story starts from z: draw a code from the prior N(0, I), decode it into a mean image, add pixel noise.')
 code(r"""
 vae2 = load_trained('vae2', 2, True); vae16 = load_trained('vae16', 16, True)
 z = torch.randn(1, 2, generator=torch.Generator().manual_seed(3))
@@ -314,6 +350,14 @@ const = 784 * math.log(SIGMA * math.sqrt(2 * math.pi))
 def log_lik(net, x, Z):                     # log p(x | z) for a batch of codes Z
     return -((net.decoder(Z.float()).double() - x) ** 2).sum(1) / (2 * SIGMA ** 2) - const
 print(f'the constant 784 log(sigma sqrt(2 pi)) = {const:.2f}')
+""")
+md('### The likelihood scores a code: three codes against our 3')
+code(r"""
+codes3 = torch.tensor([[-0.2261, 0.0608], [0.824, -0.742], [0.0, 3.2]], dtype=F64)   # in the posterior's patch, a prior draw, the 1s
+with torch.no_grad(): means3 = vae2.decoder(codes3.float()).double()
+for name, z_, m_, ll in zip(('in the posterior’s patch', 'a draw from the prior', 'where the 1s are'), codes3, means3, log_lik(vae2, x3, codes3)):
+    print(f'{name:26s} z = {z_.numpy().round(3)}   squared error {float(((m_ - x3) ** 2).sum()):6.1f}   log p(x | z) {float(ll):7.1f}')
+show_digits(torch.cat([x3[None], means3]), ncol=4, size=1.3, title='our 3, and the mean image of each code')
 """)
 section('5.3', 'The same wall as Lecture 1', 'vae-wall',
         'p(x) is an integral over every code. With only 2 numbers we can still add up rectangles on a fine grid; with 16 we could not.')
@@ -332,7 +376,16 @@ print(f'log p(x) by adding rectangles: {log_px:.2f}')
 print('posterior of our 3: mean', pm.numpy().round(4), ' sd', ps.numpy().round(4))
 plt.figure(figsize=(4, 3.6)); plt.contourf(ax_x, ax_y, post.reshape(n, n), levels=20, cmap='Greens'); plt.title('p(z | our 3), zoomed'); plt.show()
 """)
-section('5.4', 'The ELBO for one image', 'vae-elbo',
+md('### The evidence by brute force: average the likelihood over draws from the prior (one run; the slide shows 30)')
+code(r"""
+Zp = torch.randn(100000, 2, generator=torch.Generator().manual_seed(9), dtype=F64)
+llp = torch.cat([log_lik(vae2, x3, Zp[i:i + 10000]) for i in range(0, len(Zp), 10000)])
+for S in (1, 10, 100, 1000, 10000, 100000):
+    print(f'S = {S:6,d} prior draws: log p(x) estimate {float(torch.logsumexp(llp[:S], 0)) - math.log(S):8.2f}   (true {log_px:.2f})')
+w = (llp - llp.max()).exp()
+print(f'the best 10 of the 100,000 draws carry {100 * float(w.sort(descending=True).values[:10].sum() / w.sum()):.0f}% of the total')
+""")
+section('5.4', 'The variational approximation', 'var-approx',
         'ELBO(x) = E_q[log p(x | z)] − KL(q(z | x) ‖ p(z)). The encoder gives q for our 3 in one pass; its ELBO sits just below log p(x).')
 code(r"""
 def elbo(net, x, m_, s_, draws=20000, seed=21):
@@ -360,6 +413,22 @@ for step in range(1200):
 m_vi, s_vi = m_q.detach().double(), log_s.detach().double().exp()
 print('per-image q: mean', m_vi.numpy().round(4), ' sd', s_vi.numpy().round(4))
 print(f'log p(x) {log_px:.2f}  |  ELBO, q fitted to this image {elbo(vae2, x3, m_vi, s_vi):.2f}  |  ELBO, encoder in one pass {e3:.2f}')
+""")
+md('### The variational approximation: four Gaussians q, their ELBO, and the gap log p(x) − ELBO, which is their KL to the posterior')
+code(r"""
+xs_gh, ws_gh = np.polynomial.hermite.hermgauss(8)                 # 8 x 8 Gauss-Hermite nodes for E over eps ~ N(0, I)
+E_gh = torch.tensor([[math.sqrt(2) * a, math.sqrt(2) * b] for a in xs_gh for b in xs_gh], dtype=F64)
+W_gh = torch.tensor([wa * wb / math.pi for wa in ws_gh for wb in ws_gh], dtype=F64)
+@torch.no_grad()
+def elbo_gh(mu, sd):
+    mu, sd = torch.as_tensor(mu, dtype=F64), torch.as_tensor(sd, dtype=F64)
+    recon = float((W_gh * ((vae2.decoder((mu + sd * E_gh).float()).double() - x3) ** 2).sum(1)).sum()) / (2 * SIGMA ** 2)
+    kl = 0.5 * float((mu ** 2 + sd ** 2 - 2 * sd.log() - 1).sum())
+    return -recon - kl - const
+for name, mu, sd in (('q = N(0, I), the prior', [0.0, 0.0], [1.0, 1.0]), ('q on the 1s', [0.0, 3.2], [0.05, 0.05]),
+                     ('the encoder’s q', mu3, sd3), ('q fitted by VI', m_vi, s_vi)):
+    e = elbo_gh(mu, sd)
+    print(f'{name:24s} ELBO {e:8.2f}   gap {log_px - e:7.2f}')
 """)
 section('5.5', 'The loss, term by term', 'vae-loss', 'One reparameterised draw for our 3, with ε = (0.5, −1.0).')
 code(r"""

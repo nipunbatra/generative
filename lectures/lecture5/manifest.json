@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 86,
+  "minutes": 92,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -19,7 +19,7 @@
     {
       "id": "ae",
       "title": "Part 2 · Autoencoders: squeeze, then rebuild",
-      "minutes": 15
+      "minutes": 18
     },
     {
       "id": "gen",
@@ -34,7 +34,7 @@
     {
       "id": "vae",
       "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
-      "minutes": 30
+      "minutes": 33
     },
     {
       "id": "end",
@@ -47,7 +47,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 66,
+  "coreSlides": 69,
   "optionalSlides": 7,
   "slides": [
     {
@@ -226,6 +226,20 @@
       "optional": false
     },
     {
+      "id": "ae-epochs",
+      "title": "During training: clusters form, then the codes drift out",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-overfit",
+      "title": "Overfitting: too few digits, and the codes fly apart",
+      "section": "ae",
+      "builds": 2,
+      "optional": false
+    },
+    {
       "id": "part-3",
       "title": "Part 3 · Can an autoencoder generate?",
       "section": "gen",
@@ -338,6 +352,13 @@
       "optional": false
     },
     {
+      "id": "vae-draw",
+      "title": "The model’s story: first a code from the prior, then an image",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "vae-pgm",
       "title": "A generative model with a hidden code",
       "section": "vae",
@@ -345,29 +366,22 @@
       "optional": false
     },
     {
-      "id": "vae-draw",
-      "title": "To draw an image, follow the arrows: first z, then x",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
       "id": "sigma",
-      "title": "The likelihood, in numbers: a squared error",
+      "title": "The likelihood scores a code: how well does it draw our 3?",
       "section": "vae",
       "builds": 3,
       "optional": false
     },
     {
       "id": "vae-wall",
-      "title": "Which codes made our 3? Bayes’ rule, and Lecture 1’s wall",
+      "title": "Run the story backwards: which codes made our 3?",
       "section": "vae",
       "builds": 3,
       "optional": false
     },
     {
-      "id": "posterior3",
-      "title": "For our 3: which codes could have made it?",
+      "id": "evidence",
+      "title": "The evidence p(x): average the likelihood over the prior",
       "section": "vae",
       "builds": 2,
       "optional": false
@@ -377,6 +391,13 @@
       "title": "Same problem as Lecture 1, new names",
       "section": "vae",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "var-approx",
+      "title": "The variational approximation: the closest Gaussian",
+      "section": "vae",
+      "builds": 3,
       "optional": false
     },
     {
@@ -562,5 +583,5 @@
       "optional": true
     }
   ],
-  "totalStates": 161
+  "totalStates": 168
 }
