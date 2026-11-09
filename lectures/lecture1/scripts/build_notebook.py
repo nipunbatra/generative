@@ -1448,7 +1448,7 @@ Slides: [Part 4]({DECK}#can-we/1). The real target is the posterior, which we ca
 md(r"""
 ### 4.1 Deriving the ELBO, one rule per line
 
-Slides: [4.1 Back to Bayes]({DECK}#back-bayes/1) · [minimise KL to the posterior directly?]({DECK}#can-we/1) · [step 1]({DECK}#elbo-step1/1) · [step 2, slowly]({DECK}#elbo-step2/1) · [why “lower bound”]({DECK}#elbo-bound/1)
+Slides: [4.1 Back to Bayes]({DECK}#back-bayes/1) · [minimise KL to the posterior directly?]({DECK}#can-we/1) · [step 1]({DECK}#elbo-step1/1) · [step 2, slowly]({DECK}#elbo-step2/1) · [why “lower bound”]({DECK}#elbo-bound/1) · [fit the data, stay near the prior]({DECK}#elbo-two-terms/1) · [how far should q drift?]({DECK}#elbo-drift/1)
 
 | step | line | rule used |
 |---|---|---|
@@ -1504,6 +1504,30 @@ fixtures["coin"]={"ordered_sequence":tosses,"heads":heads,"tails":tails,
     "prior":[5,3],"posterior":[22,16],"log_evidence":number(log_evidence),
     "candidates":coin_candidates,"convention":"ordered sequence; no binomial coefficient"}
 """, anchor="cell-coin")
+md(r"""
+#### The ELBO's two terms as q drifts from the prior
+
+Slides: [fit the data, stay near the prior]({DECK}#elbo-two-terms/1) · [how far should q drift?]({DECK}#elbo-drift/1)
+
+$\mathrm{ELBO}(q)=\mathbb E_q[\log p(\mathcal D\mid r)]-\mathrm{KL}\big(q\,\|\,p(r)\big)$, and we **maximise** it. Three q's: the prior itself (no drift), the posterior, and a spike at $r=17/30$, the best single guess. Moving q from the prior raises the fit term but also the KL; the ELBO rises only while the fit gains more than the KL costs.
+""", anchor="cell-coin-drift")
+code(r"""
+def fit_term(a,b):
+    a,b=torch.as_tensor(a),torch.as_tensor(b)
+    return heads*(torch.digamma(a)-torch.digamma(a+b))+tails*(torch.digamma(b)-torch.digamma(a+b))
+coin_drift=[]
+for name,a,b in [("the prior",5.,3.),("the posterior",22.,16.),("a spike at r = 17/30",567.,433.)]:
+    q=dist.Beta(torch.tensor(a),torch.tensor(b))
+    fit,kl=fit_term(a,b),dist.kl_divergence(q,prior)
+    assert abs(number(fit-kl-direct_beta_elbo(a,b)))<1e-10
+    coin_drift.append(dict(name=name,a=a,b=b,fit=number(fit),prior_kl=number(kl),elbo=number(fit-kl)))
+    print(f"q = {name}, Beta({a:g},{b:g}): fit {fit:.2f}, KL to the prior {kl:.2f}, ELBO {fit-kl:.2f}")
+# The fit term alone is largest when all of q sits at the maximum-likelihood r = 17/30
+best_fit=heads*math.log(heads/30)+tails*math.log(tails/30)
+print(f"largest possible fit term: {best_fit:.2f}; log p(D) = {log_evidence:.2f}")
+fixtures["coin"]["drift"]=coin_drift
+fixtures["coin"]["best_fit"]=best_fit
+""")
 md(r"""
 #### Live demo · joint-only optimisation, about 3–4 minutes
 

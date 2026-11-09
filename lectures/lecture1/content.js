@@ -1,6 +1,6 @@
 import {m,eq,at,only,cols,code,image,table,flow,plot,palette} from '../shared/author.js';
 import {panel,label,legend,fig,widget,thetaBars,PARAM_NAMES,TINT,MUTED,AX,num,lin,covEllipse,matrix2,weather,mount as mountWidgets} from './widgets.js';
-import {normalPdf,normalKL} from './math.mjs';
+import {normalPdf,normalKL,betaPdf} from './math.mjs';
 
 const d=await fetch(new URL('./data/science.json',import.meta.url),{cache:'no-cache'}).then(r=>r.json());
 const ANCHORS=new Set(await fetch(new URL('./data/notebook-anchors.json',import.meta.url),{cache:'no-cache'}).then(r=>r.json()));
@@ -12,16 +12,17 @@ const small=s=>`<p class="caption">${s}</p>`;
 const stack=(...a)=>`<div class="equation-stack">${a.join('')}</div>`;
 const n=d.normal,c=d.coin,g=d.gradients,mc=d.monte_carlo,st=d.story,b=st.bnn,ink=palette.ink;
 const A=b.theta_A,Bt=b.theta_B,E=b.evidence,H=b.hmc,V=b.vi,VF=b.vi_full;
+const [D0,D1,D2]=c.drift;
 export const meta={
  id:'lecture1',number:1,title:'KL and variational inference',
- subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:144,
+ subtitle:'Bayes for a neural network, KL from scratch, and the ELBO',minutes:146,
  notebook:'lecture1-variational-inference.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
   {id:'bayes',title:'Part 1 · Bayes’ rule for a neural network',minutes:30},
   {id:'kl',title:'Part 2 · How far apart are two distributions?',minutes:62},
   {id:'fit',title:'Part 3 · Find the closest q',minutes:25},
-  {id:'elbo',title:'Part 4 · Back to Bayes: the ELBO',minutes:18},
+  {id:'elbo',title:'Part 4 · Back to Bayes: the ELBO',minutes:20},
   {id:'impl',title:'Part 5 · Implement it',minutes:8},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
@@ -688,6 +689,32 @@ function elboLadder(){
    (r.posterior_kl>1e-6?`<path d="M${xq.toFixed(1)},${yy+12} V${yy+22} H${xe.toFixed(1)} V${yy+12}" fill="none" stroke="${palette.loss}" stroke-width="2"/>`+
     (xe-xq>120?label((xq+xe)/2,yy+42,`KL ${num(r.posterior_kl,2)}`,{fill:palette.loss,size:18,anchor:'middle'}):label(xe+14,yy+30,`KL ${num(r.posterior_kl,2)}`,{fill:palette.loss,size:18})):label(xe+14,yy+30,'KL = 0',{fill:palette.loss,size:18}));});
  return fig(W,H,s,'Three Beta q’s for the coin: as q improves the ELBO moves right towards the fixed log evidence, and the KL gap shrinks to zero.');
+}
+
+/** How far q drifts from the coin’s prior: for three q’s, the fit term (orange), the KL to the prior (green) and the ELBO (purple), one row per build. */
+function driftFig(){
+ const W=1150,RH=112,top=44,H=top+3*RH+16,lo=-23.1,hi=-20.25,X0=290,X=v=>X0+(v-lo)/(hi-lo)*(W-X0-24),G=palette.d;
+ const rs=lin(.002,.998,400),prior={alpha:c.prior[0],beta:c.prior[1]},py=rs.map(r=>betaPdf(r,prior)),xe=X(c.log_evidence),xb=X(c.best_fit);
+ let s=legend(0,24,[[`prior Beta(${c.prior[0]}, ${c.prior[1]})`,G],['q',palette.q],['r = 17/30',palette.noise,true]],19)+
+  `<line x1="${xe.toFixed(1)}" y1="34" x2="${xe.toFixed(1)}" y2="${H-22}" stroke="${palette.data}" stroke-width="2" stroke-dasharray="6 5"/>`+
+  label(xe,24,`log p(𝒟) = ${num(c.log_evidence,2)}`,{fill:palette.data,size:19,anchor:'middle'});
+ c.drift.forEach((r,k)=>{
+  const oy=top+k*RH,yy=oy+66,xf=X(r.fit),xq=X(r.elbo),q={alpha:r.a,beta:r.b},qy=rs.map(x=>betaPdf(x,q)),peak=Math.max(...qy);
+  const P=panel({ox:0,oy,W:250,H:RH-6,L:6,R:6,T:12,B:10,xMin:0,xMax:1,yMax:7,yAxis:false,fs:16,ticksX:k===2?[0,.5,1]:[]});
+  let g=P.axes+P.area(rs,py,'#14773722')+P.line(rs,py,G,thin(2.5))+
+   `<line x1="${P.x(17/30).toFixed(1)}" y1="${oy+6}" x2="${P.x(17/30).toFixed(1)}" y2="${oy+RH-16}" stroke="${palette.noise}" stroke-width="2" stroke-dasharray="5 4"/>`+
+   P.line(rs,qy,palette.q)+(peak>7?label(P.x(r.a/(r.a+r.b))+10,oy+22,`peak ${Math.round(peak)}`,{fill:palette.q,size:16}):'');
+  g+=label(X0,oy+24,`q = ${r.name}, Beta(${r.a}, ${r.b})`,{fill:palette.q,size:21,weight:600})+`<line x1="${X0}" y1="${yy}" x2="${W-24}" y2="${yy}" stroke="${AX}"/>`;
+  if(r.prior_kl<1e-9)g+=label(xq+14,yy-14,`fit = ELBO = ${num(r.fit,2)}`,{fill:palette.q,size:19})+label(xq+14,yy+34,'KL to the prior = 0',{fill:G,size:19});
+  else g+=`<path d="M${xq.toFixed(1)},${yy+10} V${yy+18} H${xf.toFixed(1)} V${yy+10}" fill="none" stroke="${G}" stroke-width="2.5"/>`+
+   label(xq+10,yy+42,`KL to the prior ${num(r.prior_kl,2)}`,{fill:G,size:19})+label(xq-12,yy-12,`ELBO ${num(r.elbo,2)}`,{fill:palette.q,size:19,anchor:'end'})+
+   label(xf<1000?xf+12:xf-12,yy-12,`fit ${num(r.fit,2)}`,{fill:palette.noise,size:19,anchor:xf<1000?'start':'end'});
+  g+=`<circle cx="${xf.toFixed(1)}" cy="${yy}" r="7" fill="${palette.noise}"/><circle cx="${xq.toFixed(1)}" cy="${yy}" r="7" fill="${palette.q}"/>`;
+  s+=k?`<g data-at="${k+1}">${g}</g>`:g;
+ });
+ s+=`<g data-at="3"><line x1="${xb.toFixed(1)}" y1="34" x2="${xb.toFixed(1)}" y2="${H-22}" stroke="${palette.noise}" stroke-width="2" stroke-dasharray="3 4"/>`+
+  label(xb,24,`fit at most ${num(c.best_fit,2)}`,{fill:palette.noise,size:19,anchor:'middle'})+'</g>';
+ return fig(W,H,s,'Three Beta q’s for the coin, from the prior to a spike at r = 17/30. For each, the fit term, the KL to the prior and the ELBO = fit − KL on one number line, against log p(𝒟). The ELBO is highest at the posterior.');
 }
 
 // ---------------------------------------------------------------- Part 3 figures kept
@@ -1712,14 +1739,28 @@ S('elbo-max','elbo','Raise the ELBO, and the KL falls by exactly as much',{build
  ask:['By how much did the KL fall from Beta(10, 10) to Beta(30, 20)?','Why does maximising one minimise the other?'],
  expected:['From 0.62 to 0.05: by 0.57 nats, exactly the ELBO’s rise.','Their sum is the fixed number log p(𝒟).'],
  transition:'What does the ELBO ask of q?'});
-S('elbo-two-terms','elbo','The ELBO in two terms: fit the data, stay near the prior',{builds:3,
- body:stack(eq(R`\qcol{\ELBO(q)}=\E_q\big[\log p(\mathcal D\mid\theta)+\log p(\theta)-\log q(\theta)\big]`),
-  at(2,eq(R`=\E_q\big[\log p(\mathcal D\mid\theta)\big]+\E_q\big[\log p(\theta)-\log q(\theta)\big]`)),
-  at(3,eq(R`=\underbrace{\E_q\big[\log p(\mathcal D\mid\theta)\big]}_{\text{fit the data}}-\underbrace{\KL\big(q(\theta)\,\|\,p(\theta)\big)}_{\text{stay near the prior}}`))),
- lines:['Back to the objective from the start of Part 4. Take the ELBO apart.','The average of a sum is the sum of the averages: a likelihood term and the rest.','The rest is minus a KL, from q to the prior. Fit the data, but stay near the prior. For our network the second term is the diagonal-Gaussian formula of 2.6; the first needs samples.'],
- ask:['Which rule splits the average?','Why is the second average minus a KL?','Which term pulls q towards a narrow, well-fitting θ?'],
- expected:['Linearity: E[a + b] = E[a] + E[b].','E_q[log p − log q] = −E_q[log q − log p] = −KL(q ‖ prior).','The data term. The KL to the N(0, 1) prior pulls the other way: wide, near zero.'],
- transition:'Check the identity where p(𝒟) is known.'});
+S('elbo-two-terms','elbo','The ELBO in two terms: fit the data, stay near the prior',{builds:4,
+ body:stack(eq(R`\qcol{\ELBO(q)}=\E_q\big[${LL}+${LP}-${LQ}\big]`),
+  at(2,eq(R`=\E_q\big[${LL}\big]+\E_q\big[${LP}-${LQ}\big]`)),
+  only('3',eq(R`=\underbrace{\E_q\big[${LL}\big]}_{\text{fit the data}}-\underbrace{\KL\big(\qcol{q(\theta)}\,\|\,\textcolor{#147737}{p(\theta)}\big)}_{\text{stay near the prior}}`)),
+  only('4',eq(R`=\underbrace{\E_q\big[${LL}\big]}_{\substack{\text{fit the data}\\\textcolor{#AA4E08}{\uparrow\ \text{make it large}}}}-\underbrace{\KL\big(\qcol{q(\theta)}\,\|\,\textcolor{#147737}{p(\theta)}\big)}_{\substack{\text{stay near the prior}\\\textcolor{#147737}{\downarrow\ \text{make it small}}}}`)),
+  at(4,p('<b>Goal: maximise the ELBO.</b> Alone, the fit would squeeze q onto the one best-fitting θ; alone, the KL would keep q at the prior.'))),
+ lines:['Back to the objective from the start of Part 4. Take the ELBO apart.','The average of a sum is the sum of the averages: a likelihood term and the rest.','The rest is minus a KL, from q to the prior. Fit the data, but stay near the prior. For our network the second term is the diagonal-Gaussian formula of 2.6; the first needs samples.',
+  'Remember the goal: we maximise the ELBO. So we want the fit large and the KL small, and they pull against each other. To fit the data, q must drift from the prior, and every step of drift costs KL, which is subtracted.'],
+ ask:['Which rule splits the average?','Why is the second average minus a KL?','Which term pulls q towards a narrow, well-fitting θ?','We maximise the ELBO. What happens to it when q drifts away from the prior?'],
+ expected:['Linearity: E[a + b] = E[a] + E[b].','E_q[log p − log q] = −E_q[log q − log p] = −KL(q ‖ prior).','The data term. The KL to the N(0, 1) prior pulls the other way: wide, near zero.',
+  'The KL to the prior grows, which lowers the ELBO; the fit term may rise. The ELBO goes up only if the fit gains more than the KL costs.'],
+ transition:'How far should q drift? The coin answers.'});
+S('elbo-drift','elbo','How far should q drift from the prior?',{builds:3,nb:'cell-coin-drift',
+ body:driftFig(),
+ lines:[`The coin: Beta(5, 3) prior, 17 heads in 30 tosses. Start with q = the prior: no drift, so the KL is 0. But the prior spreads q from about 0.3 to 0.9, and most of those r explain 17 heads poorly: fit = ELBO = ${num(D0.fit,2)}.`,
+  `Let q drift to Beta(22, 16): the fit rises by ${num(D1.fit-D0.fit,2)} and the KL costs only ${num(D1.prior_kl,2)}, so the ELBO rises by ${num(D1.elbo-D0.elbo,2)}, to ${num(D1.elbo,2)} = log p(𝒟), the highest any q can reach. This q is the posterior.`,
+  `Drift further, to a spike at r = 17/30: the fit gains only ${num(D2.fit-D1.fit,2)} more, but the KL costs ${num(D2.prior_kl-D1.prior_kl,2)} more, so the ELBO falls to ${num(D2.elbo,2)}. On its own the fit term would pick this spike: maximum likelihood, with no uncertainty. The KL stops it.`],
+ ask:['Why is the fit poor when q is the prior?','Was this drift worth it?','What would q be without the KL term?'],
+ expected:['The prior is wide and centred at 0.625: much of its weight is on r that make 17 heads in 30 unlikely.',`Yes: +${num(D1.fit-D0.fit,2)} of fit for ${num(D1.prior_kl,2)} of KL. Net +${num(D1.elbo-D0.elbo,2)}, and the gap to log p(𝒟) is 0.`,
+  `A spike at the maximum-likelihood r = 17/30, with fit at most ${num(c.best_fit,2)}: one number, no uncertainty. For a network, an over-confident fit.`],
+ point:'Maximising the ELBO balances the two pulls, and the balance point is the posterior (here the Beta family contains it). The distance from each ELBO to log p(𝒟) is the KL to the posterior. In Part 5 each of the network’s seven parameters pays its own KL to N(0, 1), and VI switches one hidden unit off.',
+ transition:'Now check the identity yourself: drag q.'});
 chap('4.2');
 S('elbo-slider','elbo','Check the identity where p(𝒟) is known: a coin',{nb:'cell-coin',
  body:widget('elboslider','Beta q sliders with the ELBO and KL split of the log evidence'),

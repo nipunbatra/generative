@@ -1,7 +1,7 @@
 {
   "status": "passed",
-  "assertions": 6719,
-  "numericalComparisons": 5701,
+  "assertions": 6729,
+  "numericalComparisons": 5711,
   "maximumAbsoluteError": 0.017600000000000005,
   "source": "Independent JavaScript formulae versus executed float64 PyTorch notebook; no new training in this check.",
   "tolerances": {
@@ -2364,6 +2364,96 @@
       "expected": -21.397241822312107,
       "error": 4.973799150320701e-14,
       "tolerance": 1e-8,
+      "passed": true
+    },
+    {
+      "name": "Drift q0 fit term",
+      "kind": "numerical",
+      "actual": -22.869047619047617,
+      "expected": -22.869047619047617,
+      "error": 0,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q0 KL to the prior",
+      "kind": "numerical",
+      "actual": 0,
+      "expected": 0,
+      "error": 0,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q0 ELBO",
+      "kind": "numerical",
+      "actual": -22.869047619047617,
+      "expected": -22.869047619047617,
+      "error": 0,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q1 fit term",
+      "kind": "numerical",
+      "actual": -20.93951182170667,
+      "expected": -20.939511821706667,
+      "error": 3.552713678800501e-15,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q1 KL to the prior",
+      "kind": "numerical",
+      "actual": 0.4577300006054337,
+      "expected": 0.45773000060546565,
+      "error": 3.197442310920451e-14,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q1 ELBO",
+      "kind": "numerical",
+      "actual": -21.397241822312104,
+      "expected": -21.397241822312132,
+      "error": 2.842170943040401e-14,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q2 fit term",
+      "kind": "numerical",
+      "actual": -20.541970155753447,
+      "expected": -20.541970155753447,
+      "error": 0,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q2 KL to the prior",
+      "kind": "numerical",
+      "actual": 2.030167669973082,
+      "expected": 2.0301676699727977,
+      "error": 2.8421709430404007e-13,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Drift q2 ELBO",
+      "kind": "numerical",
+      "actual": -22.572137825726465,
+      "expected": -22.572137825726244,
+      "error": 2.2026824808563106e-13,
+      "tolerance": 5e-11,
+      "passed": true
+    },
+    {
+      "name": "Largest fit term",
+      "kind": "numerical",
+      "actual": -20.52695295390901,
+      "expected": -20.52695295390901,
+      "error": 0,
+      "tolerance": 1e-12,
       "passed": true
     },
     {

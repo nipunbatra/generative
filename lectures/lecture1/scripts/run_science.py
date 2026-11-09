@@ -1042,6 +1042,22 @@ fixtures["coin"]={"ordered_sequence":tosses,"heads":heads,"tails":tails,
     "prior":[5,3],"posterior":[22,16],"log_evidence":number(log_evidence),
     "candidates":coin_candidates,"convention":"ordered sequence; no binomial coefficient"}
 
+def fit_term(a,b):
+    a,b=torch.as_tensor(a),torch.as_tensor(b)
+    return heads*(torch.digamma(a)-torch.digamma(a+b))+tails*(torch.digamma(b)-torch.digamma(a+b))
+coin_drift=[]
+for name,a,b in [("the prior",5.,3.),("the posterior",22.,16.),("a spike at r = 17/30",567.,433.)]:
+    q=dist.Beta(torch.tensor(a),torch.tensor(b))
+    fit,kl=fit_term(a,b),dist.kl_divergence(q,prior)
+    assert abs(number(fit-kl-direct_beta_elbo(a,b)))<1e-10
+    coin_drift.append(dict(name=name,a=a,b=b,fit=number(fit),prior_kl=number(kl),elbo=number(fit-kl)))
+    print(f"q = {name}, Beta({a:g},{b:g}): fit {fit:.2f}, KL to the prior {kl:.2f}, ELBO {fit-kl:.2f}")
+# The fit term alone is largest when all of q sits at the maximum-likelihood r = 17/30
+best_fit=heads*math.log(heads/30)+tails*math.log(tails/30)
+print(f"largest possible fit term: {best_fit:.2f}; log p(D) = {log_evidence:.2f}")
+fixtures["coin"]["drift"]=coin_drift
+fixtures["coin"]["best_fit"]=best_fit
+
 torch.manual_seed(2401)
 psi=torch.nn.Parameter(torch.log(torch.tensor([10.,10.])))
 optimiser=torch.optim.Adam([psi],lr=.025)

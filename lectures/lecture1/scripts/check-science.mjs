@@ -45,6 +45,13 @@ for(const [i,row] of d.coin.candidates.entries()){
  near(`Beta candidate${i} identity`,row.elbo+row.posterior_kl,d.coin.log_evidence,5e-11);
  near(`Beta candidate${i} quadrature`,d.checks.coin_quadrature[i].numerical_elbo,row.elbo,1e-8);
 }
+for(const [i,row] of d.coin.drift.entries()){
+ const q={alpha:row.a,beta:row.b};
+ near(`Drift q${i} fit term`,coinELBO(q,prior,data).expectedLogLikelihood,row.fit,5e-11);
+ near(`Drift q${i} KL to the prior`,betaKL(q,prior),row.prior_kl,5e-11);
+ near(`Drift q${i} ELBO`,coinELBO(q,prior,data).elbo,row.elbo,5e-11);
+}
+near('Largest fit term',17*Math.log(17/30)+13*Math.log(13/30),d.coin.best_fit,1e-12);
 for(const row of d.coin.training.trace){
  const q={alpha:row.a,beta:row.b};
  check(`Coin step${row.step} positive shapes`,row.a>0&&row.b>0);

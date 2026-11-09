@@ -1,6 +1,6 @@
 # KL and variational inference: speaker notes
 
-Planned main route: 144 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 146 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -10,7 +10,7 @@ Planned main route: 144 minutes. Timing includes student responses and the speci
 | Part 1 · Bayes’ rule for a neural network | 30 |
 | Part 2 · How far apart are two distributions? | 62 |
 | Part 3 · Find the closest q | 25 |
-| Part 4 · Back to Bayes: the ELBO | 18 |
+| Part 4 · Back to Bayes: the ELBO | 20 |
 | Part 5 · Implement it | 8 |
 
 ## contents: Lecture 1 at a glance: five parts, twenty-two sections
@@ -1701,7 +1701,29 @@ Planned main route: 144 minutes. Timing includes student responses and the speci
 
 **Expected:** The data term. The KL to the N(0, 1) prior pulls the other way: wide, near zero.
 
-**Transition:** Check the identity where p(𝒟) is known.
+**Build 4, ask:** We maximise the ELBO. What happens to it when q drifts away from the prior?
+
+**Expected:** The KL to the prior grows, which lowers the ELBO; the fit term may rise. The ELBO goes up only if the fit gains more than the KL costs.
+
+**Transition:** How far should q drift? The coin answers.
+
+## elbo-drift: How far should q drift from the prior?
+
+**Build 1, ask:** Why is the fit poor when q is the prior?
+
+**Expected:** The prior is wide and centred at 0.625: much of its weight is on r that make 17 heads in 30 unlikely.
+
+**Build 2, ask:** Was this drift worth it?
+
+**Expected:** Yes: +1.93 of fit for 0.46 of KL. Net +1.47, and the gap to log p(𝒟) is 0.
+
+**Build 3, ask:** What would q be without the KL term?
+
+**Expected:** A spike at the maximum-likelihood r = 17/30, with fit at most −20.53: one number, no uncertainty. For a network, an over-confident fit.
+
+**Point here:** Maximising the ELBO balances the two pulls, and the balance point is the posterior (here the Beta family contains it). The distance from each ELBO to log p(𝒟) is the KL to the posterior. In Part 5 each of the network’s seven parameters pays its own KL to N(0, 1), and VI switches one hidden unit off.
+
+**Transition:** Now check the identity yourself: drag q.
 
 ## elbo-slider: Check the identity where p(𝒟) is known: a coin
 

@@ -3,7 +3,7 @@
   "number": 1,
   "title": "KL and variational inference",
   "subtitle": "Bayes for a neural network, KL from scratch, and the ELBO",
-  "minutes": 144,
+  "minutes": 146,
   "notebook": "lecture1-variational-inference.ipynb",
   "sections": [
     {
@@ -29,7 +29,7 @@
     {
       "id": "elbo",
       "title": "Part 4 · Back to Bayes: the ELBO",
-      "minutes": 18
+      "minutes": 20
     },
     {
       "id": "impl",
@@ -42,7 +42,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 125,
+  "coreSlides": 126,
   "optionalSlides": 28,
   "slides": [
     {
@@ -868,6 +868,13 @@
       "id": "elbo-two-terms",
       "title": "The ELBO in two terms: fit the data, stay near the prior",
       "section": "elbo",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "elbo-drift",
+      "title": "How far should q drift from the prior?",
+      "section": "elbo",
       "builds": 3,
       "optional": false
     },
@@ -1117,5 +1124,5 @@
       "optional": true
     }
   ],
-  "totalStates": 334
+  "totalStates": 338
 }
