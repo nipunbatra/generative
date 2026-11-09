@@ -1,5 +1,5 @@
 {
-  "created": "2026-11-09T07:08:38.598Z",
+  "created": "2026-11-09T07:14:12.696Z",
   "scope": "Deliverable source, notebooks, figures, data, checkpoints and exports. QA screenshots omitted from this inventory.",
   "files": [
     {
@@ -34,8 +34,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 6186,
-      "sha256": "f34e9c694d60130d08fd29ad880b289c9f04e3d25522b1329e97a13a8feeb393"
+      "bytes": 6187,
+      "sha256": "630ba5c34d6918497039470d9d1bd8cadff574193f48074563d64de8597f672a"
     },
     {
       "path": "lecture1/README.md",
@@ -1519,13 +1519,13 @@
     },
     {
       "path": "lecture5/README.md",
-      "bytes": 9336,
-      "sha256": "73898e4e5fd252352e28821e87cd01ad1d4c1d95f3b291df0b94bc5f0b3f5be8"
+      "bytes": 9583,
+      "sha256": "883ad2b3f97a89b4d6e9eb99bd2e61bcab0c9cf880a82b91413f84a4fb3cc50e"
     },
     {
       "path": "lecture5/content.js",
-      "bytes": 155329,
-      "sha256": "b656f76adf5ae22bcfbe786f2e751dfef2099a55d144804bd000d04c66cc10ab"
+      "bytes": 163509,
+      "sha256": "dad8e5f09ea85d9b9689c04813e7103ae538af1524884a0dd9d7799b9ea49962"
     },
     {
       "path": "lecture5/data/empirical.json",
@@ -1549,18 +1549,18 @@
     },
     {
       "path": "lecture5/exports/all-builds.pdf",
-      "bytes": 15345108,
-      "sha256": "15aebbd9709f4fc1bf753b653f50cdcf5e768ad44a2be707664979cac144c574"
+      "bytes": 15471189,
+      "sha256": "4706e74081d8f64b2cd810c83d932ce719e2d1fffb27ed4e3500768fc79e809c"
     },
     {
       "path": "lecture5/exports/completed.pdf",
-      "bytes": 8825411,
-      "sha256": "994ac60fc59cf53a71603db60a94a89ad7c8f2eb26391828f14ad7b6043523f3"
+      "bytes": 8885346,
+      "sha256": "c30d4b6017939187d4da73b39d21fde8a2dd6728186d42f627be2ba33ec8b794"
     },
     {
       "path": "lecture5/index.html",
       "bytes": 1721,
-      "sha256": "889e21414794b73e738a9da41ef0b011dcb35f1a75993de3ff0ad296f5b49f88"
+      "sha256": "eaf167b2c9f113a36a7f98d88f3db7d2edeb6d001e8ee603d0f259af95c953f0"
     },
     {
       "path": "lecture5/lecture5-autoencoders-vae.ipynb",
@@ -1569,8 +1569,8 @@
     },
     {
       "path": "lecture5/manifest.json",
-      "bytes": 14241,
-      "sha256": "6f60b59541d93b5f209885f43925bcde242e3d80e5a7123176dac284b49dbe0d"
+      "bytes": 15109,
+      "sha256": "37ccbe9bed53665461cefc296717398e768907b42014030d9ead65b851ca8840"
     },
     {
       "path": "lecture5/scripts/build_notebook.py",
@@ -1594,8 +1594,8 @@
     },
     {
       "path": "lecture5/speaker-notes.md",
-      "bytes": 47334,
-      "sha256": "cdd34f553e008a32d57bd6a8b751cced33532a79a9623931d6932fdc5b0794d2"
+      "bytes": 50592,
+      "sha256": "23d2f03760b37646d33cb3dc06d9b0f453c6bac7f8f89c4d4df5a2dd16b0c9a1"
     },
     {
       "path": "lecture5/widgets.js",

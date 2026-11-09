@@ -1030,6 +1030,24 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Transition:** End of the main route. Optional slides follow.
 
+## recap-elbo: From Lecture 1: one objective we can compute (optional)
+
+**Build 1, ask:** Which part of log p(𝒟) could we compute?
+
+**Expected:** The ELBO. The KL to the posterior needs p(𝒟), which we cannot compute.
+
+**Build 2, ask:** What does each ELBO term ask of q?
+
+**Expected:** The first: put q on θ values that explain the data. The second: do not stray far from the prior.
+
+**Build 3, ask:** What did gradient descent change in Lecture 1?
+
+**Expected:** ψ: the means and log-widths of q, one bell per weight of the tiny network.
+
+**Point here:** Colours follow Lecture 1’s Part 4: q purple, likelihood orange, prior green, evidence blue, the KL to the posterior red.
+
+**Transition:** A model with a hidden code.
+
 ## vae-pgm: The VAE as a graphical model: a hidden code (optional)
 
 **Build 1, ask:** Which circle is observed?
@@ -1046,6 +1064,54 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Point here:** Graphical-model notation (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter. Prior green, likelihood orange, as in Lecture 1.
 
+## cast: Same problem as Lecture 1, new names (optional)
+
+**Build 1, ask:** Which row changed the most?
+
+**Expected:** The approximation: one q became a q for every image, produced by a network.
+
+**Build 2, ask:** Why not fit 60,000 separate q’s, as Lecture 1 fitted one?
+
+**Expected:** It would take a separate optimisation for every image, and again for every new image. One encoder pass is instant.
+
+**Point here:** Fitting one network that outputs q for any input is called amortised inference.
+
+**Transition:** Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.
+
+## vae-elbo: Lecture 1’s ELBO, for one image (optional)
+
+**Build 1, ask:** Which term is new compared with Lecture 1?
+
+**Expected:** None: every term has a counterpart. Only the names changed.
+
+**Build 2, ask:** Which term rewards a good reconstruction?
+
+**Expected:** The first: the expected log-likelihood of the image.
+
+**Build 3, ask:** What does maximising the ELBO do to θ, and to φ?
+
+**Expected:** θ: the images become more probable under the model. φ: q moves towards the true posterior.
+
+**Point here:** The same derivation as Lecture 1, Section 4.1, with θ → z and 𝒟 → x; Lecture 2, Section 6.3 writes it out for one image.
+
+**Transition:** Who computes q for each image?
+
+## elbo-read: Read the ELBO term by term: it is Part 4’s three fixes (optional)
+
+**Build 1, ask:** Which fix does the average over q correspond to?
+
+**Expected:** Fix 2: drawing z from the image’s cloud, q_φ(z | x).
+
+**Build 2, ask:** Which term was the autoencoder’s whole loss?
+
+**Expected:** log p(x | z): the reconstruction, up to the 1/2σ² weight.
+
+**Build 3, ask:** Where did Fix 1 go?
+
+**Expected:** Into the prior p(z) = N(0, I), inside the KL.
+
+**Transition:** Fitting q for one image, as Lecture 1 did.
+
 ## vi3: Lecture 1’s VI on one image: fit q for our 3, press play (optional)
 
 **Build 1, ask:** What happens to the ELBO at first? Why?
@@ -1059,6 +1125,24 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 **Point here:** Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step. Left: all codes, prior circles at radius 1 and 2; middle: zoomed on the posterior.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## vae-loss-terms: Minus the ELBO is Part 4’s loss, with its weight decided (optional)
+
+**Build 1, ask:** Which term pulls the codes towards N(0, I)?
+
+**Expected:** The KL term.
+
+**Build 2, ask:** Why is one draw enough?
+
+**Expected:** Over many steps and images the noise averages out; the estimate is unbiased.
+
+**Build 3, ask:** What does the KL do to a code with μ = 5?
+
+**Expected:** Adds about ½ × 25 = 12.5 per number: strong pressure back towards the origin.
+
+**Point here:** The constant is 784 log(σ√2π) = −541.4 for σ = 0.2. Shape of the loss: data fit + penalty, like ridge regression, but here the penalty comes out of the ELBO.
+
+**Transition:** Put in the numbers for our 3.
 
 ## opt-ae-test: Did the autoencoder memorise? Training against test error (optional)
 

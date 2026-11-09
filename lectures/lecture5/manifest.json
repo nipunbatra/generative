@@ -48,7 +48,7 @@
     }
   ],
   "coreSlides": 67,
-  "optionalSlides": 9,
+  "optionalSlides": 14,
   "slides": [
     {
       "id": "contents",
@@ -520,8 +520,36 @@
       "optional": false
     },
     {
+      "id": "recap-elbo",
+      "title": "From Lecture 1: one objective we can compute",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
       "id": "vae-pgm",
       "title": "The VAE as a graphical model: a hidden code",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "cast",
+      "title": "Same problem as Lecture 1, new names",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "vae-elbo",
+      "title": "Lecture 1’s ELBO, for one image",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "elbo-read",
+      "title": "Read the ELBO term by term: it is Part 4’s three fixes",
       "section": "optional",
       "builds": 3,
       "optional": true
@@ -531,6 +559,13 @@
       "title": "Lecture 1’s VI on one image: fit q for our 3, press play",
       "section": "optional",
       "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "vae-loss-terms",
+      "title": "Minus the ELBO is Part 4’s loss, with its weight decided",
+      "section": "optional",
+      "builds": 3,
       "optional": true
     },
     {
@@ -583,5 +618,5 @@
       "optional": true
     }
   ],
-  "totalStates": 172
+  "totalStates": 186
 }
