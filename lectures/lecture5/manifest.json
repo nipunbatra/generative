@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 98,
+  "minutes": 92,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -34,7 +34,7 @@
     {
       "id": "vae",
       "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
-      "minutes": 33
+      "minutes": 27
     },
     {
       "id": "end",
@@ -47,8 +47,8 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 72,
-  "optionalSlides": 7,
+  "coreSlides": 67,
+  "optionalSlides": 9,
   "slides": [
     {
       "id": "contents",
@@ -366,8 +366,8 @@
       "optional": false
     },
     {
-      "id": "recap-elbo",
-      "title": "From Lecture 1: one objective we can compute",
+      "id": "same-problem",
+      "title": "Same problem as Lecture 1: the same picture, new names",
       "section": "vae",
       "builds": 3,
       "optional": false
@@ -375,13 +375,6 @@
     {
       "id": "vae-draw",
       "title": "The model’s story: first a code from the prior, then an image",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "vae-pgm",
-      "title": "A generative model with a hidden code",
       "section": "vae",
       "builds": 3,
       "optional": false
@@ -408,38 +401,10 @@
       "optional": false
     },
     {
-      "id": "cast",
-      "title": "Same problem as Lecture 1, new names",
-      "section": "vae",
-      "builds": 2,
-      "optional": false
-    },
-    {
       "id": "var-approx",
       "title": "The variational approximation: the closest Gaussian",
       "section": "vae",
       "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "vae-elbo",
-      "title": "Lecture 1’s ELBO, for one image",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "elbo-read",
-      "title": "Read the ELBO term by term: it is Part 4’s three fixes",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "vi3",
-      "title": "Lecture 1’s VI on one image: fit q for our 3, press play",
-      "section": "vae",
-      "builds": 2,
       "optional": false
     },
     {
@@ -451,9 +416,9 @@
     },
     {
       "id": "vae-loss",
-      "title": "Minus the ELBO is Part 4’s loss, with its weight decided",
+      "title": "From the ELBO to the loss: recon + KL, derived, not guessed",
       "section": "vae",
-      "builds": 3,
+      "builds": 4,
       "optional": false
     },
     {
@@ -555,6 +520,20 @@
       "optional": false
     },
     {
+      "id": "vae-pgm",
+      "title": "The VAE as a graphical model: a hidden code",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "vi3",
+      "title": "Lecture 1’s VI on one image: fit q for our 3, press play",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
       "id": "opt-ae-test",
       "title": "Did the autoencoder memorise? Training against test error",
       "section": "optional",
@@ -604,5 +583,5 @@
       "optional": true
     }
   ],
-  "totalStates": 179
+  "totalStates": 172
 }

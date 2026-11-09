@@ -40,6 +40,9 @@ const CSS=`
 .xy-rows{display:flex;flex-direction:column;gap:14px}.xy-row{display:grid;grid-template-columns:150px 1fr 372px;gap:20px;align-items:center;border-top:1.5px solid ${LINE};padding-top:12px}
 .xy-f{font-size:30px}.xy-q{font-size:22px;line-height:1.3}.xy-tag{display:inline-block;font-size:16px;font-weight:650;border-radius:999px;padding:2px 10px;margin-top:6px;border:1.5px solid currentColor}
 .xy-cells{display:flex;gap:12px;align-items:flex-start}
+.two-eq{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px}
+@media(max-width:760px){.reading .two-eq,.reading .derive{grid-template-columns:minmax(0,1fr)}}
+.derive{display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px 26px;align-items:center}.derive .d-tag{font-size:17px;line-height:1.3;color:${MUTED}}.derive .d-tag b{display:block;color:${palette.ink};font-size:18px}.derive .display{font-size:25px}.derive .display .katex-display{margin:.15em 0}
 @media(max-width:760px){.reading .xy,.reading .xy-row{grid-template-columns:minmax(0,1fr)}.reading .xy-cells{flex-wrap:wrap}}
 .dflex{display:flex;gap:22px;align-items:center}
 .mh .diagram,.mh .plot{max-height:var(--mh)}
@@ -88,7 +91,7 @@ const OURS='Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py
 // ---------------------------------------------------------------- sections and the slide builder
 export const meta={
  id:'lecture5',number:5,title:'Autoencoders and the VAE, from the ELBO',
- subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:98,
+ subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:92,
  notebook:'lecture5-autoencoders-vae.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
@@ -96,7 +99,7 @@ export const meta={
   {id:'ae',title:'Part 2 · Autoencoders: squeeze, then rebuild',minutes:18},
   {id:'gen',title:'Part 3 · Can an autoencoder generate?',minutes:10},
   {id:'idea',title:'Part 4 · From an autoencoder to a VAE: three fixes',minutes:12},
-  {id:'vae',title:'Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time',minutes:33},
+  {id:'vae',title:'Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time',minutes:27},
   {id:'end',title:'Part 6 · Putting it together',minutes:6},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
@@ -108,7 +111,7 @@ const CHAPTERS=[
  ['2.1','An image is 784 numbers'],['2.2','Encoder, code, decoder'],['2.3','The loss, and training'],['2.4','What the code holds'],
  ['3.1','Decode random codes'],['3.2','Where the codes are'],['3.3','What we want instead'],
  ['4.1','Fix 1: choose where codes live'],['4.2','Fix 2: a cloud for each image'],['4.3','Fix 3: pull the clouds to N(0, I)'],['4.4','The loss the fixes give'],
- ['5.1','What Lecture 1 gave us'],['5.2','A model with a hidden code'],['5.3','The same wall as Lecture 1'],['5.4','The variational approximation'],['5.5','The loss, term by term'],['5.6','Both terms, live'],['5.7','What the VAE learned'],['5.8','The KL weight β'],
+ ['5.1','Same problem as Lecture 1'],['5.2','A model with a hidden code'],['5.3','The same wall as Lecture 1'],['5.4','The variational approximation'],['5.5','The loss, derived from the ELBO'],['5.6','Both terms, live'],['5.7','What the VAE learned'],['5.8','The KL weight β'],
  ['6.1','The whole lecture in maths'],['6.2','Wrap-up'],
 ];
 const PARTS=[['1','Why generate?'],['2','Autoencoders: squeeze, then rebuild'],['3','Can an autoencoder generate?'],['4','From an autoencoder to a VAE: three fixes'],['5','Why this loss: Lecture 1’s ELBO, one image at a time'],['6','Putting it together']];
@@ -206,6 +209,29 @@ function vaePgm(stage){
   g+=label(650,132,'the likelihood:',{fill:palette.noise,size:20,weight:650})+label(650,160,'p(x | z) = N(x; decoder(z), σ² I)',{fill:palette.noise,size:19})+label(650,186,'each pixel: the decoder’s value + noise of size σ',{size:17})+imgBox(digitSrc('vae2_prior_samples',0),W-122,204,56,palette.noise,'')+imgBox(digitSrc('vae2_noisy_sample',0),W-58,204,56,palette.data,'')+label(W-124,232,'f(z), then x:',{size:15,anchor:'end'});}
  if(stage>=3){g+=`<circle cx="318" cy="290" r="9" fill="${palette.ink}"/>`+label(332,296,'θ: the decoder’s weights, shared by all images (learned)',{size:17})+`<line x1="318" y1="281" x2="318" y2="142" stroke="${palette.ink}" stroke-width="2" stroke-dasharray="4 4"/>`;}
  return fig(W,H+12,g,'The VAE as a graphical model: a hidden code z with prior N(0, I), an arrow through the decoder to the observed image x, decoder weights θ shared.');
+}
+/** Lecture 1 and the VAE as the same picture: the unknown, the data, and three arrows (likelihood, posterior, q). */
+function sameFig(){
+ const W=1150,H=304,BW=112,BX=398,T=72,B=262;
+ const arrow=(x1,x2,y,col,dash,dir)=>{const [a,b]=dir>0?[x1,x2]:[x2,x1];return `<line x1="${a}" y1="${y}" x2="${b-(dir>0?12:-12)}" y2="${y}" stroke="${col}" stroke-width="2.6"${dash?' stroke-dasharray="8 6"':''}/><path d="M${b},${y} l${dir>0?-14:14},-7 v14 z" fill="${col}"/>`;};
+ const panel=(ox,o)=>{const x1=ox+BW+6,x2=ox+BX-6,mid=(x1+x2)/2;
+  let g=label(ox,20,o.title,{fill:palette.ink,size:19,weight:650})+label(ox,T-14,o.prior,{fill:GREEN,size:16,weight:650});
+  g+=`<rect x="${ox}" y="${T}" width="${BW}" height="${B-T}" rx="14" fill="${palette.paper}" stroke="${GREEN}" stroke-width="3"/>`+label(ox+BW/2,T+80,o.u,{fill:GREEN,size:40,anchor:'middle',weight:650})+label(ox+BW/2,T+110,o.uSub,{size:15,anchor:'middle'});
+  g+=`<rect x="${ox+BX}" y="${T}" width="${BW}" height="${B-T}" rx="14" fill="#E8ECF2" stroke="${palette.data}" stroke-width="3"/>`+label(ox+BX+BW/2,T+(o.img?44:80),o.o,{fill:palette.data,size:40,anchor:'middle',weight:650})+label(ox+BX+BW/2,T+(o.img?72:110),o.oSub,{size:15,anchor:'middle'});
+  if(o.img)g+=`<image href="${o.img}" x="${ox+BX+BW/2-36}" y="${T+86}" width="72" height="72" style="image-rendering:pixelated"/>`;
+  g+=arrow(x1,x2,110,palette.ink,false,1)+label(mid,98,o.lik,{fill:palette.noise,size:16,anchor:'middle',weight:650});
+  g+=arrow(x1,x2,172,palette.p,true,-1)+label(mid,160,o.post,{fill:palette.p,size:16,anchor:'middle',weight:650})+label(mid,192,o.postNo,{fill:palette.loss,size:15,anchor:'middle'});
+  g+=arrow(x1,x2,236,palette.q,true,-1)+label(mid,224,o.q,{fill:palette.q,size:16,anchor:'middle',weight:650});
+  return g;};
+ let g=panel(0,{title:'Lecture 1: a tiny network',prior:'prior p(θ) = N(0, I)',u:'θ',uSub:'7 weights',o:'𝒟',oSub:'17 points',lik:'likelihood p(𝒟 | θ)',post:'posterior p(θ | 𝒟)',postNo:'✗ needs p(𝒟)',q:`${sub('q','ψ')}(θ): fitted by VI`});
+ g+=`<g data-at="2">`+panel(638,{title:'Today: a VAE, for one image',prior:'prior p(z) = N(0, I)',u:'z',uSub:'2 numbers',o:'x',oSub:'our 3',img:digitSrc('example',0),lik:`likelihood ${sub('p','θ')}(x | z)`,post:'posterior p(z | x)',postNo:'✗ needs p(x)',q:`${sub('q','φ')}(z | x): the encoder`})+
+  label(574,132,'θ → z',{fill:palette.ink,size:20,anchor:'middle',weight:650})+label(574,166,'𝒟 → x',{fill:palette.ink,size:20,anchor:'middle',weight:650})+label(574,196,'same roles,',{size:14,anchor:'middle'})+label(574,214,'same colours',{size:14,anchor:'middle'})+'</g>';
+ const badge=(x,y,n)=>`<circle cx="${x}" cy="${y}" r="11" fill="${palette.loss}"/>`+label(x,y+5,n,{fill:'#fff',size:14,anchor:'middle',weight:700});
+ g+=`<g data-at="3">`+[[12,8],[6,4]].map(([d,o])=>`<rect x="${638+d}" y="${T+d}" width="${BX+BW}" height="${B-T}" rx="14" fill="none" stroke="${MUTED}" stroke-opacity=".${o}" stroke-width="2"/>`).join('')+
+  badge(650,290,'1')+label(666,295,'one z for every image: 60,000 unknowns, not one',{fill:palette.loss,size:15,weight:650})+
+  badge(838,128,'2')+label(852,133,'the decoder θ: learned too',{fill:palette.loss,size:14,weight:650})+
+  badge(818,254,'3')+label(832,259,'one network gives every q',{fill:palette.loss,size:14,weight:650})+'</g>';
+ return fig(W,H+8,g,'Lecture 1 and the VAE drawn the same way: an unknown with a prior, observed data, a likelihood arrow, a posterior that needs the evidence, and an approximation q. Three differences are marked on the VAE.');
 }
 /** The graphical model with the dashed inference arrow: the encoder. */
 function inferPgm(stage){
@@ -850,19 +876,15 @@ S('vae-tug','idea','Two terms pull in opposite directions',{builds:4,
 partOpener(5,'vae','Why is Part 4’s loss the right one? Write a model with a hidden code, hit Lecture 1’s wall, and get past it the same way: the ELBO, one image at a time.',
  'Which wall did Lecture 1 hit?','The evidence p(𝒟): an integral with no formula, so the posterior was out of reach.');
 chap('5.1');
-S('recap-elbo','vae','From Lecture 1: one objective we can compute',{builds:3,
- body:stack(eq(R`\dcol{\log p(\mathcal D)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}`),
-  small('log p(𝒟) is one fixed number. Whatever the ELBO gains, the KL to the posterior loses.'),
-  at(2,eq(R`\qcol{\ELBO(q)}=\underbrace{\E_{\theta\sim q}\big[\ncol{\log p(\mathcal D\mid\theta)}\big]}_{\text{fit the data}}-\underbrace{\KL\big(\qcol{q(\theta)}\,\|\,${PRI(R`p(\theta)`)}\big)}_{\text{stay near the prior}}`)),
-  at(3,eq(R`\text{train:}\quad\psi^*=\arg\max_\psi\ \qcol{\ELBO(q_\psi)}\qquad\text{loss}=-\qcol{\ELBO}`)),
-  at(3,`<div>${l1('elbo-goal','4.1','the objective')}${l1('elbo-two-terms','4.1','the ELBO in two terms')}</div>`)),
- lines:['Lecture 1’s budget: the fixed log evidence splits into the ELBO, which we can compute, and the KL to the posterior, which we cannot.',
-  'The ELBO in two terms: an average log-likelihood, to fit the data, minus a KL from q to the prior, to stay near it.',
-  'The objective: tune q’s knobs ψ to maximise the ELBO, by gradient descent on minus the ELBO. Today reuses this line unchanged.'],
- ask:['Which part of log p(𝒟) could we compute?','What does each ELBO term ask of q?','What did gradient descent change in Lecture 1?'],
- expected:['The ELBO. The KL to the posterior needs p(𝒟), which we cannot compute.','The first: put q on θ values that explain the data. The second: do not stray far from the prior.','ψ: the means and log-widths of q, one bell per weight of the tiny network.'],
- point:'Colours follow Lecture 1’s Part 4: q purple, likelihood orange, prior green, evidence blue, the KL to the posterior red.',
- transition:'A model with a hidden code.'});
+S('same-problem','vae','Same problem as Lecture 1: the same picture, new names',{builds:3,
+ body:stack(sameFig(),`<div class="eq-sm two-eq">${eq(R`\dcol{\log p(\mathcal D)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}`)}${at(2,eq(R`\dcol{\log p_\theta(x)}=\qcol{\ELBO(x)}+\lcol{\KL\big(q_\phi(z\mid x)\,\|\,p(z\mid x)\big)}`))}</div>`),
+ lines:['Lecture 1 in one picture: a prior on the weights θ, a likelihood for the data, and a posterior out of reach because it needs p(𝒟). So we fitted a simple q and maximised the ELBO.',
+  'Today, the same picture with new names: the unknown is an image’s code z, the data are the image x. Prior, likelihood, the posterior out of reach, a q and the ELBO: every piece and colour carries over.',
+  'Three differences: ① every image has its own z, 60,000 unknowns; ② the likelihood has weights of its own, the decoder, learned at the same time; ③ one network, the encoder, gives every image its q.'],
+ ask:['Why could Lecture 1 not compute the posterior?','What plays the role of θ today, and what plays 𝒟?','Why not fit 60,000 separate q’s, as Lecture 1 fitted one?'],
+ expected:['The evidence p(𝒟): an integral over all seven weights, with no formula.','The code z is the unknown with a prior (θ’s role); the image x is what we observe (𝒟’s role).','It would take an optimisation per image, and again for every new image. One pass of the encoder is instant: amortised inference.'],
+ point:'Careful with θ: in Lecture 1 it was the unknown; today it names the decoder’s weights, learned as ordinary parameters. The unknown with a prior is z. Colours as in Lecture 1: prior green, likelihood orange, evidence blue, posterior teal, q purple, KL to the posterior red.',
+ transition:'Start with the model’s story, from z.'});
 chap('5.2');
 S('vae-draw','vae','The model’s story: first a code from the prior, then an image',{builds:3,
  body:stack(storyFig(),at(3,eq(R`p_\theta(x,z)\;=\;${PRI('p(z)')}\;\cdot\;\ncol{p_\theta(x\mid z)}`))),
@@ -872,14 +894,7 @@ S('vae-draw','vae','The model’s story: first a code from the prior, then an im
  ask:['What does the prior describe?','Why is this code a 9?','Does generating need the encoder?'],
  expected:['Where codes come from before any image is seen: N(0, I), chosen by us.','Because of where z sits: the decoder learned which region of codes draws which digit.','No: only the prior and the decoder.'],
  point:'We usually display the mean image: the pixel noise is independent speckle and says nothing about the digit. Colours as in Lecture 1: prior green, likelihood orange.',
- transition:'The same story in two circles.',source:OURS});
-S('vae-pgm','vae','A generative model with a hidden code',{builds:3,
- body:`<div class="state-slot">${[1,2,3].map(k=>`<div data-only="${k}">${vaePgm(k)}</div>`).join('')}</div>`,
- lines:['The same story in shorthand. The circle z is the code, with its prior N(0, I) in green. It is hidden: no one ever tells us a digit’s code.','The arrow is the likelihood: x is drawn given z, through the decoder and then pixel noise. x is shaded because we observe it.','The decoder’s weights θ sit outside the box: one set, shared by every image, learned from the data.'],
- ask:['Which circle is observed?','What does the arrow mean?','How many sets of decoder weights are there?'],
- expected:['x, the image (shaded). z is never observed.','x is drawn given z: through the decoder, then pixel noise.','One, shared by all 60,000 images.'],
- point:'Graphical-model notation (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter. Prior green, likelihood orange, as in Lecture 1.',
- transition:'The likelihood, in numbers.'});
+ transition:'The likelihood, in numbers.',source:OURS});
 S('sigma','vae','The likelihood scores a code: how well does it draw our 3?',{builds:3,
  body:stack(eq(R`\ncol{\log p_\theta(x\mid z)}=\sum_{j=1}^{784}\log\N\big(x_j;\,f_\theta(z)_j,\ \sigma^2\big)=-\frac{\lVert x-f_\theta(z)\rVert^2}{2\sigma^2}+${f(-V.loglik_const,1)}`),
   at(2,likFig()),at(3,small(`σ = ${f(d.meta.sigma,1)}: about the typical pixel error of a 2-number code, √(31 / 784) ≈ 0.2. The constant is −784 log(σ√2π).`))),
@@ -909,79 +924,42 @@ S('evidence','vae','The evidence p(x): average the likelihood over the prior',{b
  ask:['Why is the estimate so poor with few draws?','Where should we draw codes from instead?'],
  expected:['Nearly every draw explains the 3 badly; the few that matter are rarely drawn.','From near the posterior: that is the job q will do.'],
  point:'Naive Monte Carlo, 30 repeats for each S; log of the average computed stably (log-sum-exp).',
- transition:'Line Lecture 1 up with today.',source:OURS});
-S('cast','vae','Same problem as Lecture 1, new names',{builds:2,
- body:stack(`<div class="table-sm">${table(['','Lecture 1','today, for one image x'],[
-  ['the unknown, with a prior','θ: the tiny network’s 7 weights','z: this image’s 2-number code'],
-  ['prior',m(PRI(R`p(\theta)`)),m(PRI(R`p(z)=\N(0,I)`))],
-  ['likelihood',m(R`\ncol{p(\mathcal D\mid\theta)}`),m(R`\ncol{p_\theta(x\mid z)}`)+': the decoder'],
-  ['posterior: out of reach',m(R`\pcol{p(\theta\mid\mathcal D)}`),m(R`\pcol{p(z\mid x)}`)],
-  ['approximation',m(R`\qcol{q_\psi(\theta)}`)+': the guide',m(R`\qcol{q_\phi(z\mid x)}`)+': the encoder'],
-  [at(2,'how many q’s?'),at(2,'one'),at(2,'one per image: 60,000, all computed by one encoder network')]])}</div>`,
-  small('Careful with θ: today it names the decoder’s weights, learned as ordinary parameters. The unknown with a prior is z.')),
- lines:['Line them up. Lecture 1’s weights θ become a code z, and the data 𝒟 become one image x. Prior, likelihood and posterior keep their roles and colours.','One change: Lecture 1 fitted one q. Here every image needs its own q, so a network, the encoder, outputs it from the image.'],
- ask:['Which row changed the most?','Why not fit 60,000 separate q’s, as Lecture 1 fitted one?'],
- expected:['The approximation: one q became a q for every image, produced by a network.','It would take a separate optimisation for every image, and again for every new image. One encoder pass is instant.'],
- point:'Fitting one network that outputs q for any input is called amortised inference.',
- transition:'Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.'});
+ transition:'Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.',source:OURS});
 chap('5.4');
 S('var-approx','vae','The variational approximation: the closest Gaussian',{builds:3,
  body:stack(varFig(),at(3,`<div class="dflex" style="justify-content:center;gap:28px">${eq(R`\dcol{\log p_\theta(x)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(z\mid x)\big)}`)}${l1('vi-idea','1.5','approximate the posterior')}</div>`)),
  lines:['We cannot compute the posterior, so do what Lecture 1 did: choose a simple family, Gaussians N(m, diag s²), and find the member closest to the posterior. First, two poor choices: the prior itself, and a q sitting on the 1s.',
-  'Two good ones: the encoder’s q, from one pass of the network, and a q fitted to this one image by Lecture 1’s VI (two slides on). Both sit on the posterior’s patch.',
+  'Two good ones: the encoder’s q, from one pass of the network, and a q fitted to this one image by Lecture 1’s VI (an optional slide replays it). Both sit on the posterior’s patch.',
   `How do we know which is closest, without the posterior? log p(x) is one fixed number, so the gap log p(x) − ELBO is exactly the KL to the posterior. Highest ELBO = closest q: gaps ${QS.map(q=>gapTxt(V.grid.log_px-q.elbo)).join(', ').replace(/, ([^,]*)$/,' and $1')}.`],
  ask:['Why is the prior a poor q?','Which q is closest, and how can you tell without the posterior?','Why Gaussians?'],
  expected:['It spreads over the whole plane, while the posterior is a tiny patch.','The VI fit: it has the highest ELBO, so the smallest gap, which is its KL to the posterior.','Easy to sample (tool ①), and their KL to N(0, I) has a formula (tool ②).'],
  point:'Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers.',
- transition:'That ELBO, written for one image.',source:OURS});
-S('vae-elbo','vae','Lecture 1’s ELBO, for one image',{builds:3,
- body:stack(small('Lecture 1'),eq(R`\qcol{\ELBO(q)}=\E_{\theta\sim q}\big[\ncol{\log p(\mathcal D\mid\theta)}\big]-\KL\big(\qcol{q(\theta)}\,\|\,${PRI(R`p(\theta)`)}\big)`),
-  at(2,small('today: swap the names')),at(2,eq(R`\qcol{\ELBO(x)}=\E_{z\sim q_\phi(z\mid x)}\big[\ncol{\log p_\theta(x\mid z)}\big]-\KL\big(\qcol{q_\phi(z\mid x)}\,\|\,${PRI(R`p(z)`)}\big)`)),
-  at(3,eq(R`\dcol{\log p_\theta(x)}=\qcol{\ELBO(x)}+\lcol{\KL\big(q_\phi(z\mid x)\,\|\,p(z\mid x)\big)}\ \ge\ \qcol{\ELBO(x)}`)),
-  at(3,small('Raising the ELBO does two jobs: θ makes the image more probable, and φ brings q closer to the posterior.'))),
- lines:['Lecture 1’s ELBO: fit the data, stay near the prior.','Swap the names: the same two terms for one image. Rebuild x from codes drawn from q, and keep q near the prior N(0, I).','And the same budget: log p(x) = ELBO + a KL that is never negative. Training maximises the ELBO summed over all 60,000 images.'],
- ask:['Which term is new compared with Lecture 1?','Which term rewards a good reconstruction?','What does maximising the ELBO do to θ, and to φ?'],
- expected:['None: every term has a counterpart. Only the names changed.','The first: the expected log-likelihood of the image.','θ: the images become more probable under the model. φ: q moves towards the true posterior.'],
- point:'The same derivation as Lecture 1, Section 4.1, with θ → z and 𝒟 → x; Lecture 2, Section 6.3 writes it out for one image.',
- transition:'Who computes q for each image?'});
-S('elbo-read','vae','Read the ELBO term by term: it is Part 4’s three fixes',{builds:3,
- body:`<div class="mchain mread"><div class="mc-h">piece of the ELBO for one image</div><div class="mc-h">what it says</div><div class="mc-h">where we met it</div>${[
-  [R`\E_{z\sim\qcol{q_\phi(z\mid x)}}\big[\,\cdots\big]`,'draw codes from this image’s cloud: the cloud is q','Fix 2'],
-  [R`\ncol{\log p_\theta(x\mid z)}`,'decode z and score how well it explains x: the rebuild term','the autoencoder’s loss (5.2)'],
-  [R`-\KL\big(\qcol{q_\phi(z\mid x)}\,\|\,${PRI('p(z)')}\big)`,'pull the cloud towards the prior p(z) = N(0, I)','Fixes 1 and 3']
- ].map(([t,say,src],k)=>{const c=x=>k?`<div data-at="${k+1}">${x}</div>`:`<div>${x}</div>`;return c(m(t))+c(`<span class="mc-w">${say}</span>`)+c(`<span class="mc-s">${src}</span>`);}).join('')}</div>`,
- lines:['The average over q: codes drawn from this image’s cloud. The encoder’s cloud of Fix 2 is Lecture 1’s q.',
-  'The log-likelihood: decode the code and score the image. With Gaussian pixels it is the rebuild term (Section 5.2).',
-  'The KL to the prior is Fix 3’s penalty, and the prior N(0, I) is Fix 1. Part 4’s guessed loss was minus the ELBO all along.'],
- ask:['Which fix does the average over q correspond to?','Which term was the autoencoder’s whole loss?','Where did Fix 1 go?'],
- expected:['Fix 2: drawing z from the image’s cloud, q_φ(z | x).','log p(x | z): the reconstruction, up to the 1/2σ² weight.','Into the prior p(z) = N(0, I), inside the KL.'],
- transition:'Fitting q for one image, as Lecture 1 did.'});
-S('vi3','vae','Lecture 1’s VI on one image: fit q for our 3, press play',{builds:2,
- body:widget('vi3','Variational inference for one image.'),
- lines:['Lecture 1’s recipe on one image: start q at the prior N(0, I), draw codes with tool ①, and climb the ELBO with Adam.',`q moves into the posterior’s patch and shrinks to fit it. The ELBO ends at ${f(V.vi3.final_elbo,2)}, just below the ceiling log p(x) = ${f(V.grid.log_px,2)}.`],
- ask:['What happens to the ELBO at first? Why?','How big is the final gap?'],
- expected:['It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.',`About ${f(V.grid.log_px-V.vi3.final_elbo,2)} nats: q is nearly the exact posterior.`],
- point:'Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step. Left: all codes, prior circles at radius 1 and 2; middle: zoomed on the posterior.',
- transition:'1,200 steps for one image. For 60,000 images, a network does it in one pass.',source:OURS});
+ transition:'Fitting one q for each of 60,000 images: who does it?',source:OURS});
 S('encoder-q','vae','The encoder’s cloud is q: one network gives q for every image',{builds:3,
  body:stack(`<div class="state-slot"><div data-only="1">${inferFig(2)}</div><div data-only="2">${inferFig('enc')}</div><div data-only="3">${inferFig('enc')}</div></div>`,
   at(3,small('Generative model: z → x, the decoder. Variational approximation: x → z, the encoder. One objective trains both: the ELBO.'))),
  lines:['The posterior for our 3, from the grid: which codes made this x. For a new image there is no grid; it is out of reach.',
-  `The dashed arrow is Part 4’s encoder. Its cloud N(μ, σ²) is q for this image, computed in one pass instead of 1,200 steps, and it lands on the patch (gap ${gapTxt(V.grid.log_px-QS[2].elbo)}).`,
+  `The dashed arrow is Part 4’s encoder. Its cloud N(μ, σ²) is q for this image, computed in one pass instead of Lecture 1’s 1,200 steps of VI, and it lands on the patch (gap ${gapTxt(V.grid.log_px-QS[2].elbo)}).`,
   'Decoder θ and encoder φ are trained together, by one objective: the ELBO, summed over all images.'],
  ask:['Which way does each arrow point?','What does the encoder output for one image?','What is variational about the VAE?'],
  expected:['Decoder: z to x (generate). Encoder: x to z (infer).','Two means and two log variances: q_φ(z | x) = N(μ, σ²).','q is a member of a simple family (diagonal Gaussians), fitted by maximising the ELBO: Lecture 1’s variational inference.'],
  point:'Kingma and Welling (2014), figure 1: solid arrow = generative model p_θ, dashed = variational approximation q_φ.',
- transition:'Write the loss.',source:OURS});
+ transition:'Now the loss, derived from the ELBO.',source:OURS});
 chap('5.5');
-S('vae-loss','vae','Minus the ELBO is Part 4’s loss, with its weight decided',{builds:3,
- body:stack(`<div>${eq(R`-\qcol{\ELBO(x)}=\underbrace{\E_{q}\Big[\tfrac{1}{2\sigma^2}\big\lVert \pcol{x}-\qcol{f_\theta(z)}\big\rVert^2\Big]}_{\text{from }-\ncol{\log p_\theta(x\mid z)}}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,${PRI(R`\N(0,I)`)}\big)}_{\text{stay near the prior}}+\underbrace{\text{const}}_{-541.4}`)}</div>`,
-  at(2,`<div>${eq(R`\E_q\big[\cdots\big]\approx\tfrac{1}{2\sigma^2}\big\lVert \pcol{x}-\qcol{f_\theta(\mu+\sigma\odot\epsilon)}\big\rVert^2,\qquad\epsilon\sim\N(0,I)\ \text{(one draw, tool ①)}`)}</div>`),
-  at(3,`<div>${eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(tool ②, no sampling)}`)}</div>`)),
- lines:['Flip the sign of the ELBO: Part 4’s loss, with the rebuild term weighted by 1/2σ², plus a constant that training can ignore.','The average over q is estimated with one reparameterised draw per image per step.','The KL between two diagonal Gaussians has a formula, so it needs no sampling. Both of Lecture 1’s tools, in one loss.'],
- ask:['Which term pulls the codes towards N(0, I)?','Why is one draw enough?','What does the KL do to a code with μ = 5?'],
- expected:['The KL term.','Over many steps and images the noise averages out; the estimate is unbiased.','Adds about ½ × 25 = 12.5 per number: strong pressure back towards the origin.'],
- point:'The constant is 784 log(σ√2π) = −541.4 for σ = 0.2. Shape of the loss: data fit + penalty, like ridge regression, but here the penalty comes out of the ELBO.',
+S('vae-loss','vae','From the ELBO to the loss: recon + KL, derived, not guessed',{builds:4,nb:'cell-derive',
+ body:`<div class="derive">${[
+  ['start','Lecture 1’s ELBO, names swapped',R`\qcol{\ELBO(x)}=\E_{z\sim\qcol{q_\phi(z\mid x)}}\big[\ncol{\log p_\theta(x\mid z)}\big]-\KL\big(\qcol{q_\phi(z\mid x)}\,\|\,${PRI('p(z)')}\big)`],
+  ['choice 1','pixels: Gaussian around the decoder’s output, noise 0.2',R`\ncol{\log p_\theta(x\mid z)}=-\frac{\lVert \pcol{x}-\qcol{f_\theta(z)}\rVert^2}{2\cdot 0.2^2}+${f(-V.loglik_const,1)}`],
+  ['choice 2','prior N(0, I); q from the encoder: N(μ, σ²)',R`\KL\big(\qcol{\N(\mu,\sigma^2)}\,\|\,${PRI(R`\N(0,I)`)}\big)=\tfrac12\textstyle\sum_k\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)`],
+  ['result','minus the ELBO: Part 4’s loss',R`-\qcol{\ELBO(x)}=\underbrace{\E_{q}\Big[\tfrac{1}{2\cdot 0.2^2}\lVert \pcol{x}-\qcol{f_\theta(z)}\rVert^2\Big]}_{\text{rebuild from the cloud: Fix 2}}+\underbrace{\KL\big(q_\phi\,\|\,${PRI(R`\N(0,I)`)}\big)}_{\text{pull to }\N(0,I)\text{: Fixes 1, 3}}-${f(-V.loglik_const,1)}`]
+ ].map(([t,d,tex],k)=>{const w=x=>k?`<div data-at="${k+1}">${x}</div>`:`<div>${x}</div>`;return w(`<div class="d-tag"><b>${t}</b>${d}</div>`)+w(eq(tex));}).join('')}</div>`,
+ lines:['Start from Lecture 1’s ELBO with the names swapped: the log-likelihood averaged over codes from q, minus the KL from q to the prior. Nothing here is about images yet.',
+  'Now the model’s first choice: each pixel is Gaussian around the decoder’s output, with noise 0.2. The log-likelihood becomes minus the squared error, weighted by 1/(2 · 0.2²) = 12.5, plus a constant.',
+  'The other choices: the prior N(0, I), and a Gaussian q whose mean and spread the encoder outputs. Their KL has a formula: Lecture 1’s tool ②.',
+  'Flip the sign. Minus the ELBO is the rebuild error plus the KL: Part 4’s loss, term for term, now with its weight decided. Nothing was guessed; every term comes from a modelling choice.'],
+ ask:['Which term needs the decoder?','Where have you seen squared error come from a Gaussian likelihood?','Which Lecture 1 tool gives the KL?','What did Part 4 guess that this derivation decides?'],
+ expected:['The log-likelihood: decode z, then score x against it.','Least squares in linear regression: maximum likelihood with Gaussian noise.','Tool ②: the KL between diagonal Gaussians, by formula, no sampling.','The weight between the terms, 1/(2 · 0.2²) from the pixel noise, and the reason the KL is there at all.'],
+ point:`The constant: log p(x | z) carries +${f(-V.loglik_const,1)} = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, with torch.distributions densities and no formulas, and gets Part 4’s loss minus ${f(-V.loglik_const,1)}.`,
  transition:'Put in the numbers for our 3.'});
 S('vae-worked','vae','One step for our 3, with numbers',{builds:3,
  body:stack(eq(R`\mu=(${f(V.q3.mu[0],3)},\,${f(V.q3.mu[1],3)}),\quad\sigma=(${f(V.q3.sd[0],3)},\,${f(V.q3.sd[1],3)}),\quad\epsilon=(${f(WK.eps[0],1)},\,${f(WK.eps[1],1)})`),eq(R`z=\mu+\sigma\odot\epsilon=(${f(WK.z[0],3)},\,${f(WK.z[1],3)})`),
@@ -1110,6 +1088,20 @@ S('next','end','Next: can we drop the pixel likelihood altogether?',{builds:2,
  transition:'End of the main route. Optional slides follow.'});
 
 // ================================================================= Optional depth
+O('vae-pgm','The VAE as a graphical model: a hidden code',{builds:3,
+ body:`<div class="state-slot">${[1,2,3].map(k=>`<div data-only="${k}">${vaePgm(k)}</div>`).join('')}</div>`,
+ lines:['The same story in shorthand. The circle z is the code, with its prior N(0, I) in green. It is hidden: no one ever tells us a digit’s code.','The arrow is the likelihood: x is drawn given z, through the decoder and then pixel noise. x is shaded because we observe it.','The decoder’s weights θ sit outside the box: one set, shared by every image, learned from the data.'],
+ ask:['Which circle is observed?','What does the arrow mean?','How many sets of decoder weights are there?'],
+ expected:['x, the image (shaded). z is never observed.','x is drawn given z: through the decoder, then pixel noise.','One, shared by all 60,000 images.'],
+ point:'Graphical-model notation (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter. Prior green, likelihood orange, as in Lecture 1.',
+ transition:''});
+O('vi3','Lecture 1’s VI on one image: fit q for our 3, press play',{builds:2,
+ body:widget('vi3','Variational inference for one image.'),
+ lines:['Lecture 1’s recipe on one image: start q at the prior N(0, I), draw codes with tool ①, and climb the ELBO with Adam.',`q moves into the posterior’s patch and shrinks to fit it. The ELBO ends at ${f(V.vi3.final_elbo,2)}, just below the ceiling log p(x) = ${f(V.grid.log_px,2)}.`],
+ ask:['What happens to the ELBO at first? Why?','How big is the final gap?'],
+ expected:['It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.',`About ${f(V.grid.log_px-V.vi3.final_elbo,2)} nats: q is nearly the exact posterior.`],
+ point:'Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step. Left: all codes, prior circles at radius 1 and 2; middle: zoomed on the posterior.',
+ transition:'',source:OURS});
 O('opt-ae-test','Did the autoencoder memorise? Training against test error',{builds:2,
  body:cols(table(['2-number code','training error','test error'],[['autoencoder',f(SW['2'].train_sse,1),f(SW['2'].test_sse,1)],['PCA','',f(M.pca.test_sse['2'],1)]]),
   stack(p('Test digits were never used for training.'),at(2,p('Training and test errors are close: it learned digits in general, not these particular 60,000.'))),'1fr 1fr'),
@@ -1154,7 +1146,7 @@ S('contents','map','Lecture 5 at a glance: six parts, twenty-five sections',{nb:
  lines:[`Six parts, twenty-five numbered sections, about ${meta.minutes} minutes. The ▶ Notebook link on every slide opens its section in Colab.`],
  ask:['Which part leans most on Lecture 1?'],
  expected:['Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.'],
- point:'A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-pgm, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.',
+ point:'A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip evidence, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.',
  transition:'Part 1: why generate?'});
 for(const [sl,k] of partOpeners){
  const figs={6:budgetFig(true),1:`<div class="photo-row" style="grid-template-columns:2.1fr 1fr 1fr 1fr">${photo('assets/gallery/stylegan-faces.jpg','faces (StyleGAN)')+photo('assets/examples/t2i-sample-1.jpg','text to image')+photo('assets/gallery/spade-out-0.jpg','a map to a landscape')}<figure>${digits('vae16_prior_samples',{idx:[0,1,2,3],cols:2,size:76,gap:6})}<figcaption>digits: today</figcaption></figure></div>`,2:maxH(250,aeDiagram({stage:4})),3:genDiagram('ae'),4:fixesFig(),5:castFig()};

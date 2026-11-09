@@ -1,6 +1,6 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 98 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 92 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -11,7 +11,7 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 | Part 2 · Autoencoders: squeeze, then rebuild | 18 |
 | Part 3 · Can an autoencoder generate? | 10 |
 | Part 4 · From an autoencoder to a VAE: three fixes | 12 |
-| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 33 |
+| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 27 |
 | Part 6 · Putting it together | 6 |
 
 ## contents: Lecture 5 at a glance: six parts, twenty-five sections
@@ -20,7 +20,7 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 
 **Expected:** Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.
 
-**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-pgm, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
+**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip evidence, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
 
 **Transition:** Part 1: why generate?
 
@@ -672,23 +672,23 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 
 **Transition:** Section 5.1.
 
-## recap-elbo: From Lecture 1: one objective we can compute
+## same-problem: Same problem as Lecture 1: the same picture, new names
 
-**Build 1, ask:** Which part of log p(𝒟) could we compute?
+**Build 1, ask:** Why could Lecture 1 not compute the posterior?
 
-**Expected:** The ELBO. The KL to the posterior needs p(𝒟), which we cannot compute.
+**Expected:** The evidence p(𝒟): an integral over all seven weights, with no formula.
 
-**Build 2, ask:** What does each ELBO term ask of q?
+**Build 2, ask:** What plays the role of θ today, and what plays 𝒟?
 
-**Expected:** The first: put q on θ values that explain the data. The second: do not stray far from the prior.
+**Expected:** The code z is the unknown with a prior (θ’s role); the image x is what we observe (𝒟’s role).
 
-**Build 3, ask:** What did gradient descent change in Lecture 1?
+**Build 3, ask:** Why not fit 60,000 separate q’s, as Lecture 1 fitted one?
 
-**Expected:** ψ: the means and log-widths of q, one bell per weight of the tiny network.
+**Expected:** It would take an optimisation per image, and again for every new image. One pass of the encoder is instant: amortised inference.
 
-**Point here:** Colours follow Lecture 1’s Part 4: q purple, likelihood orange, prior green, evidence blue, the KL to the posterior red.
+**Point here:** Careful with θ: in Lecture 1 it was the unknown; today it names the decoder’s weights, learned as ordinary parameters. The unknown with a prior is z. Colours as in Lecture 1: prior green, likelihood orange, evidence blue, posterior teal, q purple, KL to the posterior red.
 
-**Transition:** A model with a hidden code.
+**Transition:** Start with the model’s story, from z.
 
 ## vae-draw: The model’s story: first a code from the prior, then an image
 
@@ -706,27 +706,9 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 
 **Point here:** We usually display the mean image: the pixel noise is independent speckle and says nothing about the digit. Colours as in Lecture 1: prior green, likelihood orange.
 
-**Transition:** The same story in two circles.
+**Transition:** The likelihood, in numbers.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
-
-## vae-pgm: A generative model with a hidden code
-
-**Build 1, ask:** Which circle is observed?
-
-**Expected:** x, the image (shaded). z is never observed.
-
-**Build 2, ask:** What does the arrow mean?
-
-**Expected:** x is drawn given z: through the decoder, then pixel noise.
-
-**Build 3, ask:** How many sets of decoder weights are there?
-
-**Expected:** One, shared by all 60,000 images.
-
-**Point here:** Graphical-model notation (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter. Prior green, likelihood orange, as in Lecture 1.
-
-**Transition:** The likelihood, in numbers.
 
 ## sigma: The likelihood scores a code: how well does it draw our 3?
 
@@ -778,23 +760,9 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 
 **Point here:** Naive Monte Carlo, 30 repeats for each S; log of the average computed stably (log-sum-exp).
 
-**Transition:** Line Lecture 1 up with today.
+**Transition:** Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
-
-## cast: Same problem as Lecture 1, new names
-
-**Build 1, ask:** Which row changed the most?
-
-**Expected:** The approximation: one q became a q for every image, produced by a network.
-
-**Build 2, ask:** Why not fit 60,000 separate q’s, as Lecture 1 fitted one?
-
-**Expected:** It would take a separate optimisation for every image, and again for every new image. One encoder pass is instant.
-
-**Point here:** Fitting one network that outputs q for any input is called amortised inference.
-
-**Transition:** Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.
 
 ## var-approx: The variational approximation: the closest Gaussian
 
@@ -812,57 +780,7 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 
 **Point here:** Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers.
 
-**Transition:** That ELBO, written for one image.
-
-**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
-
-## vae-elbo: Lecture 1’s ELBO, for one image
-
-**Build 1, ask:** Which term is new compared with Lecture 1?
-
-**Expected:** None: every term has a counterpart. Only the names changed.
-
-**Build 2, ask:** Which term rewards a good reconstruction?
-
-**Expected:** The first: the expected log-likelihood of the image.
-
-**Build 3, ask:** What does maximising the ELBO do to θ, and to φ?
-
-**Expected:** θ: the images become more probable under the model. φ: q moves towards the true posterior.
-
-**Point here:** The same derivation as Lecture 1, Section 4.1, with θ → z and 𝒟 → x; Lecture 2, Section 6.3 writes it out for one image.
-
-**Transition:** Who computes q for each image?
-
-## elbo-read: Read the ELBO term by term: it is Part 4’s three fixes
-
-**Build 1, ask:** Which fix does the average over q correspond to?
-
-**Expected:** Fix 2: drawing z from the image’s cloud, q_φ(z | x).
-
-**Build 2, ask:** Which term was the autoencoder’s whole loss?
-
-**Expected:** log p(x | z): the reconstruction, up to the 1/2σ² weight.
-
-**Build 3, ask:** Where did Fix 1 go?
-
-**Expected:** Into the prior p(z) = N(0, I), inside the KL.
-
-**Transition:** Fitting q for one image, as Lecture 1 did.
-
-## vi3: Lecture 1’s VI on one image: fit q for our 3, press play
-
-**Build 1, ask:** What happens to the ELBO at first? Why?
-
-**Expected:** It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.
-
-**Build 2, ask:** How big is the final gap?
-
-**Expected:** About 0.02 nats: q is nearly the exact posterior.
-
-**Point here:** Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step. Left: all codes, prior circles at radius 1 and 2; middle: zoomed on the posterior.
-
-**Transition:** 1,200 steps for one image. For 60,000 images, a network does it in one pass.
+**Transition:** Fitting one q for each of 60,000 images: who does it?
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
@@ -882,25 +800,29 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 
 **Point here:** Kingma and Welling (2014), figure 1: solid arrow = generative model p_θ, dashed = variational approximation q_φ.
 
-**Transition:** Write the loss.
+**Transition:** Now the loss, derived from the ELBO.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## vae-loss: Minus the ELBO is Part 4’s loss, with its weight decided
+## vae-loss: From the ELBO to the loss: recon + KL, derived, not guessed
 
-**Build 1, ask:** Which term pulls the codes towards N(0, I)?
+**Build 1, ask:** Which term needs the decoder?
 
-**Expected:** The KL term.
+**Expected:** The log-likelihood: decode z, then score x against it.
 
-**Build 2, ask:** Why is one draw enough?
+**Build 2, ask:** Where have you seen squared error come from a Gaussian likelihood?
 
-**Expected:** Over many steps and images the noise averages out; the estimate is unbiased.
+**Expected:** Least squares in linear regression: maximum likelihood with Gaussian noise.
 
-**Build 3, ask:** What does the KL do to a code with μ = 5?
+**Build 3, ask:** Which Lecture 1 tool gives the KL?
 
-**Expected:** Adds about ½ × 25 = 12.5 per number: strong pressure back towards the origin.
+**Expected:** Tool ②: the KL between diagonal Gaussians, by formula, no sampling.
 
-**Point here:** The constant is 784 log(σ√2π) = −541.4 for σ = 0.2. Shape of the loss: data fit + penalty, like ridge regression, but here the penalty comes out of the ELBO.
+**Build 4, ask:** What did Part 4 guess that this derivation decides?
+
+**Expected:** The weight between the terms, 1/(2 · 0.2²) from the pixel noise, and the reason the KL is there at all.
+
+**Point here:** The constant: log p(x | z) carries +541.4 = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, with torch.distributions densities and no formulas, and gets Part 4’s loss minus 541.4.
 
 **Transition:** Put in the numbers for our 3.
 
@@ -1107,6 +1029,36 @@ Planned main route: 98 minutes. Timing includes student responses and the specif
 **Expected:** A classifier trained to tell real from generated: a learned critic.
 
 **Transition:** End of the main route. Optional slides follow.
+
+## vae-pgm: The VAE as a graphical model: a hidden code (optional)
+
+**Build 1, ask:** Which circle is observed?
+
+**Expected:** x, the image (shaded). z is never observed.
+
+**Build 2, ask:** What does the arrow mean?
+
+**Expected:** x is drawn given z: through the decoder, then pixel noise.
+
+**Build 3, ask:** How many sets of decoder weights are there?
+
+**Expected:** One, shared by all 60,000 images.
+
+**Point here:** Graphical-model notation (Bishop, PRML chapter 8): shaded = observed, box = repeated for each example, a dot outside = a parameter. Prior green, likelihood orange, as in Lecture 1.
+
+## vi3: Lecture 1’s VI on one image: fit q for our 3, press play (optional)
+
+**Build 1, ask:** What happens to the ELBO at first? Why?
+
+**Expected:** It wobbles and dips: q is still huge, and most codes it draws explain the 3 badly.
+
+**Build 2, ask:** How big is the final gap?
+
+**Expected:** About 0.02 nats: q is nearly the exact posterior.
+
+**Point here:** Adam, step size 0.05 then 0.01, 64 reparameterised draws per step, 1,200 steps (seed 23). The ELBO plotted is the noisy estimate at each step. Left: all codes, prior circles at radius 1 and 2; middle: zoomed on the posterior.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
 ## opt-ae-test: Did the autoencoder memorise? Training against test error (optional)
 

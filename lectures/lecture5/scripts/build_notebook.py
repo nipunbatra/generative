@@ -371,8 +371,9 @@ section('4.4', 'The loss the fixes give', 'fix-loss',
 # ------------------------------------------------------------------------------------------------ Part 5
 part('5', 'Why this loss: Lecture 1’s ELBO, one image at a time',
      'A model with a hidden code: z ~ N(0, I), x | z ~ N(decoder(z), 0.2² I). Lecture 2’s trained VAEs (50 epochs).')
-section('5.1', 'What Lecture 1 gave us', 'recap-elbo',
-        'The objective: maximise the ELBO = E_q[log-likelihood] − KL(q ‖ prior). log p(𝒟) = ELBO + KL(q ‖ posterior), so raising the ELBO lowers the KL to the posterior.')
+section('5.1', 'Same problem as Lecture 1', 'same-problem',
+        'Lecture 1: a prior p(θ), a likelihood p(𝒟 | θ), a posterior out of reach because it needs p(𝒟), so a simple q and the ELBO, with log p(𝒟) = ELBO + KL(q ‖ posterior). '
+        'Today the same picture with an image’s code z for θ and the image x for 𝒟. Three differences: one z per image, a decoder whose weights are learned too, and one encoder that gives every q.')
 section('5.2', 'A model with a hidden code', 'vae-draw', 'The story starts from z: draw a code from the prior N(0, I), decode it into a mean image, add pixel noise.')
 code(r"""
 vae2 = load_trained('vae2', 2, True); vae16 = load_trained('vae16', 16, True)
@@ -466,7 +467,25 @@ for name, mu, sd in (('q = N(0, I), the prior', [0.0, 0.0], [1.0, 1.0]), ('q on 
     e = elbo_gh(mu, sd)
     print(f'{name:24s} ELBO {e:8.2f}   gap {log_px - e:7.2f}')
 """)
-section('5.5', 'The loss, term by term', 'vae-loss', 'One reparameterised draw for our 3, with ε = (0.5, −1.0).')
+section('5.5', 'The loss, derived from the ELBO', 'vae-loss',
+        'Start from ELBO(x) = E_q[log p(x | z)] − KL(q(z | x) ‖ p(z)). Gaussian pixels with noise 0.2 turn log p(x | z) into minus the squared error over 2 · 0.2², plus a constant; '
+        'a Gaussian prior and q give the KL formula. So minus the ELBO is Part 4’s loss, rebuild + KL, minus a constant. Below: the same number two ways, then one reparameterised draw for our 3.')
+md('### The same number two ways: the ELBO from its definition, and Part 4’s loss', anchor='cell-derive')
+code(r"""
+# (1) The ELBO from Lecture 1's definition, E_q[log p(x | z) + log p(z) - log q(z | x)], with torch.distributions densities and no formulas
+g = torch.Generator().manual_seed(5)
+zs = mu3 + sd3 * torch.randn(20000, 2, generator=g, dtype=F64)
+with torch.no_grad(): fz = vae2.decoder(zs.float()).double()
+log_lik = Normal(fz, SIGMA).log_prob(x3).sum(1)                       # Gaussian pixels around the decoder's output
+log_prior = Normal(0.0, 1.0).log_prob(zs).sum(1)                      # p(z) = N(0, I)
+log_q = Normal(mu3, sd3).log_prob(zs).sum(1)                          # the encoder's q for our 3
+elbo_def = float((log_lik + log_prior - log_q).mean())
+# (2) Part 4's loss: squared error / (2 * 0.2**2), averaged over q, plus the KL by formula
+part4 = float((((fz - x3) ** 2).sum(1) / (2 * SIGMA ** 2)).mean()) + 0.5 * float((mu3 ** 2 + sd3 ** 2 - 2 * sd3.log() - 1).sum())
+print(f'ELBO from its definition: {elbo_def:.2f}, so minus the ELBO = {-elbo_def:.2f}')
+print(f"Part 4's loss {part4:.2f}, minus the constant {-const:.2f}: {part4 + const:.2f}")
+""")
+md('### One reparameterised draw for our 3, with ε = (0.5, −1.0)')
 code(r"""
 eps = torch.tensor([0.5, -1.0], dtype=F64)
 z = mu3 + sd3 * eps
