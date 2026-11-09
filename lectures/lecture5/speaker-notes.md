@@ -1,6 +1,6 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 94 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 96 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -11,7 +11,7 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 | Part 2 · Autoencoders: squeeze, then rebuild | 18 |
 | Part 3 · Can an autoencoder generate? | 10 |
 | Part 4 · From an autoencoder to a VAE: three fixes | 12 |
-| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 29 |
+| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 31 |
 | Part 6 · Putting it together | 6 |
 
 ## contents: Lecture 5 at a glance: six parts, twenty-five sections
@@ -196,7 +196,7 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Build 1, ask:** Which of these needs only samples? Which needs a score p(x)?
 
-**Expected:** Create, simulate, augment: samples. Anomalies and compression: a score.
+**Expected:** Create, fill in, simulate and make more data: samples. The odd one out and compression: a score.
 
 **Build 2, ask:** Which use connects to Lecture 1?
 
@@ -236,7 +236,7 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Build 2, ask:** When is the average still useful?
 
-**Expected:** As a summary, or a prediction scored by squared error. Not as a sample.
+**Expected:** As a summary, or as a prediction scored by squared error, but not as a sample.
 
 **Transition:** Today’s route.
 
@@ -696,7 +696,31 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Point here:** Careful with θ: in Lecture 1 it was the unknown; today it names the decoder’s weights, learned as ordinary parameters. The unknown with a prior is z. Colours as in Lecture 1: prior green, likelihood orange, evidence blue, posterior teal, q purple, KL to the posterior red.
 
+**Transition:** Lecture 1 wanted the posterior for predictions. What does a VAE want it for?
+
+## why-post: Why does a VAE need the posterior at all?
+
+**Build 1, ask:** What did Lecture 1 use the posterior for?
+
+**Expected:** Predictions: the posterior predictive averages every network’s prediction, weighted by the posterior.
+
+**Build 2, ask:** Which parts of the VAE does generating use?
+
+**Expected:** Only the prior and the decoder.
+
+**Build 3, ask:** Which part of the VAE takes an image and returns codes?
+
+**Expected:** The encoder: image in, a small cloud of codes out.
+
+**Build 4, ask:** Why is the encoder only a guess at the posterior?
+
+**Expected:** The exact posterior needs p(x), an integral with no formula (Section 5.3). The encoder gives a Gaussian guess, as Lecture 1’s q did.
+
+**Point here:** Lecture 1, Section 1.5 built the posterior predictive. Why training needs the posterior, exactly: the gradient of log p_θ(x) is an average over it, ∇θ log p_θ(x) = E over p(z | x) of ∇θ log p_θ(x, z). Section 5.3 tells the same thing with codes A, B and C. After training the encoder is useful on its own: it gives any image its code. The cloud is the encoder’s real output for our 3, drawn larger than its true width of about 0.01.
+
 **Transition:** Start with the model’s story, from z.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
 ## vae-draw: The model’s story: first a code from the prior, then an image
 
@@ -848,13 +872,13 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Build 3, ask:** Which Lecture 1 tool gives the KL?
 
-**Expected:** Tool ②: the KL between two Gaussians, computed exactly, with no sampling.
+**Expected:** Tool ②: a formula for the KL between two Gaussians.
 
 **Build 4, ask:** What did Part 4 guess that this derivation decides?
 
 **Expected:** The weight between the terms, 1/(2 · 0.2²) from the pixel noise, and the reason the KL is there at all.
 
-**Point here:** The constant: log p(x | z) carries +541.4 = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, with torch.distributions densities and no formulas, and gets Part 4’s loss minus 541.4.
+**Point here:** The constant: log p(x | z) carries +541.4 = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, using torch.distributions densities instead of the formulas, and gets Part 4’s loss minus 541.4.
 
 **Transition:** Put in the numbers for our 3.
 

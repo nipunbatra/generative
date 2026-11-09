@@ -56,7 +56,7 @@ md(r"""
 
 [▶ Open in Colab]({COLAB}) · [Slides]({DECK}) · [Lecture 5 at a glance]({DECK}#contents/1) · ES 667 Deep Learning, IIT Gandhinagar
 
-This notebook runs the experiments behind the Lecture 5 slides, **in the same order and with the same section numbers** (1.1 … 6.2). Every slide's **▶ Notebook** link jumps to its section here.
+This notebook runs the experiments behind the Lecture 5 slides, in the same order and with the same section numbers (1.1 … 6.2). Every slide's **▶ Notebook** link jumps to its section here.
 
 The networks are Lecture 2's: a 2-number autoencoder, and 2-number and 16-number VAEs, trained there for 30 and 50 epochs. This notebook loads them and trains only a few small extra models for a few epochs each.
 
@@ -90,7 +90,7 @@ def show_digits(x, ncol=8, size=0.9, title=None):
 """)
 
 # ------------------------------------------------------------------------------------------------ Part 1
-part('1', 'Why generate?', 'Generative models make new text, pictures and sound: a quick tour, what they are good for, and the one recipe they share.')
+part('1', 'Why generate?', 'Generative models make new text, pictures and sound. We take a quick tour, see what they are good for, and find the one recipe they share.')
 section('1.1', 'Things that do not exist', 'faces',
         'StyleGAN faces, then six real and six generated digits. The fakes are the first six draws z ~ N(0, I) through Lecture 2’s 16-number VAE; Section 5.7 makes more of them.')
 section('1.2', 'Text, pictures and sound', 'llm',
@@ -98,8 +98,8 @@ section('1.2', 'Text, pictures and sound', 'llm',
         'A language model gives a probability to every possible next word; generating is “sample a word, append it, repeat”.')
 section('1.3', 'What p(x) means, and what it is for', 'xy',
         'x is the data (an image: 784 numbers), y a label about it (which digit). A classifier learns p(y | x); a generative model learns p(x); '
-        'a conditional one learns p(x | y). Then the uses. Samples: create, fill in missing values, simulate many futures. '
-        'Scores p(x): spot anomalies, compress (Lecture 1’s codes). And extra or synthetic data.')
+        'a conditional one learns p(x | y). Then the uses. Samples let us create, fill in missing values and simulate many futures; '
+        'scores p(x) let us spot anomalies and compress (Lecture 1’s codes); and a model can make extra or synthetic data.')
 md('### p(y | x) from a classifier, and p(x), p(x, y) and p(y | x) for one number per image (slides [xy]({DECK}#xy/1) and [gen-disc]({DECK}#gen-disc/1))', anchor='cell-xy')
 code(r"""
 from torchvision.datasets import MNIST
@@ -144,7 +144,7 @@ b.plot(grid, post1, color='#0F766E'); b.axhline(.5, ls='--', c='grey'); b.set_yl
 plt.show()
 """, anchor=None)
 section('1.4', 'What they all share', 'recipe',
-        'Random numbers in, a learned network, a sample out. A model of p(x) can score and sample. The average example is not a sample: '
+        'Each model turns random numbers into a sample through a learned network. A model of p(x) can score and sample. The average example is not a sample: '
         'look at the pixel-by-pixel average of the test 3s.')
 code(r"""
 threes = Xte[yte == 3]
@@ -323,7 +323,7 @@ grid = torch.stack(torch.meshgrid(gy, gx, indexing='ij')[::-1], -1).reshape(-1, 
 with torch.no_grad(): show_digits(ae2.decoder(grid), ncol=12, size=.5, title='decoder output over a 12 x 12 grid of codes')
 """)
 section('3.3', 'What we want instead', 'wishes',
-        'Codes that fill N(0, I); each image owning a small cloud of codes; one probability model that can score and sample. The VAE does all three.')
+        'We want codes that fill N(0, I), a small cloud of codes for each image, and one probability model that can score and sample. The VAE does all three.')
 
 # ------------------------------------------------------------------------------------------------ Part 4
 part('4', 'From an autoencoder to a VAE: three fixes', 'The autoencoder cannot generate. Three fixes, one at a time, turn it into a VAE.')
@@ -373,10 +373,12 @@ section('4.4', 'The loss the fixes give', 'fix-loss',
 
 # ------------------------------------------------------------------------------------------------ Part 5
 part('5', 'Why this loss: Lecture 1’s ELBO, one image at a time',
-     'A model with a hidden code: z ~ N(0, I), x | z ~ N(decoder(z), 0.2² I). Lecture 2’s trained VAEs (50 epochs).')
+     'A model with a hidden code: z ~ N(0, I), x | z ~ N(decoder(z), 0.2² I). The networks are Lecture 2’s trained VAEs (50 epochs).')
 section('5.1', 'Same problem as Lecture 1', 'same-problem',
         'Lecture 1: a prior p(θ), a likelihood p(𝒟 | θ), a posterior out of reach because it needs p(𝒟), so a simple q and the ELBO, with log p(𝒟) = ELBO + KL(q ‖ posterior). '
-        'Today the same picture with an image’s code z for θ and the image x for 𝒟. Three differences: one z per image, a decoder whose weights are learned too, and one encoder that gives every q.')
+        'Today the same picture with an image’s code z for θ and the image x for 𝒟. Three differences: one z per image, a decoder whose weights are learned too, and one encoder that gives every q. '
+        'Why a VAE needs the posterior: Lecture 1 used it for predictions, but a VAE generates from the prior and the decoder alone. '
+        'It is still an autoencoder, though. Asking which codes could have made an image is the posterior p(z | x), and the encoder is our guess at it. Training needs the posterior too (5.3).')
 section('5.2', 'A model with a hidden code', 'vae-draw', 'The story starts from z: draw a code from the prior N(0, I), decode it into a mean image, add pixel noise.')
 code(r"""
 vae2 = load_trained('vae2', 2, True); vae16 = load_trained('vae16', 16, True)

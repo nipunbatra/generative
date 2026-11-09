@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 94,
+  "minutes": 96,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -34,7 +34,7 @@
     {
       "id": "vae",
       "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
-      "minutes": 29
+      "minutes": 31
     },
     {
       "id": "end",
@@ -47,7 +47,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 68,
+  "coreSlides": 69,
   "optionalSlides": 15,
   "slides": [
     {
@@ -373,6 +373,13 @@
       "optional": false
     },
     {
+      "id": "why-post",
+      "title": "Why does a VAE need the posterior at all?",
+      "section": "vae",
+      "builds": 4,
+      "optional": false
+    },
+    {
       "id": "vae-draw",
       "title": "The model’s story: first a code from the prior, then an image",
       "section": "vae",
@@ -632,5 +639,5 @@
       "optional": true
     }
   ],
-  "totalStates": 194
+  "totalStates": 198
 }

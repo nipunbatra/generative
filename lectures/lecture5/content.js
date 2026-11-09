@@ -42,6 +42,9 @@ const CSS=`
 .xy-f{font-size:30px}.xy-q{font-size:22px;line-height:1.3}.xy-tag{display:inline-block;font-size:16px;font-weight:650;border-radius:999px;padding:2px 10px;margin-top:6px;border:1.5px solid currentColor}
 .xy-cells{display:flex;gap:12px;align-items:flex-start}
 .two-eq{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px}
+.why3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;align-items:start}.why3 h4{margin:0 0 8px;font-size:21px;font-weight:650;line-height:1.25}
+.why3 .w3v{height:178px;display:flex;align-items:center;justify-content:center}.why3 .w3v>.math{font-size:22px;white-space:nowrap}.why3 .w3c{font-size:18px;line-height:1.35;color:${MUTED};margin-top:6px}
+@media(max-width:760px){.reading .why3{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:760px){.reading .two-eq,.reading .derive{grid-template-columns:minmax(0,1fr)}}
 .derive{display:grid;grid-template-columns:230px minmax(0,1fr);gap:10px 26px;align-items:center}.derive .d-tag{font-size:17px;line-height:1.3;color:${MUTED}}.derive .d-tag b{display:block;color:${palette.ink};font-size:18px}.derive .display{font-size:25px}.derive .display .katex-display{margin:.15em 0}
 @media(max-width:760px){.reading .xy,.reading .xy-row{grid-template-columns:minmax(0,1fr)}.reading .xy-cells{flex-wrap:wrap}}
@@ -92,7 +95,7 @@ const OURS='Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py
 // ---------------------------------------------------------------- sections and the slide builder
 export const meta={
  id:'lecture5',number:5,title:'Autoencoders and the VAE, from the ELBO',
- subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:94,
+ subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:96,
  notebook:'lecture5-autoencoders-vae.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
@@ -100,7 +103,7 @@ export const meta={
   {id:'ae',title:'Part 2 · Autoencoders: squeeze, then rebuild',minutes:18},
   {id:'gen',title:'Part 3 · Can an autoencoder generate?',minutes:10},
   {id:'idea',title:'Part 4 · From an autoencoder to a VAE: three fixes',minutes:12},
-  {id:'vae',title:'Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time',minutes:29},
+  {id:'vae',title:'Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time',minutes:31},
   {id:'end',title:'Part 6 · Putting it together',minutes:6},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
@@ -234,6 +237,23 @@ function sameFig(){
   badge(818,254,'3')+label(832,259,'one network gives every q',{fill:palette.loss,size:14,weight:650})+'</g>';
  return fig(W,H+8,g,'Lecture 1 and the VAE drawn the same way: an unknown with a prior, observed data, a likelihood arrow, a posterior that needs the evidence, and an approximation q. Three differences are marked on the VAE.');
 }
+/** Why a VAE wants the posterior: generating uses the prior and decoder; the encoder answers "which codes made this image?". */
+function genMini(){
+ const W=340,H=170,A=y=>`<line x1="140" y1="${y}" x2="222" y2="${y}" stroke="${palette.ink}" stroke-width="2.6"/><path d="M234,${y} l-14,-7 v14 z" fill="${palette.ink}"/>`;
+ let g=`<circle cx="70" cy="88" r="56" fill="none" stroke="${GREEN}" stroke-width="2" stroke-dasharray="6 5"/>`+label(70,22,'prior N(0, I)',{fill:GREEN,size:15,anchor:'middle',weight:650})+
+  `<circle cx="84" cy="76" r="7" fill="${GREEN}"/>`+label(96,70,'z',{fill:GREEN,size:20,weight:650});
+ g+=A(88)+label(186,74,'decoder',{fill:palette.noise,size:16,anchor:'middle',weight:650});
+ g+=`<image href="${digitSrc('vae16_prior_samples',11)}" x="244" y="42" width="92" height="92" style="image-rendering:pixelated"/>`+label(290,158,'a new digit',{size:15,anchor:'middle'});
+ return fig(W,H,g,'Generating: a code z drawn from the prior N(0, I) goes through the decoder and comes out as a new digit.');
+}
+function encMini(){
+ const W=340,H=170,X0=226,S=104,sc=S/8,mx=X0+S/2+V.q3.mu[0]*sc,my=36+S/2-V.q3.mu[1]*sc;
+ let g=`<image href="${digitSrc('example',0)}" x="4" y="42" width="92" height="92" style="image-rendering:pixelated;outline:3px solid ${palette.p}"/>`+label(50,158,'our 3',{size:15,anchor:'middle'});
+ g+=`<line x1="104" y1="88" x2="200" y2="88" stroke="${palette.q}" stroke-width="2.6" stroke-dasharray="8 6"/><path d="M212,88 l-14,-7 v14 z" fill="${palette.q}"/>`+label(158,74,'encoder',{fill:palette.q,size:16,anchor:'middle',weight:650});
+ g+=`<rect x="${X0}" y="36" width="${S}" height="${S}" rx="6" fill="${palette.paper}" stroke="${LINE}" stroke-width="1.5"/>`+label(X0+S/2,26,'code plane',{size:15,anchor:'middle'})+
+  `<circle cx="${mx}" cy="${my}" r="9" fill="${palette.q}33" stroke="${palette.q}" stroke-width="2"/><circle cx="${mx}" cy="${my}" r="2.5" fill="${palette.q}"/>`+label(X0+S/2,158,'its codes',{fill:palette.q,size:15,anchor:'middle',weight:650});
+ return fig(W,H,g,'Encoding: our 3 goes through the encoder and comes out as a small cloud of codes on the code plane, its guess at which codes made the 3.');
+}
 /** The graphical model with the dashed inference arrow: the encoder. */
 function inferPgm(stage){
  const W=1100,H=290;let g=`<rect x="60" y="16" width="520" height="240" rx="10" fill="none" stroke="${MUTED}" stroke-width="2"/>`+label(568,244,'60,000 images',{size:17,anchor:'end'});
@@ -339,7 +359,7 @@ function xyNames(){
  return `<div class="xy"><div class="xy-left"><div class="xy-name"><b>x</b> = the data</div>${digit('example',0,150)}<div class="mini">one image: 784 numbers, one per pixel: (…, ${pixelPeek()}, …)</div>
   <div class="xy-name" style="margin-top:8px"><b>y</b> = a label about x</div><div class="dflex" style="gap:14px"><span class="xy-y">3</span><span class="mini">which digit:<br>one of 0, 1, …, 9</span></div></div>
  <div class="xy-rows">${row(2,R`\pcol{p(y\mid x)}`,'Given this image, how probable is each label? “|” reads “given”.','discriminative: a classifier',palette.p,yBars(C.our3))}
-  ${row(3,R`p(x)`,'How probable is this image itself, with no label? And: draw a new one.','generative: today',palette.q,`<div class="xy-cells">${cell(digitSrc('example',0),'high')}${cell(digitSrc('uniform',0),'almost 0')}${cell(digitSrc('vae16_prior_samples',11),'a new x')}</div>`)}
+  ${row(3,R`p(x)`,'How probable is this image itself, with no label? And how do we draw a new one?','generative: today',palette.q,`<div class="xy-cells">${cell(digitSrc('example',0),'high')}${cell(digitSrc('uniform',0),'almost 0')}${cell(digitSrc('vae16_prior_samples',11),'a new x')}</div>`)}
   ${row(4,R`p(x\mid y{=}3)`,'Fix the label, then ask: which images? Every way to write a 3.','conditional generative',palette.noise,`<div class="xy-cells">${threes.slice(0,5).map(i=>cell(digitSrc('display',i),'',62)).join('')}</div>`)}</div></div>`;
 }
 /** One number per image (its ink) for the training 0s and 1s: p(x), the two humps p(x, y), and p(y = 1 | x) below. */
@@ -560,12 +580,12 @@ function varFig(){
 }
 
 // ================================================================= Part 1 · Why generate?
-partOpener(1,'why','Generative models make new text, pictures and sound. A quick tour, what they are good for, and the one recipe they all share.',
+partOpener(1,'why','Generative models make new text, pictures and sound. We take a quick tour, see what they are good for, and find the one recipe they all share.',
  'What do a chatbot, an image generator and a weather model have in common?','Each turns random numbers into a new sample, through a network fitted to data.');
 chap('1.1');
 S('faces','why','Who are these people?',{builds:2,
  body:stack(`<figure class="evidence"><img src="${L2A('assets/gallery/stylegan-faces.jpg')}" alt="A grid of photographs of faces" style="max-height:330px"></figure>`,at(2,p('None of them exist. A network turned random numbers into each face.'))),
- lines:['Look closely: ages, hair, glasses, backgrounds. Who are these people?','Nobody. Each face is a sample from a generative model (StyleGAN, 2019): random numbers in, a face out.'],
+ lines:['Look closely: ages, hair, glasses, backgrounds. Who are these people?','Nobody: each face is a sample from a generative model, StyleGAN (2019).'],
  ask:['Who are these people? Would you have known?','What did the network need, to make these?'],
  expected:['Students guess celebrities or stock photos. None exist.','Many real photographs to learn from, and a way to turn random numbers into new ones. That is today’s subject.'],
  transition:'A smaller test, on the digits we will use all lecture.',
@@ -573,7 +593,7 @@ S('faces','why','Who are these people?',{builds:2,
 S('realfake','why','Real or generated? Six of these twelve digits are fake',{builds:2,
  body:cols(`<div class="state-slot"><div data-only="1">${digits('realfake',{cols:6,size:104,gap:14})}</div><div data-only="2">${digits('realfake',{cols:6,size:104,gap:14,marks:rfMarks,labels:RF.map(x=>x?'<span class="tag fake">generated</span>':'<span class="tag real">real</span>')})}</div></div>`,
   stack(p('Six are handwritten MNIST test digits. Six come from a network.'),at(2,p(`The fakes: numbers ${RF.map((x,i)=>x?i+1:null).filter(Boolean).join(', ')}, counting left to right, top to bottom.`)),at(2,small('By the end of today you will know how the network that made them was trained: a VAE with 16 numbers per code.'))),'1.55fr 1fr'),
- lines:['Six are real, six are generated. Write down which six you think are fake.','The six outlined in red are generated. Some give themselves away with broken strokes; some fool most people.'],
+ lines:['Write down the six you think are generated.','The six outlined in red are generated. Some give themselves away with broken strokes; some fool most people.'],
  ask:['Which six are fake? Write the positions.','Which fakes gave themselves away, and how?'],
  expected:['Answers vary; take a quick show of hands for two or three digits.','Broken or doubled strokes and blurry edges give some away; the cleanest fakes are hard to tell.'],
  point:'Real digits: six random MNIST test images. Fakes: the first six draws z ~ N(0, I) through Lecture 2’s 16-number VAE, not chosen by hand.',
@@ -582,14 +602,14 @@ chap('1.2');
 S('llm','why','A chatbot is a generative model: one prompt, three different answers',{builds:2,
  body:stack(`<div class="prompt-box"><b>Prompt:</b> Write one sentence that opens a short story about the first monsoon rain in Gandhinagar.</div>`,
   `<div class="cards" style="grid-template-columns:1fr 1fr 1fr">${LLM.map((t,i)=>(i===0?'':'<div data-at="2">')+`<div class="sample-text"><b>Sample ${i+1}.</b> ${t.trim()}</div>`+(i===0?'':'</div>')).join('')}</div>`),
- lines:['We sent the same prompt to a language model three times. Here is the first reply.','Same prompt, three different replies. Each is a sample from a distribution over sentences.'],
+ lines:['We sent the same prompt to a language model three times. Here is the first reply.','The same prompt gave three different replies. Each is a sample from a distribution over sentences.'],
  ask:['If we send the same prompt again, do we get the same sentence?','Why would we want different answers each time?'],
  expected:['No: the model samples, so each run differs.','Variety: one prompt has many good answers. A model that always gave the single most likely sentence would be repetitive.'],
  transition:'How does it choose? One word at a time.',
  source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.5 Flash, temperature 1 (<code>lecture2/assets/examples/provenance.json</code>).'});
 S('next-word','why','Under the hood: a probability for every possible next word',{builds:2,
  body:cols(nextWordChart(),stack(at(2,p('Sampling = pick a word with these probabilities, append it, repeat.')),at(2,small(`The same model’s three continuations: “${NW.samples.map(x=>x.split('\n')[0].trim()).join('”, “')}”.`))),'1.45fr 1fr'),
- lines:['A small language model (SmolLM2, 360 million weights) scores every word it knows as the next word. “wet” gets 17%.','Sample a word, append it, repeat. That is all a chatbot does when it writes, at a much larger scale.'],
+ lines:['A small language model (SmolLM2, 360 million weights) scores every word it knows as the next word. “wet” gets 17%.','That loop is all a chatbot does when it writes, at a much larger scale.'],
  ask:['Which word would the model pick if it always took the most likely one?','What is the model a distribution over?'],
  expected:['“wet”: 17%, but 83% of the time something else is sampled.','The next word given the words so far. Chaining them gives a distribution over whole sentences.'],
  point:'Probabilities are real: SmolLM2-360M-Instruct, computed locally for Lecture 2. The point is only that generation = repeated sampling.',
@@ -598,7 +618,7 @@ S('next-word','why','Under the hood: a probability for every possible next word'
 S('t2i','why','Text to image: one prompt, four samples',{builds:2,
  body:stack(`<div class="prompt-box"><b>Prompt:</b> A watercolour painting of a camel walking across the white salt desert of the Rann of Kutch at sunrise, soft light, wide view.</div>`,
   `<div class="photo-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${[1,2,3,4].map(i=>(i===1?'':`<div data-at="2">`)+photo(`assets/examples/t2i-sample-${i}.jpg`,`sample ${i}`)+(i===1?'':'</div>')).join('')}</div>`),
- lines:['Same idea for pictures. One prompt, and the first picture the model returned.','Three more runs, same prompt: a rider appears, a walker, a different horizon. Four samples.'],
+ lines:['The same idea for pictures: one prompt, and the first picture the model returned.','Three more runs of the same prompt bring a rider, a walker and a different horizon.'],
  ask:['What stayed the same across the four, and what changed?','Where does the variety come from?'],
  expected:['Same: camel, salt flat, sunrise, watercolour. Changed: rider, framing, sky.','From random numbers fed into the model; the prompt only narrows what is plausible.'],
  transition:'Images can also be the input.',
@@ -606,7 +626,7 @@ S('t2i','why','Text to image: one prompt, four samples',{builds:2,
 S('img2img','why','Image in, image out',{builds:2,
  body:`<div class="state-slot"><div data-only="1"><div class="photo-row" style="grid-template-columns:repeat(6,minmax(0,1fr))">${photo('assets/gallery/shoe-input.jpg','edges of a shoe')+photo('assets/gallery/shoe-output.jpg','pix2pix: a photo')+photo('assets/gallery/spade-layout.jpg','a label map')+photo('assets/gallery/spade-out-0.jpg','SPADE: a landscape')+photo('assets/gallery/horse.jpg','a horse')+photo('assets/gallery/zebra.jpg','CycleGAN: a zebra')}</div></div>`+
   `<div data-only="2"><div class="photo-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${photo('assets/gallery/spade-layout.jpg','one label map')+photo('assets/gallery/spade-out-0.jpg','sample 1')+photo('assets/gallery/spade-out-1.jpg','sample 2')+photo('assets/gallery/spade-out-2.jpg','sample 3')}</div></div></div>`,
- lines:['The input can be an image: a sketch becomes a photo, a coloured map becomes a landscape, a horse becomes a zebra.','The same label map, sampled three times: three different photographs. Still a distribution, now given an input.'],
+ lines:['The input can be an image: a sketch becomes a photo, a coloured map becomes a landscape, a horse becomes a zebra.','Sampling the same label map three times gives three different photographs. The model is still a distribution, now given an input.'],
  ask:['Is there one right answer for “photo of this sketch”?','So what is the model a distribution over?'],
  expected:['No: colour, texture and lighting are not in the sketch.','Over images, given the input image: p(photo | sketch).'],
  transition:'Sound works the same way.',
@@ -614,7 +634,7 @@ S('img2img','why','Image in, image out',{builds:2,
 S('speech','why','Sound: text in, 24,000 numbers per second out',{builds:2,
  body:stack(`<div class="prompt-box"><b>Text:</b> “A generative model turns a few random numbers into a new example: a sentence, a picture, or this voice.”</div>`,waveFig(),
   `<div class="audio-row"><audio controls preload="none" src="${L2A('assets/examples/tts-sample.mp3')}"></audio>${at(2,`<span class="mini">${comma(WAVE.samples)} numbers for ${f(WAVE.seconds,1)} seconds. A few of them: ${WAVE.first.slice(0,6).map(v=>f(v,3)).join(', ')}, …</span>`)}</div>`),
- lines:['A text-to-speech model read this sentence aloud. Press play.','The output is just a long list of numbers: the air pressure, 24,000 times a second. Generating sound = generating that list.'],
+ lines:['A text-to-speech model read this sentence aloud. Press play.','The output is just a long list of numbers: the air pressure, 24,000 times a second. Generating sound means generating that list.'],
  ask:['What exactly does the model output?','Is there one right way to say this sentence?'],
  expected:['About 191,000 numbers: a waveform sampled 24,000 times a second.','No: speed, pitch, pauses and voice all vary. Another sample would sound different.'],
  transition:'Before more examples: a model of what, exactly? First, the letters.',
@@ -622,43 +642,43 @@ S('speech','why','Sound: text in, 24,000 numbers per second out',{builds:2,
 chap('1.3');
 S('xy','why','First, the names: x is the data, y is a label',{builds:4,nb:'cell-xy',
  body:xyNames(),
- lines:['Two letters for the whole course. x is the data: here one image, 784 numbers. y is a label about x: which digit it is. Many datasets have no y at all.',
+ lines:['We use two letters all course. x is the data: here one image, 784 numbers. y is a label about x: which digit it is. Many datasets have no y at all.',
   `p(y | x), read “p of y given x”: for this one image, a probability for each label, adding up to 1. A classifier learns it. Ours gives our 3 a ${Math.round(XY.classifier.our3[3]*1000)/10}% chance of being a 3.`,
-  'p(x): a probability for the image itself, no label involved. High for a clean 3, almost 0 for static. A model of p(x) can also draw new x: a generative model, today’s subject.',
-  'p(x | y = 3): fix the label first, then ask which images are likely: every way to write a 3. The real 3s are draws from it. A text-to-image model learns p(image | prompt), with the prompt as y.'],
+  'p(x) is a probability for the image itself: high for a clean 3, almost 0 for static. A model of p(x) can also draw new x. That is a generative model, today’s subject.',
+  'p(x | y = 3) fixes the label first and covers every way to write a 3. The real 3s are draws from it. A text-to-image model learns p(image | prompt), with the prompt as y.'],
  ask:['What is x for a chatbot? For a spam filter, what are x and y?','Read p(y | x) aloud. What do its ten numbers add up to?','What should p(x) be for random static?','Which probability does a text-to-image model learn?'],
  expected:['A chatbot: x is a sentence. Spam filter: x is the email, y is spam or not.','“p of y given x”: one probability per label for this image; they add up to 1.','Almost 0: nobody writes static. That is how p(x) spots odd inputs.','p(image | prompt): a conditional generative model, with the prompt in the place of y.'],
  point:`The classifier is a softmax regression (784 numbers in, 10 out) on the 60,000 training digits: ${num(XY.classifier.test_accuracy*100,1)}% of test digits right. Its least sure display digit, a 5, gets 9: ${Math.round(XY.classifier.hard.p[9]*100)}%, 5: ${Math.round(XY.classifier.hard.p[5]*100)}%, 4: ${Math.round(XY.classifier.hard.p[4]*100)}%: p(y | x) is a distribution, not just a label.`,
  transition:'Draw all of these in one picture.',source:'Classifier and numbers: <code>lecture5/scripts/xy.py</code>. Digits from Lecture 2’s data; the new x is a draw from its 16-number VAE.'});
 S('gen-disc','why','Generative or discriminative, in one picture',{builds:3,nb:'cell-xy',
- body:cols(inkFig(),stack(mini('<b>To draw it:</b> one number per image, its ink. Only the 0s and 1s.'),
+ body:cols(inkFig(),stack(mini('To draw it: one number per image, its ink, for the 0s and 1s only.'),
   at(2,`<div class="eq-sm">${eq(R`p(x,y)=${PRI('p(y)')}\;p(x\mid y)`)}${eq(R`p(x)=p(x,0)+p(x,1)`)}</div>`),
   at(3,`<div class="eq-sm">${eq(R`\pcol{p(y\mid x)}=\frac{p(x,y)}{p(x)}`)}</div>`),
   at(3,`<div class="takeaway"><b>Generative</b> learns the top: it can score and draw x, and the bottom follows. <b>Discriminative</b> learns only the bottom: it can label, not draw.</div>`)),'1.25fr 1fr'),
  lines:[`784 numbers are too many to draw, so describe each image by one number: its ink. The ${comma(XY.ink.n[0]+XY.ink.n[1])} training 0s and 1s give this curve, p(x): where the data are.`,
   `Now colour by label. The 1s use little ink (about ${num(XY.ink.mean[1],0)}), the 0s more (about ${num(XY.ink.mean[0],0)}). Each hump is p(x, y) = p(y) p(x | y); ${Math.round(XY.ink.p_y[1]*100)}% of these digits are 1s. The humps add up to p(x).`,
-  `Divide the 1s’ hump by the total and you get p(y = 1 | x): near 1 for little ink, near 0 for a lot, 50:50 at ink ${num(XY.ink.boundary,0)}. A classifier learns only this curve. A generative model learns the humps, and gets this curve free by Bayes’ rule.`],
+  `Divide the 1s’ hump by the total and you get p(y = 1 | x): near 1 for little ink, near 0 for a lot, 50:50 at ink ${num(XY.ink.boundary,0)}. A classifier learns only this curve; a model of the humps gets it free by Bayes’ rule.`],
  ask:['Where is p(x) high? Where is it near 0?','Why is the 1s’ hump taller and narrower?','Can you get the top picture back from the bottom curve alone?'],
  expected:['High near ink 60 and 136, where most images are; near 0 above 230: almost no digit has that much ink.',`The 1s all use about the same ink, so their hump is narrow; and they are a little more common: ${Math.round(XY.ink.p_y[1]*100)}%.`,'No. p(y | x) says nothing about where the data are, so it cannot score or draw an x. The top gives the bottom, never the other way.'],
  point:`This is Bayes’ rule, as in Lecture 1, with the label y as the unknown: p(y | x) = p(x | y) p(y) / p(x). Humps: Gaussian kernel densities (bandwidths ${num(XY.ink.bandwidth[0],1)} and ${num(XY.ink.bandwidth[1],1)}) of the ${comma(XY.ink.n[0])} training 0s and ${comma(XY.ink.n[1])} 1s.`,
  transition:'Generative models also matter far from art and chat.',source:'Numbers: <code>lecture5/scripts/xy.py</code> (MNIST training set).'});
 S('science','why','Beyond pictures: generative models in science',{builds:2,
  body:`<div class="cards big" style="grid-template-columns:1fr 1fr">${card('Weather','GenCast samples 50 possible futures for the next 15 days. The spread of the samples says how sure the forecast is.',palette.data,'Price et al., Nature 2025')+card('Proteins','RFdiffusion generates new protein shapes, for example ones that bind a chosen target.',palette.p,'Watson et al., Nature 2023')}${at(2,card('Materials','MatterGen proposes new crystal structures with properties you ask for.',palette.q,'Zeni et al., Nature 2025'))}${at(2,card('Missing data','Sensors drop readings. A model of p(x) fills the gap with plausible values instead of a flat average, and says how unsure it is.',palette.noise,'for example, air-quality and smart-meter records'))}</div>`,
- lines:['Weather and proteins: the output is a sample, and many samples together describe what could happen.','Materials, and the everyday case: filling in missing sensor readings with plausible values.'],
+ lines:['Weather and proteins: the output is a sample, and many samples together describe what could happen.','The same goes for new materials, and for an everyday job: filling in missing sensor readings.'],
  ask:['Why would a forecaster want 50 samples instead of one best forecast?','Why not fill a gap in a sensor record with the average value?'],
  expected:['The samples show the range of possible futures: if they disagree, the forecast is uncertain.','The average is smooth and typical-looking but may never happen, and it hides the uncertainty. A sample looks like real data.'],
  transition:'Collect the uses.',
  source:'Price et al., “Probabilistic weather forecasting with machine learning” (GenCast), Nature 2025; Watson et al., “De novo design of protein structure and function with RFdiffusion”, Nature 2023; Zeni et al., “A generative model for inorganic materials design” (MatterGen), Nature 2025.'});
 S('uses','why','What a model of p(x) is good for',{builds:2,
  body:`<div class="cards big" style="grid-template-columns:repeat(3,minmax(0,1fr))">${card('Create','new text, images, sound, designs',palette.q)+card('Fill in','missing pixels, missing readings, the rest of a sentence',palette.noise)+card('Simulate','many plausible futures instead of one average',palette.data)}${at(2,card('Spot the odd one out','a reading with very low p(x) is suspicious: a faulty sensor, a fraud',palette.loss))}${at(2,card('Compress','likely data needs fewer bits: Lecture 1’s codes',palette.p))}${at(2,card('Make more data','extra training examples, or shareable synthetic records',GREEN))}</div>`,
- lines:['Three uses that need samples: create, fill in, simulate.','Three that need scores: spot anomalies, compress, and generate extra data when real data is scarce or private.'],
+ lines:['The first three uses need samples from the model.','Spotting the odd one out and compressing need a score p(x). Making more data needs samples again, and helps when real data is scarce or private.'],
  ask:['Which of these needs only samples? Which needs a score p(x)?','Which use connects to Lecture 1?'],
- expected:['Create, simulate, augment: samples. Anomalies and compression: a score.','Compression: an event with probability p costs log₂(1/p) bits, Lecture 1’s codes.'],
+ expected:['Create, fill in, simulate and make more data: samples. The odd one out and compression: a score.','Compression: an event with probability p costs log₂(1/p) bits, Lecture 1’s codes.'],
  transition:'What do all these models have in common?'});
 chap('1.4');
 S('recipe','why','What they share: random numbers in, a learned network, a sample out',{builds:2,
  body:`<div class="state-slot"><div data-only="1">${recipeDiagram(1)}</div><div data-only="2">${recipeDiagram(2)}</div></div>`,
- lines:['Every model on the tour: random numbers z go in, a network with learned weights θ turns them into a sample x.','Most also take a condition c that steers the sample: a prompt, a class label, a sketch. Today we drop c and learn p(x) for digits.'],
+ lines:['In every model on the tour, random numbers z go in and a network with learned weights θ turns them into a sample x.','Most also take a condition c that steers the sample: a prompt, a class label, a sketch. Today we drop c and learn p(x) for digits.'],
  ask:['What plays the role of z in the chatbot?','What is the condition for the camel pictures?'],
  expected:['The random choices made when sampling each next word.','The text prompt.'],
  transition:'Two jobs such a model can do.'});
@@ -672,9 +692,9 @@ S('two-jobs','why','A model of p(x) can do two jobs: score and sample',{builds:2
 S('why-not-mean','why','Why not just output the average?',{builds:2,
  body:cols(digits('display',{idx:threes.slice(0,5),cols:5,size:84}),
   stack(`<div class="dflex"><span class="lead">average of ${threes.length} threes:</span>${rawDigit(mean3,120)}</div>`,at(2,p('Nobody writes this 3. The average is the blur in the middle of many real 3s.'))),'1.1fr 1fr'),
- lines:[`Five real 3s, and the pixel-by-pixel average of ${threes.length} of them.`,'The average looks like no real 3. We need the whole distribution, so we can draw one sharp 3 at a time.'],
+ lines:[`Five real 3s, and the pixel-by-pixel average of ${threes.length} of them.`,'We need the whole distribution, so that we can draw one sharp 3 at a time.'],
  ask:['Would you accept the average as a new handwritten 3?','When is the average still useful?'],
- expected:['No: it is a ghost of many 3s.','As a summary, or a prediction scored by squared error. Not as a sample.'],
+ expected:['No: it is a ghost of many 3s.','As a summary, or as a prediction scored by squared error, but not as a sample.'],
  transition:'Today’s route.'});
 S('today','why','Today: two networks, then Lecture 1’s objective',{builds:3,
  body:stack(grid(3,card('Part 2 · Autoencoder','One network squeezes a digit into 2 numbers; a second rebuilds it.',palette.p),
@@ -690,7 +710,7 @@ S('today','why','Today: two networks, then Lecture 1’s objective',{builds:3,
  transition:'Part 2: autoencoders.'});
 
 // ================================================================= Part 2 · Autoencoders
-partOpener(2,'ae','Squeeze each digit into 2 numbers, then rebuild it from them. Two small networks, trained together on one squared-error loss.',
+partOpener(2,'ae','Squeeze each digit into 2 numbers, then rebuild it from them. Two small networks do this, trained together on one squared-error loss.',
  'Why would squeezing a digit into 2 numbers be useful?','The 2 numbers must keep what matters about the digit. Later we will try inventing them.');
 chap('2.1');
 S('mnist','ae','MNIST: 70,000 handwritten digits, 28 × 28 pixels each',{builds:2,
@@ -723,7 +743,7 @@ S('ae-code','ae','Two small networks in PyTorch',{builds:2,
         z = self.encoder(x)     # 784 -> z numbers
         return self.decoder(z)  # z -> 784 numbers`)}</div>`,
   stack(at(2,p('Why a sigmoid at the end? Are we classifying?')),at(2,small('No: it keeps every output pixel between 0 and 1, like the data.'))),'2fr 1fr'),
- lines:['Two nn.Sequential blocks. The forward pass encodes, then decodes.','The final sigmoid squashes each of the 784 outputs into (0, 1), the range of our pixels.'],
+ lines:['The model is two nn.Sequential blocks, and the forward pass encodes, then decodes.','The final sigmoid squashes each of the 784 outputs into (0, 1), the range of our pixels.'],
  ask:['How many weights does the encoder have?','Why no activation after the encoder’s last layer?'],
  expected:['784 × 400 + 400 + 400 × 2 + 2 ≈ 315,000.','The code can be any real number; a ReLU would forbid negative codes.'],
  transition:'What does it minimise?'});
@@ -758,7 +778,7 @@ for epoch in range(30):
         loss.backward()     # encoder AND decoder
         opt.step()`)}</div>`,
   stack(p(`${comma(A.steps_per_epoch)} steps per pass over the 60,000 digits; 30 passes.`),at(2,p('One loss, one backward pass: the gradient flows from the pixel errors back through the decoder, the code, and the encoder.'))),'1.5fr 1fr'),
- lines:['Batches of 128 digits, the loss from the last slide, Adam.','loss.backward() sends gradients through the decoder, into the code, and on into the encoder: both are trained together.'],
+ lines:['Each step takes a batch of 128 digits, computes the loss from the last slide, and updates with Adam.','loss.backward() reaches both networks, so the encoder and the decoder are trained together.'],
  ask:['How many updates in total?','Does the encoder get a gradient even though the loss compares only images?'],
  expected:[`${comma(30*A.steps_per_epoch)}.`,'Yes: the reconstruction depends on the code, which depends on the encoder’s weights.'],
  transition:'Watch the reconstructions form.'});
@@ -775,7 +795,7 @@ S('ae-train','ae','Press play: reconstructions sharpen, then stop improving',{bu
 chap('2.4');
 S('code-size','ae','More numbers in the code, sharper rebuilds',{builds:2,
  body:rows(['originals',digits('watch',{cols:8,size:58,gap:6})],[`2 numbers · error ${f(SW['2'].test_sse,1)}`,digits('ae2_recon_watch',{cols:8,size:58,gap:6})],[`8 numbers · ${f(SW['8'].test_sse,1)}`,digits('ae8_recon_watch',{cols:8,size:58,gap:6})],[`32 numbers · ${f(SW['32'].test_sse,1)}`,at(2,digits('ae32_recon_watch',{cols:8,size:58,gap:6}))],[`128 numbers · ${f(SW['128'].test_sse,1)}`,at(2,digits('ae128_recon_watch',{cols:8,size:58,gap:6}))]),
- lines:['The same 8 test digits through autoencoders with codes of 2 and 8 numbers. The error is the average over all 10,000 test digits.','With 32 and 128 numbers the strokes come back almost exactly. Hold on to this: Part 3 asks which of them can generate.'],
+ lines:['The same 8 test digits through autoencoders with codes of 2 and 8 numbers. The error is the average over all 10,000 test digits.','With 32 and 128 numbers the strokes come back almost exactly. Part 3 asks which of these can generate.'],
  ask:['What does the 2-number code lose?','Which of these would you pick?'],
  expected:['Stroke thickness, slant and small details.','For rebuilding, the widest. For generating, wait for Part 3.'],
  transition:'Where do the 2-number codes land?',source:OURS});
@@ -822,7 +842,7 @@ chap('3.2');
 S('overlay','gen','Put the random codes on top of the real ones',{builds:2,
  body:stack(widget('scatter','Autoencoder codes of 1,000 test digits, 500 draws from N(0, I) in red, and the circles of N(0, I).',{src:'ae2',lim:AE_LIM.join(','),ticks:'0,10,20,30|-10,0,10',prior:500,contours:'1',decode:'ae2',h:300,title:'real codes and 500 random ones (red)',side:'Circles: N(0, I) at radius 1, 2 and 3.|Hover a dot to see the digit and what|the decoder draws from that code.'}),
   at(2,takeaway('N(0, I) covers a small corner of the real codes: random codes reach a few digit types and miss the rest.'))),
- lines:['The codes of 1,000 test digits, and 500 draws from N(0, I) in red inside its circles. Hover any dot to see what the decoder draws.','Nothing in the loss asked the codes to sit near N(0, I). The red draws land in one corner: some digits there, none of the rest.'],
+ lines:['The codes of 1,000 test digits, and 500 draws from N(0, I) in red inside its circles. Hover any dot to see what the decoder draws.','Nothing in the loss asked the codes to sit near N(0, I), so the red draws reach only the digits in one corner.'],
  ask:['Hover a red dot near the origin, then one in an empty area. What does the decoder draw?','For the 128-number model, where would the red points fall?'],
  expected:['Near real codes: a digit; in empty places: blurs or odd strokes.','Even further from the real codes: in 128 numbers the space is mostly empty.'],
  point:'The decoder runs in the browser from lecture2/data/nets.json.',
@@ -834,7 +854,7 @@ S('explore-ae','gen','Your turn: three ways to choose a code',{builds:1,
  transition:'Decode a whole grid of codes at once.',source:OURS});
 S('ae-grid','gen','Decode a whole grid of codes',{builds:2,
  body:cols(fig(squareW([-12,30,-13,18],400),400,scatterSVG('ae2',{W:squareW([-12,30,-13,18],400),H:400,lim:[-12,30,-13,18],ticks:[[-10,0,10,20,30],[-10,0,10]],box:G.ae2_grid_box,r:3,opacity:.45}).s,'Codes with the decoded grid’s area marked.'),
-  stack(digits('ae2_grid',{cols:12,size:23,gap:1}),at(2,takeaway('Good digits only where real codes are. Away from them the decoder only extrapolates.'))),'1.15fr 1fr'),
+  stack(digits('ae2_grid',{cols:12,size:23,gap:1}),at(2,takeaway('The decoder draws good digits only where real codes are. Away from them it extrapolates.'))),'1.15fr 1fr'),
  lines:['Decode a 12 × 12 grid of codes covering the dashed box: the codes on the left, the decoder’s output at each grid point on the right.','Over the real codes, digits blend into each other. Far from them, thick 1s and 0s and broken strokes: the decoder never trained there.'],
  ask:['Which parts of the grid are useful for generation?','What does the decoder do far from any real code?'],
  expected:['Those over the clusters of real codes.','It extrapolates from the nearest digits: exaggerated or broken shapes.'],
@@ -845,10 +865,10 @@ S('ae-empirical','gen','Why not sample from the real codes instead of N(0, I)?',
    at(2,`<div><div class="dg-title">2 · Jitter: a real code plus N(0, I) noise</div>${empRow(EMP.methods.jitter.images)}</div>`),
    at(3,`<div><div class="dg-title">3 · Fit 10 Gaussians to the codes, sample them</div>${empRow(EMP.methods.mog.images)}</div>`)),'1fr 1.1fr')+
   at(4,takeaway('It works, and large systems do it: Stable Diffusion trains an autoencoder, then a second generative model for its codes. The VAE does it in one model: training puts the codes in N(0, I), and it can score p(x).')),
- lines:['Why invent codes when we have 60,000 real ones? Simplest: pick a training digit’s code (top row) and decode it (below). We get that digit back, blurred: nothing new.',
+ lines:['Why invent codes when we have 60,000 real ones? The simplest way: pick a training digit’s code (top row) and decode it (below). That gives the same digit back, blurred.',
   `Smooth it: a real code plus a little N(0, I) noise. Only ${num(EMP.methods.jitter.in_gap*100,1)}% land further from a training code than real test digits do; between clusters the decoder blends digits, like a 3 that is half 8.`,
   `Or fit 10 Gaussians to the codes and sample them (Lecture 2’s fix): ${num(EMP.methods.mog.in_gap*100,1)}% in the gaps, and mostly plausible digits of every kind.`,
-  'So it works, and large systems do it. The VAE gets there in one model and one objective, and also gives a score for p(x).'],
+  'So a second model for the codes works. The VAE gets there with one model and one objective, and it also scores p(x).'],
  ask:['What do we get if we decode a real code exactly?','Where can the jittered codes go wrong?','Why does this beat N(0, I) for the plain autoencoder?','What does the VAE give that this two-step recipe does not?'],
  expected:['The training digit it came from, blurred by the 2-number code: a copy, not a new digit.','Between two clusters: the decoder never trained on codes there, so it blends two digits.','It follows where the real codes are, so every digit type is covered, not just the corner N(0, I) reaches.','One model and one objective: codes that fill N(0, I) by design, and a lower bound on log p(x) to score an image.'],
  point:`“In a gap”: the nearest training code is further than ${num(EMP.gap_distance,2)}, the 99th percentile of that distance for the 10,000 test digits. Copies: 0%; jitter: ${num(EMP.methods.jitter.in_gap*100,1)}%; 10 Gaussians: ${num(EMP.methods.mog.in_gap*100,1)}%; N(0, I): ${num(EMP.methods.prior.in_gap*100,1)}% (10,000 draws each). With 60,000 codes in 2 numbers the plane is crowded; the real cost of N(0, I) is the digits it misses, not gaps.`,
@@ -899,8 +919,8 @@ S('fix-kl','idea','Fix 3: a penalty that pulls every cloud towards N(0, I)',{bui
  body:stack(p('With Fixes 1 and 2 alone, nothing stops the encoder from shrinking each cloud to a point and placing it far from the centre: an autoencoder again.'),
   `<div class="dflex" style="justify-content:center;gap:30px;align-items:center">${at(2,eq(R`\text{penalty}=\KL\big(\qcol{\N(\mu,\sigma^2)}\,\|\,${PRI(R`\N(0,1)`)}\big)`))}${at(2,l1('diag-kl','2.6','tool ②: the Gaussian KL'))}</div>`,
   at(3,maxH(250,klFig()))),
- lines:['Two ways the encoder could cheat: shrink every cloud to a point, or push the clouds far apart. Either way we are back to an autoencoder.',
-  'Charge each cloud for being unlike N(0, 1), with Lecture 1’s KL: one such term per code number. Tool ② computes it exactly, with no sampling.',
+ lines:['The encoder has two ways to cheat, and either one takes us back to an autoencoder.',
+  'Charge each cloud for being unlike N(0, 1), with Lecture 1’s KL: one such term per code number. Tool ② computes it exactly, so no sampling is needed.',
   `Green is N(0, 1), purple the cloud. Far away costs ${f(klq(5,1),1)}; shrunk to a point costs ${f(klq(0,.01),1)}, and our 3’s cloud is nearly that narrow. Only N(0, 1) itself is free.`],
  ask:['What would the encoder do without this penalty?','Why a KL and not just μ²?','Why does a cloud shrunk to a point cost anything?'],
  expected:['Make clouds tiny and far apart: reconstruction is easiest that way.','μ² would pull clouds to the centre but let σ shrink to 0. The KL stops both, and Part 5 shows it is exactly what Lecture 1’s ELBO asks for.','The KL averages log q − log N(0, 1) over the cloud. A narrow cloud’s density is huge where it sits, while N(0, 1) stays below 0.4, so the gap grows without limit as σ → 0.'],
@@ -918,7 +938,7 @@ S('fix-loss','idea','The three fixes give a loss: reconstruction plus KL',{build
   only('2',`<div class="eq-sm">${eq(R`L(x)=${RECON}\phantom{${KLTERM}}`)}</div>`),
   only('3-4',`<div class="eq-sm">${eq(R`L(x)=${RECON}${KLTERM}`)}</div>`),
   at(4,p('Two questions remain: how much weight each term should get, and whether this sum is a sensible objective or a hack that happens to work.'))),
- lines:['Collect the three fixes, each with its formula: codes live in N(0, I); each image gets a cloud we draw from; a KL pulls the cloud towards N(0, I).',
+ lines:['Collect the three fixes, each with its formula and the section it came from.',
   'The reconstruction term: draw a code from the image’s cloud, decode it, and compare with x. It is the autoencoder’s squared error, with a draw in place of a fixed code.',
   'The KL term: how unlike N(0, I) the cloud is. Fix 3 is the penalty, and Fix 1 chose its target. The loss is the sum of the two.',
   'Part 5 answers both with Lecture 1: the sum is minus the ELBO, the weight on the reconstruction term comes from the pixel noise, and the KL appears by itself.'],
@@ -941,12 +961,26 @@ chap('5.1');
 S('same-problem','vae','Same problem as Lecture 1: the same picture, new names',{builds:3,
  body:stack(sameFig(),`<div class="eq-sm two-eq">${eq(R`\dcol{\log p(\mathcal D)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(\theta\mid\mathcal D)\big)}`)}${at(2,eq(R`\dcol{\log p_\theta(x)}=\qcol{\ELBO(x)}+\lcol{\KL\big(q_\phi(z\mid x)\,\|\,p(z\mid x)\big)}`))}</div>`),
  lines:['Lecture 1 in one picture: a prior on the weights θ, a likelihood for the data, and a posterior out of reach because it needs p(𝒟). So we fitted a simple q and maximised the ELBO.',
-  'Today, the same picture with new names: the unknown is an image’s code z, the data are the image x. Prior, likelihood, the posterior out of reach, a q and the ELBO: every piece and colour carries over.',
+  'Today the unknown is an image’s code z, and the data are the image x. Every other piece, and every colour, carries over.',
   'Three differences: ① every image has its own z, 60,000 unknowns; ② the likelihood has weights of its own, the decoder, learned at the same time; ③ one network, the encoder, gives every image its q.'],
  ask:['Why could Lecture 1 not compute the posterior?','What plays the role of θ today, and what plays 𝒟?','Why not fit 60,000 separate q’s, as Lecture 1 fitted one?'],
  expected:['The evidence p(𝒟): an integral over all seven weights, with no formula.','The code z is the unknown with a prior (θ’s role); the image x is what we observe (𝒟’s role).','It would take an optimisation per image, and again for every new image. One pass of the encoder is instant: amortised inference.'],
  point:'Careful with θ: in Lecture 1 it was the unknown; today it names the decoder’s weights, learned as ordinary parameters. The unknown with a prior is z. Colours as in Lecture 1: prior green, likelihood orange, evidence blue, posterior teal, q purple, KL to the posterior red.',
- transition:'Start with the model’s story, from z.'});
+ transition:'Lecture 1 wanted the posterior for predictions. What does a VAE want it for?'});
+S('why-post','vae','Why does a VAE need the posterior at all?',{builds:4,
+ body:stack(`<div class="why3">`+
+  `<div><h4>Lecture 1: the posterior gives predictions</h4><div class="w3v">${m(R`\begin{gathered}p(y^*\mid x^*,\mathcal D)\\=\int p(y^*\mid x^*,\theta)\;\pcol{p(\theta\mid\mathcal D)}\,d\theta\end{gathered}`)}</div><div class="w3c">every network’s prediction at a new x*, weighted by the posterior</div></div>`+
+  at(2,`<div><h4>A VAE generating: no posterior needed</h4><div class="w3v">${genMini()}</div><div class="w3c">a code from the prior, then the decoder</div></div>`)+
+  at(3,`<div><h4 style="color:${palette.p}">A VAE encoding: this is the posterior</h4><div class="w3v">${encMini()}</div><div class="w3c">which codes could have made this 3? That question is <span style="color:${palette.p}">p(z | x)</span>.</div></div>`)+`</div>`,
+  at(4,takeaway('A VAE is still an autoencoder. The decoder runs the story forwards, code → image; the encoder runs it backwards, image → codes. Running the story backwards is the posterior, so the encoder is our guess at it.'))),
+ lines:['In Lecture 1 we wanted the posterior for predictions: average every network’s prediction at a new x*, giving more weight to networks that explain the data well.',
+  'A VAE generates without any posterior: draw a code from the prior and decode it. So why would we want p(z | x) at all?',
+  'Because a VAE is still an autoencoder. Give it our 3 and ask which codes could have made it. That question is the posterior, and Part 4’s encoder answers it with a small cloud.',
+  'The decoder is the likelihood, and we can compute it. Training needs the posterior as well; Section 5.3 shows why, with our 3.'],
+ ask:['What did Lecture 1 use the posterior for?','Which parts of the VAE does generating use?','Which part of the VAE takes an image and returns codes?','Why is the encoder only a guess at the posterior?'],
+ expected:['Predictions: the posterior predictive averages every network’s prediction, weighted by the posterior.','Only the prior and the decoder.','The encoder: image in, a small cloud of codes out.','The exact posterior needs p(x), an integral with no formula (Section 5.3). The encoder gives a Gaussian guess, as Lecture 1’s q did.'],
+ point:'Lecture 1, Section 1.5 built the posterior predictive. Why training needs the posterior, exactly: the gradient of log p_θ(x) is an average over it, ∇θ log p_θ(x) = E over p(z | x) of ∇θ log p_θ(x, z). Section 5.3 tells the same thing with codes A, B and C. After training the encoder is useful on its own: it gives any image its code. The cloud is the encoder’s real output for our 3, drawn larger than its true width of about 0.01.',
+ transition:'Start with the model’s story, from z.',source:OURS});
 chap('5.2');
 S('vae-draw','vae','The model’s story: first a code from the prior, then an image',{builds:3,
  body:stack(story5(1),maxH(310,storyFig()),at(3,eq(R`p_\theta(x,z)\;=\;${PRI('p(z)')}\;\cdot\;\ncol{p_\theta(x\mid z)}`))),
@@ -970,10 +1004,10 @@ chap('5.3');
 S('why-back','vae','Why run the story backwards? Images come without codes',{builds:3,
  body:stack(story5(3),noCodesFig(),
   at(2,`<div class="dflex eq-sm" style="justify-content:center;gap:30px;align-items:center">${eq(R`\dcol{p_\theta(x)}=\E_{z\sim ${PRI('p(z)')}}\big[\ncol{p_\theta(x\mid z)}\big]`)}${small('how likely the model is to draw our 3 at all:<br>each code’s chance of drawing it, averaged over the prior')}</div>`),
-  at(3,takeaway(`Codes like A carry this average; codes like B and C add almost nothing. So training needs to know: <b>which codes could have made our 3?</b> That is the story run backwards, the posterior p(z | x).`))),
+  at(3,takeaway(`Codes like A carry this average; codes like B and C add almost nothing. So training needs to know which codes could have made our 3. That is the story run backwards, the posterior p(z | x).`))),
  lines:['Training data are images only. Nobody recorded the code each image came from, so we cannot train the decoder as plain regression from codes to images.',
-  'What we can ask: how likely is the model to draw our 3 at all? Average each code’s chance of drawing it over the prior. Training makes this evidence large for every image: maximum likelihood.',
-  'Most codes draw other digits and add almost nothing; a few carry the average. To find them, run the story backwards. Lecture 1 asked the same of the weights θ: which ones explain the data?'],
+  'We can still ask how likely the model is to draw our 3 at all. Training makes this evidence large for every image: maximum likelihood.',
+  'To find the few codes that carry the average, run the story backwards. Lecture 1 asked the same of the weights θ: which ones explain the data?'],
  ask:['If we knew each image’s code, how would we train the decoder?','Why make p(x) large?','Which codes carry the average for our 3?'],
  expected:['As regression: code in, image out, squared error.','A good model gives its training images high probability: maximum likelihood, as for any model in this course.','Codes in the tiny patch that draws a 3, like code A.'],
  point:'The average is of the likelihood itself, p(x | z), not of its log. Lecture 1, Section 1.1 asked the same question of the weights: which θ explain the data?',
@@ -1002,10 +1036,10 @@ chap('5.4');
 S('var-approx','vae','Put a guide q: a Gaussian guess of where the codes are',{builds:4,
  body:stack(story5(5),maxH(286,varFig()),
   `<div class="dflex eq-sm" style="justify-content:center;gap:40px;align-items:center">${at(3,eq(R`\qcol{\ELBO(q)}=\E_{z\sim\qcol{q}}\big[\ncol{\log p_\theta(x\mid z)}\big]-\KL\big(\qcol{q}\,\|\,${PRI('p(z)')}\big)`))}${at(4,eq(R`\dcol{\log p_\theta(x)}=\qcol{\ELBO(q)}+\lcol{\KL\big(q\,\|\,p(z\mid x)\big)}`))}</div>`),
- lines:['We cannot compute the posterior, so do what Lecture 1 did: put a guide q, a simple Gaussian guess of where the codes of our 3 are, and draw codes from it instead of the prior. First, two poor guides: the prior itself, and one sitting on the 1s.',
+ lines:['We cannot compute the posterior, so do as Lecture 1 did: put a guide q, a simple Gaussian guess of where our 3’s codes are, and draw codes from it instead of the prior. Two poor guides first: the prior itself, and one on the 1s.',
   'Two good ones: the encoder’s q, from one pass of the network, and a q fitted to this one image by Lecture 1’s VI (an optional slide replays it). Both sit on the posterior’s patch.',
   'Score each guide with Lecture 1’s ELBO, which needs no posterior. First term: codes drawn from the guide should draw our 3 well. Second: the guide should not stray from the prior without reason.',
-  `Why this score? log p(x) is one fixed number, and the gap log p(x) − ELBO is exactly the guide’s KL to the posterior. Highest ELBO = closest guide: gaps ${QS.map(q=>gapTxt(V.grid.log_px-q.elbo)).join(', ').replace(/, ([^,]*)$/,' and $1')}.`],
+  `Why this score? log p(x) is one fixed number, and the gap log p(x) − ELBO is exactly the guide’s KL to the posterior. The highest ELBO marks the closest guide: gaps ${QS.map(q=>gapTxt(V.grid.log_px-q.elbo)).join(', ').replace(/, ([^,]*)$/,' and $1')}.`],
  ask:['Why is the prior a poor guide?','Which guide is closest?','What do the ELBO’s two terms ask of a guide?','How can you tell which guide is closest without the posterior?'],
  expected:['It spreads over the whole plane, while the posterior is a tiny patch.','The VI fit, then the encoder’s q: both on the patch.','Its codes should draw our 3 (first term), and it should stay near the prior N(0, I) (second term).','The highest ELBO has the smallest gap, and the gap is the KL to the posterior.'],
  point:'Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers. Why Gaussians: easy to sample (tool ①), and their KL to N(0, I) is exact (tool ②). Pyro calls q the guide. Lecture 1, Section 1.5 introduced the idea: approximate the posterior with a simple q.',
@@ -1024,17 +1058,17 @@ chap('5.5');
 S('vae-loss','vae','Now we have the loss: minus the ELBO is reconstruction + KL',{builds:4,nb:'cell-derive',
  body:stack(story5(7),`<div class="derive">${[
   ['start','the ELBO, with the encoder as the guide',R`\qcol{\ELBO(x)}=\E_{z\sim\qcol{q_\phi(z\mid x)}}\big[\ncol{\log p_\theta(x\mid z)}\big]-\KL\big(\qcol{q_\phi(z\mid x)}\,\|\,${PRI('p(z)')}\big)`],
-  ['choice 1','pixels: Gaussian around the decoder’s output, noise 0.2',R`\ncol{\log p_\theta(x\mid z)}=-\frac{\lVert \pcol{x}-\qcol{f_\theta(z)}\rVert^2}{2\cdot 0.2^2}+${f(-V.loglik_const,1)}`],
+  ['choice 1','pixels: Gaussian around the decoder’s output, noise 0.2',R`\ncol{\log p_\theta(x\mid z)}=-\frac{\lVert \pcol{x}-\qcol{f_\theta(z)}\rVert^2}{2\cdot 0.2^2}+\textcolor{${MUTED}}{\text{const}}`],
   ['choice 2','prior N(0, I); q from the encoder: N(μ, σ²)',R`\KL\big(\qcol{q_\phi(z\mid x)}\,\|\,${PRI('p(z)')}\big)=\KL\big(\qcol{\N(\mu,\sigma^2)}\,\|\,${PRI(R`\N(0,I)`)}\big)`],
-  ['result','minus the ELBO: Part 4’s loss',R`-\qcol{\ELBO(x)}=\underbrace{\E_{q}\Big[\tfrac{1}{2\cdot 0.2^2}\lVert \pcol{x}-\qcol{f_\theta(z)}\rVert^2\Big]}_{\text{reconstruction term: Fix 2}}+\underbrace{\KL\big(q_\phi\,\|\,${PRI(R`\N(0,I)`)}\big)}_{\text{KL term: Fixes 1, 3}}-${f(-V.loglik_const,1)}`]
+  ['result','minus the ELBO: Part 4’s loss',R`-\qcol{\ELBO(x)}=\underbrace{\E_{q}\Big[\tfrac{1}{2\cdot 0.2^2}\lVert \pcol{x}-\qcol{f_\theta(z)}\rVert^2\Big]}_{\text{reconstruction term: Fix 2}}+\underbrace{\KL\big(q_\phi\,\|\,${PRI(R`\N(0,I)`)}\big)}_{\text{KL term: Fixes 1, 3}}+\textcolor{${MUTED}}{\text{const}}`]
  ].map(([t,d,tex],k)=>{const w=x=>k?`<div data-at="${k+1}">${x}</div>`:`<div>${x}</div>`;return w(`<div class="d-tag"><b>${t}</b>${d}</div>`)+w(eq(tex));}).join('')}</div>`),
- lines:['Now we have every piece. Start from the ELBO with the encoder as the guide: the log-likelihood averaged over codes from the guide, minus the KL from the guide to the prior. Nothing here is about images yet.',
-  'Now the model’s first choice: each pixel is Gaussian around the decoder’s output, with noise 0.2. The log-likelihood becomes minus the squared error, weighted by 1/(2 · 0.2²) = 12.5, plus a constant.',
+ lines:['Start from the ELBO with the encoder as the guide: the log-likelihood averaged over codes from the guide, minus the KL from the guide to the prior. Nothing here is about images yet.',
+  'The model’s first choice is that each pixel is Gaussian around the decoder’s output, with noise 0.2. The log-likelihood becomes minus the squared error, weighted by 1/(2 · 0.2²) = 12.5, plus a constant.',
   'The other choices: the prior N(0, I), and a Gaussian q whose mean and spread the encoder outputs. The KL term becomes a KL between two Gaussians, which Lecture 1’s tool ② computes exactly.',
-  'Flip the sign. Minus the ELBO is the reconstruction term plus the KL term: Part 4’s loss, term for term, now with its weight decided. Nothing was guessed; every term comes from a modelling choice.'],
+  'Flip the sign. Minus the ELBO is the reconstruction term plus the KL term: Part 4’s loss, term for term, with its weight now decided. The constant does not change any gradient, so we drop it.'],
  ask:['Which term needs the decoder?','Where have you seen squared error come from a Gaussian likelihood?','Which Lecture 1 tool gives the KL?','What did Part 4 guess that this derivation decides?'],
- expected:['The log-likelihood: decode z, then score x against it.','Least squares in linear regression: maximum likelihood with Gaussian noise.','Tool ②: the KL between two Gaussians, computed exactly, with no sampling.','The weight between the terms, 1/(2 · 0.2²) from the pixel noise, and the reason the KL is there at all.'],
- point:`The constant: log p(x | z) carries +${f(-V.loglik_const,1)} = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, with torch.distributions densities and no formulas, and gets Part 4’s loss minus ${f(-V.loglik_const,1)}.`,
+ expected:['The log-likelihood: decode z, then score x against it.','Least squares in linear regression: maximum likelihood with Gaussian noise.','Tool ②: a formula for the KL between two Gaussians.','The weight between the terms, 1/(2 · 0.2²) from the pixel noise, and the reason the KL is there at all.'],
+ point:`The constant: log p(x | z) carries +${f(-V.loglik_const,1)} = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, using torch.distributions densities instead of the formulas, and gets Part 4’s loss minus ${f(-V.loglik_const,1)}.`,
  transition:'Put in the numbers for our 3.'});
 S('vae-worked','vae','One step for our 3, with numbers',{builds:3,
  body:stack(eq(R`\mu=(${f(V.q3.mu[0],3)},\,${f(V.q3.mu[1],3)}),\quad\sigma=(${f(V.q3.sd[0],3)},\,${f(V.q3.sd[1],3)}),\quad\epsilon=(${f(WK.eps[0],1)},\,${f(WK.eps[1],1)})`),eq(R`z=\mu+\sigma\odot\epsilon=(${f(WK.z[0],3)},\,${f(WK.z[1],3)})`),
@@ -1061,7 +1095,7 @@ x_hat, mu, logvar = model(x)
 recon = ((x_hat - x)**2).sum(1) / (2 * 0.2**2)
 kl = 0.5 * (mu**2 + logvar.exp() - logvar - 1).sum(1)  # (3)
 loss = (recon + kl).mean()`)}</div>`,stack(at(2,p('(1) the encoder outputs 2z numbers, (2) the code is a reparameterised draw (tool ①), (3) the loss adds the KL (tool ②).')),at(2,small('The training loop is the autoencoder’s, unchanged.'))),'1.75fr 1fr'),
- lines:['The autoencoder of Part 2, with three changes.','Everything else, the batches, Adam and the passes over the data, is the autoencoder’s loop.'],
+ lines:['Start from Part 2’s autoencoder and make three changes.','Everything else, the batches, Adam and the passes over the data, is the autoencoder’s loop.'],
  ask:['What are the three changes?','How many lines of the training loop change?'],
  expected:['Two outputs per code number, a random draw of z, and the KL term.','None: only the model and the loss.'],
  transition:'Both terms on the real model, live.'});
@@ -1083,7 +1117,7 @@ S('vae-samples','vae','Now sample: z ~ N(0, I), then decode',{builds:3,
 S('vae-scatter','vae','The codes now fill N(0, I)',{builds:2,
  body:cols(`<div class="state-slot"><div data-only="1">${fig(squareW([-5,5,-5,5],420),420,scatterSVG('vae2',{W:squareW([-5,5,-5,5],420),H:420,lim:[-5,5,-5,5],ticks:[[-4,-2,0,2,4],[-4,-2,0,2,4]],contours:true}).s,'VAE codes of 1,000 test digits.')}</div><div data-only="2">${fig(squareW([-5,5,-5,5],420),420,scatterSVG('vae2',{W:squareW([-5,5,-5,5],420),H:420,lim:[-5,5,-5,5],ticks:[[-4,-2,0,2,4],[-4,-2,0,2,4]],prior:500,contours:true}).s,'VAE codes with 500 draws from N(0, I).')}</div></div>`,
   stack(p(`Codes of all 10,000 test digits: mean (${f(V.agg.mean[0],1)}, ${f(V.agg.mean[1],1)}), spread (${f(V.agg.sd[0],1)}, ${f(V.agg.sd[1],1)}).`),at(2,p('Random draws (red) now land among real codes, on every digit.'))),'1.25fr 1fr'),
- lines:['The VAE’s codes (the means μ) for the same 1,000 test digits: one round cloud around the origin, digits side by side.','Overlay 500 draws from N(0, I): they fall on real codes of every digit. That is why sampling works.'],
+ lines:['The VAE’s codes (the means μ) for the same 1,000 test digits: one round cloud around the origin, digits side by side.','Overlay 500 draws from N(0, I). Because they land among real codes, sampling now works.'],
  ask:['Compare with the autoencoder’s map. What changed?','Is the cloud exactly N(0, I)?'],
  expected:['Codes fill a round region around the origin with no large gaps; the scale is about 1, not 20.','Not quite: a little wider (spread 1.7) and slightly off-centre, since the KL only pulls codes towards N(0, I).'],
  transition:'Decode a grid, and walk between two digits.',source:OURS});
@@ -1125,7 +1159,7 @@ S('maths-chain','end','The whole lecture in five lines of maths',{builds:5,
   ['④','Gaussian pixels',R`-\ncol{\log p_\theta(x\mid z)}=\tfrac{1}{2\sigma^2}\lVert x-f_\theta(z)\rVert^2+\text{const}`,'today 5.2 and 2.3'],
   ['⑤','the two tools',R`z=\mu+\sigma\odot\epsilon,\qquad\KL\big(\qcol{\N(\mu,\sigma^2)}\,\|\,${PRI(R`\N(0,I)`)}\big)\ \text{exactly}`,'Lecture 1, 3.5, 2.6 · today 4.2–4.3']
  ].map(([n,w,t,src],k)=>{const c=x=>k?`<div data-at="${k+1}">${x}</div>`:`<div>${x}</div>`;return c(`<span class="mc-n">${n}</span>`)+c(`<span class="mc-w">${w}</span>`)+c(m(t))+c(`<span class="mc-s">${src}</span>`);}).join('')}</div>`,
- lines:['① Lecture 1’s KL: the average extra cost of using q where p is right. Never negative.',
+ lines:['① Lecture 1’s KL: the average extra cost of using q where p is right. It is never negative.',
   '② The budget for one image: log p(x) splits into the ELBO and a KL to the posterior. So the ELBO is a lower bound on log p(x).',
   '③ The ELBO’s two terms: rebuild x from codes drawn from q, and keep q near the prior.',
   '④ With Gaussian pixels, the first term is the autoencoder’s squared error, scaled by 1/2σ².',
@@ -1151,7 +1185,7 @@ S('summary','end','Autoencoder and VAE, side by side',{builds:2,
   ['random z ~ N(0, I) gives','mostly junk','digits'],
   ['can it score an image?','no','yes, through the ELBO, a lower bound on log p(x)']])}</div>`,
   at(2,takeaway('A VAE is an autoencoder trained with Lecture 1’s objective. The KL to the prior makes the codes fill N(0, I), so random codes decode to digits.'))),
- lines:['Same two networks, two changes: a cloud instead of a point, and a KL to the prior in the loss.','Both changes come from Lecture 1: the ELBO with a code per image, the reparameterisation trick, and the Gaussian KL.'],
+ lines:['The VAE keeps the same two networks with two changes: a cloud instead of a point, and a KL to the prior in the loss.','Both changes come from Lecture 1: the ELBO with a code per image, the reparameterisation trick, and the Gaussian KL.'],
  ask:['Which row explains why sampling works?','Which Lecture 1 ideas did the VAE use?'],
  expected:['The loss row: the KL pulls codes into N(0, I), where random draws land.','Variational inference and the ELBO, reparameterisation, and the closed-form KL between Gaussians.'],
  transition:'What comes next.'});
@@ -1239,7 +1273,7 @@ O('vae-loss-terms','Minus the ELBO is Part 4’s loss, with its weight decided',
  body:stack(`<div>${eq(R`-\qcol{\ELBO(x)}=\underbrace{\E_{q}\Big[\tfrac{1}{2\sigma^2}\big\lVert \pcol{x}-\qcol{f_\theta(z)}\big\rVert^2\Big]}_{\text{from }-\ncol{\log p_\theta(x\mid z)}}+\underbrace{\KL\big(q_\phi(z\mid x)\,\|\,${PRI(R`\N(0,I)`)}\big)}_{\text{stay near the prior}}+\underbrace{\text{const}}_{-541.4}`)}</div>`,
   at(2,`<div>${eq(R`\E_q\big[\cdots\big]\approx\tfrac{1}{2\sigma^2}\big\lVert \pcol{x}-\qcol{f_\theta(\mu+\sigma\odot\epsilon)}\big\rVert^2,\qquad\epsilon\sim\N(0,I)\ \text{(one draw, tool ①)}`)}</div>`),
   at(3,`<div>${eq(R`\KL=\tfrac12\sum_{k=1}^{2}\big(\mu_k^2+\sigma_k^2-\log\sigma_k^2-1\big)\qquad\text{(tool ②, no sampling)}`)}</div>`)),
- lines:['Flip the sign of the ELBO: Part 4’s loss, with the rebuild term weighted by 1/2σ², plus a constant that training can ignore.','The average over q is estimated with one reparameterised draw per image per step.','The KL between two diagonal Gaussians has a formula, so it needs no sampling. Both of Lecture 1’s tools, in one loss.'],
+ lines:['Flip the sign of the ELBO: Part 4’s loss, with the rebuild term weighted by 1/2σ², plus a constant that training can ignore.','The average over q is estimated with one reparameterised draw per image per step.','The KL between two diagonal Gaussians has a formula, so it needs no sampling. The loss uses both of Lecture 1’s tools.'],
  ask:['Which term pulls the codes towards N(0, I)?','Why is one draw enough?','What does the KL do to a code with μ = 5?'],
  expected:['The KL term.','Over many steps and images the noise averages out; the estimate is unbiased.','Adds about ½ × 25 = 12.5 per number: strong pressure back towards the origin.'],
  point:'The constant is 784 log(σ√2π) = −541.4 for σ = 0.2. Shape of the loss: data fit + penalty, like ridge regression, but here the penalty comes out of the ELBO.',
