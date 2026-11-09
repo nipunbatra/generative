@@ -95,23 +95,23 @@ const OURS='Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py
 // ---------------------------------------------------------------- sections and the slide builder
 export const meta={
  id:'lecture5',number:5,title:'Autoencoders and the VAE, from the ELBO',
- subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:94,
+ subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:85,
  notebook:'lecture5-autoencoders-vae.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
-  {id:'why',title:'Part 1 · Why generate?',minutes:18},
+  {id:'why',title:'Part 1 · Why generate?',minutes:13},
   {id:'ae',title:'Part 2 · Autoencoders: squeeze, then rebuild',minutes:18},
   {id:'gen',title:'Part 3 · Can an autoencoder generate?',minutes:10},
   {id:'idea',title:'Part 4 · From an autoencoder to a VAE: three fixes',minutes:12},
-  {id:'vae',title:'Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time',minutes:29},
-  {id:'end',title:'Part 6 · Putting it together',minutes:6},
+  {id:'vae',title:'Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time',minutes:26},
+  {id:'end',title:'Part 6 · Putting it together',minutes:5},
   {id:'optional',title:'Optional depth',minutes:0},
  ],
 };
 export const slides=[];
 /** Numbered sections. The notebook uses the same numbers, with anchors sec-1-1 … sec-6-2. */
 const CHAPTERS=[
- ['1.1','Things that do not exist'],['1.2','Text, pictures and sound'],['1.3','What p(x) means, and what it is for'],['1.4','What they all share'],
+ ['1.1','Things that do not exist'],['1.2','Text and pictures'],['1.3','What p(x) means, and what it is for'],['1.4','What they all share'],
  ['2.1','An image is 784 numbers'],['2.2','Encoder, code, decoder'],['2.3','The loss, and training'],['2.4','What the code holds'],
  ['3.1','Decode random codes'],['3.2','Where the codes are'],['3.3','What we want instead'],
  ['4.1','Fix 1: choose where codes live'],['4.2','Fix 2: a cloud for each image'],['4.3','Fix 3: pull the clouds to N(0, I)'],['4.4','The loss the fixes give'],
@@ -605,40 +605,16 @@ S('llm','why','A chatbot is a generative model: one prompt, three different answ
  lines:['We sent the same prompt to a language model three times. Here is the first reply.','The same prompt gave three different replies. Each is a sample from a distribution over sentences.'],
  ask:['If we send the same prompt again, do we get the same sentence?','Why would we want different answers each time?'],
  expected:['No: the model samples, so each run differs.','Variety: one prompt has many good answers. A model that always gave the single most likely sentence would be repetitive.'],
- transition:'How does it choose? One word at a time.',
- source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.5 Flash, temperature 1 (<code>lecture2/assets/examples/provenance.json</code>).'});
-S('next-word','why','Under the hood: a probability for every possible next word',{builds:2,
- body:cols(nextWordChart(),stack(at(2,p('Sampling = pick a word with these probabilities, append it, repeat.')),at(2,small(`The same model’s three continuations: “${NW.samples.map(x=>x.split('\n')[0].trim()).join('”, “')}”.`))),'1.45fr 1fr'),
- lines:['A small language model (SmolLM2, 360 million weights) scores every word it knows as the next word. “wet” gets 17%.','That loop is all a chatbot does when it writes, at a much larger scale.'],
- ask:['Which word would the model pick if it always took the most likely one?','What is the model a distribution over?'],
- expected:['“wet”: 17%, but 83% of the time something else is sampled.','The next word given the words so far. Chaining them gives a distribution over whole sentences.'],
- point:'Probabilities are real: SmolLM2-360M-Instruct, computed locally for Lecture 2. The point is only that generation = repeated sampling.',
  transition:'Pictures: one prompt, many images.',
- source:'SmolLM2-360M-Instruct (Hugging Face), next-token probabilities and three samples at temperature 1, computed for Lecture 2.'});
+ source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.5 Flash, temperature 1 (<code>lecture2/assets/examples/provenance.json</code>).'});
 S('t2i','why','Text to image: one prompt, four samples',{builds:2,
  body:stack(`<div class="prompt-box"><b>Prompt:</b> A watercolour painting of a camel walking across the white salt desert of the Rann of Kutch at sunrise, soft light, wide view.</div>`,
   `<div class="photo-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${[1,2,3,4].map(i=>(i===1?'':`<div data-at="2">`)+photo(`assets/examples/t2i-sample-${i}.jpg`,`sample ${i}`)+(i===1?'':'</div>')).join('')}</div>`),
  lines:['The same idea for pictures: one prompt, and the first picture the model returned.','Three more runs of the same prompt bring a rider, a walker and a different horizon.'],
  ask:['What stayed the same across the four, and what changed?','Where does the variety come from?'],
  expected:['Same: camel, salt flat, sunrise, watercolour. Changed: rider, framing, sky.','From random numbers fed into the model; the prompt only narrows what is plausible.'],
- transition:'Images can also be the input.',
+ transition:'A model of what, exactly? First, the letters.',
  source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3 Pro Image (<code>lecture2/assets/examples/provenance.json</code>).'});
-S('img2img','why','Image in, image out',{builds:2,
- body:`<div class="state-slot"><div data-only="1"><div class="photo-row" style="grid-template-columns:repeat(6,minmax(0,1fr))">${photo('assets/gallery/shoe-input.jpg','edges of a shoe')+photo('assets/gallery/shoe-output.jpg','pix2pix: a photo')+photo('assets/gallery/spade-layout.jpg','a label map')+photo('assets/gallery/spade-out-0.jpg','SPADE: a landscape')+photo('assets/gallery/horse.jpg','a horse')+photo('assets/gallery/zebra.jpg','CycleGAN: a zebra')}</div></div>`+
-  `<div data-only="2"><div class="photo-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${photo('assets/gallery/spade-layout.jpg','one label map')+photo('assets/gallery/spade-out-0.jpg','sample 1')+photo('assets/gallery/spade-out-1.jpg','sample 2')+photo('assets/gallery/spade-out-2.jpg','sample 3')}</div></div></div>`,
- lines:['The input can be an image: a sketch becomes a photo, a coloured map becomes a landscape, a horse becomes a zebra.','Sampling the same label map three times gives three different photographs. The model is still a distribution, now given an input.'],
- ask:['Is there one right answer for “photo of this sketch”?','So what is the model a distribution over?'],
- expected:['No: colour, texture and lighting are not in the sketch.','Over images, given the input image: p(photo | sketch).'],
- transition:'Sound works the same way.',
- source:'Isola et al., pix2pix (CVPR 2017); Park et al., SPADE (CVPR 2019); Zhu et al., CycleGAN (ICCV 2017). Attributed teaching excerpts; copyright with the authors.'});
-S('speech','why','Sound: text in, 24,000 numbers per second out',{builds:2,
- body:stack(`<div class="prompt-box"><b>Text:</b> “A generative model turns a few random numbers into a new example: a sentence, a picture, or this voice.”</div>`,waveFig(),
-  `<div class="audio-row"><audio controls preload="none" src="${L2A('assets/examples/tts-sample.mp3')}"></audio>${at(2,`<span class="mini">${comma(WAVE.samples)} numbers for ${f(WAVE.seconds,1)} seconds. A few of them: ${WAVE.first.slice(0,6).map(v=>f(v,3)).join(', ')}, …</span>`)}</div>`),
- lines:['A text-to-speech model read this sentence aloud. Press play.','The output is just a long list of numbers: the air pressure, 24,000 times a second. Generating sound means generating that list.'],
- ask:['What exactly does the model output?','Is there one right way to say this sentence?'],
- expected:['About 191,000 numbers: a waveform sampled 24,000 times a second.','No: speed, pitch, pauses and voice all vary. Another sample would sound different.'],
- transition:'Before more examples: a model of what, exactly? First, the letters.',
- source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.8 Flash TTS, voice “Kore”.'});
 chap('1.3');
 S('xy','why','First, the names: x is the data, y is a label',{builds:4,nb:'cell-xy',
  body:xyNames(),
@@ -661,14 +637,7 @@ S('gen-disc','why','Generative or discriminative, in one picture',{builds:3,nb:'
  ask:['Where is p(x) high? Where is it near 0?','Why is the 1s’ hump taller and narrower?','Can you get the top picture back from the bottom curve alone?'],
  expected:['High near ink 60 and 136, where most images are; near 0 above 230: almost no digit has that much ink.',`The 1s all use about the same ink, so their hump is narrow; and they are a little more common: ${Math.round(XY.ink.p_y[1]*100)}%.`,'No. p(y | x) says nothing about where the data are, so it cannot score or draw an x. The top gives the bottom, never the other way.'],
  point:`This is Bayes’ rule, as in Lecture 1, with the label y as the unknown: p(y | x) = p(x | y) p(y) / p(x). Humps: Gaussian kernel densities (bandwidths ${num(XY.ink.bandwidth[0],1)} and ${num(XY.ink.bandwidth[1],1)}) of the ${comma(XY.ink.n[0])} training 0s and ${comma(XY.ink.n[1])} 1s.`,
- transition:'Generative models also matter far from art and chat.',source:'Numbers: <code>lecture5/scripts/xy.py</code> (MNIST training set).'});
-S('science','why','Beyond pictures: generative models in science',{builds:2,
- body:`<div class="cards big" style="grid-template-columns:1fr 1fr">${card('Weather','GenCast samples 50 possible futures for the next 15 days. The spread of the samples says how sure the forecast is.',palette.data,'Price et al., Nature 2025')+card('Proteins','RFdiffusion generates new protein shapes, for example ones that bind a chosen target.',palette.p,'Watson et al., Nature 2023')}${at(2,card('Materials','MatterGen proposes new crystal structures with properties you ask for.',palette.q,'Zeni et al., Nature 2025'))}${at(2,card('Missing data','Sensors drop readings. A model of p(x) fills the gap with plausible values instead of a flat average, and says how unsure it is.',palette.noise,'for example, air-quality and smart-meter records'))}</div>`,
- lines:['Weather and proteins: the output is a sample, and many samples together describe what could happen.','The same goes for new materials, and for an everyday job: filling in missing sensor readings.'],
- ask:['Why would a forecaster want 50 samples instead of one best forecast?','Why not fill a gap in a sensor record with the average value?'],
- expected:['The samples show the range of possible futures: if they disagree, the forecast is uncertain.','The average is smooth and typical-looking but may never happen, and it hides the uncertainty. A sample looks like real data.'],
- transition:'Collect the uses.',
- source:'Price et al., “Probabilistic weather forecasting with machine learning” (GenCast), Nature 2025; Watson et al., “De novo design of protein structure and function with RFdiffusion”, Nature 2023; Zeni et al., “A generative model for inorganic materials design” (MatterGen), Nature 2025.'});
+ transition:'What is a model of p(x) good for?',source:'Numbers: <code>lecture5/scripts/xy.py</code> (MNIST training set).'});
 S('uses','why','What a model of p(x) is good for',{builds:2,
  body:`<div class="cards big" style="grid-template-columns:repeat(3,minmax(0,1fr))">${card('Create','new text, images, sound, designs',palette.q)+card('Fill in','missing pixels, missing readings, the rest of a sentence',palette.noise)+card('Simulate','many plausible futures instead of one average',palette.data)}${at(2,card('Spot the odd one out','a reading with very low p(x) is suspicious: a faulty sensor, a fraud',palette.loss))}${at(2,card('Compress','likely data needs fewer bits: Lecture 1’s codes',palette.p))}${at(2,card('Make more data','extra training examples, or shareable synthetic records',GREEN))}</div>`,
  lines:['The first three uses need samples from the model.','Spotting the odd one out and compressing need a score p(x). Making more data needs samples again, and helps when real data is scarce or private.'],
@@ -1065,16 +1034,7 @@ S('vae-loss','vae','Put in the model’s choices: the loss is reconstruction + K
  ask:['Which term needs the decoder?','Where have you seen squared error come from a Gaussian likelihood?','Which Lecture 1 tool gives the KL?','What did Part 4 guess that this derivation decides?'],
  expected:['The log-likelihood: decode z, then score x against it.','Least squares in linear regression: maximum likelihood with Gaussian noise.','Tool ②: a formula for the KL between two Gaussians.','The weight between the terms, 1/(2 · 0.2²) from the pixel noise, and the reason the KL is there at all.'],
  point:`The constant: log p(x | z) carries +${f(-V.loglik_const,1)} = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, using torch.distributions densities instead of the formulas, and gets Part 4’s loss minus ${f(-V.loglik_const,1)}.`,
- transition:'Put in the numbers for our 3.'});
-S('vae-worked','vae','One step for our 3, with numbers',{builds:3,
- body:stack(eq(R`\mu=(${f(V.q3.mu[0],3)},\,${f(V.q3.mu[1],3)}),\quad\sigma=(${f(V.q3.sd[0],3)},\,${f(V.q3.sd[1],3)}),\quad\epsilon=(${f(WK.eps[0],1)},\,${f(WK.eps[1],1)})`),eq(R`z=\mu+\sigma\odot\epsilon=(${f(WK.z[0],3)},\,${f(WK.z[1],3)})`),
-  at(2,`<div class="dflex">${digit('example',0,92,`style="outline:3px solid ${palette.p};outline-offset:1px"`)}<span class="lead">vs</span>${digit('vae2_worked_recon',0,92,`style="outline:3px solid ${palette.q};outline-offset:1px"`)}${eq(R`\tfrac{1}{2(0.2)^2}\times\lcol{${f(WK.sse,2)}}=${f(WK.recon,1)}`)}</div>`),
-  at(3,eq(R`\KL=${f(V.q3.kl_prior,2)}\qquad \lcol{L}=${f(WK.recon,1)}+${f(V.q3.kl_prior,2)}=\lcol{${f(WK.loss,1)}}`))),
- lines:['The encoder gives μ and σ for our 3; draw ε; the code is z = μ + σ ⊙ ε.',`Decode z and compare with our 3 (teal) pixel by pixel: squared error ${f(WK.sse,1)}, scaled by 1/(2σ²) = 12.5.`,'Add the KL to the prior, from tool ②: the loss for this image on this step.'],
- ask:['Why is z so close to μ?','Which term is larger, and what does that say?','What does backward() update?'],
- expected:['σ is tiny (about 0.01): the code of this 3 is pinned down precisely.','Reconstruction, by far: fitting the pixels dominates this model.','The decoder’s θ through the reconstruction; the encoder’s φ through both μ, σ (via z) and the KL.'],
- point:`Check: L − ${f(-V.loglik_const,1)} = ${f(WK.loss+V.loglik_const,1)}, close to −ELBO = ${f(-V.q3.elbo,1)}. The loss drops the constant, and one draw is noisy.`,
- transition:'The whole thing in PyTorch.',source:OURS});
+ transition:'The whole thing in PyTorch.'});
 S('vae-code','vae','The VAE in PyTorch: three changes to the autoencoder',{builds:2,
  body:cols(`<div class="code-xs">${code(`class VAE(AutoEncoder):          # same decoder
     def __init__(self, z=2):
@@ -1122,11 +1082,6 @@ S('vae-grid','vae','Decode a grid of codes: digits everywhere',{builds:2,
  lines:['Every point of a 12 × 12 grid over [−3, 3]² decodes to a digit, morphing smoothly into the next.','Walk from a 1 to a 0: every step is a plausible digit. The space between images was trained, because each image owned a cloud.'],
  ask:['Compare with the autoencoder’s grid. What is different?','Why are the in-between images plausible now?'],
  expected:['No junk: the whole region N(0, I) samples from is used.','During training each image owned a small cloud of codes, so the decoder learned to draw something sensible everywhere in between.'],
- transition:'Your turn: choose codes for the VAE.',source:OURS});
-S('explore-vae','vae','Your turn again: choose a code for the VAE',{builds:1,
- body:widget('explorer','Choose a code for the VAE or the autoencoder and see its decoder output.',{net:'vae2',both:'1',limae:'-6,24,-9,14',limvae:'-4.5,4.5,-4.5,4.5'}),
- lines:['Random codes, encoded test digits, or click anywhere. Switch between the VAE and the autoencoder to compare.'],
- ask:['Click in the gaps between digit groups. What do you see now?'],expected:['Plausible in-between shapes: the space between digits is filled.'],
  transition:'One knob: the weight on the KL.',source:OURS});
 chap('5.8');
 S('beta-what','vae','Put a weight on the KL: β',{builds:2,
@@ -1184,12 +1139,6 @@ S('summary','end','Autoencoder and VAE, side by side',{builds:2,
  lines:['The VAE keeps the same two networks with two changes: a cloud instead of a point, and a KL to the prior in the loss.','Both changes come from Lecture 1: the ELBO with a code per image, the reparameterisation trick, and the Gaussian KL.'],
  ask:['Which row explains why sampling works?','Which Lecture 1 ideas did the VAE use?'],
  expected:['The loss row: the KL pulls codes into N(0, I), where random draws land.','Variational inference and the ELBO, reparameterisation, and the closed-form KL between Gaussians.'],
- transition:'What comes next.'});
-S('next','end','Next: can we drop the pixel likelihood altogether?',{builds:2,
- body:stack(p('VAE samples are soft because each pixel is an independent Gaussian around a mean image.'),at(2,p('Next: a generator trained against a second network that judges real from fake (GANs). Then many small denoising steps (diffusion).'))),
- lines:['The pixel-wise Gaussian likelihood is the VAE’s weak point: it rewards the safe average stroke.','Lectures 3 and 4 replace it: a learned critic, then repeated denoising.'],
- ask:['Why does a pixel-wise Gaussian encourage soft images?','What else could tell a generator its images are wrong?'],
- expected:['Squared error favours the mean of plausible images, which is blurry.','A classifier trained to tell real from generated: a learned critic.'],
  transition:'End of the main route. Optional slides follow.'});
 
 // ================================================================= Optional depth
@@ -1333,13 +1282,65 @@ O('opt-beta-collapse','β = 256: every code decodes to the same blur',{builds:2,
  ask:['Why is KL = 0 the cheapest solution here?','How would you spot collapse during training?'],
  expected:['β × KL dominates the loss; reconstruction error is worth less than any information in the code.','The KL term falls to about 0 and samples all look the same.'],source:OURS});
 
+O('next-word','Under the hood: a probability for every possible next word',{builds:2,
+ body:cols(nextWordChart(),stack(at(2,p('Sampling = pick a word with these probabilities, append it, repeat.')),at(2,small(`The same model’s three continuations: “${NW.samples.map(x=>x.split('\n')[0].trim()).join('”, “')}”.`))),'1.45fr 1fr'),
+ lines:['A small language model (SmolLM2, 360 million weights) scores every word it knows as the next word. “wet” gets 17%.','That loop is all a chatbot does when it writes, at a much larger scale.'],
+ ask:['Which word would the model pick if it always took the most likely one?','What is the model a distribution over?'],
+ expected:['“wet”: 17%, but 83% of the time something else is sampled.','The next word given the words so far. Chaining them gives a distribution over whole sentences.'],
+ point:'Probabilities are real: SmolLM2-360M-Instruct, computed locally for Lecture 2. The point is only that generation = repeated sampling.',
+ transition:'Pictures: one prompt, many images.',
+ source:'SmolLM2-360M-Instruct (Hugging Face), next-token probabilities and three samples at temperature 1, computed for Lecture 2.'});
+O('img2img','Image in, image out',{builds:2,
+ body:`<div class="state-slot"><div data-only="1"><div class="photo-row" style="grid-template-columns:repeat(6,minmax(0,1fr))">${photo('assets/gallery/shoe-input.jpg','edges of a shoe')+photo('assets/gallery/shoe-output.jpg','pix2pix: a photo')+photo('assets/gallery/spade-layout.jpg','a label map')+photo('assets/gallery/spade-out-0.jpg','SPADE: a landscape')+photo('assets/gallery/horse.jpg','a horse')+photo('assets/gallery/zebra.jpg','CycleGAN: a zebra')}</div></div>`+
+  `<div data-only="2"><div class="photo-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">${photo('assets/gallery/spade-layout.jpg','one label map')+photo('assets/gallery/spade-out-0.jpg','sample 1')+photo('assets/gallery/spade-out-1.jpg','sample 2')+photo('assets/gallery/spade-out-2.jpg','sample 3')}</div></div></div>`,
+ lines:['The input can be an image: a sketch becomes a photo, a coloured map becomes a landscape, a horse becomes a zebra.','Sampling the same label map three times gives three different photographs. The model is still a distribution, now given an input.'],
+ ask:['Is there one right answer for “photo of this sketch”?','So what is the model a distribution over?'],
+ expected:['No: colour, texture and lighting are not in the sketch.','Over images, given the input image: p(photo | sketch).'],
+ transition:'Sound works the same way.',
+ source:'Isola et al., pix2pix (CVPR 2017); Park et al., SPADE (CVPR 2019); Zhu et al., CycleGAN (ICCV 2017). Attributed teaching excerpts; copyright with the authors.'});
+O('speech','Sound: text in, 24,000 numbers per second out',{builds:2,
+ body:stack(`<div class="prompt-box"><b>Text:</b> “A generative model turns a few random numbers into a new example: a sentence, a picture, or this voice.”</div>`,waveFig(),
+  `<div class="audio-row"><audio controls preload="none" src="${L2A('assets/examples/tts-sample.mp3')}"></audio>${at(2,`<span class="mini">${comma(WAVE.samples)} numbers for ${f(WAVE.seconds,1)} seconds. A few of them: ${WAVE.first.slice(0,6).map(v=>f(v,3)).join(', ')}, …</span>`)}</div>`),
+ lines:['A text-to-speech model read this sentence aloud. Press play.','The output is just a long list of numbers: the air pressure, 24,000 times a second. Generating sound means generating that list.'],
+ ask:['What exactly does the model output?','Is there one right way to say this sentence?'],
+ expected:['About 191,000 numbers: a waveform sampled 24,000 times a second.','No: speed, pitch, pauses and voice all vary. Another sample would sound different.'],
+ transition:'Before more examples: a model of what, exactly? First, the letters.',
+ source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.8 Flash TTS, voice “Kore”.'});
+O('science','Beyond pictures: generative models in science',{builds:2,
+ body:`<div class="cards big" style="grid-template-columns:1fr 1fr">${card('Weather','GenCast samples 50 possible futures for the next 15 days. The spread of the samples says how sure the forecast is.',palette.data,'Price et al., Nature 2025')+card('Proteins','RFdiffusion generates new protein shapes, for example ones that bind a chosen target.',palette.p,'Watson et al., Nature 2023')}${at(2,card('Materials','MatterGen proposes new crystal structures with properties you ask for.',palette.q,'Zeni et al., Nature 2025'))}${at(2,card('Missing data','Sensors drop readings. A model of p(x) fills the gap with plausible values instead of a flat average, and says how unsure it is.',palette.noise,'for example, air-quality and smart-meter records'))}</div>`,
+ lines:['Weather and proteins: the output is a sample, and many samples together describe what could happen.','The same goes for new materials, and for an everyday job: filling in missing sensor readings.'],
+ ask:['Why would a forecaster want 50 samples instead of one best forecast?','Why not fill a gap in a sensor record with the average value?'],
+ expected:['The samples show the range of possible futures: if they disagree, the forecast is uncertain.','The average is smooth and typical-looking but may never happen, and it hides the uncertainty. A sample looks like real data.'],
+ transition:'Collect the uses.',
+ source:'Price et al., “Probabilistic weather forecasting with machine learning” (GenCast), Nature 2025; Watson et al., “De novo design of protein structure and function with RFdiffusion”, Nature 2023; Zeni et al., “A generative model for inorganic materials design” (MatterGen), Nature 2025.'});
+O('vae-worked','One step for our 3, with numbers',{builds:3,
+ body:stack(eq(R`\mu=(${f(V.q3.mu[0],3)},\,${f(V.q3.mu[1],3)}),\quad\sigma=(${f(V.q3.sd[0],3)},\,${f(V.q3.sd[1],3)}),\quad\epsilon=(${f(WK.eps[0],1)},\,${f(WK.eps[1],1)})`),eq(R`z=\mu+\sigma\odot\epsilon=(${f(WK.z[0],3)},\,${f(WK.z[1],3)})`),
+  at(2,`<div class="dflex">${digit('example',0,92,`style="outline:3px solid ${palette.p};outline-offset:1px"`)}<span class="lead">vs</span>${digit('vae2_worked_recon',0,92,`style="outline:3px solid ${palette.q};outline-offset:1px"`)}${eq(R`\tfrac{1}{2(0.2)^2}\times\lcol{${f(WK.sse,2)}}=${f(WK.recon,1)}`)}</div>`),
+  at(3,eq(R`\KL=${f(V.q3.kl_prior,2)}\qquad \lcol{L}=${f(WK.recon,1)}+${f(V.q3.kl_prior,2)}=\lcol{${f(WK.loss,1)}}`))),
+ lines:['The encoder gives μ and σ for our 3; draw ε; the code is z = μ + σ ⊙ ε.',`Decode z and compare with our 3 (teal) pixel by pixel: squared error ${f(WK.sse,1)}, scaled by 1/(2σ²) = 12.5.`,'Add the KL to the prior, from tool ②: the loss for this image on this step.'],
+ ask:['Why is z so close to μ?','Which term is larger, and what does that say?','What does backward() update?'],
+ expected:['σ is tiny (about 0.01): the code of this 3 is pinned down precisely.','Reconstruction, by far: fitting the pixels dominates this model.','The decoder’s θ through the reconstruction; the encoder’s φ through both μ, σ (via z) and the KL.'],
+ point:`Check: L − ${f(-V.loglik_const,1)} = ${f(WK.loss+V.loglik_const,1)}, close to −ELBO = ${f(-V.q3.elbo,1)}. The loss drops the constant, and one draw is noisy.`,
+ transition:'The whole thing in PyTorch.',source:OURS});
+O('explore-vae','Your turn again: choose a code for the VAE',{builds:1,
+ body:widget('explorer','Choose a code for the VAE or the autoencoder and see its decoder output.',{net:'vae2',both:'1',limae:'-6,24,-9,14',limvae:'-4.5,4.5,-4.5,4.5'}),
+ lines:['Random codes, encoded test digits, or click anywhere. Switch between the VAE and the autoencoder to compare.'],
+ ask:['Click in the gaps between digit groups. What do you see now?'],expected:['Plausible in-between shapes: the space between digits is filled.'],
+ transition:'One knob: the weight on the KL.',source:OURS});
+O('next','Next: can we drop the pixel likelihood altogether?',{builds:2,
+ body:stack(p('VAE samples are soft because each pixel is an independent Gaussian around a mean image.'),at(2,p('Next: a generator trained against a second network that judges real from fake (GANs). Then many small denoising steps (diffusion).'))),
+ lines:['The pixel-wise Gaussian likelihood is the VAE’s weak point: it rewards the safe average stroke.','Lectures 3 and 4 replace it: a learned critic, then repeated denoising.'],
+ ask:['Why does a pixel-wise Gaussian encourage soft images?','What else could tell a generator its images are wrong?'],
+ expected:['Squared error favours the mean of plausible images, which is blurry.','A classifier trained to tell real from generated: a learned critic.'],
+ transition:'End of the main route. Optional slides follow.'});
+
 // ================================================================= Lecture map, filled in once every section knows its first slide
 S('contents','map','Lecture 5 at a glance: six parts, twenty-five sections',{nb:'top',
  body:'',
  lines:[`Six parts, twenty-five numbered sections, about ${meta.minutes} minutes. The ▶ Notebook link on every slide opens its section in Colab.`],
  ask:['Which part leans most on Lecture 1?'],
  expected:['Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.'],
- point:'A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-worked, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.',
+ point:'A 60-minute cut: in Part 1 skip gen-disc; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-code and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.',
  transition:'Part 1: why generate?'});
 for(const [sl,k] of partOpeners){
  const figs={6:budgetFig(true),1:`<div class="photo-row" style="grid-template-columns:2.1fr 1fr 1fr 1fr">${photo('assets/gallery/stylegan-faces.jpg','faces (StyleGAN)')+photo('assets/examples/t2i-sample-1.jpg','text to image')+photo('assets/gallery/spade-out-0.jpg','a map to a landscape')}<figure>${digits('vae16_prior_samples',{idx:[0,1,2,3],cols:2,size:76,gap:6})}<figcaption>digits: today</figcaption></figure></div>`,2:maxH(250,aeDiagram({stage:4})),3:genDiagram('ae'),4:fixesFig(),5:castFig()};

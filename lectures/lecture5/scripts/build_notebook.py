@@ -93,8 +93,8 @@ def show_digits(x, ncol=8, size=0.9, title=None):
 part('1', 'Why generate?', 'Generative models make new text, pictures and sound. We take a quick tour, see what they are good for, and find the one recipe they share.')
 section('1.1', 'Things that do not exist', 'faces',
         'StyleGAN faces, then six real and six generated digits. The fakes are the first six draws z ~ N(0, I) through Lecture 2’s 16-number VAE; Section 5.7 makes more of them.')
-section('1.2', 'Text, pictures and sound', 'llm',
-        'A chatbot, a text-to-image model, image-to-image models and text to speech. Each one samples: the same prompt gives a different output every time. '
+section('1.2', 'Text and pictures', 'llm',
+        'A chatbot and a text-to-image model; the optional slides add image to image and speech. Each one samples: the same prompt gives a different output every time. '
         'A language model gives a probability to every possible next word; generating is “sample a word, append it, repeat”.')
 section('1.3', 'What p(x) means, and what it is for', 'xy',
         'x is the data (an image: 784 numbers), y a label about it (which digit). A classifier learns p(y | x); a generative model learns p(x); '

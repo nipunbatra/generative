@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 94,
+  "minutes": 85,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -14,7 +14,7 @@
     {
       "id": "why",
       "title": "Part 1 · Why generate?",
-      "minutes": 18
+      "minutes": 13
     },
     {
       "id": "ae",
@@ -34,12 +34,12 @@
     {
       "id": "vae",
       "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
-      "minutes": 29
+      "minutes": 26
     },
     {
       "id": "end",
       "title": "Part 6 · Putting it together",
-      "minutes": 6
+      "minutes": 5
     },
     {
       "id": "optional",
@@ -47,8 +47,8 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 68,
-  "optionalSlides": 17,
+  "coreSlides": 61,
+  "optionalSlides": 24,
   "slides": [
     {
       "id": "contents",
@@ -86,29 +86,8 @@
       "optional": false
     },
     {
-      "id": "next-word",
-      "title": "Under the hood: a probability for every possible next word",
-      "section": "why",
-      "builds": 2,
-      "optional": false
-    },
-    {
       "id": "t2i",
       "title": "Text to image: one prompt, four samples",
-      "section": "why",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "img2img",
-      "title": "Image in, image out",
-      "section": "why",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "speech",
-      "title": "Sound: text in, 24,000 numbers per second out",
       "section": "why",
       "builds": 2,
       "optional": false
@@ -125,13 +104,6 @@
       "title": "Generative or discriminative, in one picture",
       "section": "why",
       "builds": 3,
-      "optional": false
-    },
-    {
-      "id": "science",
-      "title": "Beyond pictures: generative models in science",
-      "section": "why",
-      "builds": 2,
       "optional": false
     },
     {
@@ -429,13 +401,6 @@
       "optional": false
     },
     {
-      "id": "vae-worked",
-      "title": "One step for our 3, with numbers",
-      "section": "vae",
-      "builds": 3,
-      "optional": false
-    },
-    {
       "id": "vae-code",
       "title": "The VAE in PyTorch: three changes to the autoencoder",
       "section": "vae",
@@ -468,13 +433,6 @@
       "title": "Decode a grid of codes: digits everywhere",
       "section": "vae",
       "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "explore-vae",
-      "title": "Your turn again: choose a code for the VAE",
-      "section": "vae",
-      "builds": 1,
       "optional": false
     },
     {
@@ -515,13 +473,6 @@
     {
       "id": "summary",
       "title": "Autoencoder and VAE, side by side",
-      "section": "end",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "next",
-      "title": "Next: can we drop the pixel likelihood altogether?",
       "section": "end",
       "builds": 2,
       "optional": false
@@ -641,6 +592,55 @@
     {
       "id": "opt-beta-collapse",
       "title": "β = 256: every code decodes to the same blur",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "next-word",
+      "title": "Under the hood: a probability for every possible next word",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "img2img",
+      "title": "Image in, image out",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "speech",
+      "title": "Sound: text in, 24,000 numbers per second out",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "science",
+      "title": "Beyond pictures: generative models in science",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "vae-worked",
+      "title": "One step for our 3, with numbers",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
+      "id": "explore-vae",
+      "title": "Your turn again: choose a code for the VAE",
+      "section": "optional",
+      "builds": 1,
+      "optional": true
+    },
+    {
+      "id": "next",
+      "title": "Next: can we drop the pixel likelihood altogether?",
       "section": "optional",
       "builds": 2,
       "optional": true

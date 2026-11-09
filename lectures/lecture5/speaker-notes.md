@@ -1,18 +1,18 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 94 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 85 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
 | Lecture map | 1 |
-| Part 1 · Why generate? | 18 |
+| Part 1 · Why generate? | 13 |
 | Part 2 · Autoencoders: squeeze, then rebuild | 18 |
 | Part 3 · Can an autoencoder generate? | 10 |
 | Part 4 · From an autoencoder to a VAE: three fixes | 12 |
-| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 29 |
-| Part 6 · Putting it together | 6 |
+| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 26 |
+| Part 6 · Putting it together | 5 |
 
 ## contents: Lecture 5 at a glance: six parts, twenty-five sections
 
@@ -20,7 +20,7 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Expected:** Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.
 
-**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-worked, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
+**Point here:** A 60-minute cut: in Part 1 skip gen-disc; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-code and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
 
 **Transition:** Part 1: why generate?
 
@@ -72,25 +72,9 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Expected:** Variety: one prompt has many good answers. A model that always gave the single most likely sentence would be repetitive.
 
-**Transition:** How does it choose? One word at a time.
-
-**Source / evidence:** Generated for Lecture 2 on 21 October 2026 with Gemini 3.5 Flash, temperature 1 (<code>lecture2/assets/examples/provenance.json</code>).
-
-## next-word: Under the hood: a probability for every possible next word
-
-**Build 1, ask:** Which word would the model pick if it always took the most likely one?
-
-**Expected:** “wet”: 17%, but 83% of the time something else is sampled.
-
-**Build 2, ask:** What is the model a distribution over?
-
-**Expected:** The next word given the words so far. Chaining them gives a distribution over whole sentences.
-
-**Point here:** Probabilities are real: SmolLM2-360M-Instruct, computed locally for Lecture 2. The point is only that generation = repeated sampling.
-
 **Transition:** Pictures: one prompt, many images.
 
-**Source / evidence:** SmolLM2-360M-Instruct (Hugging Face), next-token probabilities and three samples at temperature 1, computed for Lecture 2.
+**Source / evidence:** Generated for Lecture 2 on 21 October 2026 with Gemini 3.5 Flash, temperature 1 (<code>lecture2/assets/examples/provenance.json</code>).
 
 ## t2i: Text to image: one prompt, four samples
 
@@ -102,37 +86,9 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Expected:** From random numbers fed into the model; the prompt only narrows what is plausible.
 
-**Transition:** Images can also be the input.
+**Transition:** A model of what, exactly? First, the letters.
 
 **Source / evidence:** Generated for Lecture 2 on 21 October 2026 with Gemini 3 Pro Image (<code>lecture2/assets/examples/provenance.json</code>).
-
-## img2img: Image in, image out
-
-**Build 1, ask:** Is there one right answer for “photo of this sketch”?
-
-**Expected:** No: colour, texture and lighting are not in the sketch.
-
-**Build 2, ask:** So what is the model a distribution over?
-
-**Expected:** Over images, given the input image: p(photo | sketch).
-
-**Transition:** Sound works the same way.
-
-**Source / evidence:** Isola et al., pix2pix (CVPR 2017); Park et al., SPADE (CVPR 2019); Zhu et al., CycleGAN (ICCV 2017). Attributed teaching excerpts; copyright with the authors.
-
-## speech: Sound: text in, 24,000 numbers per second out
-
-**Build 1, ask:** What exactly does the model output?
-
-**Expected:** About 191,000 numbers: a waveform sampled 24,000 times a second.
-
-**Build 2, ask:** Is there one right way to say this sentence?
-
-**Expected:** No: speed, pitch, pauses and voice all vary. Another sample would sound different.
-
-**Transition:** Before more examples: a model of what, exactly? First, the letters.
-
-**Source / evidence:** Generated for Lecture 2 on 21 October 2026 with Gemini 3.8 Flash TTS, voice “Kore”.
 
 ## xy: First, the names: x is the data, y is a label
 
@@ -174,23 +130,9 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Point here:** This is Bayes’ rule, as in Lecture 1, with the label y as the unknown: p(y | x) = p(x | y) p(y) / p(x). Humps: Gaussian kernel densities (bandwidths 6.2 and 3.1) of the 5,923 training 0s and 6,742 1s.
 
-**Transition:** Generative models also matter far from art and chat.
+**Transition:** What is a model of p(x) good for?
 
 **Source / evidence:** Numbers: <code>lecture5/scripts/xy.py</code> (MNIST training set).
-
-## science: Beyond pictures: generative models in science
-
-**Build 1, ask:** Why would a forecaster want 50 samples instead of one best forecast?
-
-**Expected:** The samples show the range of possible futures: if they disagree, the forecast is uncertain.
-
-**Build 2, ask:** Why not fill a gap in a sensor record with the average value?
-
-**Expected:** The average is smooth and typical-looking but may never happen, and it hides the uncertainty. A sample looks like real data.
-
-**Transition:** Collect the uses.
-
-**Source / evidence:** Price et al., “Probabilistic weather forecasting with machine learning” (GenCast), Nature 2025; Watson et al., “De novo design of protein structure and function with RFdiffusion”, Nature 2023; Zeni et al., “A generative model for inorganic materials design” (MatterGen), Nature 2025.
 
 ## uses: What a model of p(x) is good for
 
@@ -868,27 +810,7 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 
 **Point here:** The constant: log p(x | z) carries +541.4 = −784 log(0.2 √(2π)); it changes no gradient. E_q is estimated with one draw z = μ + σ ⊙ ε per image per step (tool ①). The notebook (5.5) computes the ELBO from its definition, using torch.distributions densities instead of the formulas, and gets Part 4’s loss minus 541.4.
 
-**Transition:** Put in the numbers for our 3.
-
-## vae-worked: One step for our 3, with numbers
-
-**Build 1, ask:** Why is z so close to μ?
-
-**Expected:** σ is tiny (about 0.01): the code of this 3 is pinned down precisely.
-
-**Build 2, ask:** Which term is larger, and what does that say?
-
-**Expected:** Reconstruction, by far: fitting the pixels dominates this model.
-
-**Build 3, ask:** What does backward() update?
-
-**Expected:** The decoder’s θ through the reconstruction; the encoder’s φ through both μ, σ (via z) and the KL.
-
-**Point here:** Check: L − 541.4 = −243.7, close to −ELBO = −243.4. The loss drops the constant, and one draw is noisy.
-
 **Transition:** The whole thing in PyTorch.
-
-**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
 ## vae-code: The VAE in PyTorch: three changes to the autoencoder
 
@@ -959,16 +881,6 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 **Build 2, ask:** Why are the in-between images plausible now?
 
 **Expected:** During training each image owned a small cloud of codes, so the decoder learned to draw something sensible everywhere in between.
-
-**Transition:** Your turn: choose codes for the VAE.
-
-**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
-
-## explore-vae: Your turn again: choose a code for the VAE
-
-**Build 1, ask:** Click in the gaps between digit groups. What do you see now?
-
-**Expected:** Plausible in-between shapes: the space between digits is filled.
 
 **Transition:** One knob: the weight on the KL.
 
@@ -1059,18 +971,6 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 **Build 2, ask:** Which Lecture 1 ideas did the VAE use?
 
 **Expected:** Variational inference and the ELBO, reparameterisation, and the closed-form KL between Gaussians.
-
-**Transition:** What comes next.
-
-## next: Next: can we drop the pixel likelihood altogether?
-
-**Build 1, ask:** Why does a pixel-wise Gaussian encourage soft images?
-
-**Expected:** Squared error favours the mean of plausible images, which is blurry.
-
-**Build 2, ask:** What else could tell a generator its images are wrong?
-
-**Expected:** A classifier trained to tell real from generated: a learned critic.
 
 **Transition:** End of the main route. Optional slides follow.
 
@@ -1319,3 +1219,103 @@ Planned main route: 94 minutes. Timing includes student responses and the specif
 **Expected:** The KL term falls to about 0 and samples all look the same.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## next-word: Under the hood: a probability for every possible next word (optional)
+
+**Build 1, ask:** Which word would the model pick if it always took the most likely one?
+
+**Expected:** “wet”: 17%, but 83% of the time something else is sampled.
+
+**Build 2, ask:** What is the model a distribution over?
+
+**Expected:** The next word given the words so far. Chaining them gives a distribution over whole sentences.
+
+**Point here:** Probabilities are real: SmolLM2-360M-Instruct, computed locally for Lecture 2. The point is only that generation = repeated sampling.
+
+**Transition:** Pictures: one prompt, many images.
+
+**Source / evidence:** SmolLM2-360M-Instruct (Hugging Face), next-token probabilities and three samples at temperature 1, computed for Lecture 2.
+
+## img2img: Image in, image out (optional)
+
+**Build 1, ask:** Is there one right answer for “photo of this sketch”?
+
+**Expected:** No: colour, texture and lighting are not in the sketch.
+
+**Build 2, ask:** So what is the model a distribution over?
+
+**Expected:** Over images, given the input image: p(photo | sketch).
+
+**Transition:** Sound works the same way.
+
+**Source / evidence:** Isola et al., pix2pix (CVPR 2017); Park et al., SPADE (CVPR 2019); Zhu et al., CycleGAN (ICCV 2017). Attributed teaching excerpts; copyright with the authors.
+
+## speech: Sound: text in, 24,000 numbers per second out (optional)
+
+**Build 1, ask:** What exactly does the model output?
+
+**Expected:** About 191,000 numbers: a waveform sampled 24,000 times a second.
+
+**Build 2, ask:** Is there one right way to say this sentence?
+
+**Expected:** No: speed, pitch, pauses and voice all vary. Another sample would sound different.
+
+**Transition:** Before more examples: a model of what, exactly? First, the letters.
+
+**Source / evidence:** Generated for Lecture 2 on 21 October 2026 with Gemini 3.8 Flash TTS, voice “Kore”.
+
+## science: Beyond pictures: generative models in science (optional)
+
+**Build 1, ask:** Why would a forecaster want 50 samples instead of one best forecast?
+
+**Expected:** The samples show the range of possible futures: if they disagree, the forecast is uncertain.
+
+**Build 2, ask:** Why not fill a gap in a sensor record with the average value?
+
+**Expected:** The average is smooth and typical-looking but may never happen, and it hides the uncertainty. A sample looks like real data.
+
+**Transition:** Collect the uses.
+
+**Source / evidence:** Price et al., “Probabilistic weather forecasting with machine learning” (GenCast), Nature 2025; Watson et al., “De novo design of protein structure and function with RFdiffusion”, Nature 2023; Zeni et al., “A generative model for inorganic materials design” (MatterGen), Nature 2025.
+
+## vae-worked: One step for our 3, with numbers (optional)
+
+**Build 1, ask:** Why is z so close to μ?
+
+**Expected:** σ is tiny (about 0.01): the code of this 3 is pinned down precisely.
+
+**Build 2, ask:** Which term is larger, and what does that say?
+
+**Expected:** Reconstruction, by far: fitting the pixels dominates this model.
+
+**Build 3, ask:** What does backward() update?
+
+**Expected:** The decoder’s θ through the reconstruction; the encoder’s φ through both μ, σ (via z) and the KL.
+
+**Point here:** Check: L − 541.4 = −243.7, close to −ELBO = −243.4. The loss drops the constant, and one draw is noisy.
+
+**Transition:** The whole thing in PyTorch.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## explore-vae: Your turn again: choose a code for the VAE (optional)
+
+**Build 1, ask:** Click in the gaps between digit groups. What do you see now?
+
+**Expected:** Plausible in-between shapes: the space between digits is filled.
+
+**Transition:** One knob: the weight on the KL.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## next: Next: can we drop the pixel likelihood altogether? (optional)
+
+**Build 1, ask:** Why does a pixel-wise Gaussian encourage soft images?
+
+**Expected:** Squared error favours the mean of plausible images, which is blurry.
+
+**Build 2, ask:** What else could tell a generator its images are wrong?
+
+**Expected:** A classifier trained to tell real from generated: a learned critic.
+
+**Transition:** End of the main route. Optional slides follow.
