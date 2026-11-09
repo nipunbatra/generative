@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 96,
+  "minutes": 94,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -34,7 +34,7 @@
     {
       "id": "vae",
       "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
-      "minutes": 31
+      "minutes": 29
     },
     {
       "id": "end",
@@ -47,8 +47,8 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 69,
-  "optionalSlides": 15,
+  "coreSlides": 68,
+  "optionalSlides": 17,
   "slides": [
     {
       "id": "contents",
@@ -408,17 +408,10 @@
       "optional": false
     },
     {
-      "id": "evidence",
-      "title": "The evidence p(x): average the likelihood over the prior",
+      "id": "vi-kl",
+      "title": "Variational inference: a guide q close to the posterior",
       "section": "vae",
-      "builds": 2,
-      "optional": false
-    },
-    {
-      "id": "var-approx",
-      "title": "Put a guide q: a Gaussian guess of where the codes are",
-      "section": "vae",
-      "builds": 4,
+      "builds": 5,
       "optional": false
     },
     {
@@ -430,7 +423,7 @@
     },
     {
       "id": "vae-loss",
-      "title": "Now we have the loss: minus the ELBO is reconstruction + KL",
+      "title": "Put in the model’s choices: the loss is reconstruction + KL",
       "section": "vae",
       "builds": 4,
       "optional": false
@@ -562,6 +555,20 @@
       "optional": true
     },
     {
+      "id": "evidence",
+      "title": "The evidence p(x): average the likelihood over the prior",
+      "section": "optional",
+      "builds": 2,
+      "optional": true
+    },
+    {
+      "id": "var-approx",
+      "title": "Put a guide q: a Gaussian guess of where the codes are",
+      "section": "optional",
+      "builds": 4,
+      "optional": true
+    },
+    {
       "id": "vae-elbo",
       "title": "Lecture 1’s ELBO, for one image",
       "section": "optional",
@@ -639,5 +646,5 @@
       "optional": true
     }
   ],
-  "totalStates": 198
+  "totalStates": 203
 }

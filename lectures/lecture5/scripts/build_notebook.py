@@ -449,9 +449,10 @@ for S in (1, 10, 100, 1000, 10000, 100000):
 w = (llp - llp.max()).exp()
 print(f'the best 10 of the 100,000 draws carry {100 * float(w.sort(descending=True).values[:10].sum() / w.sum()):.0f}% of the total')
 """)
-section('5.4', 'A guide q, made by a network', 'var-approx',
-        'Put a guide q, a simple Gaussian guess of which codes made our 3, and score it with the ELBO: ELBO = E_q[log p(x | z)] − KL(q ‖ p(z)). '
-        'Making a guide for every image with VI is slow; the encoder makes the guide for our 3 in one pass, and its ELBO sits just below log p(x).')
+section('5.4', 'A guide q close to the posterior', 'vi-kl',
+        'Lecture 1’s way past the wall: pick a simple Gaussian guide q and make it close to the posterior, minimising KL(q ‖ p(z | x)). '
+        'Bayes’ rule turns that KL into −E_q[log p(x | z)] + KL(q ‖ p(z)) + log p(x). log p(x) is the same for every q, so the best guide minimises the first two terms: '
+        'the VAE loss, which is minus the ELBO. Below: the encoder’s guide for our 3, that identity checked on the grid, Lecture 1’s VI on this one image, and four guides scored by their ELBO.')
 code(r"""
 def elbo(net, x, m_, s_, draws=20000, seed=21):
     eps = torch.randn(draws, 2, generator=torch.Generator().manual_seed(seed), dtype=F64)
@@ -461,6 +462,18 @@ def elbo(net, x, m_, s_, draws=20000, seed=21):
 print('encoder q for our 3: mean', mu3.numpy().round(4), ' sd', sd3.numpy().round(4))
 e3 = elbo(vae2, x3, mu3, sd3)
 print(f'log p(x) {log_px:.2f}  |  ELBO with the encoder’s q {e3:.2f}  |  gap = KL to the posterior {log_px - e3:.2f}')
+""")
+md('### Check the identity on our 3: the KL to the posterior, computed two ways')
+code(r"""
+lq = torch.distributions.Normal(mu3, sd3).log_prob(Zg).sum(1)      # log q(z) on the fine grid of 5.3
+qw = torch.softmax(lq, 0)                                          # q as weights on the grid cells
+log_post = lj - log_px                                             # log p(z | x) = log p(x | z) + log p(z) - log p(x)
+kl_grid = float((qw * (lq - log_post)).sum())
+eps = torch.randn(20000, 2, generator=torch.Generator().manual_seed(21), dtype=F64)
+recon = -float(log_lik(vae2, x3, mu3 + sd3 * eps).mean())            # -E_q[log p(x | z)]
+kl_prior = 0.5 * float((mu3 ** 2 + sd3 ** 2 - 2 * sd3.log() - 1).sum())
+print(f'KL(q || posterior), directly on the grid: {kl_grid:.2f}')
+print(f'reconstruction term {recon:.2f} + KL to the prior {kl_prior:.2f} + log p(x) {log_px:.2f} = {recon + kl_prior + log_px:.2f}')
 """)
 md("### Lecture 1’s variational inference on this one image: fit q(z) = N(m, diag s²) by maximising the ELBO")
 code(r"""

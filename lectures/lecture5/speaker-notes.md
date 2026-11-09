@@ -1,6 +1,6 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 96 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 94 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -11,7 +11,7 @@ Planned main route: 96 minutes. Timing includes student responses and the specif
 | Part 2 · Autoencoders: squeeze, then rebuild | 18 |
 | Part 3 · Can an autoencoder generate? | 10 |
 | Part 4 · From an autoencoder to a VAE: three fixes | 12 |
-| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 31 |
+| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 29 |
 | Part 6 · Putting it together | 6 |
 
 ## contents: Lecture 5 at a glance: six parts, twenty-five sections
@@ -20,7 +20,7 @@ Planned main route: 96 minutes. Timing includes student responses and the specif
 
 **Expected:** Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.
 
-**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip evidence, vae-worked, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
+**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-worked, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
 
 **Transition:** Part 1: why generate?
 
@@ -796,47 +796,35 @@ Planned main route: 96 minutes. Timing includes student responses and the specif
 
 **Point here:** log prior = −log 2π − ‖z‖²/2 for N(0, I). Colours as in Lecture 1: posterior teal, likelihood orange, prior green, evidence blue.
 
-**Transition:** Can we at least estimate the evidence?
+**Transition:** Lecture 1’s way past the wall: a guide q, as close to the posterior as we can make it.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## evidence: The evidence p(x): average the likelihood over the prior
+## vi-kl: Variational inference: a guide q close to the posterior
 
-**Build 1, ask:** Why is the estimate so poor with few draws?
+**Build 1, ask:** Why not compute the posterior directly?
 
-**Expected:** Nearly every draw explains the 3 badly; the few that matter are rarely drawn.
+**Expected:** It needs p(x), an integral over every code with no formula (last slide).
 
-**Build 2, ask:** Where should we draw codes from instead?
+**Build 2, ask:** When is this KL zero?
 
-**Expected:** From near the posterior: that is the job q will do.
+**Expected:** Only when q is exactly the posterior.
 
-**Point here:** Naive Monte Carlo, 30 repeats for each S; log of the average computed stably (log-sum-exp).
+**Build 3, ask:** Which of the three pieces can we compute?
 
-**Transition:** Lecture 1’s way past the wall: a guide q that knows where to look.
+**Expected:** The log-likelihood (decode z and compare with x) and the log prior. The log evidence is the wall.
 
-**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+**Build 4, ask:** Where does KL(q ‖ p(z)) come from?
 
-## var-approx: Put a guide q: a Gaussian guess of where the codes are
+**Expected:** log q minus log prior, averaged over codes from q, is the KL from q to the prior.
 
-**Build 1, ask:** Why is the prior a poor guide?
+**Build 5, ask:** If log p(x) is unknown, how can we still find the best q?
 
-**Expected:** It spreads over the whole plane, while the posterior is a tiny patch.
+**Expected:** It is the same for every q, so minimising the other two terms minimises the KL to the posterior. For our 3 with the encoder’s q: −251.31 + 7.94 + 244.07 = 0.70.
 
-**Build 2, ask:** Which guide is closest?
+**Point here:** Lecture 1, Section 1.5 did the same for the weights θ. Minus the first two terms is the ELBO, so the last line says log p(x) = ELBO + KL(q ‖ p(z | x)). A KL is never negative, so the ELBO is a lower bound on log p(x), and raising it over the decoder’s weights pushes p(x) up as well. Our 3 with the encoder’s q: E_q[log p(x | z)] = 251.31 (positive, because a density over 784 pixels with noise 0.2 is large), KL to the prior 7.94, log p(x) = 244.07 from the grid, so the KL to the posterior is 0.70. The optional slides “Put a guide q” and “Lecture 1’s VI on one image” score four guides and fit one by VI.
 
-**Expected:** The VI fit, then the encoder’s q: both on the patch.
-
-**Build 3, ask:** What do the ELBO’s two terms ask of a guide?
-
-**Expected:** Its codes should draw our 3 (first term), and it should stay near the prior N(0, I) (second term).
-
-**Build 4, ask:** How can you tell which guide is closest without the posterior?
-
-**Expected:** The highest ELBO has the smallest gap, and the gap is the KL to the posterior.
-
-**Point here:** Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers. Why Gaussians: easy to sample (tool ①), and their KL to N(0, I) is exact (tool ②). Pyro calls q the guide. Lecture 1, Section 1.5 introduced the idea: approximate the posterior with a simple q.
-
-**Transition:** One guide for each of 60,000 images: who makes them?
+**Transition:** Fitting a guide for every image by VI would be slow. Who makes them?
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
@@ -852,15 +840,15 @@ Planned main route: 96 minutes. Timing includes student responses and the specif
 
 **Build 3, ask:** What is variational about the VAE?
 
-**Expected:** q is a member of a simple family (diagonal Gaussians), fitted by maximising the ELBO: Lecture 1’s variational inference.
+**Expected:** q comes from a simple family (diagonal Gaussians) and is pushed towards the posterior by minimising the KL, which is the same as maximising the ELBO: Lecture 1’s variational inference.
 
 **Point here:** Kingma and Welling (2014), figure 1: solid arrow = generative model p_θ, dashed = variational approximation q_φ.
 
-**Transition:** Now we have everything: write out the ELBO, and the loss follows.
+**Transition:** Put the model’s choices into the loss.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## vae-loss: Now we have the loss: minus the ELBO is reconstruction + KL
+## vae-loss: Put in the model’s choices: the loss is reconstruction + KL
 
 **Build 1, ask:** Which term needs the decoder?
 
@@ -1147,6 +1135,46 @@ Planned main route: 96 minutes. Timing includes student responses and the specif
 **Build 3, ask:** Is σ learned here?
 
 **Expected:** No, fixed at 0.2. It can be learned; we keep it fixed for clarity.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## evidence: The evidence p(x): average the likelihood over the prior (optional)
+
+**Build 1, ask:** Why is the estimate so poor with few draws?
+
+**Expected:** Nearly every draw explains the 3 badly; the few that matter are rarely drawn.
+
+**Build 2, ask:** Where should we draw codes from instead?
+
+**Expected:** From near the posterior: that is the job q will do.
+
+**Point here:** Naive Monte Carlo, 30 repeats for each S; log of the average computed stably (log-sum-exp).
+
+**Transition:** Lecture 1’s way past the wall: a guide q that knows where to look.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## var-approx: Put a guide q: a Gaussian guess of where the codes are (optional)
+
+**Build 1, ask:** Why is the prior a poor guide?
+
+**Expected:** It spreads over the whole plane, while the posterior is a tiny patch.
+
+**Build 2, ask:** Which guide is closest?
+
+**Expected:** The VI fit, then the encoder’s q: both on the patch.
+
+**Build 3, ask:** What do the ELBO’s two terms ask of a guide?
+
+**Expected:** Its codes should draw our 3 (first term), and it should stay near the prior N(0, I) (second term).
+
+**Build 4, ask:** How can you tell which guide is closest without the posterior?
+
+**Expected:** The highest ELBO has the smallest gap, and the gap is the KL to the posterior.
+
+**Point here:** Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers. Why Gaussians: easy to sample (tool ①), and their KL to N(0, I) is exact (tool ②). Pyro calls q the guide. Lecture 1, Section 1.5 introduced the idea: approximate the posterior with a simple q.
+
+**Transition:** One guide for each of 60,000 images: who makes them?
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
