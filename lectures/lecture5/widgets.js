@@ -1,7 +1,7 @@
 // Lecture 5's own live figure: choose q for our 3 and watch the two terms of the ELBO.
 // It reuses Lecture 2's chart kit and runs Lecture 2's 2-number VAE decoder (lecture2/data/nets.json) in the browser.
 import {palette,esc} from '../shared/author.js';
-import {label,svg,num,comma,panel,digitURL,digitSrc,imgs,scatterSVG,squareW,classLegend,CLASS,MUTED,LINE} from '../lecture2/widgets.js';
+import {label,svg,num,comma,panel,digitURL,digitSrc,imgs,scatterSVG,squareW,classLegend,animated,CLASS,MUTED,LINE} from '../lecture2/widgets.js';
 
 let DATA=null,NETS=null,EPOCHS=null;
 export function init(d,nets,epochs){DATA=d;NETS=nets;EPOCHS=epochs;}
@@ -147,7 +147,7 @@ function codeEpochs(el,ctx){
   return svg(1150,396,s,`The 2-number codes of 1,000 test digits at epoch ${ep}, ${EP_TEXT[run]}, with training and test error.`);
  };
  if(ctx.printing){
-  const pick=run==='few'?[10,100,1000,10000]:[0,1,30,300],S_=284;
+  const pick=run==='few'?[10,100,1000,10000]:[0,1,30,save.at(-1)],S_=284;
   let s='';pick.forEach((ep,i)=>{const sm=E.summary[String(ep)];s+=codePanel(E.codes[String(ep)],fixed,{ox:i*(S_+4),S:S_,r:2.2,title:`epoch ${comma(ep)}`,fs:14})+label(i*(S_+4)+50,S_+22,`train ${num(sm.train,1)} · test ${num(sm.test,1)}`,{size:15});});
   el.innerHTML=svg(1150,S_+32,s,`The codes ${EP_TEXT[run]} at epochs ${pick.join(', ')}, on the same axes.`)+`<p class="caption">${esc(EP_TEXT[run][0].toUpperCase()+EP_TEXT[run].slice(1))}: the same axes in every panel. Our 3 is ringed.</p>`;return;
  }
@@ -162,9 +162,39 @@ function codeEpochs(el,ctx){
  draw();
 }
 
+// ---------------------------------------------------------------- Lecture 2's training replay, carried on past epoch 30 (scripts/epochs.py)
+/** Lecture 2's 12 frames of its 2-number autoencoder's training (to epoch 30), then the same run's later epochs. */
+function aeTrainLong(el,ctx){
+ const A=DATA.ae,E=EPOCHS.all,spe=A.steps_per_epoch,C=A.ae2_step_curve,more=Object.keys(E.watch).map(Number).filter(e=>e>30).sort((a,b)=>a-b);
+ const frames=[...A.ae2_frames_steps.map((st,i)=>({st,sse:A.ae2_frames_sse[i],per:A.ae2_frames_digit_sse[i],src:Array.from({length:8},(_,j)=>digitSrc('ae2_train_frames',i*8+j))})),
+  ...more.map(ep=>{const b=b64(E.watch[ep].images);return {st:ep*spe,sse:E.test[ep],per:E.watch[ep].digit_sse,src:Array.from({length:8},(_,j)=>digitURL(b,j*784))};})];
+ const n=frames.length,lastStep=frames[n-1].st,lx=v=>Math.log10(v+1),W=1150,H=372,SZ=74,GAP=8,yMax=70,end30=A.ae2_frames_steps.at(-1);
+ const epochs=E.epoch.filter(e=>e>=1),test=[...C.step.map((st,k)=>[st,C.test_sse[k]]),...epochs.filter(e=>e*spe>end30).map(e=>[e*spe,E.test[e]])],train=epochs.map(e=>[e*spe,E.train[e]]);
+ const render=i=>{
+  const {st,sse,per,src}=frames[i],ep=st/spe,trainNow=st>=spe&&Number.isInteger(ep)?E.train[ep]:null;
+  let s=label(0,22,'8 test digits',{fill:palette.ink,size:20,weight:600});
+  for(let j=0;j<8;j++)s+=`<image href="${digitSrc('watch',j)}" x="${j*(SZ+GAP)}" y="32" width="${SZ}" height="${SZ}" style="image-rendering:pixelated"/>`;
+  s+=label(0,140,st===0?'what the untrained network outputs':`what it outputs after ${comma(st)} step${st===1?'':'s'}${st>=spe?` (${comma(ep)} epoch${ep>=2?'s':''})`:''}`,{fill:palette.q,size:20,weight:600});
+  for(let j=0;j<8;j++)s+=`<image href="${src[j]}" x="${j*(SZ+GAP)}" y="152" width="${SZ}" height="${SZ}" style="image-rendering:pixelated"/><rect x="${j*(SZ+GAP)}" y="152" width="${SZ}" height="${SZ}" fill="none" stroke="${palette.q}" stroke-opacity=".5"/>`+
+   label(j*(SZ+GAP)+SZ/2,252,num(per[j],0),{fill:palette.noise,size:18,anchor:'middle',weight:600});
+  s+=label(0,284,'squared error of each digit (summed over its 784 pixels)',{fill:palette.noise,size:17});
+  s+=label(0,322,`average over the 10,000 test digits: ${num(sse,1)}`,{fill:palette.noise,size:22,weight:650});
+  if(trainNow!==null)s+=label(0,354,`average over the 60,000 training digits: ${num(trainNow,1)}`,{fill:palette.data,size:22,weight:650});
+  const P=panel({ox:690,W:460,H,L:52,R:16,T:44,B:56,xMin:0,xMax:lx(lastStep),yMin:0,yMax,ticksX:[0,1,2,3,4,5],fmtX:v=>comma(10**v),ticksY:[0,20,40,60],xLabel:'training step (log scale)',fs:16});
+  const line=(pts,c,o='')=>P.line(pts.map(q=>lx(q[0])),pts.map(q=>q[1]),c,o),upto=pts=>pts.filter(q=>q[0]<=st);
+  s+=P.axes+label(690+52,22,`<tspan fill="${palette.noise}" font-weight="650">test error</tspan> <tspan fill="${palette.data}" font-weight="650">training error</tspan>`,{size:19});
+  s+=`<line x1="${P.x(lx(end30)).toFixed(1)}" y1="${P.y(yMax)}" x2="${P.x(lx(end30)).toFixed(1)}" y2="${P.y(0)}" stroke="${MUTED}" stroke-dasharray="4 4"/>`+label(P.x(lx(end30))-6,P.y(yMax)+16,'epoch 30',{size:15,anchor:'end'});
+  s+=line(test,palette.noise+'44')+line(train,palette.data+'44')+line(upto(test),palette.noise)+line(upto(train),palette.data)+P.dot(lx(st),Math.min(yMax,sse),palette.noise,7);
+  if(trainNow!==null)s+=P.dot(lx(st),trainNow,palette.data,6);
+  if(sse>yMax)s+=label(P.x(lx(st))+10,P.y(yMax)+18,`${num(sse,0)}, off the chart`,{fill:palette.noise,size:16});
+  return svg(W,H,s,'Reconstructions of eight test digits as the 2-number autoencoder trains for up to 1,000 epochs, with each digit’s error and the training and test error so far.');
+ };
+ animated(el,ctx,{count:n,render,step:i=>`step ${comma(frames[i].st)}`,alt:'Autoencoder training',duration:8000});
+}
+
 /** Mount Lecture 5's own live figures (data-widget5); Lecture 2's are mounted by its module. */
 export function mount(stage,ctx){
- const make={'elbo-explorer':elboExplorer,'code-epochs':codeEpochs};
+ const make={'elbo-explorer':elboExplorer,'code-epochs':codeEpochs,'ae-train-long':aeTrainLong};
  for(const el of stage.querySelectorAll('[data-widget5]')){const f=make[el.dataset.widget5];if(!f)throw new Error('Unknown widget '+el.dataset.widget5);f(el,ctx);}
 }
 export const widget5=(name,alt,attrs={})=>`<div class="widget" data-widget5="${name}" role="group" aria-label="${esc(alt)}" ${Object.entries(attrs).map(([k,v])=>`data-${k}="${esc(String(v))}"`).join(' ')}></div>`;

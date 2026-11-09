@@ -1,15 +1,16 @@
 """Where the 2-number codes go while an autoencoder trains: the data for the slides ae-epochs and ae-overfit.
 
-    MNIST_ROOT=... python lecture5/scripts/epochs.py      # from lectures/, about 5 minutes on an M-series Mac
+    MNIST_ROOT=... python lecture5/scripts/epochs.py      # from lectures/, about 15 minutes on an M-series Mac
 
 Two runs, both with Lecture 2's 2-number autoencoder (784 -> 400 -> 2 -> 400 -> 784):
   all  Lecture 2's own training of ae2, replayed step for step (same seed, device and batches), so its epoch-30 codes
-       are the ones on the slide ae-scatter; then it keeps going to epoch 300. It needs the device Lecture 2 used (mps):
+       are the ones on the slide ae-scatter; then it keeps going to epoch 1,000. It needs the device Lecture 2 used (mps):
        on another device the run is similar but not identical.
   few  the same network trained on only 200 training digits (20 of each), all 200 in every step, for 10,000 steps,
        on the CPU. It overfits: the training error keeps falling while the test error rises.
 Writes lecture5/data/epochs.json: the codes of Lecture 2's 1,000 display digits (test set) at chosen epochs,
-training and test error per epoch, and our 3 (test digit #90) rebuilt at each chosen epoch.
+training and test error per epoch, and our 3 (test digit #90) rebuilt at each chosen epoch. For the slide ae-train, the
+"all" run also rebuilds Lecture 2's 8 watched test digits (train.WATCH) at epochs 30 to 1,000, with each one's squared error.
 """
 import base64
 import json
@@ -26,7 +27,8 @@ import train as T  # noqa: E402  Lecture 2's network, data loader and loss
 S = json.load(open(HERE.parent / 'lecture2' / 'data' / 'science.json'))
 DISP = torch.tensor(S['mnist']['display_index'])
 EXAMPLE = S['meta']['example_index']            # test digit #90, our 3
-SAVE_ALL = [0, 1, 3, 10, 30, 100, 300]
+SAVE_ALL = [0, 1, 3, 10, 30, 100, 300, 1000]
+WATCH_ALL = [30, 100, 300, 1000]                # epochs at which Lecture 2's 8 watched test digits are rebuilt (slide ae-train)
 SAVE_FEW = [0, 10, 30, 100, 300, 1000, 3000, 10000]
 N_FEW, STEPS_FEW, SEED_FEW = 20, 10000, 5
 
@@ -66,6 +68,7 @@ def run_all(data):
     out = dict(n_train=len(xtr), device=T.DEVICE, save=SAVE_ALL, codes={}, recon3={}, epoch=[0],
                train=[errors(model, xtr)], test=[errors(model, xte)])
     record(model, D, x3, out, 0, 3)
+    watch, out['watch'] = xte[T.WATCH], {}
     for epoch in range(1, SAVE_ALL[-1] + 1):
         order = torch.randperm(len(xtr), generator=gen).to(T.DEVICE)
         for i in range(0, len(xtr), 128):
@@ -76,6 +79,12 @@ def run_all(data):
         if epoch in SAVE_ALL:
             record(model, D, x3, out, epoch, 3)
             print(f'all  epoch {epoch:5d}  train {out["train"][-1]:6.2f}  test {out["test"][-1]:6.2f}', flush=True)
+        if epoch in WATCH_ALL:
+            model.eval()
+            with torch.no_grad():
+                r = model.decoder(model.encode(watch)[0])
+            model.train()
+            out['watch'][str(epoch)] = dict(images=png_bytes(r), digit_sse=[round(float(v), 2) for v in ((r - watch) ** 2).sum(1)])
     ref = torch.tensor(S['ae']['ae2_codes'])
     out['max_diff_from_lecture2'] = round(float((torch.tensor(out['codes']['30']) - ref).abs().max()), 4)
     print('largest difference from Lecture 2’s epoch-30 codes:', out['max_diff_from_lecture2'])

@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 92,
+  "minutes": 98,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -14,7 +14,7 @@
     {
       "id": "why",
       "title": "Part 1 · Why generate?",
-      "minutes": 14
+      "minutes": 18
     },
     {
       "id": "ae",
@@ -24,7 +24,7 @@
     {
       "id": "gen",
       "title": "Part 3 · Can an autoencoder generate?",
-      "minutes": 8
+      "minutes": 10
     },
     {
       "id": "idea",
@@ -47,7 +47,7 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 69,
+  "coreSlides": 72,
   "optionalSlides": 7,
   "slides": [
     {
@@ -111,6 +111,20 @@
       "title": "Sound: text in, 24,000 numbers per second out",
       "section": "why",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "xy",
+      "title": "First, the names: x is the data, y is a label",
+      "section": "why",
+      "builds": 4,
+      "optional": false
+    },
+    {
+      "id": "gen-disc",
+      "title": "Generative or discriminative, in one picture",
+      "section": "why",
+      "builds": 3,
       "optional": false
     },
     {
@@ -206,7 +220,7 @@
     },
     {
       "id": "ae-train",
-      "title": "Press play: reconstructions sharpen as it trains",
+      "title": "Press play: reconstructions sharpen, then stop improving",
       "section": "ae",
       "builds": 2,
       "optional": false
@@ -279,6 +293,13 @@
       "title": "Decode a whole grid of codes",
       "section": "gen",
       "builds": 2,
+      "optional": false
+    },
+    {
+      "id": "ae-empirical",
+      "title": "Why not sample from the real codes instead of N(0, I)?",
+      "section": "gen",
+      "builds": 4,
       "optional": false
     },
     {
@@ -583,5 +604,5 @@
       "optional": true
     }
   ],
-  "totalStates": 168
+  "totalStates": 179
 }

@@ -1,15 +1,15 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 92 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 98 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
 | Episode | Minutes |
 |---|---:|
 | Lecture map | 1 |
-| Part 1 · Why generate? | 14 |
+| Part 1 · Why generate? | 18 |
 | Part 2 · Autoencoders: squeeze, then rebuild | 18 |
-| Part 3 · Can an autoencoder generate? | 8 |
+| Part 3 · Can an autoencoder generate? | 10 |
 | Part 4 · From an autoencoder to a VAE: three fixes | 12 |
 | Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 33 |
 | Part 6 · Putting it together | 6 |
@@ -20,7 +20,7 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Expected:** Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.
 
-**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech and science; in Part 2 skip ae-untrained, ae-step and code-size; in Part 3 skip ae-grid; keep all of Part 4; in Part 5 skip vae-pgm, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
+**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-pgm, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
 
 **Transition:** Part 1: why generate?
 
@@ -130,9 +130,53 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Expected:** No: speed, pitch, pauses and voice all vary. Another sample would sound different.
 
-**Transition:** Generative models also matter far from art and chat.
+**Transition:** Before more examples: a model of what, exactly? First, the letters.
 
 **Source / evidence:** Generated for Lecture 2 on 21 October 2026 with Gemini 3.8 Flash TTS, voice “Kore”.
+
+## xy: First, the names: x is the data, y is a label
+
+**Build 1, ask:** What is x for a chatbot? For a spam filter, what are x and y?
+
+**Expected:** A chatbot: x is a sentence. Spam filter: x is the email, y is spam or not.
+
+**Build 2, ask:** Read p(y | x) aloud. What do its ten numbers add up to?
+
+**Expected:** “p of y given x”: one probability per label for this image; they add up to 1.
+
+**Build 3, ask:** What should p(x) be for random static?
+
+**Expected:** Almost 0: nobody writes static. That is how p(x) spots odd inputs.
+
+**Build 4, ask:** Which probability does a text-to-image model learn?
+
+**Expected:** p(image | prompt): a conditional generative model, with the prompt in the place of y.
+
+**Point here:** The classifier is a softmax regression (784 numbers in, 10 out) on the 60,000 training digits: 92.2% of test digits right. Its least sure display digit, a 5, gets 9: 27%, 5: 24%, 4: 21%: p(y | x) is a distribution, not just a label.
+
+**Transition:** Draw all of these in one picture.
+
+**Source / evidence:** Classifier and numbers: <code>lecture5/scripts/xy.py</code>. Digits from Lecture 2’s data; the new x is a draw from its 16-number VAE.
+
+## gen-disc: Generative or discriminative, in one picture
+
+**Build 1, ask:** Where is p(x) high? Where is it near 0?
+
+**Expected:** High near ink 60 and 136, where most images are; near 0 above 230: almost no digit has that much ink.
+
+**Build 2, ask:** Why is the 1s’ hump taller and narrower?
+
+**Expected:** The 1s all use about the same ink, so their hump is narrow; and they are a little more common: 53%.
+
+**Build 3, ask:** Can you get the top picture back from the bottom curve alone?
+
+**Expected:** No. p(y | x) says nothing about where the data are, so it cannot score or draw an x. The top gives the bottom, never the other way.
+
+**Point here:** This is Bayes’ rule, as in Lecture 1, with the label y as the unknown: p(y | x) = p(x | y) p(y) / p(x). Humps: Gaussian kernel densities (bandwidths 6.2 and 3.1) of the 5,923 training 0s and 6,742 1s.
+
+**Transition:** Generative models also matter far from art and chat.
+
+**Source / evidence:** Numbers: <code>lecture5/scripts/xy.py</code> (MNIST training set).
 
 ## science: Beyond pictures: generative models in science
 
@@ -312,15 +356,17 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Transition:** Watch the reconstructions form.
 
-## ae-train: Press play: reconstructions sharpen as it trains
+## ae-train: Press play: reconstructions sharpen, then stop improving
 
 **Build 1, ask:** What does the network learn first?
 
 **Expected:** The average digit: a blurry blob that lowers the error everywhere.
 
-**Build 2, ask:** Which digits stay hardest to rebuild from 2 numbers?
+**Build 2, ask:** Is it worth training for 1,000 epochs?
 
-**Expected:** Ones that resemble other digits, like 4 and 9, or unusual shapes.
+**Expected:** Not here: the training digits keep improving, the test digits do not. To rebuild better we need a bigger code (next slide).
+
+**Point here:** Frames to epoch 30: Lecture 2’s run. Later frames: the same run replayed step for step and continued by lecture5/scripts/epochs.py (its epoch-30 frame matches Lecture 2’s).
 
 **Transition:** How much does the code size matter?
 
@@ -362,9 +408,9 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Build 2, ask:** Is this autoencoder overfitting?
 
-**Expected:** No: with 60,000 digits the training and test errors stay within about 4 of each other.
+**Expected:** A little, and late: the test error is lowest at epoch 65 (30.5) and creeps up to 32.4 while the training error keeps falling. With only 200 digits it is far worse: next slide.
 
-**Point here:** Lecture 2’s training of this exact network, replayed step for step (same seed and batches), then continued from epoch 30 to 300. “Same axes throughout” uses the epoch-300 window.
+**Point here:** Lecture 2’s training of this exact network, replayed step for step (same seed and batches), then continued from epoch 30 to 1,000. “Same axes throughout” uses the epoch-1,000 window.
 
 **Transition:** Now give it far too little data, and train for far too long.
 
@@ -460,9 +506,33 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Expected:** It extrapolates from the nearest digits: exaggerated or broken shapes.
 
-**Transition:** What we want instead.
+**Transition:** Why not sample from the real codes, then?
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
+
+## ae-empirical: Why not sample from the real codes instead of N(0, I)?
+
+**Build 1, ask:** What do we get if we decode a real code exactly?
+
+**Expected:** The training digit it came from, blurred by the 2-number code: a copy, not a new digit.
+
+**Build 2, ask:** Where can the jittered codes go wrong?
+
+**Expected:** Between two clusters: the decoder never trained on codes there, so it blends two digits.
+
+**Build 3, ask:** Why does this beat N(0, I) for the plain autoencoder?
+
+**Expected:** It follows where the real codes are, so every digit type is covered, not just the corner N(0, I) reaches.
+
+**Build 4, ask:** What does the VAE give that this two-step recipe does not?
+
+**Expected:** One model and one objective: codes that fill N(0, I) by design, and a lower bound on log p(x) to score an image.
+
+**Point here:** “In a gap”: the nearest training code is further than 0.26, the 99th percentile of that distance for the 10,000 test digits. Copies: 0%; jitter: 2.3%; 10 Gaussians: 1.4%; N(0, I): 0.7% (10,000 draws each). With 60,000 codes in 2 numbers the plane is crowded; the real cost of N(0, I) is the digits it misses, not gaps.
+
+**Transition:** What we want instead.
+
+**Source / evidence:** Lecture 2’s 2-number autoencoder and its 10-Gaussian fit to the training codes; draws and decodes: <code>lecture5/scripts/empirical.py</code>.
 
 ## wishes: What we saw, and what we want instead
 

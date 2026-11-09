@@ -96,11 +96,11 @@ section('1.1', 'Things that do not exist', 'faces',
 section('1.2', 'Text, pictures and sound', 'llm',
         'A chatbot, a text-to-image model, image-to-image models and text to speech. Each one samples: the same prompt gives a different output every time. '
         'A language model gives a probability to every possible next word; generating is “sample a word, append it, repeat”.')
-section('1.3', 'What generative models are for', 'science',
-        'Samples: create, fill in missing values, simulate many futures. Scores p(x): spot anomalies, compress (Lecture 1’s codes). And extra or synthetic data.')
-section('1.4', 'What they all share', 'recipe',
-        'Random numbers in, a learned network, a sample out. A model of p(x) can score and sample. The average example is not a sample: '
-        'load MNIST and look at the pixel-by-pixel average of the test 3s.')
+section('1.3', 'What p(x) means, and what it is for', 'xy',
+        'x is the data (an image: 784 numbers), y a label about it (which digit). A classifier learns p(y | x); a generative model learns p(x); '
+        'a conditional one learns p(x | y). Then the uses. Samples: create, fill in missing values, simulate many futures. '
+        'Scores p(x): spot anomalies, compress (Lecture 1’s codes). And extra or synthetic data.')
+md('### p(y | x) from a classifier, and p(x), p(x, y) and p(y | x) for one number per image (slides [xy]({DECK}#xy/1) and [gen-disc]({DECK}#gen-disc/1))', anchor='cell-xy')
 code(r"""
 from torchvision.datasets import MNIST
 MNIST_ROOT = os.environ.get('MNIST_ROOT', 'data')
@@ -111,6 +111,42 @@ Xtr = train_set.data.reshape(-1, 784).double() / 255; ytr = train_set.targets
 Xte = test_set.data.reshape(-1, 784).double() / 255; yte = test_set.targets
 x3 = Xte[90]
 print(f'{len(Xtr):,} training and {len(Xte):,} test digits, {Xtr.shape[1]} numbers each; test digit #90 is a {int(yte[90])}')
+print('p(y), the share of each digit:', [round(float((ytr == c).double().mean()), 3) for c in range(10)])
+
+# A classifier learns p(y | x): 784 numbers in, 10 numbers out, softmax turns them into probabilities
+torch.manual_seed(0)
+clf = nn.Linear(784, 10); opt = torch.optim.Adam(clf.parameters(), lr=1e-3)
+gen = torch.Generator().manual_seed(0); Xf = Xtr.float()
+for epoch in range(5):
+    for idx in torch.randperm(len(Xf), generator=gen).split(128):
+        loss = nn.functional.cross_entropy(clf(Xf[idx]), ytr[idx])
+        opt.zero_grad(); loss.backward(); opt.step()
+with torch.no_grad():
+    print(f'test accuracy {float((clf(Xte.float()).argmax(1) == yte).float().mean()):.3f}')
+    print('p(y | our 3):', [round(v, 3) for v in clf(x3.float()[None]).softmax(1)[0].tolist()])
+
+# One number per image, its ink, for the training 0s and 1s: p(x | y) by a Gaussian kernel density, then Bayes' rule
+keep = (ytr == 0) | (ytr == 1); ink, y01 = Xtr[keep].sum(1), ytr[keep]
+grid = torch.linspace(0, 260, 261, dtype=F64)
+def kde(v):
+    h = 1.06 * float(v.std()) * len(v) ** -0.2
+    return torch.exp(-0.5 * ((grid[:, None] - v[None]) / h) ** 2).sum(1) / (len(v) * h * math.sqrt(2 * math.pi))
+p1 = float((y01 == 1).double().mean())
+joint0, joint1 = (1 - p1) * kde(ink[y01 == 0]), p1 * kde(ink[y01 == 1])     # p(x, y) = p(y) p(x | y)
+px = joint0 + joint1                                                      # p(x)
+post1 = joint1 / px                                                       # p(y = 1 | x)
+print(f'{int(keep.sum()):,} 0s and 1s; p(y = 1) = {p1:.3f}; mean ink {float(ink[y01 == 0].mean()):.1f} (0s), {float(ink[y01 == 1].mean()):.1f} (1s)')
+print(f'p(y = 1 | x) = 0.5 at ink {float(grid[int((post1 < 0.5).nonzero()[0])]):.0f}')
+fig, (a, b) = plt.subplots(2, 1, figsize=(7, 5), sharex=True, height_ratios=[3, 2])
+a.fill_between(grid, joint1, alpha=.3, color='#AA4E08', label='1s: p(x, y = 1)'); a.fill_between(grid, joint0, alpha=.3, color='#245EDB', label='0s: p(x, y = 0)')
+a.plot(grid, px, 'k', label='p(x)'); a.legend(); a.set_yticks([])
+b.plot(grid, post1, color='#0F766E'); b.axhline(.5, ls='--', c='grey'); b.set_ylabel('p(y = 1 | x)'); b.set_xlabel('ink: the sum of the 784 pixel values')
+plt.show()
+""", anchor=None)
+section('1.4', 'What they all share', 'recipe',
+        'Random numbers in, a learned network, a sample out. A model of p(x) can score and sample. The average example is not a sample: '
+        'look at the pixel-by-pixel average of the test 3s.')
+code(r"""
 threes = Xte[yte == 3]
 show_digits(threes[:5], ncol=5, size=1.2, title='five real 3s')
 show_digits(threes.mean(0)[None], ncol=1, size=2, title=f'the average of all {len(threes):,} test 3s: no one writes this')

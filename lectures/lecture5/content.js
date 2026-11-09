@@ -2,7 +2,7 @@
 // A condensed route through Lecture 2's Parts 4–6. It reuses Lecture 2's trained networks, numbers, images
 // and live figures (lecture2/data, lecture2/widgets.js), so every number here is one Lecture 2 computed.
 import {m,eq,at,cols,code,table,palette} from '../shared/author.js';
-import {init,mount as mountWidgets,panel,label,fig,widget,num,comma,lin,digits,digit,digitSrc,rawDigit,imgs,scatterSVG,posteriorSVG,squareW,CLASS,MUTED,LINE} from '../lecture2/widgets.js';
+import {init,mount as mountWidgets,panel,label,fig,widget,num,comma,lin,digits,digit,digitSrc,digitURL,rawDigit,imgs,scatterSVG,posteriorSVG,squareW,CLASS,MUTED,LINE} from '../lecture2/widgets.js';
 import {init as init5,mount as mount5,widget5,elboFor,logLikFor,cloudW} from './widgets.js';
 
 const get=(f,base=import.meta.url)=>fetch(new URL(f,base),{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(`${f}: ${r.status}`);return r.json();});
@@ -10,7 +10,7 @@ const L2=new URL('../lecture2/',import.meta.url);
 const [d,DG,NETS,NW,WAVE]=await Promise.all([get('data/science.json',L2),get('data/digits.json',L2),get('data/nets.json',L2),get('assets/examples/next-word.json',L2),get('assets/examples/tts-wave.json',L2)]);
 const LLM=await Promise.all([1,2,3].map(i=>fetch(new URL(`assets/examples/llm-sample-${i}.txt`,L2)).then(r=>r.text())));
 const ANCHORS=new Set(await get('./data/notebook-anchors.json').catch(()=>[]));
-const EP=await get('./data/epochs.json');
+const EP=await get('./data/epochs.json'),XY=await get('./data/xy.json'),EMP=await get('./data/empirical.json');
 init(d,DG,NETS);init5(d,NETS,EP);
 export const mount=(stage,ctx)=>{mountWidgets(stage,ctx);mount5(stage,ctx);};
 
@@ -35,6 +35,12 @@ const CSS=`
 .tag.real{color:${palette.p};border:1.5px solid ${palette.p}}.tag.fake{color:${palette.loss};border:1.5px solid ${palette.loss}}
 .pix-table{border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}.pix-table td{width:38px;height:30px;text-align:center;padding:0;border:1px solid #fff}
 .mini{font-size:20px;line-height:1.35}
+.xy{display:grid;grid-template-columns:240px 1fr;gap:34px;align-items:center}.xy-left{display:flex;flex-direction:column;gap:10px}.xy-name{font-size:24px;line-height:1.25}.xy-name b{font-size:30px;font-family:"Times New Roman",Georgia,serif;font-style:italic}
+.xy-y{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border:2px solid ${palette.ink};border-radius:10px;font-size:30px;font-weight:650}
+.xy-rows{display:flex;flex-direction:column;gap:14px}.xy-row{display:grid;grid-template-columns:150px 1fr 372px;gap:20px;align-items:center;border-top:1.5px solid ${LINE};padding-top:12px}
+.xy-f{font-size:30px}.xy-q{font-size:22px;line-height:1.3}.xy-tag{display:inline-block;font-size:16px;font-weight:650;border-radius:999px;padding:2px 10px;margin-top:6px;border:1.5px solid currentColor}
+.xy-cells{display:flex;gap:12px;align-items:flex-start}
+@media(max-width:760px){.reading .xy,.reading .xy-row{grid-template-columns:minmax(0,1fr)}.reading .xy-cells{flex-wrap:wrap}}
 .dflex{display:flex;gap:22px;align-items:center}
 .mh .diagram,.mh .plot{max-height:var(--mh)}
 .mchain{display:grid;grid-template-columns:auto auto 1fr auto;gap:22px 20px;align-items:center;font-size:24px}.mchain>div{min-width:0}.mchain .math{font-size:1.12em;white-space:nowrap}.mread{grid-template-columns:auto 1fr auto;gap:26px 28px}.mread .mc-w{color:${palette.ink}}
@@ -82,13 +88,13 @@ const OURS='Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py
 // ---------------------------------------------------------------- sections and the slide builder
 export const meta={
  id:'lecture5',number:5,title:'Autoencoders and the VAE, from the ELBO',
- subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:92,
+ subtitle:'For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO',minutes:98,
  notebook:'lecture5-autoencoders-vae.ipynb',
  sections:[
   {id:'map',title:'Lecture map',minutes:1},
-  {id:'why',title:'Part 1 · Why generate?',minutes:14},
+  {id:'why',title:'Part 1 · Why generate?',minutes:18},
   {id:'ae',title:'Part 2 · Autoencoders: squeeze, then rebuild',minutes:18},
-  {id:'gen',title:'Part 3 · Can an autoencoder generate?',minutes:8},
+  {id:'gen',title:'Part 3 · Can an autoencoder generate?',minutes:10},
   {id:'idea',title:'Part 4 · From an autoencoder to a VAE: three fixes',minutes:12},
   {id:'vae',title:'Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time',minutes:33},
   {id:'end',title:'Part 6 · Putting it together',minutes:6},
@@ -98,7 +104,7 @@ export const meta={
 export const slides=[];
 /** Numbered sections. The notebook uses the same numbers, with anchors sec-1-1 … sec-6-2. */
 const CHAPTERS=[
- ['1.1','Things that do not exist'],['1.2','Text, pictures and sound'],['1.3','What generative models are for'],['1.4','What they all share'],
+ ['1.1','Things that do not exist'],['1.2','Text, pictures and sound'],['1.3','What p(x) means, and what it is for'],['1.4','What they all share'],
  ['2.1','An image is 784 numbers'],['2.2','Encoder, code, decoder'],['2.3','The loss, and training'],['2.4','What the code holds'],
  ['3.1','Decode random codes'],['3.2','Where the codes are'],['3.3','What we want instead'],
  ['4.1','Fix 1: choose where codes live'],['4.2','Fix 2: a cloud for each image'],['4.3','Fix 3: pull the clouds to N(0, I)'],['4.4','The loss the fixes give'],
@@ -285,6 +291,57 @@ const AE_LIM=(()=>{const c=A.ae2_codes,xs=c.map(v=>v[0]),ys=c.map(v=>v[1]),pad=(
 const wideMark=()=>{const W_=posteriorSVG({S:400,prior:true}),P_=W_.P,cx=P_.x(V.grid.post_mean[0]),cy=P_.y(V.grid.post_mean[1]);return W_.s+`<circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="${palette.loss}" stroke-width="2.5"/>`+label(cx,cy+40,'the posterior: a tiny patch',{fill:palette.loss,size:17,weight:600,anchor:'middle'});};
 const RF=V.realfake_is_fake,rfMarks=RF.map(x=>x?palette.loss:palette.p);
 /** Randomness in, a learned network, a sample out; optionally a condition (Lecture 2). */
+// ---------------------------------------------------------------- Part 1: x, y and the probabilities about them (data: scripts/xy.py)
+/** p(y | x) as ten bars, one per digit; the most probable label in teal. */
+function yBars(pv,{W=372,H=110}={}){
+ const bw=W/10,top=pv.indexOf(Math.max(...pv));let s='';
+ pv.forEach((v,k)=>{const h=Math.max(2,v*(H-56)),x=k*bw+5,c=k===top?palette.p:'#C3C9D2';
+  s+=`<rect x="${x.toFixed(1)}" y="${(H-28-h).toFixed(1)}" width="${(bw-10).toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${c}"/>`+
+   label(x+(bw-10)/2,H-7,String(k),{size:17,anchor:'middle',fill:k===top?palette.p:MUTED,weight:k===top?'700':''});
+  if(v>=.05)s+=label(x+(bw-10)/2,H-33-h,`${num(v*100,v>.99?1:0)}%`,{size:16,anchor:'middle',fill:k===top?palette.p:MUTED,weight:k===top?'700':''});});
+ return fig(W,H,s,'A bar for each digit 0 to 9: the probability of that label for this image.');
+}
+const cell=(src,cap,size=68)=>`<figure class="dg-cell"><img class="dg" src="${src}" width="${size}" height="${size}" alt="">${cap?`<figcaption>${cap}</figcaption>`:''}</figure>`;
+/** A few of our 3's pixel values, from its row with the most ink. */
+function pixelPeek(){
+ const g=M.pixels3,r=g.reduce((b,row,i)=>row.reduce((a,v)=>a+v,0)>g[b].reduce((a,v)=>a+v,0)?i:b,0),row=g[r],k=row.findIndex(v=>v>0);
+ return row.slice(Math.max(0,k-1),k+4).map(v=>num(v,2)).join(', ');
+}
+function xyNames(){
+ const C=XY.classifier,row=(k,tex,q,tag,color,viz)=>at(k,`<div class="xy-row"><div class="xy-f">${m(tex)}</div><div><div class="xy-q">${q}</div><span class="xy-tag" style="color:${color}">${tag}</span></div><div>${viz}</div></div>`);
+ return `<div class="xy"><div class="xy-left"><div class="xy-name"><b>x</b> = the data</div>${digit('example',0,150)}<div class="mini">one image: 784 numbers, one per pixel: (…, ${pixelPeek()}, …)</div>
+  <div class="xy-name" style="margin-top:8px"><b>y</b> = a label about x</div><div class="dflex" style="gap:14px"><span class="xy-y">3</span><span class="mini">which digit:<br>one of 0, 1, …, 9</span></div></div>
+ <div class="xy-rows">${row(2,R`\pcol{p(y\mid x)}`,'Given this image, how probable is each label? “|” reads “given”.','discriminative: a classifier',palette.p,yBars(C.our3))}
+  ${row(3,R`p(x)`,'How probable is this image itself, with no label? And: draw a new one.','generative: today',palette.q,`<div class="xy-cells">${cell(digitSrc('example',0),'high')}${cell(digitSrc('uniform',0),'almost 0')}${cell(digitSrc('vae16_prior_samples',11),'a new x')}</div>`)}
+  ${row(4,R`p(x\mid y{=}3)`,'Fix the label, then ask: which images? Every way to write a 3.','conditional generative',palette.noise,`<div class="xy-cells">${threes.slice(0,5).map(i=>cell(digitSrc('display',i),'',62)).join('')}</div>`)}</div></div>`;
+}
+/** One number per image (its ink) for the training 0s and 1s: p(x), the two humps p(x, y), and p(y = 1 | x) below. */
+function inkFig(){
+ const K=XY.ink,xs=K.grid,W=700,L=50,R=16,C0=CLASS[0],C1=CLASS[1],ink=palette.ink;
+ const j=K.p_x_given_y.map((d,c)=>d.map(v=>v*K.p_y[c])),top=Math.max(...K.p_x)*1.12;
+ const P=panel({W,H:262,L,R,T:34,B:56,xMin:0,xMax:260,yMax:top,yAxis:false,ticksX:[0,50,100,150,200,250],fs:17,xLabel:'x = ink: the sum of the 784 pixel values'});
+ const Q=panel({oy:270,W,H:152,L,R,T:14,B:14,xMin:0,xMax:260,yMin:0,yMax:1,ticksY:[0,.5,1],fs:17});
+ const xb=P.x(K.boundary);
+ let s=P.axes+P.area(xs,K.p_x,'#14171F14')+P.line(xs,K.p_x,ink)+label(L,22,`p(x): ${comma(K.n[0]+K.n[1])} training 0s and 1s, labels ignored`,{fill:ink,size:19,weight:600});
+ s+=`<g data-at="2">${P.area(xs,j[1],C1+'40')+P.line(xs,j[1],C1,'style="stroke-width:2.5"')+P.area(xs,j[0],C0+'40')+P.line(xs,j[0],C0,'style="stroke-width:2.5"')+P.line(xs,K.p_x,ink)}`+
+  [[1,C1,101,44],[0,C0,1,94]].map(([c,col,i,yy])=>`<image href="${digitSrc('display',i)}" x="${P.x(172)}" y="${yy-30}" width="40" height="40" style="image-rendering:pixelated"/><rect x="${P.x(172)}" y="${yy-30}" width="40" height="40" fill="none" stroke="${col}" stroke-width="2"/>`+
+   label(P.x(172)+50,yy-4,`${c}s: p(x, y = ${c})`,{fill:col,size:18,weight:600})).join('')+'</g>';
+ s+=`<g data-at="3">${Q.axes}<line x1="${Q.x(0)}" y1="${Q.y(.5)}" x2="${Q.x(260)}" y2="${Q.y(.5)}" stroke="${MUTED}" stroke-dasharray="4 4"/>`+Q.line(xs,K.p_y1_given_x,palette.p)+
+  `<line x1="${xb.toFixed(1)}" y1="40" x2="${xb.toFixed(1)}" y2="${Q.y(0)}" stroke="${palette.p}" stroke-dasharray="6 5" stroke-width="1.6"/>`+
+  label(Q.x(150),Q.y(.78),'p(y = 1 | x): is it a 1?',{fill:palette.p,size:19,weight:600})+label(xb+8,Q.y(.5)-10,`50:50 at ink ${num(K.boundary,0)}`,{fill:palette.p,size:17})+'</g>';
+ return fig(W,422,s,'Each training 0 and 1 reduced to one number, its ink. Top: p(x), and the two humps p(x, y) for the 1s and the 0s, which add up to it. Bottom: p(y = 1 | x), the share of 1s at each ink level.');
+}
+
+// ---------------------------------------------------------------- Part 3: sample the real codes instead? (data: scripts/empirical.py)
+const EB=k=>Uint8Array.from(atob(k),c=>c.charCodeAt(0));
+const empRow=(b64,size=38)=>{const b=EB(b64);return `<div class="dflex" style="gap:5px">${Array.from({length:8},(_,i)=>`<img class="dg" src="${digitURL(b,i*784)}" width="${size}" height="${size}" alt="">`).join('')}</div>`;};
+/** The real codes with 300 codes drawn one of three ways on top. */
+function empScatter(method){
+ const H=300,W=squareW(AE_LIM,H),{s,P}=scatterSVG('ae2',{W,H,lim:AE_LIM,ticks:[[0,10,20],[-5,0,5,10,15]],r:3,opacity:.3,mog:method==='mog'?G.ae2_mog:null});
+ const pts=EMP.methods[method].codes.map(([a,b])=>`<circle cx="${P.x(a).toFixed(1)}" cy="${P.y(b).toFixed(1)}" r="3.4" fill="${palette.ink}" stroke="#fff" stroke-width=".8"/>`).join('');
+ return fig(W,H,s+`<g ${P.clip}>${pts}</g>`,'The codes of 1,000 test digits, with 300 codes drawn from the real codes on top in black.');
+}
+
 function recipeDiagram(stage=1){
  const W=1100,H=stage>=2?300:230;let s='';
  const box=(x,y,w,h,t,s_,c)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${palette.paper}" stroke="${c}" stroke-width="2.5"/>`+label(x+w/2,y+h/2+(s_?-4:9),t,{fill:c,size:26,anchor:'middle',weight:600})+(s_?label(x+w/2,y+h/2+24,s_,{size:19,anchor:'middle'}):'');
@@ -481,9 +538,31 @@ S('speech','why','Sound: text in, 24,000 numbers per second out',{builds:2,
  lines:['A text-to-speech model read this sentence aloud. Press play.','The output is just a long list of numbers: the air pressure, 24,000 times a second. Generating sound = generating that list.'],
  ask:['What exactly does the model output?','Is there one right way to say this sentence?'],
  expected:['About 191,000 numbers: a waveform sampled 24,000 times a second.','No: speed, pitch, pauses and voice all vary. Another sample would sound different.'],
- transition:'Generative models also matter far from art and chat.',
+ transition:'Before more examples: a model of what, exactly? First, the letters.',
  source:'Generated for Lecture 2 on 21 October 2026 with Gemini 3.8 Flash TTS, voice “Kore”.'});
 chap('1.3');
+S('xy','why','First, the names: x is the data, y is a label',{builds:4,nb:'cell-xy',
+ body:xyNames(),
+ lines:['Two letters for the whole course. x is the data: here one image, 784 numbers. y is a label about x: which digit it is. Many datasets have no y at all.',
+  `p(y | x), read “p of y given x”: for this one image, a probability for each label, adding up to 1. A classifier learns it. Ours gives our 3 a ${Math.round(XY.classifier.our3[3]*1000)/10}% chance of being a 3.`,
+  'p(x): a probability for the image itself, no label involved. High for a clean 3, almost 0 for static. A model of p(x) can also draw new x: a generative model, today’s subject.',
+  'p(x | y = 3): fix the label first, then ask which images are likely: every way to write a 3. The real 3s are draws from it. A text-to-image model learns p(image | prompt), with the prompt as y.'],
+ ask:['What is x for a chatbot? For a spam filter, what are x and y?','Read p(y | x) aloud. What do its ten numbers add up to?','What should p(x) be for random static?','Which probability does a text-to-image model learn?'],
+ expected:['A chatbot: x is a sentence. Spam filter: x is the email, y is spam or not.','“p of y given x”: one probability per label for this image; they add up to 1.','Almost 0: nobody writes static. That is how p(x) spots odd inputs.','p(image | prompt): a conditional generative model, with the prompt in the place of y.'],
+ point:`The classifier is a softmax regression (784 numbers in, 10 out) on the 60,000 training digits: ${num(XY.classifier.test_accuracy*100,1)}% of test digits right. Its least sure display digit, a 5, gets 9: ${Math.round(XY.classifier.hard.p[9]*100)}%, 5: ${Math.round(XY.classifier.hard.p[5]*100)}%, 4: ${Math.round(XY.classifier.hard.p[4]*100)}%: p(y | x) is a distribution, not just a label.`,
+ transition:'Draw all of these in one picture.',source:'Classifier and numbers: <code>lecture5/scripts/xy.py</code>. Digits from Lecture 2’s data; the new x is a draw from its 16-number VAE.'});
+S('gen-disc','why','Generative or discriminative, in one picture',{builds:3,nb:'cell-xy',
+ body:cols(inkFig(),stack(mini('<b>To draw it:</b> one number per image, its ink. Only the 0s and 1s.'),
+  at(2,`<div class="eq-sm">${eq(R`p(x,y)=${PRI('p(y)')}\;p(x\mid y)`)}${eq(R`p(x)=p(x,0)+p(x,1)`)}</div>`),
+  at(3,`<div class="eq-sm">${eq(R`\pcol{p(y\mid x)}=\frac{p(x,y)}{p(x)}`)}</div>`),
+  at(3,`<div class="takeaway"><b>Generative</b> learns the top: it can score and draw x, and the bottom follows. <b>Discriminative</b> learns only the bottom: it can label, not draw.</div>`)),'1.25fr 1fr'),
+ lines:[`784 numbers are too many to draw, so describe each image by one number: its ink. The ${comma(XY.ink.n[0]+XY.ink.n[1])} training 0s and 1s give this curve, p(x): where the data are.`,
+  `Now colour by label. The 1s use little ink (about ${num(XY.ink.mean[1],0)}), the 0s more (about ${num(XY.ink.mean[0],0)}). Each hump is p(x, y) = p(y) p(x | y); ${Math.round(XY.ink.p_y[1]*100)}% of these digits are 1s. The humps add up to p(x).`,
+  `Divide the 1s’ hump by the total and you get p(y = 1 | x): near 1 for little ink, near 0 for a lot, 50:50 at ink ${num(XY.ink.boundary,0)}. A classifier learns only this curve. A generative model learns the humps, and gets this curve free by Bayes’ rule.`],
+ ask:['Where is p(x) high? Where is it near 0?','Why is the 1s’ hump taller and narrower?','Can you get the top picture back from the bottom curve alone?'],
+ expected:['High near ink 60 and 136, where most images are; near 0 above 230: almost no digit has that much ink.',`The 1s all use about the same ink, so their hump is narrow; and they are a little more common: ${Math.round(XY.ink.p_y[1]*100)}%.`,'No. p(y | x) says nothing about where the data are, so it cannot score or draw an x. The top gives the bottom, never the other way.'],
+ point:`This is Bayes’ rule, as in Lecture 1, with the label y as the unknown: p(y | x) = p(x | y) p(y) / p(x). Humps: Gaussian kernel densities (bandwidths ${num(XY.ink.bandwidth[0],1)} and ${num(XY.ink.bandwidth[1],1)}) of the ${comma(XY.ink.n[0])} training 0s and ${comma(XY.ink.n[1])} 1s.`,
+ transition:'Generative models also matter far from art and chat.',source:'Numbers: <code>lecture5/scripts/xy.py</code> (MNIST training set).'});
 S('science','why','Beyond pictures: generative models in science',{builds:2,
  body:`<div class="cards big" style="grid-template-columns:1fr 1fr">${card('Weather','GenCast samples 50 possible futures for the next 15 days. The spread of the samples says how sure the forecast is.',palette.data,'Price et al., Nature 2025')+card('Proteins','RFdiffusion generates new protein shapes, for example ones that bind a chosen target.',palette.p,'Watson et al., Nature 2023')}${at(2,card('Materials','MatterGen proposes new crystal structures with properties you ask for.',palette.q,'Zeni et al., Nature 2025'))}${at(2,card('Missing data','Sensors drop readings. A model of p(x) fills the gap with plausible values instead of a flat average, and says how unsure it is.',palette.noise,'for example, air-quality and smart-meter records'))}</div>`,
  lines:['Weather and proteins: the output is a sample, and many samples together describe what could happen.','Materials, and the everyday case: filling in missing sensor readings with plausible values.'],
@@ -604,11 +683,15 @@ for epoch in range(30):
  ask:['How many updates in total?','Does the encoder get a gradient even though the loss compares only images?'],
  expected:[`${comma(30*A.steps_per_epoch)}.`,'Yes: the reconstruction depends on the code, which depends on the encoder’s weights.'],
  transition:'Watch the reconstructions form.'});
-S('ae-train','ae','Press play: reconstructions sharpen as it trains',{builds:2,
- body:widget('ae-train','Reconstructions during training of the 2-number autoencoder.'),
- lines:[`Frame 0: grey, error ${f(A.ae2_frames_sse[0],0)}. Press play: after 10 steps it is ${f(A.ae2_frames_sse[1],0)}; the network has learned the average blob.`,`The error keeps falling as each digit takes shape; after 30 epochs it is ${f(A.ae2_frames_sse.at(-1),1)}. Under each digit: its own error.`],
- ask:['What does the network learn first?','Which digits stay hardest to rebuild from 2 numbers?'],
- expected:['The average digit: a blurry blob that lowers the error everywhere.','Ones that resemble other digits, like 4 and 9, or unusual shapes.'],
+const EA=EP.all.summary,EF=EP.few.summary,EFB=EP.few.best,ENT=EP.few.nearest_train_to_recon3,EL=String(EP.all.save.at(-1));
+const TBEST=(()=>{const t=EP.all.test;let k=1;for(let i=1;i<t.length;i++)if(t[i]<t[k])k=i;return {epoch:EP.all.epoch[k],test:t[k]};})();
+S('ae-train','ae','Press play: reconstructions sharpen, then stop improving',{builds:2,
+ body:widget5('ae-train-long','Reconstructions during training of the 2-number autoencoder, to epoch '+comma(EL)+'.'),
+ lines:[`Frame 0: grey, error ${f(A.ae2_frames_sse[0],0)}. Press play: after 10 steps it is ${f(A.ae2_frames_sse[1],0)}; the network has learned the average blob.`,
+  `Each digit takes shape: ${f(A.ae2_frames_sse.at(-1),1)} after 30 epochs, where Lecture 2 stopped. Carry on to ${comma(EL)}: the training error falls to ${f(EA[EL].train,1)}, but the test error is lowest at epoch ${TBEST.epoch} (${f(TBEST.test,1)}) and ends at ${f(EA[EL].test,1)}. Two numbers per digit, not training time, is the limit.`],
+ ask:['What does the network learn first?','Is it worth training for 1,000 epochs?'],
+ expected:['The average digit: a blurry blob that lowers the error everywhere.','Not here: the training digits keep improving, the test digits do not. To rebuild better we need a bigger code (next slide).'],
+ point:'Frames to epoch 30: Lecture 2’s run. Later frames: the same run replayed step for step and continued by lecture5/scripts/epochs.py (its epoch-30 frame matches Lecture 2’s).',
  transition:'How much does the code size matter?',source:OURS});
 chap('2.4');
 S('code-size','ae','More numbers in the code, sharper rebuilds',{builds:2,
@@ -623,14 +706,13 @@ S('ae-scatter','ae','Where the codes land: 1,000 test digits at their 2 numbers'
  ask:['Which digits are still mixed?','The codes run from about −5 to 22. Is that a problem?'],
  expected:['4 and 9; some 3, 5 and 8.','Not for rebuilding. For generating, Part 3 will show it is.'],
  transition:'How did the codes get there? Watch them during training.',source:OURS});
-const EA=EP.all.summary,EF=EP.few.summary,EFB=EP.few.best,ENT=EP.few.nearest_train_to_recon3;
 S('ae-epochs','ae','During training: clusters form, then the codes drift out',{builds:2,
  body:widget5('code-epochs','The 2-number codes of 1,000 test digits during training, with training and test error.',{run:'all'}),
  lines:[`Epoch 0: every code sits near 0 and every rebuild is the same grey blob. After one pass over the 60,000 digits the clusters are already there: ${f(100*EA['1'].knn5,0)}% of codes have neighbours of the same digit (${f(100*EA['0'].knn5,0)}% at the start).`,
-  `Press play. Epoch 30 is the last slide’s picture; training goes on to 300. The clusters sharpen a little (${f(100*EA['300'].knn5,0)}%) while the cloud keeps stretching: ${f(cloudW(EA['1']),0)} wide after one epoch, ${f(cloudW(EA['30']),0)} at 30, ${f(cloudW(EA['300']),0)} at 300. Training and test error stay close (${f(EA['300'].train,1)} and ${f(EA['300'].test,1)}).`],
+  `Press play. Epoch 30 is the last slide’s picture; training goes on to ${comma(EL)}. The clusters sharpen a little (${f(100*EA[EL].knn5,0)}%) while the cloud keeps stretching: ${f(cloudW(EA['1']),0)} wide after one epoch, ${f(cloudW(EA['30']),0)} at 30, ${f(cloudW(EA['300']),0)} at 300, ${f(cloudW(EA[EL]),0)} at ${comma(EL)}. The training error keeps falling (${f(EA[EL].train,1)}); the test error is lowest at epoch ${TBEST.epoch} and creeps up to ${f(EA[EL].test,1)}.`],
  ask:['What stops the codes from drifting further out?','Is this autoencoder overfitting?'],
- expected:['Nothing in the loss: it scores only the rebuild, so any position and any scale of the codes is equally good.','No: with 60,000 digits the training and test errors stay within about 4 of each other.'],
- point:'Lecture 2’s training of this exact network, replayed step for step (same seed and batches), then continued from epoch 30 to 300. “Same axes throughout” uses the epoch-300 window.',
+ expected:['Nothing in the loss: it scores only the rebuild, so any position and any scale of the codes is equally good.',`A little, and late: the test error is lowest at epoch ${TBEST.epoch} (${f(TBEST.test,1)}) and creeps up to ${f(EA[EL].test,1)} while the training error keeps falling. With only 200 digits it is far worse: next slide.`],
+ point:`Lecture 2’s training of this exact network, replayed step for step (same seed and batches), then continued from epoch 30 to ${comma(EL)}. “Same axes throughout” uses the epoch-${comma(EL)} window.`,
  transition:'Now give it far too little data, and train for far too long.',source:'Lecture 2’s network and training, replayed and extended by <code>lecture5/scripts/epochs.py</code>.'});
 S('ae-overfit','ae','Overfitting: too few digits, and the codes fly apart',{builds:2,
  body:widget5('code-epochs','The 2-number codes of 1,000 test digits while an autoencoder overfits 200 training digits.',{run:'few'}),
@@ -677,7 +759,21 @@ S('ae-grid','gen','Decode a whole grid of codes',{builds:2,
  lines:['Decode a 12 × 12 grid of codes covering the dashed box: the codes on the left, the decoder’s output at each grid point on the right.','Over the real codes, digits blend into each other. Far from them, thick 1s and 0s and broken strokes: the decoder never trained there.'],
  ask:['Which parts of the grid are useful for generation?','What does the decoder do far from any real code?'],
  expected:['Those over the clusters of real codes.','It extrapolates from the nearest digits: exaggerated or broken shapes.'],
- transition:'What we want instead.',source:OURS});
+ transition:'Why not sample from the real codes, then?',source:OURS});
+S('ae-empirical','gen','Why not sample from the real codes instead of N(0, I)?',{builds:4,
+ body:cols(`<div class="state-slot mh" style="--mh:292px"><div data-only="1">${empScatter('copy')}</div><div data-only="2">${empScatter('jitter')}</div><div data-only="3-4">${empScatter('mog')}</div></div>`,
+  stack(`<div><div class="dg-title">1 · Copy: pick a training digit’s code</div>${empRow(EMP.methods.copy.train_images)}<div style="height:5px"></div>${empRow(EMP.methods.copy.images)}</div>`,
+   at(2,`<div><div class="dg-title">2 · Jitter: a real code plus N(0, I) noise</div>${empRow(EMP.methods.jitter.images)}</div>`),
+   at(3,`<div><div class="dg-title">3 · Fit 10 Gaussians to the codes, sample them</div>${empRow(EMP.methods.mog.images)}</div>`)),'1fr 1.1fr')+
+  at(4,takeaway('It works, and large systems do it: Stable Diffusion trains an autoencoder, then a second generative model for its codes. The VAE does it in one model: training puts the codes in N(0, I), and it can score p(x).')),
+ lines:['Why invent codes when we have 60,000 real ones? Simplest: pick a training digit’s code (top row) and decode it (below). We get that digit back, blurred: nothing new.',
+  `Smooth it: a real code plus a little N(0, I) noise. Only ${num(EMP.methods.jitter.in_gap*100,1)}% land further from a training code than real test digits do; between clusters the decoder blends digits, like a 3 that is half 8.`,
+  `Or fit 10 Gaussians to the codes and sample them (Lecture 2’s fix): ${num(EMP.methods.mog.in_gap*100,1)}% in the gaps, and mostly plausible digits of every kind.`,
+  'So it works, and large systems do it. The VAE gets there in one model and one objective, and also gives a score for p(x).'],
+ ask:['What do we get if we decode a real code exactly?','Where can the jittered codes go wrong?','Why does this beat N(0, I) for the plain autoencoder?','What does the VAE give that this two-step recipe does not?'],
+ expected:['The training digit it came from, blurred by the 2-number code: a copy, not a new digit.','Between two clusters: the decoder never trained on codes there, so it blends two digits.','It follows where the real codes are, so every digit type is covered, not just the corner N(0, I) reaches.','One model and one objective: codes that fill N(0, I) by design, and a lower bound on log p(x) to score an image.'],
+ point:`“In a gap”: the nearest training code is further than ${num(EMP.gap_distance,2)}, the 99th percentile of that distance for the 10,000 test digits. Copies: 0%; jitter: ${num(EMP.methods.jitter.in_gap*100,1)}%; 10 Gaussians: ${num(EMP.methods.mog.in_gap*100,1)}%; N(0, I): ${num(EMP.methods.prior.in_gap*100,1)}% (10,000 draws each). With 60,000 codes in 2 numbers the plane is crowded; the real cost of N(0, I) is the digits it misses, not gaps.`,
+ transition:'What we want instead.',source:'Lecture 2’s 2-number autoencoder and its 10-Gaussian fit to the training codes; draws and decodes: <code>lecture5/scripts/empirical.py</code>.'});
 chap('3.3');
 S('wishes','gen','What we saw, and what we want instead',{builds:3,
  body:`<div>${table(['what we saw','what we want'],[
@@ -1055,10 +1151,10 @@ O('opt-beta-collapse','β = 256: every code decodes to the same blur',{builds:2,
 // ================================================================= Lecture map, filled in once every section knows its first slide
 S('contents','map','Lecture 5 at a glance: six parts, twenty-five sections',{nb:'top',
  body:'',
- lines:['Six parts, twenty-five numbered sections, about 85 minutes. The ▶ Notebook link on every slide opens its section in Colab.'],
+ lines:[`Six parts, twenty-five numbered sections, about ${meta.minutes} minutes. The ▶ Notebook link on every slide opens its section in Colab.`],
  ask:['Which part leans most on Lecture 1?'],
  expected:['Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.'],
- point:'A 60-minute cut: in Part 1 skip next-word, img2img, speech and science; in Part 2 skip ae-untrained, ae-step and code-size; in Part 3 skip ae-grid; keep all of Part 4; in Part 5 skip vae-pgm, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.',
+ point:'A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip vae-pgm, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.',
  transition:'Part 1: why generate?'});
 for(const [sl,k] of partOpeners){
  const figs={6:budgetFig(true),1:`<div class="photo-row" style="grid-template-columns:2.1fr 1fr 1fr 1fr">${photo('assets/gallery/stylegan-faces.jpg','faces (StyleGAN)')+photo('assets/examples/t2i-sample-1.jpg','text to image')+photo('assets/gallery/spade-out-0.jpg','a map to a landscape')}<figure>${digits('vae16_prior_samples',{idx:[0,1,2,3],cols:2,size:76,gap:6})}<figcaption>digits: today</figcaption></figure></div>`,2:maxH(250,aeDiagram({stage:4})),3:genDiagram('ae'),4:fixesFig(),5:castFig()};

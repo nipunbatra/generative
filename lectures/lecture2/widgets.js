@@ -62,7 +62,7 @@ const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
  * which plays it (arriving there directly shows the final frame). Reading: final frame, with controls.
  * Print: frame 0 before the play build and the final frame from it, as static states.
  */
-function animated(el,ctx,{count,render,step,alt,playBuild=2,duration=4200,extra=''}){
+export function animated(el,ctx,{count,render,step,alt,playBuild=2,duration=4200,extra=''}){
  const last=count-1;
  if(ctx.printing){el.innerHTML=`<div class="state-slot"><div data-only="1-${playBuild-1}">${render(0)}</div><div data-only="${playBuild}-99">${render(last)}</div></div>`;return {rerender(){}};}
  el.innerHTML=`<div class="w-fig diagram-scroll"></div><div class="w-controls"><button type="button" class="w-play">▶ Play</button><input class="w-scrub" type="range" min="0" max="${last}" step="1" value="0" aria-label="${esc(alt)}: frame"><span class="w-readout w-step"></span>${extra}</div>`;
