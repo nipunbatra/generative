@@ -3,7 +3,7 @@
   "number": 5,
   "title": "Autoencoders and the VAE, from the ELBO",
   "subtitle": "For a class that knows the ELBO: why generate, an autoencoder, why it cannot generate, the VAE as Lecture 1’s objective with a code per image, and every term traced back to KL and the ELBO",
-  "minutes": 92,
+  "minutes": 94,
   "notebook": "lecture5-autoencoders-vae.ipynb",
   "sections": [
     {
@@ -34,7 +34,7 @@
     {
       "id": "vae",
       "title": "Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time",
-      "minutes": 27
+      "minutes": 29
     },
     {
       "id": "end",
@@ -47,8 +47,8 @@
       "minutes": 0
     }
   ],
-  "coreSlides": 67,
-  "optionalSlides": 14,
+  "coreSlides": 68,
+  "optionalSlides": 15,
   "slides": [
     {
       "id": "contents",
@@ -346,9 +346,9 @@
     },
     {
       "id": "fix-loss",
-      "title": "The three fixes give a loss",
+      "title": "The three fixes give a loss: reconstruction plus KL",
       "section": "idea",
-      "builds": 3,
+      "builds": 4,
       "optional": false
     },
     {
@@ -387,6 +387,13 @@
       "optional": false
     },
     {
+      "id": "why-back",
+      "title": "Why run the story backwards? Images come without codes",
+      "section": "vae",
+      "builds": 3,
+      "optional": false
+    },
+    {
       "id": "vae-wall",
       "title": "Run the story backwards: which codes made our 3?",
       "section": "vae",
@@ -402,21 +409,21 @@
     },
     {
       "id": "var-approx",
-      "title": "The variational approximation: the closest Gaussian",
+      "title": "Put a guide q: a Gaussian guess of where the codes are",
       "section": "vae",
-      "builds": 3,
+      "builds": 4,
       "optional": false
     },
     {
       "id": "encoder-q",
-      "title": "The encoder’s cloud is q: one network gives q for every image",
+      "title": "The guide is a neural network: the encoder",
       "section": "vae",
       "builds": 3,
       "optional": false
     },
     {
       "id": "vae-loss",
-      "title": "From the ELBO to the loss: recon + KL, derived, not guessed",
+      "title": "Now we have the loss: minus the ELBO is reconstruction + KL",
       "section": "vae",
       "builds": 4,
       "optional": false
@@ -541,6 +548,13 @@
       "optional": true
     },
     {
+      "id": "lik-formula",
+      "title": "The likelihood, written out: Gaussian pixels",
+      "section": "optional",
+      "builds": 3,
+      "optional": true
+    },
+    {
       "id": "vae-elbo",
       "title": "Lecture 1’s ELBO, for one image",
       "section": "optional",
@@ -618,5 +632,5 @@
       "optional": true
     }
   ],
-  "totalStates": 186
+  "totalStates": 194
 }

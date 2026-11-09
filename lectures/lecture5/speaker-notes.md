@@ -1,6 +1,6 @@
 # Autoencoders and the VAE, from the ELBO: speaker notes
 
-Planned main route: 92 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
+Planned main route: 94 minutes. Timing includes student responses and the specified short demonstrations. Optional extensions are outside this budget.
 
 ## Pacing
 
@@ -11,7 +11,7 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 | Part 2 · Autoencoders: squeeze, then rebuild | 18 |
 | Part 3 · Can an autoencoder generate? | 10 |
 | Part 4 · From an autoencoder to a VAE: three fixes | 12 |
-| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 27 |
+| Part 5 · Why this loss: Lecture 1’s ELBO, one image at a time | 29 |
 | Part 6 · Putting it together | 6 |
 
 ## contents: Lecture 5 at a glance: six parts, twenty-five sections
@@ -20,7 +20,7 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Expected:** Part 5: the VAE’s loss is Lecture 1’s ELBO with a code per image. Part 6 traces every term back to it.
 
-**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip evidence, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
+**Point here:** A 60-minute cut: in Part 1 skip next-word, img2img, speech, gen-disc and science; in Part 2 skip ae-untrained, ae-step, code-size and ae-overfit; in Part 3 skip ae-grid and ae-empirical; keep all of Part 4; in Part 5 skip evidence, vae-worked, vae-code, explore-vae and beta-what. The optional slides carry the detours, and Lecture 2 has the full two-session version.
 
 **Transition:** Part 1: why generate?
 
@@ -618,27 +618,35 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Expected:** μ² would pull clouds to the centre but let σ shrink to 0. The KL stops both, and Part 5 shows it is exactly what Lecture 1’s ELBO asks for.
 
-**Build 3, ask:** Which term punishes a shrinking cloud?
+**Build 3, ask:** Why does a cloud shrunk to a point cost anything?
 
-**Expected:** −log σ²: it grows without limit as σ → 0.
+**Expected:** The KL averages log q − log N(0, 1) over the cloud. A narrow cloud’s density is huge where it sits, while N(0, 1) stays below 0.4, so the gap grows without limit as σ → 0.
+
+**Point here:** Tool ② has a closed form for the KL between two Gaussians; the appendix slide “Minus the ELBO is Part 4’s loss” and the notebook (4.3) write it out.
 
 **Transition:** Put the three fixes together.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## fix-loss: The three fixes give a loss
+## fix-loss: The three fixes give a loss: reconstruction plus KL
 
-**Build 1, ask:** Which term is the autoencoder’s loss?
+**Build 1, ask:** Which fixes act only in training?
 
-**Expected:** The first: squared error between the image and its rebuild.
+**Expected:** Fixes 2 and 3. Fix 1 is also where we draw codes to generate, and it is the KL’s target in training.
 
-**Build 2, ask:** What would a weight of 0 on the KL give?
+**Build 2, ask:** Which term is the autoencoder’s loss?
+
+**Expected:** The reconstruction term, with a random draw from the cloud in place of a fixed code.
+
+**Build 3, ask:** What would a weight of 0 on the KL give?
 
 **Expected:** An autoencoder with noisy codes; in practice the clouds shrink to points (Section 5.8, β = 0).
 
-**Build 3, ask:** What would a probability model add?
+**Build 4, ask:** What would a probability model add?
 
 **Expected:** A reason for the loss and its weights, and a score for images: a lower bound on log p(x).
+
+**Point here:** Papers and code call the two terms the reconstruction loss and the KL (or regularisation) term.
 
 **Transition:** The two terms pull against each other.
 
@@ -712,27 +720,47 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 ## sigma: The likelihood scores a code: how well does it draw our 3?
 
-**Build 1, ask:** Where have you seen squared error = Gaussian likelihood before?
+**Build 1, ask:** Why does code A score so much higher than the others?
 
-**Expected:** Linear regression: least squares is maximum likelihood with Gaussian noise.
+**Expected:** Its drawing matches our 3 almost pixel for pixel.
 
-**Build 2, ask:** Why are the three scores so far apart?
+**Build 2, ask:** What does a score of 252 against −360 mean?
 
-**Expected:** Every unit of squared error costs 1/2σ² = 12.5 nats, summed over 784 pixels.
+**Expected:** Code A is e to the 612 times more likely than B to draw exactly our 3.
 
-**Build 3, ask:** Is σ learned here?
+**Build 3, ask:** How much of the plane draws our 3 well?
 
-**Expected:** No, fixed at 0.2. It can be learned; we keep it fixed for clarity.
+**Expected:** Very little: about 0.3% of the grid comes within 100 of the best score.
 
-**Transition:** Now run the story backwards.
+**Point here:** Gaussian pixels with σ = 0.2 make the score minus the squared error over 2σ², plus a constant: squared errors 23.1, 72.1, 83.7 give 252, −360, −505. The optional slide “The likelihood, written out” has the formula. Map: an 81 × 81 grid of codes (scripts/lik.py).
+
+**Transition:** Why would we want to run the story backwards?
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
+## why-back: Why run the story backwards? Images come without codes
+
+**Build 1, ask:** If we knew each image’s code, how would we train the decoder?
+
+**Expected:** As regression: code in, image out, squared error.
+
+**Build 2, ask:** Why make p(x) large?
+
+**Expected:** A good model gives its training images high probability: maximum likelihood, as for any model in this course.
+
+**Build 3, ask:** Which codes carry the average for our 3?
+
+**Expected:** Codes in the tiny patch that draws a 3, like code A.
+
+**Point here:** The average is of the likelihood itself, p(x | z), not of its log. Lecture 1, Section 1.1 asked the same question of the weights: which θ explain the data?
+
+**Transition:** Bayes’ rule answers which codes made our 3.
+
 ## vae-wall: Run the story backwards: which codes made our 3?
 
-**Build 1, ask:** Why do we want the posterior?
+**Build 1, ask:** Why does the prior barely matter for these three codes?
 
-**Expected:** To know which codes explain each image, so the decoder can be trained on them.
+**Expected:** The log priors differ by about 5; the log-likelihoods differ by hundreds. 784 pixels outvote 2 numbers.
 
 **Build 2, ask:** Why is the patch so small?
 
@@ -742,7 +770,7 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Expected:** The integral through a network has no formula, and with 16 code numbers a grid of 100 points per number needs 100¹⁶ points.
 
-**Point here:** Colours as in Lecture 1: posterior teal, likelihood orange, prior green, evidence blue.
+**Point here:** log prior = −log 2π − ‖z‖²/2 for N(0, I). Colours as in Lecture 1: posterior teal, likelihood orange, prior green, evidence blue.
 
 **Transition:** Can we at least estimate the evidence?
 
@@ -760,35 +788,39 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Point here:** Naive Monte Carlo, 30 repeats for each S; log of the average computed stably (log-sum-exp).
 
-**Transition:** Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.
+**Transition:** Lecture 1’s way past the wall: a guide q that knows where to look.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## var-approx: The variational approximation: the closest Gaussian
+## var-approx: Put a guide q: a Gaussian guess of where the codes are
 
-**Build 1, ask:** Why is the prior a poor q?
+**Build 1, ask:** Why is the prior a poor guide?
 
 **Expected:** It spreads over the whole plane, while the posterior is a tiny patch.
 
-**Build 2, ask:** Which q is closest, and how can you tell without the posterior?
+**Build 2, ask:** Which guide is closest?
 
-**Expected:** The VI fit: it has the highest ELBO, so the smallest gap, which is its KL to the posterior.
+**Expected:** The VI fit, then the encoder’s q: both on the patch.
 
-**Build 3, ask:** Why Gaussians?
+**Build 3, ask:** What do the ELBO’s two terms ask of a guide?
 
-**Expected:** Easy to sample (tool ①), and their KL to N(0, I) has a formula (tool ②).
+**Expected:** Its codes should draw our 3 (first term), and it should stay near the prior N(0, I) (second term).
 
-**Point here:** Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers.
+**Build 4, ask:** How can you tell which guide is closest without the posterior?
 
-**Transition:** Fitting one q for each of 60,000 images: who does it?
+**Expected:** The highest ELBO has the smallest gap, and the gap is the KL to the posterior.
+
+**Point here:** Gaps are log p(x) − ELBO, with log p(x) = 244.07 from the grid. Each ELBO is an 8 × 8 Gauss–Hermite average, as in the ELBO explorer (5.6); the notebook computes the same numbers. Why Gaussians: easy to sample (tool ①), and their KL to N(0, I) is exact (tool ②). Pyro calls q the guide. Lecture 1, Section 1.5 introduced the idea: approximate the posterior with a simple q.
+
+**Transition:** One guide for each of 60,000 images: who makes them?
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## encoder-q: The encoder’s cloud is q: one network gives q for every image
+## encoder-q: The guide is a neural network: the encoder
 
-**Build 1, ask:** Which way does each arrow point?
+**Build 1, ask:** Why not fit a separate guide for each image?
 
-**Expected:** Decoder: z to x (generate). Encoder: x to z (infer).
+**Expected:** An optimisation per image, and again for every new image. One pass of the encoder is instant: amortised inference.
 
 **Build 2, ask:** What does the encoder output for one image?
 
@@ -800,11 +832,11 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Point here:** Kingma and Welling (2014), figure 1: solid arrow = generative model p_θ, dashed = variational approximation q_φ.
 
-**Transition:** Now the loss, derived from the ELBO.
+**Transition:** Now we have everything: write out the ELBO, and the loss follows.
 
 **Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
-## vae-loss: From the ELBO to the loss: recon + KL, derived, not guessed
+## vae-loss: Now we have the loss: minus the ELBO is reconstruction + KL
 
 **Build 1, ask:** Which term needs the decoder?
 
@@ -816,7 +848,7 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Build 3, ask:** Which Lecture 1 tool gives the KL?
 
-**Expected:** Tool ②: the KL between diagonal Gaussians, by formula, no sampling.
+**Expected:** Tool ②: the KL between two Gaussians, computed exactly, with no sampling.
 
 **Build 4, ask:** What did Part 4 guess that this derivation decides?
 
@@ -958,7 +990,7 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 
 **Build 1, ask:** Which Lecture 1 ideas does the VAE’s loss use?
 
-**Expected:** The ELBO, the KL and its formula for Gaussians, and the reparameterisation trick.
+**Expected:** The ELBO, the KL between two Gaussians, and the reparameterisation trick.
 
 **Transition:** Section 6.1.
 
@@ -1077,6 +1109,22 @@ Planned main route: 92 minutes. Timing includes student responses and the specif
 **Point here:** Fitting one network that outputs q for any input is called amortised inference.
 
 **Transition:** Lecture 1’s way past the wall: a simple q, as close to the posterior as possible.
+
+## lik-formula: The likelihood, written out: Gaussian pixels (optional)
+
+**Build 1, ask:** Where have you seen squared error = Gaussian likelihood before?
+
+**Expected:** Linear regression: least squares is maximum likelihood with Gaussian noise.
+
+**Build 2, ask:** Why are the three scores so far apart?
+
+**Expected:** Every unit of squared error costs 1/2σ² = 12.5 nats, summed over 784 pixels.
+
+**Build 3, ask:** Is σ learned here?
+
+**Expected:** No, fixed at 0.2. It can be learned; we keep it fixed for clarity.
+
+**Source / evidence:** Networks and numbers from Lecture 2: <code>lecture2/scripts/train.py</code> and <code>science.py</code> (MNIST, fixed seeds).
 
 ## vae-elbo: Lecture 1’s ELBO, for one image (optional)
 

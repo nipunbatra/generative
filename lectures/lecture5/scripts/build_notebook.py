@@ -351,7 +351,9 @@ print('z =', z.detach().numpy().round(3))
 print('dz/dmu =', mu.grad.numpy(), '  dz/dlog_sigma =', log_sigma.grad.numpy().round(3), '(= sigma * eps)')
 """)
 section('4.3', 'Fix 3: pull the clouds to N(0, I)', 'fix-kl',
-        'Charge each cloud for being unlike N(0, 1) with Lecture 1’s KL, by formula (tool ②): ½(μ² + σ² − log σ² − 1). A cloud far away costs, and so does a cloud shrunk to a point.')
+        'Charge each cloud for being unlike N(0, 1) with Lecture 1’s KL: penalty = KL(N(μ, σ²) ‖ N(0, 1)). The slides keep it as a KL; to compute it, '
+        'the code uses tool ②’s closed form for two Gaussians, ½(μ² + σ² − log σ² − 1), and checks it against torch and Monte Carlo. '
+        'A cloud far away costs, and so does a cloud shrunk to a point.')
 code(r"""
 # Tool 2: the KL from N(mu, sigma^2) to N(0, 1), three ways.
 def kl_to_std_normal(m, s):
@@ -365,8 +367,9 @@ for m_, s_, what in ((0.0, 1.0, 'exactly N(0, 1)'), (5.0, 1.0, 'far from the cen
     print(f'{what:26s} mu = {m_:4.1f}, sigma = {s_:5.2f}: penalty {kl_to_std_normal(m_, s_):5.1f}')
 """)
 section('4.4', 'The loss the fixes give', 'fix-loss',
-        'Rebuild the image from a draw of its cloud, plus the KL that pulls the cloud towards N(0, I): '
-        'L = ‖x − f(μ + σ ⊙ ε)‖² + KL(N(μ, σ²) ‖ N(0, I)). Part 5 shows this is minus the ELBO, with a weight of 1/2σ² on the first term.')
+        'Fix 1: codes live in N(0, I). Fix 2: each image gets a cloud N(μ, σ²), and we draw z = μ + σ ⊙ ε from it. Fix 3: a KL pulls the cloud towards N(0, I). '
+        'Together: L = ‖x − f(μ + σ ⊙ ε)‖² + KL(N(μ, σ²) ‖ N(0, I)), the reconstruction term plus the KL term. '
+        'Part 5 shows this is minus the ELBO, with a weight of 1/2σ² on the reconstruction term.')
 
 # ------------------------------------------------------------------------------------------------ Part 5
 part('5', 'Why this loss: Lecture 1’s ELBO, one image at a time',
@@ -388,7 +391,7 @@ def log_lik(net, x, Z):                     # log p(x | z) for a batch of codes 
     return -((net.decoder(Z.float()).double() - x) ** 2).sum(1) / (2 * SIGMA ** 2) - const
 print(f'the constant 784 log(sigma sqrt(2 pi)) = {const:.2f}')
 """)
-md('### The likelihood scores a code: three codes against our 3')
+md('### The likelihood scores a code: codes A, B and C against our 3')
 code(r"""
 codes3 = torch.tensor([[-0.2261, 0.0608], [0.824, -0.742], [0.0, 3.2]], dtype=F64)   # in the posterior's patch, a prior draw, the 1s
 with torch.no_grad(): means3 = vae2.decoder(codes3.float()).double()
@@ -396,8 +399,30 @@ for name, z_, m_, ll in zip(('in the posterior’s patch', 'a draw from the prio
     print(f'{name:26s} z = {z_.numpy().round(3)}   squared error {float(((m_ - x3) ** 2).sum()):6.1f}   log p(x | z) {float(ll):7.1f}')
 show_digits(torch.cat([x3[None], means3]), ncol=4, size=1.3, title='our 3, and the mean image of each code')
 """)
-section('5.3', 'The same wall as Lecture 1', 'vae-wall',
-        'p(x) is an integral over every code. With only 2 numbers we can still add up rectangles on a fine grid; with 16 we could not.')
+md('### Score every code on the plane (the map on the slide; lecture5/scripts/lik.py writes the same numbers)')
+code(r"""
+ax = torch.linspace(-4, 4, 81, dtype=F64)
+Zmap = torch.stack(torch.meshgrid(ax, ax, indexing='xy'), -1).reshape(-1, 2)
+ll_map = log_lik(vae2, x3, Zmap)
+best = int(ll_map.argmax())
+print(f'best code on the grid {Zmap[best].numpy().round(2)}: log p(x | z) = {float(ll_map[best]):.1f};  worst {float(ll_map.min()):.1f}')
+print(f'share of the grid within 100 of the best score: {float((ll_map > ll_map.max() - 100).double().mean()):.4f}')
+plt.figure(figsize=(4, 3.6)); plt.imshow(ll_map.reshape(81, 81), origin='lower', extent=(-4, 4, -4, 4), cmap='Oranges')
+plt.colorbar(label='log p(x | z)'); plt.scatter(*codes3.T, c='k', s=12)
+for name, (a, b) in zip('ABC', codes3.tolist()): plt.annotate(name, (a, b), xytext=(5, 5), textcoords='offset points')
+plt.title('how well each code draws our 3'); plt.show()
+""")
+section('5.3', 'Run the story backwards', 'why-back',
+        'Training has images but no codes, and must make each image probable: p(x), the likelihood averaged over the prior. Only codes that could have made the image matter: '
+        'the posterior p(z | x) = p(x | z) p(z) / p(x). p(x) is an integral over every code. With only 2 numbers we can still add up rectangles on a fine grid; with 16 we could not.')
+md('### Bayes’ rule for codes A, B and C: log prior plus log likelihood')
+code(r"""
+log_prior = lambda Z: -math.log(2 * math.pi) - 0.5 * (Z ** 2).sum(1)
+lj3 = log_prior(codes3) + log_lik(vae2, x3, codes3)
+for name, lp, ll, lj in zip('ABC', log_prior(codes3), log_lik(vae2, x3, codes3), lj3):
+    print(f'code {name}: log prior {float(lp):5.1f}   log likelihood {float(ll):7.1f}   sum {float(lj):7.1f}   compared with A: e^{float(lj - lj3[0]):.0f}')
+""")
+md('### Every code on a fine grid: the posterior, and the evidence by adding rectangles')
 code(r"""
 with torch.no_grad(): mu3, lv3 = vae2.encode(x3[None].float())
 mu3, sd3 = mu3[0].double(), (0.5 * lv3[0].double()).exp()
@@ -422,8 +447,9 @@ for S in (1, 10, 100, 1000, 10000, 100000):
 w = (llp - llp.max()).exp()
 print(f'the best 10 of the 100,000 draws carry {100 * float(w.sort(descending=True).values[:10].sum() / w.sum()):.0f}% of the total')
 """)
-section('5.4', 'The variational approximation', 'var-approx',
-        'ELBO(x) = E_q[log p(x | z)] − KL(q(z | x) ‖ p(z)). The encoder gives q for our 3 in one pass; its ELBO sits just below log p(x).')
+section('5.4', 'A guide q, made by a network', 'var-approx',
+        'Put a guide q, a simple Gaussian guess of which codes made our 3, and score it with the ELBO: ELBO = E_q[log p(x | z)] − KL(q ‖ p(z)). '
+        'Making a guide for every image with VI is slow; the encoder makes the guide for our 3 in one pass, and its ELBO sits just below log p(x).')
 code(r"""
 def elbo(net, x, m_, s_, draws=20000, seed=21):
     eps = torch.randn(draws, 2, generator=torch.Generator().manual_seed(seed), dtype=F64)
